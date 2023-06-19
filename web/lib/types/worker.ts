@@ -1,13 +1,13 @@
 import { z } from "zod";
 import type { Car, Worker, WorkerAvailability } from "../../lib/prisma/client";
 import { Serialized } from "./serialize";
-import { Allergy } from "./allergy";
 import useZodOpenApi from "lib/api/useZodOpenApi";
 import {
   CarSchema,
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from "lib/prisma/zod";
+import {Allergy} from "../../lib/prisma/client";
 
 useZodOpenApi;
 
@@ -26,6 +26,7 @@ export const WorkerCreateSchema = z
     phone: z.string().min(1),
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
+    note: z.string().optional(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

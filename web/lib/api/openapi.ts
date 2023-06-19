@@ -22,7 +22,6 @@ import {
   ActiveJobCreateSchema,
   ActiveJobUpdateSchema,
 } from "lib/types/active-job";
-import { Allergy } from "lib/types/allergy";
 import { WrappedApiErrorSchema } from "lib/types/api-error";
 import { AreaCreateSchema, AreaUpdateSchema } from "lib/types/area";
 import { Permission } from "lib/types/auth";
@@ -55,6 +54,7 @@ import {
   WorkersCreateSchema,
 } from "lib/types/worker";
 import { z } from "zod";
+import { Allergy } from "../prisma/client";
 
 const registry = new OpenAPIRegistry();
 

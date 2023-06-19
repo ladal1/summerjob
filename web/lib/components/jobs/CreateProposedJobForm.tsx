@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIProposedJobCreate } from "lib/fetcher/proposed-job";
 import { datesBetween } from "lib/helpers/helpers";
-import { Area } from "lib/prisma/client";
+import {Area, JobType} from "lib/prisma/client";
 import { deserializeAreas } from "lib/types/area";
 import {
   ProposedJobCreateData,
@@ -16,7 +16,9 @@ import AllergyPill from "../forms/AllergyPill";
 import DaysSelection from "../forms/DaysSelection";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { Allergy } from "lib/types/allergy";
+import {allergyMapping} from "../../data/allergyMapping";
+import {jobTypeMapping} from "../../data/jobTypeMapping";
+
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized<Area[]>;
@@ -30,7 +32,6 @@ export default function CreateProposedJobForm({
   eventEndDate,
 }: CreateProposedJobProps) {
   const areas = deserializeAreas(serializedAreas);
-  const allergens = Object.values(Allergy);
   const { trigger, error, isMutating, reset } = useAPIProposedJobCreate();
   const [saved, setSaved] = useState(false);
   const {
@@ -57,6 +58,10 @@ export default function CreateProposedJobForm({
   const selectArea = (item: FilterSelectItem) => {
     setValue("areaId", item.id);
   };
+  const selectJobType = (item: FilterSelectItem) => {
+    setValue("jobType", item.id as JobType);
+  };
+
 
   const allDates = datesBetween(
     new Date(eventStartDate),
@@ -197,16 +202,34 @@ export default function CreateProposedJobForm({
               days={allDates}
               register={() => register("availability")}
             />
+            <div>
+            <label className="form-label fw-bold mt-4" htmlFor="area">
+              Typ práce
+            </label>
+            <input type={"hidden"} {...register("jobType")} />
+            <FilterSelect
+                items={Object.entries(jobTypeMapping).map(([jobTypeKey, jobTypeToSelectName]) => ({
+                  id: jobTypeKey,
+                  name: jobTypeToSelectName,
+                  searchable: jobTypeToSelectName,
+                  item: (<span> {jobTypeToSelectName} </span>),
+                }))}
+                placeholder="Vyberte typ práce"
+                onSelected={selectJobType}
+            />
+            {errors.jobType && <div className="text-danger">Vyberte typ práce</div>}
+            </div>
             <label className="form-label d-block fw-bold mt-4" htmlFor="email">
               Alergie
             </label>
             <div className="form-check-inline">
-              {allergens.map((allergy) => (
-                <AllergyPill
-                  key={allergy}
-                  allergy={allergy}
-                  register={() => register("allergens")}
-                />
+              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
+                  <AllergyPill
+                      key={allergyKey}
+                      allergyId={allergyKey}
+                      allergyName={allergyName}
+                      register={() => register("allergens")}
+                  />
               ))}
             </div>
 

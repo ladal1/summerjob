@@ -17,8 +17,9 @@ import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
 import { datesBetween, pick } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
-import { Allergy } from "lib/types/allergy";
 import FormWarning from "../forms/FormWarning";
+import {Allergy} from "../../prisma/client";
+import { allergyMapping } from "lib/data/allergyMapping";
 
 const schema = WorkerUpdateSchema;
 type WorkerForm = z.input<typeof schema>;
@@ -37,7 +38,6 @@ export default function EditWorker({
   isProfilePage,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker);
-  const allergies = Object.values(Allergy);
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
@@ -181,10 +181,11 @@ export default function EditWorker({
               Alergie
             </label>
             <div className="form-check-inline">
-              {allergies.map((allergy) => (
+              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
                 <AllergyPill
-                  key={allergy}
-                  allergy={allergy}
+                  key={allergyKey}
+                  allergyId={allergyKey}
+                  allergyName={allergyName}
                   register={() => register("allergyIds")}
                 />
               ))}
@@ -234,6 +235,18 @@ export default function EditWorker({
                 ))}
               </div>
             )}
+            {!isProfilePage && (<div>
+             <label className="form-label fw-bold mt-4" htmlFor="note">
+                Poznámka
+              </label>
+              <input
+                  id="note"
+                  className="form-control p-0 fs-5"
+                  type="text"
+                  placeholder="Poznámka"
+                  {...register("note")}
+              />
+            </div>)}
 
             <div className="d-flex justify-content-between gap-3">
               <button

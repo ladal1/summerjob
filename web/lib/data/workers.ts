@@ -255,6 +255,7 @@ export async function createWorker(
       email: data.email.toLowerCase(),
       phone: data.phone,
       isStrong: data.strong,
+      note: data.note,
       allergies: {
         set: data.allergyIds,
       },

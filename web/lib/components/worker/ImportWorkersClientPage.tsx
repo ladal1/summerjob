@@ -12,7 +12,7 @@ import { useAPIWorkersCreate } from "lib/fetcher/worker";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import { useRouter } from "next/navigation";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { Allergy } from "lib/types/allergy";
+import {Allergy} from "../../prisma/client";
 
 interface ImportWorkersClientPageProps {
   eventName: string;

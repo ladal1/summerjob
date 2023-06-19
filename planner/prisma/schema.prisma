@@ -1,12 +1,28 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "./client"
+  provider      = "prisma-client-js"
+  output        = "./client"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Allergy {
+  DUST
+  ANIMALS
+  HAY
+  POLLEN
+  MITES
+}
+
+enum JobType {
+  WOOD
+  PAINTING
+  HOUSEWORK
+  GARDEN
+  OTHER
 }
 
 model Worker {
@@ -17,7 +33,7 @@ model Worker {
   email          String               @unique
   cars           Car[]
   isStrong       Boolean              @default(false)
-  allergies      String[]
+  allergies      Allergy[]
   jobs           ActiveJob[]
   driving        Ride[]               @relation("Driver")
   passengerIn    Ride[]
@@ -27,6 +43,7 @@ model Worker {
   blocked        Boolean              @default(false)
   permissions    WorkerPermissions    @relation(fields: [permissionsId], references: [id])
   permissionsId  String               @unique
+  note           String
 }
 
 model WorkerPermissions {
@@ -83,8 +100,9 @@ model ProposedJob {
   area               Area        @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId             String
   activeJobs         ActiveJob[]
-  allergens          String[]
+  allergens          Allergy[]
   availability       DateTime[]  @db.Date
+  jobType            JobType
 }
 
 model ActiveJob {

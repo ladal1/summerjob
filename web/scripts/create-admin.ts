@@ -27,6 +27,7 @@ async function createAccount(
       firstName,
       lastName,
       email,
+      note: "",
       phone: "000 000 000",
       permissions: {
         create: {

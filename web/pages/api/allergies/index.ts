@@ -1,7 +1,7 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
-import { Allergy } from "lib/types/allergy";
 import { NextApiRequest, NextApiResponse } from "next";
+import { Allergy } from "../../../lib/prisma/client";
 
 export type AllergiesAPIGetResponse = string[];
 async function get(

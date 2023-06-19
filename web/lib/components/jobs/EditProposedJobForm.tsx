@@ -12,12 +12,14 @@ import { WorkerBasicInfo } from "lib/types/worker";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FilterSelectItem } from "../filter-select/FilterSelect";
+import {FilterSelect, FilterSelectItem} from "../filter-select/FilterSelect";
 import AllergyPill from "../forms/AllergyPill";
 import DaysSelection from "../forms/DaysSelection";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { Allergy } from "lib/types/allergy";
+import {allergyMapping} from "lib/data/allergyMapping";
+import {jobTypeMapping} from "../../data/jobTypeMapping";
+import {JobType} from "../../prisma/client";
 
 interface EditProposedJobProps {
   serializedJob: Serialized<ProposedJobComplete>;
@@ -34,7 +36,6 @@ export default function EditProposedJobForm({
   eventEndDate,
 }: EditProposedJobProps) {
   const job = deserializeProposedJob(serializedJob);
-  const allergens = Object.values(Allergy);
   const { trigger, error, isMutating, reset } = useAPIProposedJobUpdate(job.id);
   const [saved, setSaved] = useState(false);
   const {
@@ -58,6 +59,7 @@ export default function EditProposedJobForm({
       hasFood: job.hasFood,
       hasShower: job.hasShower,
       availability: job.availability.map((day) => day.toJSON()),
+      jobType: job.jobType
     },
   });
 
@@ -66,6 +68,9 @@ export default function EditProposedJobForm({
     new Date(eventEndDate)
   );
 
+  const selectJobType = (item: FilterSelectItem) => {
+    setValue("jobType", item.id as JobType);
+  };
   const onSubmit = (data: ProposedJobForm) => {
     trigger(data, {
       onSuccess: () => {
@@ -180,16 +185,35 @@ export default function EditProposedJobForm({
               days={allDates}
               register={() => register("availability")}
             />
+            <div>
+              <label className="form-label fw-bold mt-4" htmlFor="area">
+                Typ práce
+              </label>
+              <input type={"hidden"} {...register("jobType")} />
+              <FilterSelect
+                  items={Object.entries(jobTypeMapping).map(([jobTypeKey, jobTypeToSelectName]) => ({
+                    id: jobTypeKey,
+                    name: jobTypeToSelectName,
+                    searchable: jobTypeToSelectName,
+                    item: (<span> {jobTypeToSelectName} </span>),
+                  }))}
+                  placeholder={jobTypeMapping[job.jobType]}
+                  onSelected={selectJobType}
+              />
+              {errors.jobType && <div className="text-danger">Vyberte typ práce</div>}
+            </div>
+
             <label className="form-label d-block fw-bold mt-4" htmlFor="email">
               Alergeny
             </label>
             <div className="form-check-inline">
-              {allergens.map((allergy) => (
-                <AllergyPill
-                  key={allergy}
-                  allergy={allergy}
-                  register={() => register("allergens")}
-                />
+              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
+                  <AllergyPill
+                      key={allergyKey}
+                      allergyId={allergyKey}
+                      allergyName={allergyName}
+                      register={() => register("allergens")}
+                  />
               ))}
             </div>
 

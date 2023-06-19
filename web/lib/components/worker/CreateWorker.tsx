@@ -11,8 +11,8 @@ import DaysSelection from "../forms/DaysSelection";
 import { datesBetween } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
 import { useAPIWorkerCreate } from "lib/fetcher/worker";
-import { Allergy } from "lib/types/allergy";
 import FormWarning from "../forms/FormWarning";
+import {allergyMapping} from "../../data/allergyMapping";
 
 const schema = WorkerCreateSchema;
 type WorkerForm = z.input<typeof schema>;
@@ -26,7 +26,6 @@ export default function CreateWorker({
   eventStartDate,
   eventEndDate,
 }: EditWorkerProps) {
-  const allergies = Object.values(Allergy);
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
@@ -160,12 +159,13 @@ export default function CreateWorker({
               Alergie
             </label>
             <div className="form-check-inline">
-              {allergies.map((allergy) => (
-                <AllergyPill
-                  key={allergy}
-                  allergy={allergy}
-                  register={() => register("allergyIds")}
-                />
+              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
+                  <AllergyPill
+                      key={allergyKey}
+                      allergyId={allergyKey}
+                      allergyName={allergyName}
+                      register={() => register("allergyIds")}
+                  />
               ))}
             </div>
             <label className="form-label d-block fw-bold mt-4">

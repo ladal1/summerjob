@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Serialized } from "./serialize";
 import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from "lib/prisma/zod";
 import useZodOpenApi from "lib/api/useZodOpenApi";
+import {Allergy, JobType} from "../prisma/client";
 
 useZodOpenApi;
 
@@ -19,10 +20,11 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>;
 
+
 export const ProposedJobCreateSchema = z
   .object({
     areaId: z.string().min(1),
-    allergens: z.array(z.string()),
+    allergens: z.array(z.nativeEnum(Allergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
     name: z.string().min(1),
@@ -43,6 +45,7 @@ export const ProposedJobCreateSchema = z
           format: "date",
         },
       }),
+      jobType: z.nativeEnum(JobType),
   })
   .strict();
 
