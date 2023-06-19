@@ -21,7 +21,6 @@ export const authOptions: NextAuthOptions = {
         token,
         provider,
       }) {
-        console.log(process.env.NODE_ENV)
         // In dev, emails are not sent, user is automatically signed in
         if (process.env.NODE_ENV === "development") {
           console.log(

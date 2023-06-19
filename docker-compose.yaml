@@ -1,0 +1,84 @@
+version: "3"
+
+services:
+  summerjob-web:
+    container_name: summerjob-web
+    hostname: summerjob-web
+    image: summerjob/web
+    restart: unless-stopped
+    networks:
+      - summerjob-network
+      # - additional networks for reverse proxy or specify open ports below
+    environment:
+      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
+      - EMAIL_SERVER=smtps://email@example.cz:emailpassword@smtp.example.cz:465
+      - EMAIL_FROM=email@example.cz
+      - NEXTAUTH_URL=http://localhost:3000
+      # - NEXTAUTH_URL=https://planner.summerjob.eu # Domain of the deployed web app, or http://localhost:3000 if running locally
+      - NEXTAUTH_SECRET=FP2xh2YUBE8wa13VTeEkGTjmKMQUF/xWrxBqRlilAgw= # Generate a random string with `openssl rand -base64 32`
+      - AMQP_URL=amqp://summerjob-amqp
+      - QUEUE_NAME=planner
+      - NODE_ENV=development
+    ports:
+      - 3000:3000
+    build:
+      context: web
+      dockerfile: Dockerfile
+    depends_on:
+      - summerjob-db
+      - summerjob-amqp
+
+  summerjob-db:
+    container_name: summerjob-db
+    hostname: summerjob-db
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=summerjob
+    networks:
+      - summerjob-network
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+
+  summerjob-planner:
+    container_name: summerjob-planner
+    hostname: summerjob-planner
+    image: summerjob/planner
+    restart: on-failure:5
+    environment:
+      - AMQP_URL=amqp://summerjob-amqp
+      - QUEUE_NAME=planner
+      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
+    networks:
+      - summerjob-network
+    build:
+      context: planner
+      dockerfile: Dockerfile
+    depends_on:
+      summerjob-db:
+        condition: service_started
+      summerjob-amqp:
+        condition: service_healthy
+
+  summerjob-amqp:
+    container_name: summerjob-amqp
+    hostname: summerjob-amqp
+    image: rabbitmq:3.11
+    restart: unless-stopped
+    networks:
+      - summerjob-network
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+networks:
+  summerjob-network:
+    
+volumes:
+  postgres:
