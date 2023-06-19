@@ -30,8 +30,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 
-ENV NODE_ENV production
-
+RUN apt-get update -y && apt-get install -y openssl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
 

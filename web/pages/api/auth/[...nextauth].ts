@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     EmailProvider({
-      server: process.env.EMAIL_SERVER,
+      server: process.env.NODE_ENV === "development" ? { host: "localhost", port: 25, auth: { user: "", pass: "" } } : process.env.EMAIL_SERVER,
       from: process.env.EMAIL_FROM,
       // maxAge: 24 * 60 * 60, // How long email links are valid for (default 24h)
       async sendVerificationRequest({
@@ -21,6 +21,7 @@ export const authOptions: NextAuthOptions = {
         token,
         provider,
       }) {
+        console.log(process.env.NODE_ENV)
         // In dev, emails are not sent, user is automatically signed in
         if (process.env.NODE_ENV === "development") {
           console.log(
