@@ -1,7 +1,6 @@
-import { PrismaClient } from "../../../prisma/client";
-import { ActiveJobNoPlan, PlanComplete, WorkerComplete } from "../DataSource";
-import { WorkerAvailability, Worker } from "../../../prisma/client";
-import { databaseWorkerToWorkerComplete } from "./worker";
+import { PrismaClient, WorkerAvailability, Worker } from '../../../prisma/client'
+import { ActiveJobNoPlan, PlanComplete, WorkerComplete } from '../DataSource'
+import { databaseWorkerToWorkerComplete } from './worker'
 
 export async function getPlanById(
   id: string,
@@ -9,11 +8,11 @@ export async function getPlanById(
 ): Promise<PlanComplete | null> {
   const simplePlan = await prisma.plan.findUnique({
     where: { id },
-  });
+  })
   if (!simplePlan) {
-    return null;
+    return null
   }
-  const eventId = simplePlan.summerJobEventId;
+  const eventId = simplePlan.summerJobEventId
   const plan = await prisma.plan.findUnique({
     where: { id },
     include: {
@@ -52,16 +51,16 @@ export async function getPlanById(
         },
       },
     },
-  });
+  })
   if (!plan) {
-    return null;
+    return null
   }
-  const jobs: ActiveJobNoPlan[] = [];
+  const jobs: ActiveJobNoPlan[] = []
   for (const job of plan.jobs) {
     jobs.push({
       ...job,
       workers: job.workers.map(databaseWorkerToWorkerComplete),
-    });
+    })
   }
-  return { ...plan, jobs };
+  return { ...plan, jobs }
 }

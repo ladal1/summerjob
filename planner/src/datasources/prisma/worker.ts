@@ -1,5 +1,5 @@
-import { Plan, PrismaClient, WorkerAvailability } from "../../../prisma/client";
-import { WorkerComplete } from "../DataSource";
+import { Plan, PrismaClient, WorkerAvailability } from '../../../prisma/client'
+import { WorkerComplete } from '../DataSource'
 
 export async function getWorkersWithoutJob(
   plan: Plan,
@@ -34,26 +34,25 @@ export async function getWorkersWithoutJob(
     },
     orderBy: [
       {
-        firstName: "asc",
+        firstName: 'asc',
       },
       {
-        lastName: "asc",
+        lastName: 'asc',
       },
     ],
-  });
+  })
   // TODO: Remove this when the prisma client findMany is fixed
-  let correctType = users as Parameters<
+  const correctType = users as Array<Parameters<
     typeof databaseWorkerToWorkerComplete
-  >[0][];
-  const res = correctType.map(databaseWorkerToWorkerComplete);
-  return res;
+  >[0]>
+  return correctType.map(databaseWorkerToWorkerComplete)
 }
 
 export function databaseWorkerToWorkerComplete(
-  worker: Omit<WorkerComplete, "availability"> & {
+  worker: Omit<WorkerComplete, 'availability'> & {
     availability: WorkerAvailability[];
   }
 ): WorkerComplete {
-  const { availability, ...rest } = worker;
-  return { ...rest, availability: availability[0] };
+  const { availability, ...rest } = worker
+  return { ...rest, availability: availability[0] }
 }

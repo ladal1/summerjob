@@ -1,10 +1,10 @@
-import { JobToBePlanned } from "../datasources/DataSource";
+import { JobToBePlanned } from '../datasources/DataSource'
 
 export interface Planner {
-  start(planId: string): Promise<PlanningResult>;
+  start: (planId: string) => Promise<PlanningResult>;
 }
 
-export type PlanningResult = {
+export interface PlanningResult {
   success: boolean;
   jobs: JobToBePlanned[];
-};
+}
