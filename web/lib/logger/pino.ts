@@ -1,18 +1,18 @@
-import pino, { Logger } from "pino";
+import pino, { Logger } from 'pino'
 
-let pinoLogger: Logger;
+let pinoLogger: Logger
 
-if (process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === 'development') {
   pinoLogger = pino({
-    level: "debug",
+    level: 'debug',
     transport: {
-      target: "pino-pretty",
+      target: 'pino-pretty',
     },
-  });
+  })
 } else {
   pinoLogger = pino({
-    level: "info",
-  });
+    level: 'info',
+  })
 }
 
-export { pinoLogger };
+export { pinoLogger }

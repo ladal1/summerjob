@@ -27,37 +27,41 @@ async function main() {
 
   await channel.consume(
     queue,
-    async (msg) => {
+    msg => {
       console.log(' [x] Received %s', msg?.content.toString())
       if (!msg?.content) {
         console.log(' [x] No content')
         return
       }
-      await onMessageReceived(msg.content.toString())
+      onMessageReceived(msg.content.toString())
       console.log(' [x] Finished')
     },
     { noAck: true }
   )
 }
 
-async function onMessageReceived(msg: string) {
-  try {
-    const message = JSON.parse(msg) as { planId: string }
-    if (!message.planId || typeof message.planId !== 'string') {
-      console.log(' [x] No planId in message: %s', msg)
-      return
+function onMessageReceived(msg: string) {
+  void (async () => {
+    try {
+      const message = JSON.parse(msg) as { planId: string }
+      if (!message.planId || typeof message.planId !== 'string') {
+        console.log(' [x] No planId in message: %s', msg)
+        return
+      }
+      const plans = await planner.start(message.planId)
+      if (!plans.success) {
+        console.log(' [x] Failed to plan %s', message.planId)
+        return
+      }
+      console.log(' [x] Planned %d jobs', plans.jobs.length)
+      await datasource.setPlannedJobs(message.planId, plans.jobs)
+    } catch (e) {
+      console.log(' [x] Failed to parse message: %s', msg)
+      console.error(e)
     }
-    const plans = await planner.start(message.planId)
-    if (!plans.success) {
-      console.log(' [x] Failed to plan %s', message.planId)
-      return
-    }
-    console.log(' [x] Planned %d jobs', plans.jobs.length)
-    datasource.setPlannedJobs(message.planId, plans.jobs)
-  } catch (e) {
-    console.log(' [x] Failed to parse message: %s', msg)
-    console.error(e)
-  }
+  })()
 }
 
 main()
+  .then(() => console.log(' [x] Done'))
+  .catch(console.error)

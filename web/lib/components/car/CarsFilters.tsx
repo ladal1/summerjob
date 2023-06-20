@@ -1,6 +1,6 @@
 interface CarsFiltersProps {
-  search: string;
-  onSearchChanged: (search: string) => void;
+  search: string
+  onSearchChanged: (search: string) => void
 }
 
 export function CarsFilters({ search, onSearchChanged }: CarsFiltersProps) {
@@ -13,10 +13,10 @@ export function CarsFilters({ search, onSearchChanged }: CarsFiltersProps) {
             className="p-2 d-inline-block outline-none border-0 smj-filter-input"
             placeholder="Vyhledat..."
             value={search}
-            onChange={(e) => onSearchChanged(e.target.value)}
+            onChange={e => onSearchChanged(e.target.value)}
           />
         </div>
       </div>
     </>
-  );
+  )
 }

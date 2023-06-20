@@ -1,41 +1,41 @@
-"use client";
-import { useAPICars } from "lib/fetcher/car";
-import { CarComplete, deserializeCars } from "lib/types/car";
-import { Serialized } from "lib/types/serialize";
-import Link from "next/link";
-import { useState } from "react";
-import PageHeader from "../page-header/PageHeader";
-import { CarsFilters } from "./CarsFilters";
-import { CarsTable } from "./CarsTable";
+'use client'
+import { useAPICars } from 'lib/fetcher/car'
+import { CarComplete, deserializeCars } from 'lib/types/car'
+import { Serialized } from 'lib/types/serialize'
+import Link from 'next/link'
+import { useState } from 'react'
+import PageHeader from '../page-header/PageHeader'
+import { CarsFilters } from './CarsFilters'
+import { CarsTable } from './CarsTable'
 
 interface CarsClientPageProps {
-  initialData: Serialized<CarComplete[]>;
+  initialData: Serialized<CarComplete[]>
 }
 
 export default function CarsClientPage({ initialData }: CarsClientPageProps) {
-  const initialCars = deserializeCars(initialData);
+  const initialCars = deserializeCars(initialData)
   const { data, error, isLoading, mutate } = useAPICars({
     fallbackData: initialCars,
-  });
-  const [filter, setFilter] = useState("");
+  })
+  const [filter, setFilter] = useState('')
 
   const filterCars = (cars: CarComplete[]) => {
-    const filterString = filter.toLocaleLowerCase();
-    return cars.filter((car) => {
-      const name = car.name.toLowerCase();
+    const filterString = filter.toLocaleLowerCase()
+    return cars.filter(car => {
+      const name = car.name.toLowerCase()
       const owner =
-        car.owner.firstName.toLowerCase() + car.owner.lastName.toLowerCase();
-      return name.includes(filterString) || owner.includes(filterString);
-    });
-  };
+        car.owner.firstName.toLowerCase() + car.owner.lastName.toLowerCase()
+      return name.includes(filterString) || owner.includes(filterString)
+    })
+  }
 
   const requestReload = (expectedResult: CarComplete[]) => {
-    mutate(expectedResult);
-  };
+    mutate(expectedResult)
+  }
 
   return (
     <>
-      <PageHeader title={"Seznam vozidel"}>
+      <PageHeader title={'Seznam vozidel'}>
         <Link href="/cars/new">
           <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-car"></i>
@@ -59,5 +59,5 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
         </div>
       </section>
     </>
-  );
+  )
 }

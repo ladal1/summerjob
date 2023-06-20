@@ -1,11 +1,11 @@
-import { capitalizeFirstLetter, formatDateShort } from "lib/helpers/helpers";
-import React from "react";
-import { UseFormRegisterReturn } from "react-hook-form";
+import { capitalizeFirstLetter, formatDateShort } from 'lib/helpers/helpers'
+import React from 'react'
+import { UseFormRegisterReturn } from 'react-hook-form'
 
 interface DaysSelectionProps {
-  name: string;
-  days: Date[];
-  register: () => UseFormRegisterReturn;
+  name: string
+  days: Date[]
+  register: () => UseFormRegisterReturn
 }
 
 export default function DaysSelection({
@@ -19,7 +19,7 @@ export default function DaysSelection({
       role="group"
       aria-label="Select from available days"
     >
-      {days.map((day) => (
+      {days.map(day => (
         <React.Fragment key={day.toJSON()}>
           <input
             type="checkbox"
@@ -38,5 +38,5 @@ export default function DaysSelection({
         </React.Fragment>
       ))}
     </div>
-  );
+  )
 }

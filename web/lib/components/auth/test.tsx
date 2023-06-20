@@ -1,9 +1,9 @@
-"use client";
-import { UserSession } from "lib/types/auth";
-import { signIn, signOut } from "next-auth/react";
+'use client'
+import { UserSession } from 'lib/types/auth'
+import { signIn, signOut } from 'next-auth/react'
 
 interface LoginClientTestProps {
-  session: UserSession | null;
+  session: UserSession | null
 }
 
 export function LoginClientTest({ session }: LoginClientTestProps) {
@@ -13,5 +13,5 @@ export function LoginClientTest({ session }: LoginClientTestProps) {
       {session && <button onClick={() => signOut()}>Sign out</button>}
       {!session && <button onClick={() => signIn()}>Sign in</button>}
     </div>
-  );
+  )
 }

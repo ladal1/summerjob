@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "seed-mini": "ts-node --skip-project prisma/seed.ts mini",
     "seed": "ts-node --skip-project prisma/seed.ts",
     "delete-db": "ts-node --skip-project prisma/drop-tables.ts",
@@ -14,8 +15,8 @@
     "create-admin": "ts-node --skip-project scripts/create-admin.ts",
     "test": "ts-mocha -p 'test/tsconfig.json' 'test/**/*.spec.ts'",
     "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
-    "prettier:write": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
-    "prepare": "cd .. && husky install web/.husky"
+    "prettier:fix": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
+    "prepare": "npx prisma generate && cd .. && husky install web/.husky"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^4.5.3",
@@ -52,6 +53,8 @@
     "@types/nodemailer": "^6.4.7",
     "@types/supertest": "^2.0.12",
     "@types/swagger-ui-react": "^4.18.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
     "chai": "^4.3.7",
     "encoding": "^0.1.13",
     "lint-staged": "^13.2.2",

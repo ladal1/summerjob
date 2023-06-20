@@ -1,7 +1,7 @@
-import { Modal, ModalSize } from "./Modal";
+import { Modal, ModalSize } from './Modal'
 type SuccessProceedModalProps = {
-  onClose: () => void;
-};
+  onClose: () => void
+}
 
 export default function SuccessProceedModal({
   onClose,
@@ -16,5 +16,5 @@ export default function SuccessProceedModal({
         Pokračovat
       </button>
     </Modal>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import GenericErrorPage from "./GenericErrorPage";
+import GenericErrorPage from './GenericErrorPage'
 
 export default function NoActiveEventPage() {
   return (
@@ -6,5 +6,5 @@ export default function NoActiveEventPage() {
       title="Nastavte aktivní ročník"
       message="V systému není nastaven aktivní ročník. Nastavte ho v administraci."
     />
-  );
+  )
 }

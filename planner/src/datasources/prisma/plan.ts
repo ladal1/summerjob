@@ -1,5 +1,5 @@
-import { PrismaClient, WorkerAvailability, Worker } from '../../../prisma/client'
-import { ActiveJobNoPlan, PlanComplete, WorkerComplete } from '../DataSource'
+import { PrismaClient } from '../../../prisma/client'
+import { ActiveJobNoPlan, PlanComplete } from '../DataSource'
 import { databaseWorkerToWorkerComplete } from './worker'
 
 export async function getPlanById(

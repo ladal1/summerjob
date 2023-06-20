@@ -1,25 +1,25 @@
-import { formatDateLong } from "lib/helpers/helpers";
-import { ChangeEvent } from "react";
+import { formatDateLong } from 'lib/helpers/helpers'
+import { ChangeEvent } from 'react'
 
 interface JobsFiltersArea {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface JobsFiltersDay {
-  id: string;
-  day: Date;
+  id: string
+  day: Date
 }
 
 interface JobsFiltersProps {
-  search: string;
-  onSearchChanged: (search: string) => void;
-  areas: JobsFiltersArea[];
-  selectedArea: JobsFiltersArea;
-  onAreaSelected: (id: string) => void;
-  days: JobsFiltersDay[];
-  selectedDay: JobsFiltersDay;
-  onDaySelected: (day: Date) => void;
+  search: string
+  onSearchChanged: (search: string) => void
+  areas: JobsFiltersArea[]
+  selectedArea: JobsFiltersArea
+  onAreaSelected: (id: string) => void
+  days: JobsFiltersDay[]
+  selectedDay: JobsFiltersDay
+  onDaySelected: (day: Date) => void
 }
 
 export function JobsFilters({
@@ -33,13 +33,13 @@ export function JobsFilters({
   onDaySelected,
 }: JobsFiltersProps) {
   const areaSelectChanged = (e: ChangeEvent<HTMLSelectElement>) => {
-    onAreaSelected(e.target.value);
-  };
+    onAreaSelected(e.target.value)
+  }
   const daySelectChanged = (e: ChangeEvent<HTMLSelectElement>) => {
-    onDaySelected(new Date(e.target.value));
-  };
-  const isDefaultAreaSelected = selectedArea.id === areas[0].id;
-  const isDefaultDaySelected = selectedDay.id === days[0].id;
+    onDaySelected(new Date(e.target.value))
+  }
+  const isDefaultAreaSelected = selectedArea.id === areas[0].id
+  const isDefaultDaySelected = selectedDay.id === days[0].id
 
   return (
     <>
@@ -50,7 +50,7 @@ export function JobsFilters({
             className="p-2 d-inline-block outline-none border-0 smj-filter-input"
             placeholder="Vyhledat..."
             value={search}
-            onChange={(e) => onSearchChanged(e.target.value)}
+            onChange={e => onSearchChanged(e.target.value)}
           />
         </div>
         <div className="col-auto mb-3">
@@ -59,13 +59,13 @@ export function JobsFilters({
               name="area"
               id="area"
               className={`form-select p-2 bg-white smj-filter-input ${
-                isDefaultAreaSelected ? "smj-default-option" : ""
+                isDefaultAreaSelected ? 'smj-default-option' : ''
               }`}
               value={selectedArea.id}
               onChange={areaSelectChanged}
             >
               {areas &&
-                areas.map((area) => (
+                areas.map(area => (
                   <option value={area.id} key={area.id}>
                     {area.name}
                   </option>
@@ -79,16 +79,16 @@ export function JobsFilters({
               name="day"
               id="day"
               className={`form-select p-2 bg-white smj-filter-input ${
-                isDefaultDaySelected ? "smj-default-option" : ""
+                isDefaultDaySelected ? 'smj-default-option' : ''
               }`}
               value={selectedDay.id}
               onChange={daySelectChanged}
             >
               {days &&
-                days.map((day) => (
+                days.map(day => (
                   <option value={day.id} key={day.id}>
-                    {day.id === "all"
-                      ? "Vyberte den"
+                    {day.id === 'all'
+                      ? 'Vyberte den'
                       : formatDateLong(day.day, true)}
                   </option>
                 ))}
@@ -97,5 +97,5 @@ export function JobsFilters({
         </div>
       </div>
     </>
-  );
+  )
 }

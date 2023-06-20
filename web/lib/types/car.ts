@@ -1,27 +1,27 @@
-import { z } from "zod";
-import { Serialized } from "./serialize";
-import { CarSchema, RideSchema, WorkerSchema } from "lib/prisma/zod";
-import useZodOpenApi from "lib/api/useZodOpenApi";
+import { z } from 'zod'
+import { Serialized } from './serialize'
+import { CarSchema, RideSchema, WorkerSchema } from 'lib/prisma/zod'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
 
-useZodOpenApi;
+useZodOpenApi
 
 export const CarCompleteSchema = CarSchema.extend({
   owner: WorkerSchema,
   rides: z.array(RideSchema),
-});
+})
 
-export type CarComplete = z.infer<typeof CarCompleteSchema>;
+export type CarComplete = z.infer<typeof CarCompleteSchema>
 
 export function serializeCars(cars: CarComplete[]): Serialized<CarComplete[]> {
   return {
     data: JSON.stringify(cars),
-  };
+  }
 }
 
 export function deserializeCars(
   cars: Serialized<CarComplete[]>
 ): CarComplete[] {
-  return JSON.parse(cars.data);
+  return JSON.parse(cars.data)
 }
 
 export const CarCreateSchema = z
@@ -35,12 +35,12 @@ export const CarCreateSchema = z
     reimbursed: z.boolean().optional().openapi({ example: false }),
     reimbursementAmount: z.number().optional(),
   })
-  .strict();
+  .strict()
 
-export type CarCreateData = z.infer<typeof CarCreateSchema>;
+export type CarCreateData = z.infer<typeof CarCreateSchema>
 
 export const CarUpdateSchema = CarCreateSchema.omit({
   ownerId: true,
-}).partial();
+}).partial()
 
-export type CarUpdateData = z.infer<typeof CarUpdateSchema>;
+export type CarUpdateData = z.infer<typeof CarUpdateSchema>

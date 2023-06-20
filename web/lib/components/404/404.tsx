@@ -1,5 +1,5 @@
 interface ErrorPage404Props {
-  message: string;
+  message: string
 }
 
 export default function ErrorPage404({ message }: ErrorPage404Props) {
@@ -14,5 +14,5 @@ export default function ErrorPage404({ message }: ErrorPage404Props) {
         </div>
       </div>
     </div>
-  );
+  )
 }

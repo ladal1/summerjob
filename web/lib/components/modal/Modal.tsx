@@ -1,13 +1,13 @@
 interface ModalProps {
-  children: React.ReactNode;
-  title: string;
-  size: ModalSize;
-  onClose?: () => void;
+  children: React.ReactNode
+  title: string
+  size: ModalSize
+  onClose?: () => void
 }
 
 export enum ModalSize {
-  MEDIUM = "",
-  LARGE = "modal-lg",
+  MEDIUM = '',
+  LARGE = 'modal-lg',
 }
 
 export function Modal({ children, title, size, onClose }: ModalProps) {
@@ -16,7 +16,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
       <div className="modal-backdrop fade show"></div>
       <div
         className={`modal fade show ${size}`}
-        style={{ display: "block" }}
+        style={{ display: 'block' }}
         tabIndex={-1}
       >
         <div className="modal-dialog">
@@ -37,5 +37,5 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
         </div>
       </div>
     </>
-  );
+  )
 }

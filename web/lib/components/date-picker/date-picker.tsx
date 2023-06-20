@@ -1,8 +1,8 @@
-import { formatDateLong } from "lib/helpers/helpers";
+import { formatDateLong } from 'lib/helpers/helpers'
 
 interface SimpleDatePickerProps {
-  initialDate: Date;
-  onDateChanged: (date: Date) => void;
+  initialDate: Date
+  onDateChanged: (date: Date) => void
 }
 
 export default function SimpleDatePicker({
@@ -10,10 +10,10 @@ export default function SimpleDatePicker({
   onDateChanged,
 }: SimpleDatePickerProps) {
   const changeDate = (days: number) => {
-    const newDate = new Date(initialDate);
-    newDate.setDate(newDate.getDate() + days);
-    onDateChanged(newDate);
-  };
+    const newDate = new Date(initialDate)
+    newDate.setDate(newDate.getDate() + days)
+    onDateChanged(newDate)
+  }
 
   return (
     <div className="input-group">
@@ -35,5 +35,5 @@ export default function SimpleDatePicker({
         <i className="fas fa-chevron-right"></i>
       </button>
     </div>
-  );
+  )
 }

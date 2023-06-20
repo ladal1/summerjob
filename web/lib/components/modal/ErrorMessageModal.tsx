@@ -1,10 +1,10 @@
-import { Modal, ModalSize } from "./Modal";
+import { Modal, ModalSize } from './Modal'
 
 type ErrorMessageModalProps = {
-  onClose: () => void;
-  mainMessage?: string;
-  details?: string;
-};
+  onClose: () => void
+  mainMessage?: string
+  details?: string
+}
 
 export default function ErrorMessageModal({
   onClose,
@@ -16,7 +16,7 @@ export default function ErrorMessageModal({
       <p>
         {mainMessage
           ? mainMessage
-          : "Během ukládání nastala chyba. Zkontrolujte připojení k internetu a zkuste to znovu."}
+          : 'Během ukládání nastala chyba. Zkontrolujte připojení k internetu a zkuste to znovu.'}
       </p>
       {details && (
         <div>
@@ -31,5 +31,5 @@ export default function ErrorMessageModal({
         Zavřít
       </button>
     </Modal>
-  );
+  )
 }

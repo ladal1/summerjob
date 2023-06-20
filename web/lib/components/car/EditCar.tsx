@@ -1,21 +1,21 @@
-"use client";
-import { useAPICarUpdate } from "lib/fetcher/car";
-import type { CarComplete, CarUpdateData } from "lib/types/car";
-import { useState } from "react";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import CarEditForm from "./CarEditForm";
+'use client'
+import { useAPICarUpdate } from 'lib/fetcher/car'
+import type { CarComplete, CarUpdateData } from 'lib/types/car'
+import { useState } from 'react'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import CarEditForm from './CarEditForm'
 
 export default function EditCar({ car }: { car: CarComplete }) {
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(false)
   const { trigger, isMutating, error, reset } = useAPICarUpdate(car.id, {
     onSuccess: () => {
-      setSaved(true);
+      setSaved(true)
     },
-  });
+  })
   const onSubmit = (data: CarUpdateData) => {
-    trigger(data);
-  };
+    trigger(data)
+  }
 
   return (
     <>
@@ -23,5 +23,5 @@ export default function EditCar({ car }: { car: CarComplete }) {
       {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
-  );
+  )
 }

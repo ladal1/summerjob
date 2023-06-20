@@ -1,20 +1,20 @@
-"use client";
-import { useAPIRideUpdateDynamic } from "lib/fetcher/rides";
-import { ActiveJobNoPlan } from "lib/types/active-job";
+'use client'
+import { useAPIRideUpdateDynamic } from 'lib/fetcher/rides'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
 import {
   NO_RIDE,
   RideComplete,
   RidesForJob,
   RideUpdateData,
-} from "lib/types/ride";
-import { WorkerComplete } from "lib/types/worker";
-import { useEffect, useState } from "react";
+} from 'lib/types/ride'
+import { WorkerComplete } from 'lib/types/worker'
+import { useEffect, useState } from 'react'
 
 interface RideSelectProps {
-  worker: WorkerComplete;
-  job: ActiveJobNoPlan;
-  otherRides: RidesForJob[];
-  onRideChanged?: () => void;
+  worker: WorkerComplete
+  job: ActiveJobNoPlan
+  otherRides: RidesForJob[]
+  onRideChanged?: () => void
 }
 
 export default function RideSelect({
@@ -23,77 +23,75 @@ export default function RideSelect({
   otherRides,
   onRideChanged,
 }: RideSelectProps) {
-  const otherJobsRides = otherRides.flatMap((r) => r.rides);
+  const otherJobsRides = otherRides.flatMap(r => r.rides)
   const [selectedRide, setSelectedRide] = useState<RideComplete | undefined>(
     undefined
-  );
-  const [requestPayload, setRequestPayload] = useState<RideUpdateData>({});
+  )
+  const [requestPayload, setRequestPayload] = useState<RideUpdateData>({})
   const { trigger, isMutating, error } = useAPIRideUpdateDynamic(
     () => selectedRide,
     {
       onSuccess: () => {
-        setSelectedRide(undefined);
-        onRideChanged?.();
+        setSelectedRide(undefined)
+        onRideChanged?.()
       },
     }
-  );
+  )
 
   useEffect(() => {
     if (selectedRide === undefined) {
-      return;
+      return
     }
-    trigger(requestPayload);
-  }, [selectedRide, trigger, requestPayload]);
+    trigger(requestPayload)
+  }, [selectedRide, trigger, requestPayload])
 
   const rideFromRideId = (rideId: string) => {
     if (rideId === NO_RIDE) {
-      return undefined;
+      return undefined
     }
-    const ride = [...job.rides, ...otherJobsRides].find((r) => r.id === rideId);
-    return ride;
-  };
+    const ride = [...job.rides, ...otherJobsRides].find(r => r.id === rideId)
+    return ride
+  }
 
   const onRideSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const rideId = e.target.value;
+    const rideId = e.target.value
     if (rideId === NO_RIDE) {
       setRequestPayload({
         passengerIds: [
-          ...ride!.passengers.map((p) => p.id).filter((id) => id !== worker.id),
+          ...ride!.passengers.map(p => p.id).filter(id => id !== worker.id),
         ],
-      });
-      setSelectedRide(ride);
-      return;
+      })
+      setSelectedRide(ride)
+      return
     }
-    const newRide = rideFromRideId(rideId);
+    const newRide = rideFromRideId(rideId)
     setRequestPayload({
-      passengerIds: [...newRide!.passengers.map((p) => p.id), worker.id],
-    });
-    setSelectedRide(newRide);
-  };
+      passengerIds: [...newRide!.passengers.map(p => p.id), worker.id],
+    })
+    setSelectedRide(newRide)
+  }
 
   const isInRide = (person: WorkerComplete, ride: RideComplete) => {
     return (
       ride.driverId === person.id ||
-      ride.passengers.some((passenger) => passenger.id === person.id)
-    );
-  };
+      ride.passengers.some(passenger => passenger.id === person.id)
+    )
+  }
 
-  const ride = [...job.rides, ...otherJobsRides].find((r) =>
-    isInRide(worker, r)
-  );
-  const isDriver = ride && ride.driverId === worker.id;
-  const selectColor = isDriver ? "bg-grey" : "bg-white";
+  const ride = [...job.rides, ...otherJobsRides].find(r => isInRide(worker, r))
+  const isDriver = ride && ride.driverId === worker.id
+  const selectColor = isDriver ? 'bg-grey' : 'bg-white'
   const capacityText = (ride: RideComplete) => {
-    return ` (${ride.passengers.length + 1}/${ride.car.seats})`;
-  };
+    return ` (${ride.passengers.length + 1}/${ride.car.seats})`
+  }
 
   const jobNameToShort = (jobName: string) => {
     return jobName
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toLocaleUpperCase();
-  };
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toLocaleUpperCase()
+  }
 
   return (
     <select
@@ -108,28 +106,28 @@ export default function RideSelect({
           {job.rides.map((r, index) => (
             <option key={r.id} value={r.id}>
               {index + 1}
-              {") "}
+              {') '}
               {r.car.name}
               {capacityText(r)}
             </option>
           ))}
         </optgroup>
       )}
-      {otherRides.map((otherJob) => {
+      {otherRides.map(otherJob => {
         return (
           <optgroup label={otherJob.jobName} key={`optgr-${otherJob.jobId}`}>
             {otherJob.rides.map((r, index) => (
               <option key={r.id} value={r.id}>
-                {jobNameToShort(otherJob.jobName) + " "}
+                {jobNameToShort(otherJob.jobName) + ' '}
                 {index + 1}
-                {") "}
+                {') '}
                 {r.car.name}
                 {capacityText(r)}
               </option>
             ))}
           </optgroup>
-        );
+        )
       })}
     </select>
-  );
+  )
 }

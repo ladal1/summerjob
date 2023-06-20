@@ -1,13 +1,13 @@
-import { getWorkers } from "lib/data/workers";
-import { WorkerComplete } from "lib/types/worker";
-import Image from "next/image";
-import logoImage from "public/logo-smj-yellow.png";
-import "/styles/print.css";
+import { getWorkers } from 'lib/data/workers'
+import { WorkerComplete } from 'lib/types/worker'
+import Image from 'next/image'
+import logoImage from 'public/logo-smj-yellow.png'
+import '/styles/print.css'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 export default async function PrintWorkersPage() {
-  const workers = await getWorkers();
+  const workers = await getWorkers()
   return (
     <>
       <div className="print-a4-landscape">
@@ -34,7 +34,7 @@ export default async function PrintWorkersPage() {
               </tr>
             </thead>
             <tbody className="">
-              {workers.map((worker) => (
+              {workers.map(worker => (
                 <SimpleRow key={worker.id} data={formatWorkerRow(worker)} />
               ))}
             </tbody>
@@ -42,7 +42,7 @@ export default async function PrintWorkersPage() {
         </div>
       </div>
     </>
-  );
+  )
 }
 
 function formatWorkerRow(worker: WorkerComplete) {
@@ -53,16 +53,16 @@ function formatWorkerRow(worker: WorkerComplete) {
     worker.email,
     <>
       {worker.cars.length > 0 && (
-        <i className="fas fa-car me-2" title={"Má auto"} />
+        <i className="fas fa-car me-2" title={'Má auto'} />
       )}
-      {worker.isStrong && <i className="fas fa-dumbbell" title={"Silák"} />}
+      {worker.isStrong && <i className="fas fa-dumbbell" title={'Silák'} />}
     </>,
-    "",
-  ];
+    '',
+  ]
 }
 
 interface RowProps {
-  data: any[];
+  data: any[]
 }
 
 export function SimpleRow({ data }: RowProps) {
@@ -72,13 +72,13 @@ export function SimpleRow({ data }: RowProps) {
         return (
           <td
             key={index}
-            title={typeof field === "string" ? field : undefined}
+            title={typeof field === 'string' ? field : undefined}
             className="text-break-word"
           >
             {field}
           </td>
-        );
+        )
       })}
     </tr>
-  );
+  )
 }

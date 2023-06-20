@@ -1,27 +1,27 @@
-import ErrorPage404 from "lib/components/404/404";
-import RideListPrint from "lib/components/plan/print/RideListPrint";
-import { getPlanById } from "lib/data/plans";
-import { formatDateLong } from "lib/helpers/helpers";
-import { ActiveJobNoPlan } from "lib/types/active-job";
-import Image from "next/image";
-import logoImage from "public/logo-smj-yellow.png";
-import React from "react";
-import "/styles/print.css";
+import ErrorPage404 from 'lib/components/404/404'
+import RideListPrint from 'lib/components/plan/print/RideListPrint'
+import { getPlanById } from 'lib/data/plans'
+import { formatDateLong } from 'lib/helpers/helpers'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import Image from 'next/image'
+import logoImage from 'public/logo-smj-yellow.png'
+import React from 'react'
+import '/styles/print.css'
 
 type PathProps = {
   params: {
-    id: string;
-  };
-};
+    id: string
+  }
+}
 
 export default async function PrintPlanPage({ params }: PathProps) {
-  const plan = await getPlanById(params.id);
-  if (!plan) return <ErrorPage404 message="Plán nenalezen." />;
+  const plan = await getPlanById(params.id)
+  if (!plan) return <ErrorPage404 message="Plán nenalezen." />
   const sortedJobs = plan.jobs.sort((a, b) =>
     a.proposedJob.name.localeCompare(b.proposedJob.name)
-  );
+  )
   for (let i = 1; i <= sortedJobs.length; i++) {
-    sortedJobs[i - 1].id = i.toString();
+    sortedJobs[i - 1].id = i.toString()
   }
 
   return (
@@ -38,22 +38,22 @@ export default async function PrintPlanPage({ params }: PathProps) {
           />
         </div>
 
-        {sortedJobs.map((job) => (
+        {sortedJobs.map(job => (
           <JobInfo job={job} jobs={sortedJobs} key={job.id}></JobInfo>
         ))}
       </div>
     </>
-  );
+  )
 }
 
 function JobInfo({
   job,
   jobs,
 }: {
-  job: ActiveJobNoPlan;
-  jobs: ActiveJobNoPlan[];
+  job: ActiveJobNoPlan
+  jobs: ActiveJobNoPlan[]
 }) {
-  const otherJobs = jobs.filter((j) => j.id !== job.id);
+  const otherJobs = jobs.filter(j => j.id !== job.id)
   return (
     <div className="jobinfo-container">
       <div className="job-number-col">{job.id}</div>
@@ -63,10 +63,10 @@ function JobInfo({
           <p>{job.publicDescription}</p>
           <div>
             <i className="fas fa-user-group me-1"></i>
-            {job.workers.length == 0 && "Nikdo"}
+            {job.workers.length == 0 && 'Nikdo'}
             {job.workers.length > 0 &&
               job.workers
-                .map<React.ReactNode>((w) =>
+                .map<React.ReactNode>(w =>
                   w.id === job.responsibleWorkerId ? (
                     <u key={`resp-worker-${w.id}`}>
                       {w.firstName} {w.lastName}
@@ -77,7 +77,7 @@ function JobInfo({
                     </span>
                   )
                 )
-                .reduce((prev, curr) => [prev, ", ", curr])}
+                .reduce((prev, curr) => [prev, ', ', curr])}
           </div>
           <div>
             <i className="fas fa-house me-1"></i>
@@ -90,10 +90,10 @@ function JobInfo({
 
           <div>
             <i className="fas fa-utensils me-1"></i>
-            {job.proposedJob.hasFood ? "Ano" : "Ne"}
+            {job.proposedJob.hasFood ? 'Ano' : 'Ne'}
             <span className="ms-4 me-4"></span>
             <i className="fas fa-shower me-1"></i>
-            {job.proposedJob.hasShower ? "Ano" : "Ne"}
+            {job.proposedJob.hasShower ? 'Ano' : 'Ne'}
           </div>
         </div>
 
@@ -102,5 +102,5 @@ function JobInfo({
         </div>
       </div>
     </div>
-  );
+  )
 }

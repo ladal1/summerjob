@@ -1,9 +1,9 @@
-import { ExpandableRow } from "../table/ExpandableRow";
-import { SimpleRow } from "../table/SimpleRow";
-import { Logging } from "lib/prisma/client";
+import { ExpandableRow } from '../table/ExpandableRow'
+import { SimpleRow } from '../table/SimpleRow'
+import { Logging } from 'lib/prisma/client'
 
 interface LogRowProps {
-  log: Logging;
+  log: Logging
 }
 
 export default function LogRow({ log }: LogRowProps) {
@@ -35,26 +35,26 @@ export default function LogRow({ log }: LogRowProps) {
       <div className="row">
         <div className="col">
           <pre className="text-prewrap">
-            {JSON.stringify(JSON.parse(log.message || "{}"), null, 2)}
+            {JSON.stringify(JSON.parse(log.message || '{}'), null, 2)}
           </pre>
         </div>
       </div>
     </ExpandableRow>
-  );
+  )
 }
 
 function formatLogRow(log: Logging) {
-  const MESSAGE_MAX_LENGTH = 50;
+  const MESSAGE_MAX_LENGTH = 50
   const message =
     log.message.length > MESSAGE_MAX_LENGTH
-      ? log.message.substring(0, MESSAGE_MAX_LENGTH - 3) + "..."
-      : log.message;
+      ? log.message.substring(0, MESSAGE_MAX_LENGTH - 3) + '...'
+      : log.message
   return [
-    log.timestamp.toLocaleString("cs"),
+    log.timestamp.toLocaleString('cs'),
     log.eventType,
     log.authorName,
     message,
-  ];
+  ]
 }
 
 /*

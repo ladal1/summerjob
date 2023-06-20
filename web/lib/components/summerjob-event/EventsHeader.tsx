@@ -1,18 +1,18 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import PageHeader from "../page-header/PageHeader";
-import NewEventModal from "./NewEventModal";
+'use client'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import PageHeader from '../page-header/PageHeader'
+import NewEventModal from './NewEventModal'
 
 export default function EventsHeader() {
-  const router = useRouter();
+  const router = useRouter()
   const onSuccess = (eventId: string) => {
-    setIsNewEventModalOpen(false);
-    router.refresh();
-  };
-  const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false);
+    setIsNewEventModalOpen(false)
+    router.refresh()
+  }
+  const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false)
   return (
-    <PageHeader title={"Ročníky"} isFluid={false}>
+    <PageHeader title={'Ročníky'} isFluid={false}>
       <button
         className="btn btn-primary btn-with-icon"
         onClick={() => setIsNewEventModalOpen(true)}
@@ -27,5 +27,5 @@ export default function EventsHeader() {
         />
       )}
     </PageHeader>
-  );
+  )
 }

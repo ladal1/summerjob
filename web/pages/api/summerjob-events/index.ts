@@ -1,54 +1,54 @@
-import { APIAccessController } from "lib/api/APIAccessControler";
-import { APIMethodHandler } from "lib/api/MethodHandler";
-import { validateOrSendError } from "lib/api/validator";
+import { APIAccessController } from 'lib/api/APIAccessControler'
+import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { validateOrSendError } from 'lib/api/validator'
 import {
   createSummerJobEvent,
   getSummerJobEvents,
-} from "lib/data/summerjob-event";
-import logger from "lib/logger/logger";
-import { ExtendedSession, Permission } from "lib/types/auth";
-import { APILogEvent } from "lib/types/logger";
+} from 'lib/data/summerjob-event'
+import logger from 'lib/logger/logger'
+import { ExtendedSession, Permission } from 'lib/types/auth'
+import { APILogEvent } from 'lib/types/logger'
 import {
   SummerJobEventCreateDataInput,
   SummerJobEventCreateSchema,
-} from "lib/types/summerjob-event";
-import { NextApiRequest, NextApiResponse } from "next";
+} from 'lib/types/summerjob-event'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export type SummerJobEventsAPIPostData = SummerJobEventCreateDataInput;
+export type SummerJobEventsAPIPostData = SummerJobEventCreateDataInput
 export type SummerJobEventsAPIPostResponse = Awaited<
   ReturnType<typeof createSummerJobEvent>
->;
+>
 async function post(
   req: NextApiRequest,
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  const data = validateOrSendError(SummerJobEventCreateSchema, req.body, res);
+  const data = validateOrSendError(SummerJobEventCreateSchema, req.body, res)
   if (!data) {
-    return;
+    return
   }
   await logger.apiRequest(
     APILogEvent.SMJEVENT_CREATE,
-    "summerjob-events",
+    'summerjob-events',
     req.body,
     session
-  );
-  const event = await createSummerJobEvent(data);
-  res.status(201).json(event);
+  )
+  const event = await createSummerJobEvent(data)
+  res.status(201).json(event)
 }
 
 type SummerJobEventsAPIGetResponse = Awaited<
   ReturnType<typeof getSummerJobEvents>
->;
+>
 async function get(
   req: NextApiRequest,
   res: NextApiResponse<SummerJobEventsAPIGetResponse>
 ) {
-  const events = await getSummerJobEvents();
-  res.status(200).json(events);
+  const events = await getSummerJobEvents()
+  res.status(200).json(events)
 }
 
 export default APIAccessController(
   [Permission.ADMIN],
   APIMethodHandler({ get, post })
-);
+)

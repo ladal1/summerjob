@@ -2,12 +2,12 @@ import {
   PrismaClient,
   WorkerAvailability,
   WorkerPermissions,
-} from "lib/prisma/client";
-import prisma from "lib/prisma/connection";
-import { Permission } from "lib/types/auth";
-import { PrismaTransactionClient } from "lib/types/prisma";
-import { UserComplete, UserUpdateData } from "lib/types/user";
-import { cache_getActiveSummerJobEventId } from "./cache";
+} from 'lib/prisma/client'
+import prisma from 'lib/prisma/connection'
+import { Permission } from 'lib/types/auth'
+import { PrismaTransactionClient } from 'lib/types/prisma'
+import { UserComplete, UserUpdateData } from 'lib/types/user'
+import { cache_getActiveSummerJobEventId } from './cache'
 
 export async function getUserByEmail(
   email: string
@@ -26,14 +26,14 @@ export async function getUserByEmail(
       permissions: true,
       availability: true,
     },
-  });
-  if (!user || user.deleted) return null;
-  return databaseUserToUserComplete(user);
+  })
+  if (!user || user.deleted) return null
+  return databaseUserToUserComplete(user)
 }
 
 export async function getUsers(): Promise<UserComplete[]> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) return [];
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) return []
   const users = await prisma.worker.findMany({
     where: {
       deleted: false,
@@ -54,8 +54,8 @@ export async function getUsers(): Promise<UserComplete[]> {
       permissions: true,
       availability: true,
     },
-  });
-  return users.map(databaseUserToUserComplete);
+  })
+  return users.map(databaseUserToUserComplete)
 }
 
 export async function updateUser(
@@ -63,16 +63,16 @@ export async function updateUser(
   data: UserUpdateData
 ): Promise<UserComplete | null> {
   if (data.blocked === undefined || data.blocked === false) {
-    return await internal_updateUser(id, data, prisma);
+    return await internal_updateUser(id, data, prisma)
   }
   // Block user and update data
-  const user = await prisma.$transaction(async (tx) => {
-    const user = await internal_updateUser(id, data, tx);
-    if (!user) return null;
-    await deleteUserSessions(user.email, tx);
-    return user;
-  });
-  return user;
+  const user = await prisma.$transaction(async tx => {
+    const user = await internal_updateUser(id, data, tx)
+    if (!user) return null
+    await deleteUserSessions(user.email, tx)
+    return user
+  })
+  return user
 }
 
 async function internal_updateUser(
@@ -101,10 +101,10 @@ async function internal_updateUser(
       deleted: true,
       permissions: true,
     },
-  });
-  if (!user) return null;
+  })
+  if (!user) return null
   // TODO: Fix this type cast once prisma has fixed their return types
-  return databaseUserToUserComplete(user as unknown as DBUserComplete);
+  return databaseUserToUserComplete(user as unknown as DBUserComplete)
 }
 
 export async function deleteUserSessions(
@@ -115,18 +115,18 @@ export async function deleteUserSessions(
     where: {
       email,
     },
-  });
-  if (!nextAuthUser) return;
+  })
+  if (!nextAuthUser) return
   await prismaClient.session.deleteMany({
     where: {
       userId: nextAuthUser?.id,
     },
-  });
+  })
 }
 
-type DBUserComplete = Omit<UserComplete, "permissions"> & {
-  permissions: WorkerPermissions;
-};
+type DBUserComplete = Omit<UserComplete, 'permissions'> & {
+  permissions: WorkerPermissions
+}
 function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
   return {
     id: user.id,
@@ -136,7 +136,7 @@ function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
     blocked: user.blocked,
     permissions: user.permissions.permissions as Permission[],
     availability: user.availability,
-  };
+  }
 }
 
 export async function blockNonAdmins(transaction: PrismaTransactionClient) {
@@ -153,8 +153,8 @@ export async function blockNonAdmins(transaction: PrismaTransactionClient) {
     select: {
       email: true,
     },
-  });
-  const emails = nonAdmins.map((user) => user.email);
+  })
+  const emails = nonAdmins.map(user => user.email)
   await transaction.worker.updateMany({
     where: {
       email: {
@@ -164,7 +164,7 @@ export async function blockNonAdmins(transaction: PrismaTransactionClient) {
     data: {
       blocked: true,
     },
-  });
+  })
   await transaction.session.deleteMany({
     where: {
       user: {
@@ -173,7 +173,7 @@ export async function blockNonAdmins(transaction: PrismaTransactionClient) {
         },
       },
     },
-  });
+  })
 }
 
 export async function addAdminsToEvent(
@@ -192,13 +192,13 @@ export async function addAdminsToEvent(
       email: true,
       availability: true,
     },
-  });
+  })
   for (const admin of admins) {
     const alreadyRegistered = admin.availability
-      .map((av) => av.eventId)
-      .includes(eventId);
+      .map(av => av.eventId)
+      .includes(eventId)
     if (alreadyRegistered) {
-      continue;
+      continue
     }
 
     await transaction.worker.update({
@@ -214,7 +214,7 @@ export async function addAdminsToEvent(
           },
         },
       },
-    });
+    })
   }
 }
 
@@ -234,5 +234,5 @@ export async function unblockRegisteredUsers(
     data: {
       blocked: false,
     },
-  });
+  })
 }

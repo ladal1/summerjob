@@ -1,12 +1,12 @@
-"use client";
-import { ActiveJobNoPlan } from "lib/types/active-job";
-import { RidesForJob } from "lib/types/ride";
-import { useMemo } from "react";
+'use client'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { RidesForJob } from 'lib/types/ride'
+import { useMemo } from 'react'
 
 interface ActiveJobIssueProps {
-  job: ActiveJobNoPlan;
-  day: Date;
-  ridesForOtherJobs: RidesForJob[];
+  job: ActiveJobNoPlan
+  day: Date
+  ridesForOtherJobs: RidesForJob[]
 }
 
 export function ActiveJobIssueBanner({
@@ -17,8 +17,8 @@ export function ActiveJobIssueBanner({
   const issues = useMemo(
     () => getIssues(job, ridesForOtherJobs, day),
     [job, ridesForOtherJobs, day]
-  );
-  const hasIssues = Object.values(issues).some((i) => i);
+  )
+  const hasIssues = Object.values(issues).some(i => i)
   return (
     <>
       {hasIssues && (
@@ -81,7 +81,7 @@ export function ActiveJobIssueBanner({
         </div>
       )}
     </>
-  );
+  )
 }
 
 export function ActiveJobIssueIcon({
@@ -92,11 +92,9 @@ export function ActiveJobIssueIcon({
   const issues = useMemo(
     () => getIssues(job, ridesForOtherJobs, day),
     [job, ridesForOtherJobs, day]
-  );
-  const hasIssues = Object.values(issues).some((i) => i);
-  return (
-    <>{hasIssues && <div className="fas fa-triangle-exclamation"></div>}</>
-  );
+  )
+  const hasIssues = Object.values(issues).some(i => i)
+  return <>{hasIssues && <div className="fas fa-triangle-exclamation"></div>}</>
 }
 
 function getIssues(
@@ -113,66 +111,66 @@ function getIssues(
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
     adorations: adorations(job, day),
-  };
+  }
 }
 
 function tooManyWorkers(job: ActiveJobNoPlan) {
-  return job.workers.length > job.proposedJob.maxWorkers;
+  return job.workers.length > job.proposedJob.maxWorkers
 }
 
 function tooFewWorkers(job: ActiveJobNoPlan) {
-  return job.workers.length < job.proposedJob.minWorkers;
+  return job.workers.length < job.proposedJob.minWorkers
 }
 
 function notEnoughStrongWorkers(job: ActiveJobNoPlan) {
-  const strongWorkers = job.workers.filter((worker) => worker.isStrong);
-  return strongWorkers.length < job.proposedJob.strongWorkers;
+  const strongWorkers = job.workers.filter(worker => worker.isStrong)
+  return strongWorkers.length < job.proposedJob.strongWorkers
 }
 
 function overloadedCars(job: ActiveJobNoPlan) {
-  return job.rides.some((ride) => ride.car.seats < ride.passengers.length + 1);
+  return job.rides.some(ride => ride.car.seats < ride.passengers.length + 1)
 }
 
 function missingResponsible(job: ActiveJobNoPlan) {
-  return !job.responsibleWorker;
+  return !job.responsibleWorker
 }
 
 function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
   if (!job.proposedJob.area.requiresCar) {
-    return false;
+    return false
   }
   const passengers = ridesForOtherJobs
-    .flatMap((record) => record.rides)
+    .flatMap(record => record.rides)
     .concat(job.rides)
-    .flatMap((ride) => ride.passengers)
-    .map((passenger) => passenger.id);
-  const drivers = job.rides.map((ride) => ride.driver.id);
-  const peopleWithRides = [...passengers, ...drivers];
+    .flatMap(ride => ride.passengers)
+    .map(passenger => passenger.id)
+  const drivers = job.rides.map(ride => ride.driver.id)
+  const peopleWithRides = [...passengers, ...drivers]
   const workersWithoutRides = job.workers.some(
-    (worker) => !peopleWithRides.includes(worker.id)
-  );
-  return workersWithoutRides;
+    worker => !peopleWithRides.includes(worker.id)
+  )
+  return workersWithoutRides
 }
 
 function allergies(job: ActiveJobNoPlan) {
-  const jobAllergenIds = job.proposedJob.allergens;
-  return job.workers.some((worker) =>
-    worker.allergies.some((allergyId) => jobAllergenIds.includes(allergyId))
-  );
+  const jobAllergenIds = job.proposedJob.allergens
+  return job.workers.some(worker =>
+    worker.allergies.some(allergyId => jobAllergenIds.includes(allergyId))
+  )
 }
 
 function adorations(job: ActiveJobNoPlan, day: Date) {
   if (job.proposedJob.area.supportsAdoration) {
-    return false;
+    return false
   }
   for (const worker of job.workers) {
     if (
       worker.availability.adorationDays
-        .map((d) => d.getTime())
+        .map(d => d.getTime())
         .includes(day.getTime())
     ) {
-      return true;
+      return true
     }
   }
-  return false;
+  return false
 }

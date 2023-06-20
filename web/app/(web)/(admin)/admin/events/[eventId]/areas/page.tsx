@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation'
 type Props = {
   params: {
-    eventId: string;
-  };
-};
+    eventId: string
+  }
+}
 
 export default function AreasPage({ params }: Props) {
-  redirect(`/admin/events/${params.eventId}`);
+  redirect(`/admin/events/${params.eventId}`)
 }

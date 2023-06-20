@@ -1,5 +1,5 @@
-import PageHeader from "lib/components/page-header/PageHeader";
-import Link from "next/link";
+import PageHeader from 'lib/components/page-header/PageHeader'
+import Link from 'next/link'
 
 export default function AdminPage() {
   return (
@@ -57,5 +57,5 @@ export default function AdminPage() {
         </div>
       </section>
     </>
-  );
+  )
 }

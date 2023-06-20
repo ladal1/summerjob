@@ -1,38 +1,38 @@
-"use client";
-import ErrorPage from "lib/components/error-page/ErrorPage";
-import PageHeader from "lib/components/page-header/PageHeader";
-import { useAPIWorkers } from "lib/fetcher/worker";
-import { Serialized } from "lib/types/serialize";
-import { deserializeWorkers, WorkerComplete } from "lib/types/worker";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { WorkersFilters } from "./WorkersFilters";
-import WorkersTable from "./WorkersTable";
+'use client'
+import ErrorPage from 'lib/components/error-page/ErrorPage'
+import PageHeader from 'lib/components/page-header/PageHeader'
+import { useAPIWorkers } from 'lib/fetcher/worker'
+import { Serialized } from 'lib/types/serialize'
+import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { WorkersFilters } from './WorkersFilters'
+import WorkersTable from './WorkersTable'
 
 interface WorkersClientPageProps {
-  sWorkers: Serialized<WorkerComplete[]>;
+  sWorkers: Serialized<WorkerComplete[]>
 }
 
 export default function WorkersClientPage({
   sWorkers,
 }: WorkersClientPageProps) {
-  const inititalWorkers = deserializeWorkers(sWorkers);
+  const inititalWorkers = deserializeWorkers(sWorkers)
   const { data, error, mutate } = useAPIWorkers({
     fallbackData: inititalWorkers,
-  });
+  })
 
-  const [filter, setFilter] = useState("");
-  const [onlyStrong, setOnlyStrong] = useState(false);
-  const [onlyWithCar, setOnlyWithCar] = useState(false);
+  const [filter, setFilter] = useState('')
+  const [onlyStrong, setOnlyStrong] = useState(false)
+  const [onlyWithCar, setOnlyWithCar] = useState(false)
 
-  const fulltextData = useMemo(() => getFulltextData(data), [data]);
+  const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(
     () => filterWorkers(filter, fulltextData, onlyStrong, onlyWithCar, data),
     [fulltextData, filter, onlyStrong, onlyWithCar, data]
-  );
+  )
 
   if (error && !data) {
-    return <ErrorPage error={error} />;
+    return <ErrorPage error={error} />
   }
 
   return (
@@ -92,12 +92,12 @@ export default function WorkersClientPage({
         </div>
       </section>
     </>
-  );
+  )
 }
 
 function getFulltextData(workers?: WorkerComplete[]) {
-  const map = new Map<string, string>();
-  workers?.forEach((worker) => {
+  const map = new Map<string, string>()
+  workers?.forEach(worker => {
     map.set(
       worker.id,
       (
@@ -106,9 +106,9 @@ function getFulltextData(workers?: WorkerComplete[]) {
         worker.phone +
         worker.email
       ).toLocaleLowerCase()
-    );
-  });
-  return map;
+    )
+  })
+  return map
 }
 
 function filterWorkers(
@@ -118,24 +118,24 @@ function filterWorkers(
   onlyWithCar: boolean,
   workers?: WorkerComplete[]
 ) {
-  if (!workers) return [];
+  if (!workers) return []
   return workers
-    .filter((w) => {
+    .filter(w => {
       if (text.length > 0) {
-        return searchable.get(w.id)?.includes(text.toLowerCase()) ?? true;
+        return searchable.get(w.id)?.includes(text.toLowerCase()) ?? true
       }
-      return true;
+      return true
     })
-    .filter((w) => {
+    .filter(w => {
       if (onlyStrong) {
-        return w.isStrong;
+        return w.isStrong
       }
-      return true;
+      return true
     })
-    .filter((w) => {
+    .filter(w => {
       if (onlyWithCar) {
-        return w.cars.length > 0;
+        return w.cars.length > 0
       }
-      return true;
-    });
+      return true
+    })
 }

@@ -1,22 +1,21 @@
-import { getSMJSession } from "lib/auth/auth";
-import { redirect } from "next/navigation";
-import Image from "next/image";
-import logoImage from "public/logo-smj-yellow.png";
-import CenteredBox from "lib/components/auth/CenteredBox";
-import { string } from "zod";
+import { getSMJSession } from 'lib/auth/auth'
+import { redirect } from 'next/navigation'
+import Image from 'next/image'
+import logoImage from 'public/logo-smj-yellow.png'
+import CenteredBox from 'lib/components/auth/CenteredBox'
+import { string } from 'zod'
 
 type Props = {
-  searchParams?: { [key: string]: string | string[] | undefined };
-};
+  searchParams?: { [key: string]: string | string[] | undefined }
+}
 
 export default async function AuthErrorPage({ searchParams }: Props) {
-  const session = await getSMJSession();
+  const session = await getSMJSession()
   if (session) {
-    redirect("/");
+    redirect('/')
   }
   const reason =
-    ErrorReason.get(searchParams?.error as string) ||
-    ErrorReason.get("Default");
+    ErrorReason.get(searchParams?.error as string) || ErrorReason.get('Default')
   return (
     <CenteredBox>
       <div className="container maxwidth-500">
@@ -49,16 +48,16 @@ export default async function AuthErrorPage({ searchParams }: Props) {
         </div>
       </div>
     </CenteredBox>
-  );
+  )
 }
 
 // Taken from https://next-auth.js.org/configuration/pages#error-page
 const ErrorReason = new Map<string, string>([
-  ["Configuration", "Nastala chyba v konfiguraci služby. Kontaktujte správce."],
-  ["AccessDenied", "Přístup byl zamítnut."],
+  ['Configuration', 'Nastala chyba v konfiguraci služby. Kontaktujte správce.'],
+  ['AccessDenied', 'Přístup byl zamítnut.'],
   [
-    "Verification",
-    "Tento přihlašovací odkaz již není platný. Zkuste se přihlásit znovu.",
+    'Verification',
+    'Tento přihlašovací odkaz již není platný. Zkuste se přihlásit znovu.',
   ],
-  ["Default", "Nastala chyba. Zkuste to znovu."],
-]);
+  ['Default', 'Nastala chyba. Zkuste to znovu.'],
+])

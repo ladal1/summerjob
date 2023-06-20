@@ -1,27 +1,27 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIAreaUpdate } from "lib/fetcher/area";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAPIAreaUpdate } from 'lib/fetcher/area'
 import {
   AreaUpdateData,
   AreaUpdateSchema,
   deserializeAreaComp,
-} from "lib/types/area";
-import { Serialized } from "lib/types/serialize";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { Area } from "lib/prisma/zod";
+} from 'lib/types/area'
+import { Serialized } from 'lib/types/serialize'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { Area } from 'lib/prisma/zod'
 
 interface EditAreaProps {
-  sArea: Serialized<Area>;
+  sArea: Serialized<Area>
 }
 
 export default function EditAreaForm({ sArea }: EditAreaProps) {
-  const area = deserializeAreaComp(sArea);
-  const { trigger, error, isMutating, reset } = useAPIAreaUpdate(area);
-  const [saved, setSaved] = useState(false);
+  const area = deserializeAreaComp(sArea)
+  const { trigger, error, isMutating, reset } = useAPIAreaUpdate(area)
+  const [saved, setSaved] = useState(false)
   const {
     register,
     handleSubmit,
@@ -32,21 +32,21 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
       name: area.name,
       requiresCar: area.requiresCar,
     },
-  });
+  })
 
   const onSubmit = (data: AreaUpdateData) => {
     trigger(data, {
       onSuccess: () => {
-        setSaved(true);
+        setSaved(true)
       },
-    });
-  };
+    })
+  }
 
-  const router = useRouter();
+  const router = useRouter()
   const onSuccessMessageClose = () => {
-    router.back();
-    router.refresh();
-  };
+    router.back()
+    router.refresh()
+  }
 
   return (
     <>
@@ -64,7 +64,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
             <input
               className="form-control p-1 ps-2"
               id="name"
-              {...register("name")}
+              {...register('name')}
             />
             {errors.name && (
               <div className="text-danger">Zadejte název jobu</div>
@@ -75,7 +75,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
                 className="form-check-input"
                 type="checkbox"
                 id="requiresCar"
-                {...register("requiresCar")}
+                {...register('requiresCar')}
               />
               <label className="form-check-label" htmlFor="requiresCar">
                 <i className="fa fa-car ms-2 me-2"></i>
@@ -92,9 +92,9 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isMutating}
               />
             </div>
@@ -104,5 +104,5 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
       {saved && <SuccessProceedModal onClose={onSuccessMessageClose} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
-  );
+  )
 }

@@ -1,16 +1,16 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent } from 'react'
 
 export interface UsersFiltersPermission {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface UsersFiltersProps {
-  search: string;
-  onSearchChanged: (search: string) => void;
-  permissions: UsersFiltersPermission[];
-  selectedPermission: UsersFiltersPermission;
-  onPermissionSelected: (id: string) => void;
+  search: string
+  onSearchChanged: (search: string) => void
+  permissions: UsersFiltersPermission[]
+  selectedPermission: UsersFiltersPermission
+  onPermissionSelected: (id: string) => void
 }
 
 export function UsersFilters({
@@ -21,11 +21,11 @@ export function UsersFilters({
   onPermissionSelected,
 }: UsersFiltersProps) {
   const permissionSelectChanged = (e: ChangeEvent<HTMLSelectElement>) => {
-    onPermissionSelected(e.target.value);
-  };
+    onPermissionSelected(e.target.value)
+  }
 
   const isDefaultPermissionSelected =
-    selectedPermission.id === permissions[0].id;
+    selectedPermission.id === permissions[0].id
 
   return (
     <>
@@ -36,7 +36,7 @@ export function UsersFilters({
             className="p-2 d-inline-block outline-none border-0 smj-filter-input"
             placeholder="Vyhledat..."
             value={search}
-            onChange={(e) => onSearchChanged(e.target.value)}
+            onChange={e => onSearchChanged(e.target.value)}
           />
         </div>
         <div className="col-auto mb-3">
@@ -45,13 +45,13 @@ export function UsersFilters({
               name="permission"
               id="permission"
               className={`form-select p-2 bg-white smj-filter-input ${
-                isDefaultPermissionSelected ? "smj-default-option" : ""
+                isDefaultPermissionSelected ? 'smj-default-option' : ''
               }`}
               value={selectedPermission.id}
               onChange={permissionSelectChanged}
             >
               {permissions &&
-                permissions.map((permission) => (
+                permissions.map(permission => (
                   <option value={permission.id} key={permission.id}>
                     {permission.name}
                   </option>
@@ -61,5 +61,5 @@ export function UsersFilters({
         </div>
       </div>
     </>
-  );
+  )
 }

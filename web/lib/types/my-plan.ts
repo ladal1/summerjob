@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { Serialized } from "./serialize";
-import useZodOpenApi from "lib/api/useZodOpenApi";
+import { z } from 'zod'
+import { Serialized } from './serialize'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
 
-useZodOpenApi;
+useZodOpenApi
 
 export const MyRideSchema = z.object({
   car: z.string().min(1),
@@ -11,19 +11,19 @@ export const MyRideSchema = z.object({
   driverPhone: z.string().min(1),
   endsAtMyJob: z.boolean(),
   endJobName: z.string().min(1),
-});
+})
 
-export type MyRide = z.infer<typeof MyRideSchema>;
+export type MyRide = z.infer<typeof MyRideSchema>
 
 export const MyPlanSchema = z.object({
   day: z
     .date()
     .or(z.string().min(1).pipe(z.coerce.date()))
     .openapi({
-      type: "array",
+      type: 'array',
       items: {
-        type: "string",
-        format: "date",
+        type: 'string',
+        format: 'date',
       },
     }),
   job: z
@@ -43,32 +43,32 @@ export const MyPlanSchema = z.object({
       ride: MyRideSchema.optional(),
     })
     .optional(),
-});
+})
 
-export type MyPlan = z.infer<typeof MyPlanSchema>;
+export type MyPlan = z.infer<typeof MyPlanSchema>
 
 export function serializeMyPlan(plan: MyPlan): Serialized<MyPlan> {
   return {
     data: JSON.stringify(plan),
-  };
+  }
 }
 
 export function deserializeMyPlan(serialized: Serialized<MyPlan>): MyPlan {
-  const myPlan = JSON.parse(serialized.data);
-  myPlan.day = new Date(myPlan.day);
-  return myPlan;
+  const myPlan = JSON.parse(serialized.data)
+  myPlan.day = new Date(myPlan.day)
+  return myPlan
 }
 
 export function serializeMyPlans(plans: MyPlan[]): Serialized<MyPlan[]> {
   return {
     data: JSON.stringify(plans),
-  };
+  }
 }
 
 export function deserializeMyPlans(serialized: Serialized<MyPlan[]>): MyPlan[] {
-  const myPlans = JSON.parse(serialized.data);
+  const myPlans = JSON.parse(serialized.data)
   for (const myPlan of myPlans) {
-    myPlan.day = new Date(myPlan.day);
+    myPlan.day = new Date(myPlan.day)
   }
-  return myPlans;
+  return myPlans
 }

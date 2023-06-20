@@ -1,4 +1,4 @@
-import GenericErrorPage from "./GenericErrorPage";
+import GenericErrorPage from './GenericErrorPage'
 
 export default function AccessDeniedPage() {
   return (
@@ -6,5 +6,5 @@ export default function AccessDeniedPage() {
       title="Přístup odepřen"
       message="Nemáte přístup na tuto stránku."
     />
-  );
+  )
 }

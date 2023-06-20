@@ -1,36 +1,36 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
-import { formatDateLong } from "lib/helpers/helpers";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAPIActiveJobUpdate } from 'lib/fetcher/active-job'
+import { formatDateLong } from 'lib/helpers/helpers'
 import {
   ActiveJobComplete,
   ActiveJobUpdateData,
   ActiveJobUpdateSchema,
   deserializeActiveJob,
-} from "lib/types/active-job";
-import { Serialized } from "lib/types/serialize";
-import { WorkerBasicInfo } from "lib/types/worker";
-import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import RidesList from "./RidesList";
+} from 'lib/types/active-job'
+import { Serialized } from 'lib/types/serialize'
+import { WorkerBasicInfo } from 'lib/types/worker'
+import Link from 'next/link'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import RidesList from './RidesList'
 
 interface EditActiveJobProps {
-  serializedJob: Serialized<ActiveJobComplete>;
+  serializedJob: Serialized<ActiveJobComplete>
 }
 
 export default function EditActiveJobForm({
   serializedJob,
 }: EditActiveJobProps) {
-  const job = deserializeActiveJob(serializedJob);
+  const job = deserializeActiveJob(serializedJob)
   const { trigger, error, isMutating, reset } = useAPIActiveJobUpdate(
     job.id,
     job.planId
-  );
-  const [saved, setSaved] = useState(false);
+  )
+  const [saved, setSaved] = useState(false)
   const {
     register,
     handleSubmit,
@@ -39,26 +39,26 @@ export default function EditActiveJobForm({
   } = useForm<ActiveJobUpdateData>({
     resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
-      publicDescription: job?.publicDescription || "",
-      privateDescription: job?.privateDescription || "",
+      publicDescription: job?.publicDescription || '',
+      privateDescription: job?.privateDescription || '',
       responsibleWorkerId: job?.responsibleWorker?.id,
     },
-  });
+  })
 
   const onSubmit = (data: ActiveJobUpdateData) => {
-    if (data.responsibleWorkerId === "") {
-      delete data.responsibleWorkerId;
+    if (data.responsibleWorkerId === '') {
+      delete data.responsibleWorkerId
     }
     trigger(data, {
       onSuccess: () => {
-        setSaved(true);
+        setSaved(true)
       },
-    });
-  };
+    })
+  }
 
   const selectResponsibleWorker = (item: FilterSelectItem) => {
-    setValue("responsibleWorkerId", item.id);
-  };
+    setValue('responsibleWorkerId', item.id)
+  }
 
   return (
     <>
@@ -84,7 +84,7 @@ export default function EditActiveJobForm({
               className="form-control border p-1 ps-2"
               id="public-description"
               rows={3}
-              {...register("publicDescription")}
+              {...register('publicDescription')}
             ></textarea>
             <label
               className="form-label fw-bold mt-4"
@@ -96,13 +96,13 @@ export default function EditActiveJobForm({
               className="form-control border p-1 ps-2"
               id="private-description"
               rows={3}
-              {...register("privateDescription")}
+              {...register('privateDescription')}
             ></textarea>
             <div>
               <small className="text-muted mt-2">
                 Popis a poznámka pro organizátory se vztahují jen k aktuálně
                 naplánovanému jobu. Pokud chcete změnit popisy celého
-                navrhovaného jobu, klikněte na tlačítko{" "}
+                navrhovaného jobu, klikněte na tlačítko{' '}
               </small>
               <pre className="d-inline m-2">Upravit další parametry jobu</pre>
               <small className="text-muted mt-2">níže.</small>
@@ -113,7 +113,7 @@ export default function EditActiveJobForm({
             >
               Zodpovědný pracant
             </label>
-            <input type={"hidden"} {...register("responsibleWorkerId")} />
+            <input type={'hidden'} {...register('responsibleWorkerId')} />
             <FilterSelect
               items={job.workers.map(workerToSelectItem)}
               placeholder="Vyberte pracanta"
@@ -150,9 +150,9 @@ export default function EditActiveJobForm({
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isMutating}
               />
             </div>
@@ -162,7 +162,7 @@ export default function EditActiveJobForm({
       {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
-  );
+  )
 }
 
 function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
@@ -175,5 +175,5 @@ function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
         {worker.firstName} {worker.lastName}
       </span>
     ),
-  };
+  }
 }

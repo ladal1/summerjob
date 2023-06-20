@@ -1,11 +1,11 @@
-import { useAPISummerJobEventSetActive } from "lib/fetcher/summerjob-event";
-import { SummerJobEvent } from "lib/prisma/client";
-import { useState } from "react";
-import ConfirmationModal from "../modal/ConfirmationModal";
+import { useAPISummerJobEventSetActive } from 'lib/fetcher/summerjob-event'
+import { SummerJobEvent } from 'lib/prisma/client'
+import { useState } from 'react'
+import ConfirmationModal from '../modal/ConfirmationModal'
 
 interface SetEventActiveButtonProps {
-  smjEvent: SummerJobEvent;
-  onSuccess: () => void;
+  smjEvent: SummerJobEvent
+  onSuccess: () => void
 }
 
 export default function SetEventActiveButton({
@@ -16,17 +16,17 @@ export default function SetEventActiveButton({
     smjEvent.id,
     {
       onSuccess: () => {
-        setIsSetActiveEventModalOpen(false);
-        onSuccess();
+        setIsSetActiveEventModalOpen(false)
+        onSuccess()
       },
     }
-  );
+  )
   const triggerSetActive = () => {
-    trigger({ isActive: true });
-  };
+    trigger({ isActive: true })
+  }
 
   const [isSetActiveEventModalOpen, setIsSetActiveEventModalOpen] =
-    useState(false);
+    useState(false)
   return (
     <>
       {smjEvent.isActive && (
@@ -64,5 +64,5 @@ export default function SetEventActiveButton({
         </ConfirmationModal>
       )}
     </>
-  );
+  )
 }

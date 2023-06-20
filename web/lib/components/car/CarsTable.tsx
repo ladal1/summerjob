@@ -1,57 +1,57 @@
-"use client";
-import { useAPICarDeleteDynamic } from "lib/fetcher/car";
-import { CarComplete } from "lib/types/car";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { MessageRow } from "../table/MessageRow";
-import { SimpleRow } from "../table/SimpleRow";
+'use client'
+import { useAPICarDeleteDynamic } from 'lib/fetcher/car'
+import { CarComplete } from 'lib/types/car'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { MessageRow } from '../table/MessageRow'
+import { SimpleRow } from '../table/SimpleRow'
 
 const _columns = [
-  "Název",
-  "Majitel",
-  "Místa",
-  "Najeto km",
-  "Proplaceno",
-  "Akce",
-];
+  'Název',
+  'Majitel',
+  'Místa',
+  'Najeto km',
+  'Proplaceno',
+  'Akce',
+]
 
 interface CarTableProps {
-  data?: CarComplete[];
-  reload: (expectedResult: CarComplete[]) => void;
+  data?: CarComplete[]
+  reload: (expectedResult: CarComplete[]) => void
 }
 
 export function CarsTable({ data, reload }: CarTableProps) {
   const [deletingCarId, setDeletingCarId] = useState<string | undefined>(
     undefined
-  );
-  const { trigger, isMutating } = useAPICarDeleteDynamic(() => deletingCarId);
+  )
+  const { trigger, isMutating } = useAPICarDeleteDynamic(() => deletingCarId)
 
   useEffect(() => {
     if (deletingCarId) {
       trigger(null, {
         onSuccess: () => {
-          setDeletingCarId(undefined);
-          reload(data?.filter((car) => car.id !== deletingCarId) ?? []);
+          setDeletingCarId(undefined)
+          reload(data?.filter(car => car.id !== deletingCarId) ?? [])
         },
         onError: () => {
-          setDeletingCarId(undefined);
+          setDeletingCarId(undefined)
         },
-      });
+      })
     }
-  }, [setDeletingCarId, deletingCarId, trigger, data, reload]);
+  }, [setDeletingCarId, deletingCarId, trigger, data, reload])
 
   const deleteCar = (carId: string) => {
     if (!isMutating) {
-      setDeletingCarId(carId);
+      setDeletingCarId(carId)
     }
-  };
+  }
 
   return (
     <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
       <table className="table table-hover mb-0">
         <thead className="smj-table-header">
           <tr>
-            {_columns.map((column) => (
+            {_columns.map(column => (
               <th key={column}>{column}</th>
             ))}
           </tr>
@@ -61,7 +61,7 @@ export function CarsTable({ data, reload }: CarTableProps) {
             <MessageRow message="Žádná auta" colspan={_columns.length} />
           )}
           {data !== undefined &&
-            data.map((car) => (
+            data.map(car => (
               <SimpleRow
                 key={car.id}
                 {...{
@@ -72,7 +72,7 @@ export function CarsTable({ data, reload }: CarTableProps) {
         </tbody>
       </table>
     </div>
-  );
+  )
 }
 
 function formatCarRow(
@@ -80,18 +80,18 @@ function formatCarRow(
   isBeingDeleted: boolean,
   deleteCar: (carId: string) => void
 ) {
-  const drivenKm = car.odometerEnd - car.odometerStart;
+  const drivenKm = car.odometerEnd - car.odometerStart
   return [
     car.name,
     `${car.owner.firstName} ${car.owner.lastName}`,
     car.seats,
     drivenKm,
-    car.reimbursed ? "Ano" : "Ne",
+    car.reimbursed ? 'Ano' : 'Ne',
     <span key={car.id} className="d-flex align-items-center gap-3">
       <Link
         key={car.id}
         href={`/cars/${car.id}`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
         className="smj-action-edit"
       >
         <i className="fas fa-edit" title="Upravit"></i>
@@ -103,7 +103,7 @@ function formatCarRow(
             title="Smazat"
             onClick={() => deleteCar(car.id)}
           ></i>
-          <span style={{ width: "0px" }}></span>
+          <span style={{ width: '0px' }}></span>
         </>
       )}
 
@@ -114,5 +114,5 @@ function formatCarRow(
         ></i>
       )}
     </span>,
-  ];
+  ]
 }

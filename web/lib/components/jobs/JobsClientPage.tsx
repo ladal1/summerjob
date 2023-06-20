@@ -1,22 +1,22 @@
-"use client";
-import ErrorPage from "lib/components/error-page/ErrorPage";
-import PageHeader from "lib/components/page-header/PageHeader";
-import { JobsTable } from "lib/components/jobs/JobsTable";
+'use client'
+import ErrorPage from 'lib/components/error-page/ErrorPage'
+import PageHeader from 'lib/components/page-header/PageHeader'
+import { JobsTable } from 'lib/components/jobs/JobsTable'
 import {
   deserializeProposedJobs,
   ProposedJobComplete,
-} from "lib/types/proposed-job";
-import { useMemo, useState } from "react";
-import { JobsFilters } from "lib/components/jobs/JobsFilters";
-import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
-import { datesBetween, filterUniqueById } from "lib/helpers/helpers";
-import Link from "next/link";
-import { Serialized } from "lib/types/serialize";
+} from 'lib/types/proposed-job'
+import { useMemo, useState } from 'react'
+import { JobsFilters } from 'lib/components/jobs/JobsFilters'
+import { useAPIProposedJobs } from 'lib/fetcher/proposed-job'
+import { datesBetween, filterUniqueById } from 'lib/helpers/helpers'
+import Link from 'next/link'
+import { Serialized } from 'lib/types/serialize'
 
 interface ProposedJobsClientPage {
-  initialData: Serialized<ProposedJobComplete[]>;
-  startDate: string;
-  endDate: string;
+  initialData: Serialized<ProposedJobComplete[]>
+  startDate: string
+  endDate: string
 }
 
 export default function ProposedJobsClientPage({
@@ -24,53 +24,49 @@ export default function ProposedJobsClientPage({
   startDate,
   endDate,
 }: ProposedJobsClientPage) {
-  const deserializedData = deserializeProposedJobs(initialData);
+  const deserializedData = deserializeProposedJobs(initialData)
   const { data, error, mutate } = useAPIProposedJobs({
     fallbackData: deserializedData,
-  });
-  const reload = () => mutate();
+  })
+  const reload = () => mutate()
 
   //#region Filtering areas
-  const areas = getAvailableAreas(data);
-  const [selectedArea, setSelectedArea] = useState(areas[0]);
+  const areas = getAvailableAreas(data)
+  const [selectedArea, setSelectedArea] = useState(areas[0])
 
   const onAreaSelected = (id: string) => {
-    setSelectedArea(areas.find((a) => a.id === id) || areas[0]);
-  };
+    setSelectedArea(areas.find(a => a.id === id) || areas[0])
+  }
   //#endregion
 
   //#region Filtering days
-  const firstDay = new Date(startDate);
-  const lastDay = new Date(endDate);
-  const days = getDays(firstDay, lastDay);
-  const [selectedDay, setSelectedDay] = useState(days[0]);
+  const firstDay = new Date(startDate)
+  const lastDay = new Date(endDate)
+  const days = getDays(firstDay, lastDay)
+  const [selectedDay, setSelectedDay] = useState(days[0])
 
   const onDaySelected = (day: Date) => {
-    setSelectedDay(
-      days.find((d) => d.day.getTime() === day.getTime()) || days[0]
-    );
-  };
+    setSelectedDay(days.find(d => d.day.getTime() === day.getTime()) || days[0])
+  }
   //#endregion
 
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState('')
 
-  const fulltextData = useMemo(() => getFulltextData(data), [data]);
+  const fulltextData = useMemo(() => getFulltextData(data), [data])
 
   function shouldShowJob(job: ProposedJobComplete) {
     const area =
-      selectedArea.id === areas[0].id || job.area.id === selectedArea.id;
+      selectedArea.id === areas[0].id || job.area.id === selectedArea.id
     const fulltext =
-      fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false;
+      fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false
     const day =
       selectedDay.id === days[0].id ||
-      job.availability
-        .map((d) => d.getTime())
-        .includes(selectedDay.day.getTime());
-    return area && fulltext && day;
+      job.availability.map(d => d.getTime()).includes(selectedDay.day.getTime())
+    return area && fulltext && day
   }
 
   if (error && !data) {
-    return <ErrorPage error={error} />;
+    return <ErrorPage error={error} />
   }
 
   return (
@@ -112,32 +108,32 @@ export default function ProposedJobsClientPage({
         </div>
       </section>
     </>
-  );
+  )
 }
 
 function getAvailableAreas(jobs?: ProposedJobComplete[]) {
-  const ALL_AREAS = { id: "all", name: "Vyberte oblast" };
+  const ALL_AREAS = { id: 'all', name: 'Vyberte oblast' }
   const areas = filterUniqueById(
-    jobs?.map((job) => ({ id: job.area.id, name: job.area.name })) || []
-  );
-  areas.sort((a, b) => a.name.localeCompare(b.name));
-  areas.unshift(ALL_AREAS);
-  return areas;
+    jobs?.map(job => ({ id: job.area.id, name: job.area.name })) || []
+  )
+  areas.sort((a, b) => a.name.localeCompare(b.name))
+  areas.unshift(ALL_AREAS)
+  return areas
 }
 
 function getDays(firstDay: Date, lastDay: Date) {
-  const ALL_DAYS = { id: "all", day: new Date() };
-  const days = datesBetween(firstDay, lastDay).map((date) => ({
+  const ALL_DAYS = { id: 'all', day: new Date() }
+  const days = datesBetween(firstDay, lastDay).map(date => ({
     id: date.toJSON(),
     day: date,
-  }));
-  days.unshift(ALL_DAYS);
-  return days;
+  }))
+  days.unshift(ALL_DAYS)
+  return days
 }
 
 function getFulltextData(jobs?: ProposedJobComplete[]) {
-  const map = new Map<string, string>();
-  jobs?.forEach((job) => {
+  const map = new Map<string, string>()
+  jobs?.forEach(job => {
     map.set(
       job.id,
       (
@@ -148,7 +144,7 @@ function getFulltextData(jobs?: ProposedJobComplete[]) {
         job.publicDescription +
         job.privateDescription
       ).toLocaleLowerCase()
-    );
-  });
-  return map;
+    )
+  })
+  return map
 }

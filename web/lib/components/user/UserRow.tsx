@@ -1,26 +1,26 @@
-"use client";
-import { useAPIUserUpdate } from "lib/fetcher/user";
-import { UserComplete } from "lib/types/user";
-import { useState } from "react";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import { Modal, ModalSize } from "../modal/Modal";
-import { SimpleRow } from "../table/SimpleRow";
-import EditUserForm from "./EditUserForm";
+'use client'
+import { useAPIUserUpdate } from 'lib/fetcher/user'
+import { UserComplete } from 'lib/types/user'
+import { useState } from 'react'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import { Modal, ModalSize } from '../modal/Modal'
+import { SimpleRow } from '../table/SimpleRow'
+import EditUserForm from './EditUserForm'
 
 interface UserRowProps {
-  user: UserComplete;
-  onUpdate: () => void;
+  user: UserComplete
+  onUpdate: () => void
 }
 
 export default function UserRow({ user, onUpdate }: UserRowProps) {
   const { trigger, error } = useAPIUserUpdate(user.id, {
     onSuccess: () => onUpdate(),
-  });
+  })
   const toggleLocked = () => {
-    trigger({ blocked: !user.blocked });
-  };
+    trigger({ blocked: !user.blocked })
+  }
 
-  return <SimpleRow data={formatUserRow(user, toggleLocked, onUpdate)} />;
+  return <SimpleRow data={formatUserRow(user, toggleLocked, onUpdate)} />
 }
 
 function formatUserRow(
@@ -28,8 +28,8 @@ function formatUserRow(
   toggleLocked: () => void,
   onUserEdited: () => void
 ) {
-  const permissions = user.permissions;
-  const permissionString = permissions.join(", ");
+  const permissions = user.permissions
+  const permissionString = permissions.join(', ')
   return [
     `${user.lastName}, ${user.firstName}`,
     user.email,
@@ -41,24 +41,24 @@ function formatUserRow(
       <EditIcon onEdited={onUserEdited} user={user} />
       <LockIcon locked={user.blocked} onConfirm={toggleLocked} />
     </span>,
-  ];
+  ]
 }
 
 function LockIcon({
   locked,
   onConfirm,
 }: {
-  locked: boolean;
-  onConfirm: () => void;
+  locked: boolean
+  onConfirm: () => void
 }) {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
   const onDialogConfirmed = () => {
-    setDialogOpen(false);
-    onConfirm();
-  };
+    setDialogOpen(false)
+    onConfirm()
+  }
   const onDialogCancelled = () => {
-    setDialogOpen(false);
-  };
+    setDialogOpen(false)
+  }
   return (
     <>
       {!locked ? (
@@ -79,7 +79,7 @@ function LockIcon({
           onConfirm={onDialogConfirmed}
           onReject={onDialogCancelled}
         >
-          <p>Chcete {locked ? "odemknout" : "zamknout"} tento účet?</p>
+          <p>Chcete {locked ? 'odemknout' : 'zamknout'} tento účet?</p>
           {!locked && (
             <>
               <p>
@@ -95,24 +95,24 @@ function LockIcon({
         </ConfirmationModal>
       )}
     </>
-  );
+  )
 }
 
 function EditIcon({
   user,
   onEdited,
 }: {
-  user: UserComplete;
-  onEdited: () => void;
+  user: UserComplete
+  onEdited: () => void
 }) {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
   const onDialogConfirmed = () => {
-    setDialogOpen(false);
-    onEdited();
-  };
+    setDialogOpen(false)
+    onEdited()
+  }
   const onDialogCancelled = () => {
-    setDialogOpen(false);
-  };
+    setDialogOpen(false)
+  }
   return (
     <>
       <i
@@ -131,5 +131,5 @@ function EditIcon({
         </Modal>
       )}
     </>
-  );
+  )
 }

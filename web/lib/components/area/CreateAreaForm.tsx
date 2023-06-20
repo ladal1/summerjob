@@ -1,42 +1,42 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIAreaCreate } from "lib/fetcher/area";
-import { AreaCreateData, AreaCreateSchema } from "lib/types/area";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { z } from "zod";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAPIAreaCreate } from 'lib/fetcher/area'
+import { AreaCreateData, AreaCreateSchema } from 'lib/types/area'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { z } from 'zod'
 
 interface CreateAreaProps {
-  eventId: string;
+  eventId: string
 }
 
 export default function CreateAreaForm({ eventId }: CreateAreaProps) {
-  const { trigger, error, isMutating, reset } = useAPIAreaCreate(eventId);
-  const [saved, setSaved] = useState(false);
+  const { trigger, error, isMutating, reset } = useAPIAreaCreate(eventId)
+  const [saved, setSaved] = useState(false)
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<AreaCreateData>({
     resolver: zodResolver(schema),
-  });
+  })
 
   const onSubmit = (data: FormData) => {
     trigger(data, {
       onSuccess: () => {
-        setSaved(true);
+        setSaved(true)
       },
-    });
-  };
+    })
+  }
 
-  const router = useRouter();
+  const router = useRouter()
   const onSuccessMessageClose = () => {
-    router.back();
-    router.refresh();
-  };
+    router.back()
+    router.refresh()
+  }
 
   return (
     <>
@@ -54,7 +54,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
             <input
               className="form-control p-1 ps-2"
               id="name"
-              {...register("name")}
+              {...register('name')}
             />
             {errors.name && (
               <div className="text-danger">Zadejte název oblasti</div>
@@ -65,7 +65,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
                 className="form-check-input"
                 type="checkbox"
                 id="requiresCar"
-                {...register("requiresCar")}
+                {...register('requiresCar')}
               />
               <label className="form-check-label" htmlFor="requiresCar">
                 <i className="fa fa-car ms-2 me-2"></i>
@@ -78,7 +78,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
                 className="form-check-input"
                 type="checkbox"
                 id="supportsAdoration"
-                {...register("supportsAdoration")}
+                {...register('supportsAdoration')}
               />
               <label className="form-check-label" htmlFor="supportsAdoration">
                 <i className="fa fa-church ms-2 me-2"></i>V oblasti je možné
@@ -95,9 +95,9 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isMutating}
               />
             </div>
@@ -107,8 +107,8 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
       {saved && <SuccessProceedModal onClose={onSuccessMessageClose} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
-  );
+  )
 }
 
-const schema = AreaCreateSchema.omit({ summerJobEventId: true });
-type FormData = z.infer<typeof schema>;
+const schema = AreaCreateSchema.omit({ summerJobEventId: true })
+type FormData = z.infer<typeof schema>

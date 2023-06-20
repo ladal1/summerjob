@@ -1,19 +1,19 @@
-"use client";
-import ErrorPage from "lib/components/error-page/ErrorPage";
-import PageHeader from "lib/components/page-header/PageHeader";
-import { useAPIPlans } from "lib/fetcher/plan";
-import { formatDateLong } from "lib/helpers/helpers";
-import { deserializePlans, PlanWithJobs } from "lib/types/plan";
-import { Serialized } from "lib/types/serialize";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { Modal, ModalSize } from "../modal/Modal";
-import NewPlanForm from "./NewPlanForm";
+'use client'
+import ErrorPage from 'lib/components/error-page/ErrorPage'
+import PageHeader from 'lib/components/page-header/PageHeader'
+import { useAPIPlans } from 'lib/fetcher/plan'
+import { formatDateLong } from 'lib/helpers/helpers'
+import { deserializePlans, PlanWithJobs } from 'lib/types/plan'
+import { Serialized } from 'lib/types/serialize'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { Modal, ModalSize } from '../modal/Modal'
+import NewPlanForm from './NewPlanForm'
 
 interface PlansClientPageProps {
-  initialData: Serialized<PlanWithJobs[]>;
-  startDate: string;
-  endDate: string;
+  initialData: Serialized<PlanWithJobs[]>
+  startDate: string
+  endDate: string
 }
 
 export default function PlansClientPage({
@@ -21,35 +21,35 @@ export default function PlansClientPage({
   startDate,
   endDate,
 }: PlansClientPageProps) {
-  const initialDataParsed = deserializePlans(initialData);
+  const initialDataParsed = deserializePlans(initialData)
   const { data, error, isLoading } = useAPIPlans({
     fallbackData: initialDataParsed,
-  });
-  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
-  const openModal = () => setIsPlansModalOpen(true);
-  const closeModal = () => setIsPlansModalOpen(false);
+  })
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false)
+  const openModal = () => setIsPlansModalOpen(true)
+  const closeModal = () => setIsPlansModalOpen(false)
 
   const sortedPlans = useMemo(() => {
-    if (!data) return [];
-    return data.sort((a, b) => b.day.getTime() - a.day.getTime());
-  }, [data]);
+    if (!data) return []
+    return data.sort((a, b) => b.day.getTime() - a.day.getTime())
+  }, [data])
 
   if (error && !data) {
-    return <ErrorPage error={error} />;
+    return <ErrorPage error={error} />
   }
 
-  const firstDay = new Date(startDate);
-  const lastDay = new Date(endDate);
+  const firstDay = new Date(startDate)
+  const lastDay = new Date(endDate)
   const nextDay = (date: Date) => {
-    const newDate = new Date(date);
-    newDate.setDate(newDate.getDate() + 1);
-    return newDate;
-  };
+    const newDate = new Date(date)
+    newDate.setDate(newDate.getDate() + 1)
+    return newDate
+  }
 
   const nextPlanDate =
     sortedPlans && sortedPlans.length > 0
       ? nextDay(sortedPlans[0].day)
-      : firstDay;
+      : firstDay
 
   return (
     <>
@@ -74,7 +74,7 @@ export default function PlansClientPage({
               <center>Žádné plány.</center>
             )}
             {isLoading && !data && <center>Načítání...</center>}
-            {sortedPlans.map((plan) => (
+            {sortedPlans.map(plan => (
               <Link
                 className="list-group-item list-group-item-action"
                 href={`/plans/${plan.id}`}
@@ -95,7 +95,7 @@ export default function PlansClientPage({
         </div>
         {isPlansModalOpen && (
           <Modal
-            title={"Přidat nový plán"}
+            title={'Přidat nový plán'}
             size={ModalSize.MEDIUM}
             onClose={closeModal}
           >
@@ -109,5 +109,5 @@ export default function PlansClientPage({
         )}
       </section>
     </>
-  );
+  )
 }

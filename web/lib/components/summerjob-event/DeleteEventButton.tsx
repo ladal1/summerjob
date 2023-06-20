@@ -1,12 +1,12 @@
-import { useAPISummerJobEventDelete } from "lib/fetcher/summerjob-event";
-import { SummerJobEventComplete } from "lib/types/summerjob-event";
-import { useState } from "react";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
+import { useAPISummerJobEventDelete } from 'lib/fetcher/summerjob-event'
+import { SummerJobEventComplete } from 'lib/types/summerjob-event'
+import { useState } from 'react'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 
 interface DeleteEventButtonProps {
-  smjEvent: SummerJobEventComplete;
-  onSuccess: () => void;
+  smjEvent: SummerJobEventComplete
+  onSuccess: () => void
 }
 
 export default function DeleteEventButton({
@@ -17,23 +17,23 @@ export default function DeleteEventButton({
     smjEvent.id,
     {
       onSuccess: () => {
-        setShowDeleteConfirmation(false);
-        onSuccess();
+        setShowDeleteConfirmation(false)
+        onSuccess()
       },
     }
-  );
+  )
 
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const hideError = () => {
-    reset();
-    setShowDeleteConfirmation(false);
-  };
+    reset()
+    setShowDeleteConfirmation(false)
+  }
   const confirmDelete = () => {
-    setShowDeleteConfirmation(true);
-  };
+    setShowDeleteConfirmation(true)
+  }
   const deleteEvent = () => {
-    trigger();
-  };
+    trigger()
+  }
 
   return (
     <>
@@ -68,5 +68,5 @@ export default function DeleteEventButton({
         />
       )}
     </>
-  );
+  )
 }

@@ -32,13 +32,13 @@ export class BasicPlanner implements Planner {
 
     const categorizedWorkers = this.categorizeWorkers(shuffledWorkers)
 
-    const jobsInPlan: PlannedJob[] = plan.jobs.map((job) => ({
+    const jobsInPlan: PlannedJob[] = plan.jobs.map(job => ({
       job: job.proposedJob,
       responsibleWorker: job.responsibleWorker || undefined,
       privateDescription: job.privateDescription || '',
       publicDescription: job.publicDescription || '',
       workers: job.workers,
-      rides: job.rides.map((ride) => ({
+      rides: job.rides.map(ride => ({
         driver: ride.driver,
         car: ride.car,
         passengers: ride.passengers,
@@ -56,7 +56,7 @@ export class BasicPlanner implements Planner {
     })
 
     const minPlanned = this.planJobsRecursive(
-      jobsInPlan.map((job) => ({ attemptsLeft: 1, plannedJob: job })),
+      jobsInPlan.map(job => ({ attemptsLeft: 1, plannedJob: job })),
       plan.day,
       categorizedWorkers
     )
@@ -140,10 +140,10 @@ export class BasicPlanner implements Planner {
       }
       // If there are passengers on this job that are currently in a shared ride, add them to the new ride instead
       const allPassengersIds = job.rides
-        .flatMap((ride) => [ride.driver, ...ride.passengers])
-        .map((worker) => worker.id)
+        .flatMap(ride => [ride.driver, ...ride.passengers])
+        .map(worker => worker.id)
       const workersWithSharedRide = job.workers.filter(
-        (worker) => !allPassengersIds.includes(worker.id)
+        worker => !allPassengersIds.includes(worker.id)
       )
       if (workersWithSharedRide.length === 0) {
         // Everyone is already in a local ride, no need to change anything
@@ -160,7 +160,7 @@ export class BasicPlanner implements Planner {
           }
           for (const ride of job.rides) {
             const index = ride.passengers.findIndex(
-              (passenger) => passenger.id === worker.id
+              passenger => passenger.id === worker.id
             )
             if (index >= 0) {
               ride.passengers.splice(index, 1)
@@ -213,26 +213,26 @@ export class BasicPlanner implements Planner {
           let availableWorker: WorkerComplete | undefined
           if (plannedJob.job.area.supportsAdoration) {
             availableWorker = workersWithoutJob.find(
-              (w) =>
+              w =>
                 !this.isAllergicTo(w, plannedJob.job.allergens) &&
                 this.workerRequiresAdoration(w, day)
             )
           } else {
             availableWorker = workersWithoutJob.find(
-              (w) =>
+              w =>
                 !this.isAllergicTo(w, plannedJob.job.allergens) &&
                 !this.workerRequiresAdoration(w, day)
             )
           }
           availableWorker ??= workersWithoutJob.find(
-            (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
+            w => !this.isAllergicTo(w, plannedJob.job.allergens)
           )
           // If every worker is allergic to this job, we can't fill it
           if (!availableWorker) {
             break
           }
           workersWithoutJob = workersWithoutJob.filter(
-            (w) => w.id !== availableWorker!.id
+            w => w.id !== availableWorker!.id
           )
           ride.passengers.push(availableWorker)
           plannedJob.workers.push(availableWorker)
@@ -246,20 +246,20 @@ export class BasicPlanner implements Planner {
           let availableWorker: WorkerComplete | undefined
           if (plannedJob.job.area.supportsAdoration) {
             availableWorker = workersWithoutJob.find(
-              (w) =>
+              w =>
                 !this.isAllergicTo(w, plannedJob.job.allergens) &&
                 this.workerRequiresAdoration(w, day)
             )
           }
           availableWorker ??= workersWithoutJob.find(
-            (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
+            w => !this.isAllergicTo(w, plannedJob.job.allergens)
           )
           // If every worker is allergic to this job, we can't fill it
           if (!availableWorker) {
             break
           }
           workersWithoutJob = workersWithoutJob.filter(
-            (w) => w.id !== availableWorker!.id
+            w => w.id !== availableWorker!.id
           )
           plannedJob.workers.push(availableWorker)
           workersNeeded--
@@ -283,14 +283,14 @@ export class BasicPlanner implements Planner {
   ): RecPlanningResult {
     if (jobsToPlan.length === 0) {
       return {
-        plannedJobs: jobsToPlan.map((a) => a.plannedJob),
+        plannedJobs: jobsToPlan.map(a => a.plannedJob),
         remainingWorkers: workersWithoutJob,
       }
     }
     if (this.numWorkers(workersWithoutJob) === 0) {
       console.log('BasicPlanner: No more workers without job')
       return {
-        plannedJobs: jobsToPlan.map((a) => a.plannedJob),
+        plannedJobs: jobsToPlan.map(a => a.plannedJob),
         remainingWorkers: workersWithoutJob,
       }
     }
@@ -300,19 +300,19 @@ export class BasicPlanner implements Planner {
     if (attemptsLeft === 0) {
       console.log('BasicPlanner: No more attempts left')
       return {
-        plannedJobs: [plannedJob, ...jobsToPlan.map((a) => a.plannedJob)],
+        plannedJobs: [plannedJob, ...jobsToPlan.map(a => a.plannedJob)],
         remainingWorkers: workersWithoutJob,
       }
     }
 
     // Remember the original state of workers in case we need to throw a worker away and replace them with a driver
-    const workersAddedByPlanner = { strong: [], regular: [] } as {
-      strong: WorkerComplete[];
-      regular: WorkerComplete[];
-    }
+    const workersAddedByPlanner: {
+      strong: WorkerComplete[]
+      regular: WorkerComplete[]
+    } = { strong: [], regular: [] }
 
     // Fill in strong workers without job
-    const assignedStrongWorkers = plannedJob.workers.filter((w) => w.isStrong)
+    const assignedStrongWorkers = plannedJob.workers.filter(w => w.isStrong)
     if (assignedStrongWorkers.length < plannedJob.job.strongWorkers) {
       const required = plannedJob.job.minWorkers - plannedJob.workers.length
       for (let i = 0; i < required; i++) {
@@ -355,10 +355,10 @@ export class BasicPlanner implements Planner {
       let workersWithoutTransport = plannedJob.workers
       for (const ride of plannedJob.rides) {
         workersWithoutTransport = workersWithoutTransport.filter(
-          (w) =>
+          w =>
             !(
               w.id === ride.driver.id ||
-              ride.passengers.map((p) => p.id).includes(w.id)
+              ride.passengers.map(p => p.id).includes(w.id)
             )
         )
       }
@@ -366,16 +366,14 @@ export class BasicPlanner implements Planner {
         // Not all workers have ride on this job, find if they already have ride from other jobs
         workersWithoutTransport = this.getWorkersNotInRides(
           workersWithoutTransport,
-          jobsToPlan.map((j) => j.plannedJob.rides).flat()
+          jobsToPlan.map(j => j.plannedJob.rides).flat()
         )
         if (workersWithoutTransport.length > 0) {
           // Plan rides for workers without transport
           // If there is already a car owner in job that doesn't have a drive planned, create a ride with them
-          const drivers = workersWithoutTransport.filter(
-            (w) => w.cars.length > 0
-          )
+          const drivers = workersWithoutTransport.filter(w => w.cars.length > 0)
           workersWithoutTransport = workersWithoutTransport.filter(
-            (w) => !drivers.map((d) => d.id).includes(w.id)
+            w => !drivers.map(d => d.id).includes(w.id)
           )
           for (const driver of drivers) {
             const car = driver.cars[0]
@@ -396,7 +394,7 @@ export class BasicPlanner implements Planner {
             const sharedRidesInfo = this.findSharedRides(
               plannedJob.job.area,
               workersWithoutTransport.length,
-              jobsToPlan.map((j) => j.plannedJob)
+              jobsToPlan.map(j => j.plannedJob)
             )
             if (sharedRidesInfo.success) {
               // We can divide the workers into shared rides
@@ -407,9 +405,9 @@ export class BasicPlanner implements Planner {
                 const passengers = workersWithoutTransport.slice(0, seats)
                 workersWithoutTransport = workersWithoutTransport.slice(seats)
                 const originalRide = jobsToPlan
-                  .map((j) => j.plannedJob)
-                  .find((j) => j.job.id === sharedRideInfo.proposedJobId)!
-                  .rides.find((r) => r.driver.id === sharedRide.driver.id)!
+                  .map(j => j.plannedJob)
+                  .find(j => j.job.id === sharedRideInfo.proposedJobId)!
+                  .rides.find(r => r.driver.id === sharedRide.driver.id)!
                 originalRide.passengers = [
                   ...originalRide.passengers,
                   ...passengers,
@@ -417,10 +415,7 @@ export class BasicPlanner implements Planner {
               }
               // Everything is planned, proceed to next job
               return this.planJobsRecursive(
-                [
-                  ...jobsToPlan,
-                  { attemptsLeft: attemptsLeft - 1, plannedJob },
-                ],
+                [...jobsToPlan, { attemptsLeft: attemptsLeft - 1, plannedJob }],
                 day,
                 workersWithoutJob
               )
@@ -435,10 +430,7 @@ export class BasicPlanner implements Planner {
             if (!findResult.worker) {
               // No driver found, just shuffle the current state of the job and try again later
               return this.planJobsRecursive(
-                [
-                  ...jobsToPlan,
-                  { attemptsLeft: attemptsLeft - 1, plannedJob },
-                ],
+                [...jobsToPlan, { attemptsLeft: attemptsLeft - 1, plannedJob }],
                 day,
                 workersWithoutJob
               )
@@ -453,14 +445,14 @@ export class BasicPlanner implements Planner {
                 const removedWorker = workersAddedByPlanner.regular.pop()!
                 workersWithoutJob.others.push(removedWorker)
                 workersWithoutTransport = workersWithoutTransport.filter(
-                  (w) => w.id !== removedWorker.id
+                  w => w.id !== removedWorker.id
                 )
               } else if (workersAddedByPlanner.strong.length > 0) {
                 plannedJob.workers.pop()
                 const removedWorker = workersAddedByPlanner.strong.pop()!
                 workersWithoutJob.strong.push(removedWorker)
                 workersWithoutTransport = workersWithoutTransport.filter(
-                  (w) => w.id !== removedWorker.id
+                  w => w.id !== removedWorker.id
                 )
               }
             }
@@ -481,10 +473,7 @@ export class BasicPlanner implements Planner {
         } else {
           // All workers have rides, proceed to next job
           return this.planJobsRecursive(
-            [
-              ...jobsToPlan,
-              { attemptsLeft: attemptsLeft - 1, plannedJob },
-            ],
+            [...jobsToPlan, { attemptsLeft: attemptsLeft - 1, plannedJob }],
             day,
             workersWithoutJob
           )
@@ -493,10 +482,7 @@ export class BasicPlanner implements Planner {
     }
 
     return this.planJobsRecursive(
-      [
-        ...jobsToPlan,
-        { attemptsLeft: attemptsLeft - 1, plannedJob },
-      ],
+      [...jobsToPlan, { attemptsLeft: attemptsLeft - 1, plannedJob }],
       day,
       workersWithoutJob
     )
@@ -513,10 +499,10 @@ export class BasicPlanner implements Planner {
     rides: RideWithPassengers[]
   ): WorkerComplete[] {
     const workersInRides = rides
-      .map((ride) => [ride.driver, ...ride.passengers])
+      .map(ride => [ride.driver, ...ride.passengers])
       .flat()
-      .map((w) => w.id)
-    return workers.filter((w) => !workersInRides.includes(w.id))
+      .map(w => w.id)
+    return workers.filter(w => !workersInRides.includes(w.id))
   }
 
   /**
@@ -535,12 +521,12 @@ export class BasicPlanner implements Planner {
       return ride.car.seats - ride.passengers.length - 1
     }
 
-    const jobsInArea = plannedJobs.filter((job) => job.job.areaId === area.id)
+    const jobsInArea = plannedJobs.filter(job => job.job.areaId === area.id)
     const ridesByJob = jobsInArea
-      .flatMap((job) =>
-        job.rides.map<JobRide>((r) => ({ proposedJobId: job.job.id, ride: r }))
+      .flatMap(job =>
+        job.rides.map<JobRide>(r => ({ proposedJobId: job.job.id, ride: r }))
       )
-      .filter((r) => freeSeats(r.ride) > 0)
+      .filter(r => freeSeats(r.ride) > 0)
     if (ridesByJob.length === 0) {
       return { success: false, availableRides: [] }
     }
@@ -581,7 +567,7 @@ export class BasicPlanner implements Planner {
     console.log('------' + job.job.name + ' [', job.job.area.name, '] ------')
     console.log(
       'Workers:',
-      job.workers.map((w) => w.firstName + ' ' + w.lastName).join(', ')
+      job.workers.map(w => w.firstName + ' ' + w.lastName).join(', ')
     )
     if (!job.job.area.requiresCar) {
       console.log('No car needed')
@@ -591,7 +577,7 @@ export class BasicPlanner implements Planner {
       console.log(
         '  ' + ride.driver.firstName + ' ' + ride.driver.lastName,
         '-',
-        ride.passengers.map((p) => p.firstName + ' ' + p.lastName).join(', '),
+        ride.passengers.map(p => p.firstName + ' ' + p.lastName).join(', '),
         '- Free seats:',
         ride.car.seats - ride.passengers.length - 1
       )
@@ -606,7 +592,7 @@ export class BasicPlanner implements Planner {
    */
   workerRequiresAdoration(worker: WorkerComplete, day: Date): boolean {
     return worker.availability.adorationDays
-      .map((d) => d.getTime())
+      .map(d => d.getTime())
       .includes(day.getTime())
   }
 
@@ -627,18 +613,18 @@ export class BasicPlanner implements Planner {
     let driver: WorkerComplete | undefined
     if (areaSupportsAdoration) {
       driver = workers.drivers.find(
-        (w) =>
+        w =>
           !this.isAllergicTo(w, jobAllergens) &&
           this.workerRequiresAdoration(w, day)
       )
     } else {
       driver ??= workers.drivers.find(
-        (w) =>
+        w =>
           !this.isAllergicTo(w, jobAllergens) &&
           !this.workerRequiresAdoration(w, day)
       )
     }
-    driver ??= workers.drivers.find((w) => !this.isAllergicTo(w, jobAllergens))
+    driver ??= workers.drivers.find(w => !this.isAllergicTo(w, jobAllergens))
     if (!driver) {
       return { worker: null, remainingWorkers: workers }
     }
@@ -647,7 +633,7 @@ export class BasicPlanner implements Planner {
       remainingWorkers: {
         others: workers.others,
         strong: workers.strong,
-        drivers: workers.drivers.filter((w) => w.id !== driver!.id),
+        drivers: workers.drivers.filter(w => w.id !== driver!.id),
       },
     }
   }
@@ -669,18 +655,18 @@ export class BasicPlanner implements Planner {
     let worker: WorkerComplete | undefined
     if (areaSupportsAdoration) {
       worker = workers.strong.find(
-        (w) =>
+        w =>
           !this.isAllergicTo(w, jobAllergens) &&
           this.workerRequiresAdoration(w, day)
       )
     } else {
       worker ??= workers.strong.find(
-        (w) =>
+        w =>
           !this.isAllergicTo(w, jobAllergens) &&
           !this.workerRequiresAdoration(w, day)
       )
     }
-    worker ??= workers.strong.find((w) => !this.isAllergicTo(w, jobAllergens))
+    worker ??= workers.strong.find(w => !this.isAllergicTo(w, jobAllergens))
     if (!worker) {
       return { worker: null, remainingWorkers: workers }
     }
@@ -688,7 +674,7 @@ export class BasicPlanner implements Planner {
       worker,
       remainingWorkers: {
         others: workers.others,
-        strong: workers.strong.filter((w) => w.id !== worker!.id),
+        strong: workers.strong.filter(w => w.id !== worker!.id),
         drivers: workers.drivers,
       },
     }
@@ -711,23 +697,23 @@ export class BasicPlanner implements Planner {
     let worker: WorkerComplete | undefined
     if (areaSupportsAdoration) {
       worker = workers.others.find(
-        (w) =>
+        w =>
           !this.isAllergicTo(w, jobAllergens) &&
           this.workerRequiresAdoration(w, day)
       )
     } else {
       worker ??= workers.others.find(
-        (w) =>
+        w =>
           !this.isAllergicTo(w, jobAllergens) &&
           !this.workerRequiresAdoration(w, day)
       )
     }
-    worker ??= workers.others.find((w) => !this.isAllergicTo(w, jobAllergens))
+    worker ??= workers.others.find(w => !this.isAllergicTo(w, jobAllergens))
     if (worker) {
       return {
         worker,
         remainingWorkers: {
-          others: workers.others.filter((w) => w.id !== worker!.id),
+          others: workers.others.filter(w => w.id !== worker!.id),
           strong: workers.strong,
           drivers: workers.drivers,
         },
@@ -762,7 +748,7 @@ export class BasicPlanner implements Planner {
    * @returns True if the worker is allergic to any of the allergens, false otherwise.
    */
   isAllergicTo(worker: WorkerComplete, allergens: string[]): boolean {
-    return worker.allergies.some((id) => allergens.includes(id))
+    return worker.allergies.some(id => allergens.includes(id))
   }
 
   /**
@@ -827,16 +813,16 @@ export class BasicPlanner implements Planner {
       plannedJob.responsibleWorker || plannedJob.workers[0] || undefined
     return {
       proposedJobId: plannedJob.job.id,
-      workerIds: plannedJob.workers.map((w) => w.id),
+      workerIds: plannedJob.workers.map(w => w.id),
       responsibleWorkerId: responsibleWorker ? responsibleWorker.id : undefined,
       privateDescription:
         plannedJob.privateDescription || plannedJob.job.privateDescription,
       publicDescription:
         plannedJob.publicDescription || plannedJob.job.publicDescription,
-      rides: plannedJob.rides.map((r) => ({
+      rides: plannedJob.rides.map(r => ({
         driverId: r.driver.id,
         carId: r.car.id,
-        passengerIds: r.passengers.map((p) => p.id),
+        passengerIds: r.passengers.map(p => p.id),
       })),
     }
   }
@@ -848,60 +834,60 @@ export class BasicPlanner implements Planner {
    */
   shuffleArray<T>(array: T[]) {
     for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]]
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[array[i], array[j]] = [array[j], array[i]]
     }
     return array
   }
 }
 
 interface FindWorkerResult {
-  worker: WorkerComplete | null;
-  remainingWorkers: CategorizedWorkers;
+  worker: WorkerComplete | null
+  remainingWorkers: CategorizedWorkers
 }
 
 interface FindSharedRidesResult {
-  success: boolean;
-  availableRides: JobRide[];
+  success: boolean
+  availableRides: JobRide[]
 }
 
 interface JobRide {
-  proposedJobId: string;
-  ride: RideWithPassengers;
+  proposedJobId: string
+  ride: RideWithPassengers
 }
 
 interface CategorizedWorkers {
-  drivers: WorkerComplete[];
-  strong: WorkerComplete[];
-  others: WorkerComplete[];
+  drivers: WorkerComplete[]
+  strong: WorkerComplete[]
+  others: WorkerComplete[]
 }
 
 interface PlannedJob {
-  job: ProposedJobNoActive;
-  workers: WorkerComplete[];
-  responsibleWorker?: Worker;
-  rides: RideWithPassengers[];
-  privateDescription?: string;
-  publicDescription?: string;
+  job: ProposedJobNoActive
+  workers: WorkerComplete[]
+  responsibleWorker?: Worker
+  rides: RideWithPassengers[]
+  privateDescription?: string
+  publicDescription?: string
 }
 
 interface RideWithPassengers {
-  driver: Worker;
-  car: Car;
-  passengers: Worker[];
+  driver: Worker
+  car: Car
+  passengers: Worker[]
 }
 
 interface RecPlanningResult {
-  plannedJobs: PlannedJob[];
-  remainingWorkers: CategorizedWorkers;
+  plannedJobs: PlannedJob[]
+  remainingWorkers: CategorizedWorkers
 }
 
 interface FillPlanningResult {
-  plannedJobs: PlannedJob[];
-  remainingWorkers: WorkerComplete[];
+  plannedJobs: PlannedJob[]
+  remainingWorkers: WorkerComplete[]
 }
 
 interface JobPlanningAttempt {
-  attemptsLeft: number;
-  plannedJob: PlannedJob;
+  attemptsLeft: number
+  plannedJob: PlannedJob
 }

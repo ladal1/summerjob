@@ -1,27 +1,27 @@
-"use client";
-import LogsTable from "./LogsTable";
-import { APILogEvent, FilteredLogs, deserializeLogs } from "lib/types/logger";
-import { Serialized } from "lib/types/serialize";
-import { LogsFilters, LogsFiltersEventType } from "./LogsFilters";
-import { useMemo, useState } from "react";
-import useDebounce from "lib/helpers/debounce";
-import { useAPILogs } from "lib/fetcher/log";
+'use client'
+import LogsTable from './LogsTable'
+import { APILogEvent, FilteredLogs, deserializeLogs } from 'lib/types/logger'
+import { Serialized } from 'lib/types/serialize'
+import { LogsFilters, LogsFiltersEventType } from './LogsFilters'
+import { useMemo, useState } from 'react'
+import useDebounce from 'lib/helpers/debounce'
+import { useAPILogs } from 'lib/fetcher/log'
 
 interface LogsClientPageProps {
-  sLogs: Serialized<FilteredLogs>;
+  sLogs: Serialized
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
 
 export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
-  const logs = deserializeLogs(sLogs);
-  const [filter, setFilter] = useState("");
-  const debouncedSearch = useDebounce(filter, 500);
-  const [page, setPage] = useState(1);
-  const eventTypes = useMemo(() => getEventTypes(), []);
+  const logs = deserializeLogs(sLogs)
+  const [filter, setFilter] = useState('')
+  const debouncedSearch = useDebounce(filter, 500)
+  const [page, setPage] = useState(1)
+  const eventTypes = useMemo(() => getEventTypes(), [])
   const [filterEventType, setFilterEventType] = useState<LogsFiltersEventType>(
     eventTypes[0]
-  );
+  )
   const { data } = useAPILogs(
     debouncedSearch,
     filterEventType.id,
@@ -31,21 +31,21 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
       fallbackData: logs,
       keepPreviousData: true,
     }
-  );
+  )
 
   const onFilterChanged = (value: string) => {
-    setPage(1);
-    setFilter(value);
-  };
+    setPage(1)
+    setFilter(value)
+  }
 
   const eventTypeSelectChanged = (id: string) => {
-    setPage(1);
-    setFilterEventType(eventTypes.find((p) => p.id === id) || eventTypes[0]);
-  };
+    setPage(1)
+    setFilterEventType(eventTypes.find(p => p.id === id) || eventTypes[0])
+  }
 
   const paginationButtons = useMemo(() => {
-    if (!data) return [];
-    const numberOfPages = Math.ceil(data.total / PAGE_SIZE);
+    if (!data) return []
+    const numberOfPages = Math.ceil(data.total / PAGE_SIZE)
     if (numberOfPages <= 5) {
       return Array.from({ length: numberOfPages }, (_, i) => (
         <PaginationButton
@@ -54,10 +54,10 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
           page={i + 1}
           onClick={() => setPage(i + 1)}
         />
-      ));
+      ))
     }
-    const pageButtons = [];
-    let lastWasDisabled = false;
+    const pageButtons = []
+    let lastWasDisabled = false
     for (let i = 1; i <= numberOfPages; i++) {
       if (i === 1 || i === numberOfPages || (i >= page - 1 && i <= page + 1)) {
         pageButtons.push(
@@ -67,23 +67,24 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
             page={i}
             onClick={() => setPage(i)}
           />
-        );
-        lastWasDisabled = false;
+        )
+        lastWasDisabled = false
       } else if (!lastWasDisabled) {
         pageButtons.push(
           <PaginationButton
             key={i}
             active={false}
-            page={"..."}
+            page={'...'}
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             onClick={() => {}}
             disabled={true}
           />
-        );
-        lastWasDisabled = true;
+        )
+        lastWasDisabled = true
       }
     }
-    return pageButtons;
-  }, [data, page, setPage]);
+    return pageButtons
+  }, [data, page, setPage])
 
   return (
     <section>
@@ -115,7 +116,7 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
         </div>
       </div>
     </section>
-  );
+  )
 }
 
 function PaginationButton({
@@ -124,34 +125,35 @@ function PaginationButton({
   active,
   disabled = false,
 }: {
-  page: string | number;
-  onClick: () => void;
-  active: boolean;
-  disabled?: boolean;
+  page: string | number
+  onClick: () => void
+  active: boolean
+  disabled?: boolean
 }) {
   return (
     <li
-      className={`smj-page-item ${active ? "active" : ""} ${
-        disabled ? "disabled" : ""
+      className={`smj-page-item ${active ? 'active' : ''} ${
+        disabled ? 'disabled' : ''
       }`}
     >
       <a
         className="smj-page-link"
         href="#"
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onClick={disabled ? () => {} : onClick}
       >
         {page}
       </a>
     </li>
-  );
+  )
 }
 
 function getEventTypes(): LogsFiltersEventType[] {
-  const types = [{ id: "all", name: "Vyberte typ události" }];
-  const events = Object.values(APILogEvent);
-  events.sort();
+  const types = [{ id: 'all', name: 'Vyberte typ události' }]
+  const events = Object.values(APILogEvent)
+  events.sort()
   for (const type of events) {
-    types.push({ id: type, name: type });
+    types.push({ id: type, name: type })
   }
-  return types;
+  return types
 }

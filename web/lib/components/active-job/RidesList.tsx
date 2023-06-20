@@ -1,16 +1,16 @@
-import type { ActiveJobComplete } from "lib/types/active-job";
-import { WorkerBasicInfo } from "lib/types/worker";
-import React from "react";
+import type { ActiveJobComplete } from 'lib/types/active-job'
+import { WorkerBasicInfo } from 'lib/types/worker'
+import React from 'react'
 
 type RidesListProps = {
-  job: ActiveJobComplete;
-};
+  job: ActiveJobComplete
+}
 
 export default function RidesList({ job }: RidesListProps) {
   return (
     <>
       <div className="list-group">
-        {job.rides.map((ride) => {
+        {job.rides.map(ride => {
           return (
             <div
               key={ride.id}
@@ -25,23 +25,23 @@ export default function RidesList({ job }: RidesListProps) {
               <br />
               <b>Obsazeno:</b> {ride.passengers.length + 1}/{ride.car.seats}
               <br />
-              <b>Cestující:</b>{" "}
+              <b>Cestující:</b>{' '}
               {[ride.driver, ...ride.passengers]
-                .map<React.ReactNode>((p) => formatPassengerName(p, job))
-                .reduce((acc, curr) => [acc, ", ", curr])}
+                .map<React.ReactNode>(p => formatPassengerName(p, job))
+                .reduce((acc, curr) => [acc, ', ', curr])}
             </div>
-          );
+          )
         })}
       </div>
     </>
-  );
+  )
 }
 
 function formatPassengerName(
   passenger: WorkerBasicInfo,
   job: ActiveJobComplete
 ) {
-  const isPassengerWorker = job.workers.some((w) => w.id === passenger.id);
+  const isPassengerWorker = job.workers.some(w => w.id === passenger.id)
   return isPassengerWorker ? (
     <span key={passenger.id}>
       {passenger.firstName} {passenger.lastName}
@@ -50,5 +50,5 @@ function formatPassengerName(
     <i key={passenger.id}>
       {passenger.firstName} {passenger.lastName}
     </i>
-  );
+  )
 }

@@ -1,8 +1,8 @@
-"use strict";
+'use strict'
 module.exports = {
-    trailingComma: 'es5',
-    tabWidth: 2,
-    semi: false,
-    singleQuote: true,
-    arrowParens: 'avoid',
-};
+  trailingComma: 'es5',
+  tabWidth: 2,
+  semi: false,
+  singleQuote: true,
+  arrowParens: 'avoid',
+}

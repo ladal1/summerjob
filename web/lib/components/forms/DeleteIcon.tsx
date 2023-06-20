@@ -1,34 +1,34 @@
-import { useState } from "react";
-import ConfirmationModal from "../modal/ConfirmationModal";
+import { useState } from 'react'
+import ConfirmationModal from '../modal/ConfirmationModal'
 
 interface DeleteIconProps {
-  onClick: () => void;
-  isBeingDeleted: boolean;
-  showConfirmation?: boolean;
-  getConfirmationMessage?: () => React.ReactNode;
+  onClick: () => void
+  isBeingDeleted: boolean
+  showConfirmation?: boolean
+  getConfirmationMessage?: () => React.ReactNode
 }
 
 export default function DeleteIcon({
   onClick,
   isBeingDeleted,
   showConfirmation = false,
-  getConfirmationMessage = () => "Opravdu chcete smazat položku?",
+  getConfirmationMessage = () => 'Opravdu chcete smazat položku?',
 }: DeleteIconProps) {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
   const onDialogConfirmed = () => {
-    setDialogOpen(false);
-    onClick();
-  };
+    setDialogOpen(false)
+    onClick()
+  }
   const onDialogCancelled = () => {
-    setDialogOpen(false);
-  };
+    setDialogOpen(false)
+  }
   const onIconClicked = () => {
     if (showConfirmation) {
-      setDialogOpen(true);
+      setDialogOpen(true)
     } else {
-      onClick();
+      onClick()
     }
-  };
+  }
   return (
     <>
       {!isBeingDeleted && (
@@ -36,12 +36,12 @@ export default function DeleteIcon({
           <i
             className="fas fa-trash-alt smj-action-delete cursor-pointer"
             title="Odstranit"
-            onClick={(e) => {
-              e.stopPropagation();
-              onIconClicked();
+            onClick={e => {
+              e.stopPropagation()
+              onIconClicked()
             }}
           ></i>
-          <span style={{ width: "0px" }}></span>
+          <span style={{ width: '0px' }}></span>
         </>
       )}
       {isBeingDeleted && (
@@ -59,5 +59,5 @@ export default function DeleteIcon({
         </ConfirmationModal>
       )}
     </>
-  );
+  )
 }

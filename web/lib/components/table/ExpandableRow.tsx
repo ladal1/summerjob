@@ -1,60 +1,60 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
+'use client'
+import { useEffect, useRef, useState } from 'react'
 
 interface RowProps {
-  data: any[];
-  children: React.ReactNode;
-  colspan?: number;
-  className?: string;
-  onDrop?: (e: React.DragEvent<HTMLTableRowElement>) => void;
+  data: any[]
+  children: React.ReactNode
+  colspan?: number
+  className?: string
+  onDrop?: (e: React.DragEvent<HTMLTableRowElement>) => void
 }
 
 export const Arrow = () => (
-  <i className="fas fa-angle-right" style={{ width: "0.5rem" }}></i>
-);
+  <i className="fas fa-angle-right" style={{ width: '0.5rem' }}></i>
+)
 export const ExpandedArrow = () => (
-  <i className="fas fa-angle-down" style={{ width: "0.5rem" }}></i>
-);
+  <i className="fas fa-angle-down" style={{ width: '0.5rem' }}></i>
+)
 
 function Cell({
   contents,
   tooltip,
   colspan,
 }: {
-  contents: any;
-  tooltip?: string;
-  colspan?: number;
+  contents: any
+  tooltip?: string
+  colspan?: number
 }) {
   return (
     <td className="text-truncate" title={tooltip} colSpan={colspan}>
       {contents}
     </td>
-  );
+  )
 }
 
 export function ExpandableRow({
   data,
   children,
   colspan,
-  className = "",
+  className = '',
   onDrop,
 }: RowProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false)
   const toggleExpanded = () => {
-    setExpanded(!expanded);
-  };
-  const [expandedHeight, setExpandedHeight] = useState(0);
-  const collapsibleContentRef = useRef<HTMLDivElement>(null);
+    setExpanded(!expanded)
+  }
+  const [expandedHeight, setExpandedHeight] = useState(0)
+  const collapsibleContentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setExpandedHeight(collapsibleContentRef.current?.scrollHeight || 0);
-  }, [children, collapsibleContentRef]);
+    setExpandedHeight(collapsibleContentRef.current?.scrollHeight || 0)
+  }, [children, collapsibleContentRef])
 
   const onDragOver = (e: React.DragEvent<HTMLTableRowElement>) => {
     if (onDrop) {
-      e.preventDefault();
+      e.preventDefault()
     }
-  };
+  }
 
   return (
     <>
@@ -81,7 +81,7 @@ export function ExpandableRow({
           <Cell
             key={index + 1}
             contents={field}
-            tooltip={typeof field === "string" ? field : undefined}
+            tooltip={typeof field === 'string' ? field : undefined}
           />
         ))}
       </tr>
@@ -91,12 +91,12 @@ export function ExpandableRow({
           <div
             className="smj-row-collapsible"
             ref={collapsibleContentRef}
-            style={{ maxHeight: expanded ? `${expandedHeight}px` : "0px" }}
+            style={{ maxHeight: expanded ? `${expandedHeight}px` : '0px' }}
           >
             <div className="p-2">{children}</div>
           </div>
         </td>
       </tr>
     </>
-  );
+  )
 }

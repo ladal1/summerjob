@@ -1,12 +1,12 @@
-import EventsHeader from "lib/components/summerjob-event/EventsHeader";
-import { getSummerJobEvents } from "lib/data/summerjob-event";
-import { formatDateNumeric } from "lib/helpers/helpers";
-import Link from "next/link";
+import EventsHeader from 'lib/components/summerjob-event/EventsHeader'
+import { getSummerJobEvents } from 'lib/data/summerjob-event'
+import { formatDateNumeric } from 'lib/helpers/helpers'
+import Link from 'next/link'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 export default async function SummerJobEventsPage() {
-  const events = await getSummerJobEvents();
+  const events = await getSummerJobEvents()
   return (
     <>
       <EventsHeader />
@@ -14,7 +14,7 @@ export default async function SummerJobEventsPage() {
         <div className="container">
           <div className="list-group">
             {events.length === 0 && <center>Žádné ročníky.</center>}
-            {events.map((event) => (
+            {events.map(event => (
               <Link
                 className="list-group-item list-group-item-action"
                 href={`/admin/events/${event.id}`}
@@ -24,7 +24,7 @@ export default async function SummerJobEventsPage() {
                   <div className="col">
                     <h5>{event.name}</h5>
                     <p>
-                      {formatDateNumeric(event.startDate)} -{" "}
+                      {formatDateNumeric(event.startDate)} -{' '}
                       {formatDateNumeric(event.endDate)}
                     </p>
                   </div>
@@ -38,5 +38,5 @@ export default async function SummerJobEventsPage() {
         </div>
       </section>
     </>
-  );
+  )
 }

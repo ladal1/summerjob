@@ -1,9 +1,9 @@
-import { Modal, ModalSize } from "./Modal";
+import { Modal, ModalSize } from './Modal'
 type ConfirmationModalProps = {
-  onConfirm: () => void;
-  onReject: () => void;
-  children: React.ReactNode;
-};
+  onConfirm: () => void
+  onReject: () => void
+  children: React.ReactNode
+}
 
 export default function ConfirmationModal({
   onConfirm,
@@ -29,5 +29,5 @@ export default function ConfirmationModal({
         </button>
       </div>
     </Modal>
-  );
+  )
 }

@@ -1,15 +1,15 @@
-import { WorkerAvailability, Worker, PrismaClient } from "lib/prisma/client";
-import prisma from "lib/prisma/connection";
-import { PrismaTransactionClient } from "lib/types/prisma";
+import { WorkerAvailability, Worker, PrismaClient } from 'lib/prisma/client'
+import prisma from 'lib/prisma/connection'
+import { PrismaTransactionClient } from 'lib/types/prisma'
 import {
   WorkerComplete,
   WorkerCreateData,
   WorkerUpdateData,
   WorkersCreateData,
-} from "lib/types/worker";
-import { cache_getActiveSummerJobEventId } from "./cache";
-import { NoActiveEventError, WorkerAlreadyExistsError } from "./internal-error";
-import { deleteUserSessions } from "./users";
+} from 'lib/types/worker'
+import { cache_getActiveSummerJobEventId } from './cache'
+import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
+import { deleteUserSessions } from './users'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -51,27 +51,27 @@ export async function getWorkers(
     },
     orderBy: [
       {
-        firstName: "asc",
+        firstName: 'asc',
       },
       {
-        lastName: "asc",
+        lastName: 'asc',
       },
     ],
-  });
+  })
   // TODO: Remove this when the prisma client findMany is fixed
-  let correctType = users as Parameters<
+  const correctType = users as Parameters<
     typeof databaseWorkerToWorkerComplete
-  >[0][];
-  const res = correctType.map(databaseWorkerToWorkerComplete);
-  return res;
+  >[0][]
+  const res = correctType.map(databaseWorkerToWorkerComplete)
+  return res
 }
 
 export async function getWorkerById(
   id: string
 ): Promise<WorkerComplete | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
-    throw new NoActiveEventError();
+    throw new NoActiveEventError()
   }
   const user = await prisma.worker.findUnique({
     where: {
@@ -90,25 +90,25 @@ export async function getWorkerById(
         take: 1,
       },
     },
-  });
+  })
   if (!user) {
-    return null;
+    return null
   }
   // Only return availability for the active event
-  return databaseWorkerToWorkerComplete(user);
+  return databaseWorkerToWorkerComplete(user)
 }
 
 export function databaseWorkerToWorkerComplete(
-  worker: Omit<WorkerComplete, "availability"> & {
-    availability: WorkerAvailability[];
+  worker: Omit<WorkerComplete, 'availability'> & {
+    availability: WorkerAvailability[]
   }
 ): WorkerComplete {
-  const { availability, ...rest } = worker;
-  return { ...rest, availability: availability[0] };
+  const { availability, ...rest } = worker
+  return { ...rest, availability: availability[0] }
 }
 
 export async function deleteWorker(id: string) {
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async tx => {
     // Check if the worker has ever been assigned to a job
     // If not, we can just delete them
     const worker = await tx.worker.findUnique({
@@ -117,23 +117,23 @@ export async function deleteWorker(id: string) {
         jobs: true,
         permissions: true,
       },
-    });
+    })
     if (!worker) {
-      return;
+      return
     }
-    await deleteUserSessions(worker.email);
+    await deleteUserSessions(worker.email)
     if (worker.jobs.length === 0) {
       await tx.worker.delete({
         where: {
           id,
         },
-      });
+      })
       await tx.workerPermissions.delete({
         where: {
           id: worker.permissions.id,
         },
-      });
-      return;
+      })
+      return
     }
     // If the worker has been assigned to a job, we cannot delete them from the database as it would break the job history
     // Instead, we anonymize them
@@ -142,10 +142,10 @@ export async function deleteWorker(id: string) {
         id,
       },
       data: {
-        firstName: "Deleted",
-        lastName: "Worker",
+        firstName: 'Deleted',
+        lastName: 'Worker',
         email: `${id}@deleted.xyz`,
-        phone: "00000000",
+        phone: '00000000',
         allergies: {
           set: [],
         },
@@ -163,8 +163,8 @@ export async function deleteWorker(id: string) {
             where: {},
             data: {
               deleted: true,
-              description: "Deleted",
-              name: "Deleted Car",
+              description: 'Deleted',
+              name: 'Deleted Car',
             },
           },
         },
@@ -176,23 +176,23 @@ export async function deleteWorker(id: string) {
           },
         },
       },
-    });
-  });
+    })
+  })
 }
 
 export async function createWorkers(data: WorkersCreateData) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
-    throw new NoActiveEventError();
+    throw new NoActiveEventError()
   }
-  const workers = await prisma.$transaction(async (tx) => {
-    const workers: Worker[] = [];
+  const workers = await prisma.$transaction(async tx => {
+    const workers: Worker[] = []
     for (const worker of data.workers) {
-      workers.push(await createWorker(worker, tx));
+      workers.push(await createWorker(worker, tx))
     }
-    return workers;
-  });
-  return workers;
+    return workers
+  })
+  return workers
 }
 
 /**
@@ -205,9 +205,9 @@ export async function createWorker(
   data: WorkerCreateData,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
-    throw new NoActiveEventError();
+    throw new NoActiveEventError()
   }
 
   const existingUser = await prismaClient.worker.findFirst({
@@ -219,10 +219,10 @@ export async function createWorker(
         },
       },
     },
-  });
+  })
 
   if (existingUser) {
-    throw new WorkerAlreadyExistsError(existingUser.email);
+    throw new WorkerAlreadyExistsError(existingUser.email)
   }
 
   return await prismaClient.worker.upsert({
@@ -276,20 +276,20 @@ export async function createWorker(
         },
       },
     },
-  });
+  })
 }
 
 export async function updateWorker(id: string, data: WorkerUpdateData) {
   if (!data.email) {
-    return await internal_updateWorker(id, data);
+    return await internal_updateWorker(id, data)
   }
-  data.email = data.email.toLowerCase();
-  return await prisma.$transaction(async (tx) => {
-    const user = await internal_updateWorker(id, data, tx);
-    if (!user) return null;
-    await deleteUserSessions(user.email, tx);
-    return user;
-  });
+  data.email = data.email.toLowerCase()
+  return await prisma.$transaction(async tx => {
+    const user = await internal_updateWorker(id, data, tx)
+    if (!user) return null
+    await deleteUserSessions(user.email, tx)
+    return user
+  })
 }
 
 export async function internal_updateWorker(
@@ -297,16 +297,16 @@ export async function internal_updateWorker(
   data: WorkerUpdateData,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (data.availability) {
     if (!activeEventId) {
-      throw new NoActiveEventError();
+      throw new NoActiveEventError()
     }
   }
 
   const allergyUpdate = data.allergyIds
     ? { allergies: { set: data.allergyIds } }
-    : {};
+    : {}
 
   return await prismaClient.worker.update({
     where: {
@@ -324,7 +324,7 @@ export async function internal_updateWorker(
           where: {
             workerId_eventId: {
               workerId: id,
-              eventId: activeEventId ?? "",
+              eventId: activeEventId ?? '',
             },
           },
           data: {
@@ -334,5 +334,5 @@ export async function internal_updateWorker(
         },
       },
     },
-  });
+  })
 }

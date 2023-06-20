@@ -1,19 +1,19 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIUserUpdate } from "lib/fetcher/user";
-import { Permission } from "lib/types/auth";
-import { UserComplete, UserUpdateData, UserUpdateSchema } from "lib/types/user";
-import { useForm } from "react-hook-form";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAPIUserUpdate } from 'lib/fetcher/user'
+import { Permission } from 'lib/types/auth'
+import { UserComplete, UserUpdateData, UserUpdateSchema } from 'lib/types/user'
+import { useForm } from 'react-hook-form'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 
 interface EditUserProps {
-  user: UserComplete;
-  onUpdate: () => void;
+  user: UserComplete
+  onUpdate: () => void
 }
 
 export default function EditUserForm({ user, onUpdate }: EditUserProps) {
   const { trigger, error, isMutating, reset } = useAPIUserUpdate(user.id, {
     onSuccess: () => onUpdate(),
-  });
+  })
   const {
     register,
     handleSubmit,
@@ -23,11 +23,11 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
     defaultValues: {
       permissions: user.permissions,
     },
-  });
+  })
 
   const onSubmit = (data: UserUpdateData) => {
-    trigger(data);
-  };
+    trigger(data)
+  }
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
           Uživatelé s rolí ADMIN mají automaticky přístup ke všem stránkám.
         </p>
         <div className="mb-3">
-          {Object.values(Permission).map((permission) => (
+          {Object.values(Permission).map(permission => (
             <label
               className="d-flex align-items-center gap-2"
               key={`label-${permission}`}
@@ -48,20 +48,20 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
                 type="checkbox"
                 value={permission}
                 className="form-check-input fs-5 checkbox-white"
-                {...register("permissions")}
-              />{" "}
+                {...register('permissions')}
+              />{' '}
               <span className="d-inline-block fs-5">{permission}</span>
             </label>
           ))}
         </div>
         <input
-          type={"submit"}
+          type={'submit'}
           className="btn btn-primary float-end pt-2 pb-2"
-          value={"Uložit"}
+          value={'Uložit'}
           disabled={isMutating}
         />
       </form>
       {error && <ErrorMessageModal onClose={reset} />}
     </>
-  );
+  )
 }

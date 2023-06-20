@@ -1,29 +1,28 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIProposedJobCreate } from "lib/fetcher/proposed-job";
-import { datesBetween } from "lib/helpers/helpers";
-import {Area, JobType} from "lib/prisma/client";
-import { deserializeAreas } from "lib/types/area";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
+import { datesBetween } from 'lib/helpers/helpers'
+import { Area, JobType } from 'lib/prisma/client'
+import { deserializeAreas } from 'lib/types/area'
 import {
   ProposedJobCreateData,
   ProposedJobCreateSchema,
-} from "lib/types/proposed-job";
-import { Serialized } from "lib/types/serialize";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
-import AllergyPill from "../forms/AllergyPill";
-import DaysSelection from "../forms/DaysSelection";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import {allergyMapping} from "../../data/allergyMapping";
-import {jobTypeMapping} from "../../data/jobTypeMapping";
-
+} from 'lib/types/proposed-job'
+import { Serialized } from 'lib/types/serialize'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
+import AllergyPill from '../forms/AllergyPill'
+import DaysSelection from '../forms/DaysSelection'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { allergyMapping } from '../../data/allergyMapping'
+import { jobTypeMapping } from '../../data/jobTypeMapping'
 
 interface CreateProposedJobProps {
-  serializedAreas: Serialized<Area[]>;
-  eventStartDate: string;
-  eventEndDate: string;
+  serializedAreas: Serialized<Area[]>
+  eventStartDate: string
+  eventEndDate: string
 }
 
 export default function CreateProposedJobForm({
@@ -31,9 +30,9 @@ export default function CreateProposedJobForm({
   eventStartDate,
   eventEndDate,
 }: CreateProposedJobProps) {
-  const areas = deserializeAreas(serializedAreas);
-  const { trigger, error, isMutating, reset } = useAPIProposedJobCreate();
-  const [saved, setSaved] = useState(false);
+  const areas = deserializeAreas(serializedAreas)
+  const { trigger, error, isMutating, reset } = useAPIProposedJobCreate()
+  const [saved, setSaved] = useState(false)
   const {
     register,
     handleSubmit,
@@ -45,28 +44,27 @@ export default function CreateProposedJobForm({
       availability: [],
       allergens: [],
     },
-  });
+  })
 
   const onSubmit = (data: ProposedJobCreateData) => {
     trigger(data, {
       onSuccess: () => {
-        setSaved(true);
+        setSaved(true)
       },
-    });
-  };
+    })
+  }
 
   const selectArea = (item: FilterSelectItem) => {
-    setValue("areaId", item.id);
-  };
+    setValue('areaId', item.id)
+  }
   const selectJobType = (item: FilterSelectItem) => {
-    setValue("jobType", item.id as JobType);
-  };
-
+    setValue('jobType', item.id as JobType)
+  }
 
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
-  );
+  )
 
   return (
     <>
@@ -84,7 +82,7 @@ export default function CreateProposedJobForm({
             <input
               className="form-control p-1 ps-2"
               id="name"
-              {...register("name")}
+              {...register('name')}
             />
             {errors.name && (
               <div className="text-danger">Zadejte název jobu</div>
@@ -99,7 +97,7 @@ export default function CreateProposedJobForm({
               className="form-control border p-1 ps-2"
               id="publicDescription"
               rows={3}
-              {...register("publicDescription")}
+              {...register('publicDescription')}
             ></textarea>
             <label
               className="form-label fw-bold mt-4"
@@ -111,12 +109,12 @@ export default function CreateProposedJobForm({
               className="form-control border p-1 ps-2"
               id="privateDescription"
               rows={3}
-              {...register("privateDescription")}
+              {...register('privateDescription')}
             ></textarea>
             <label className="form-label fw-bold mt-4" htmlFor="area">
               Oblast jobu
             </label>
-            <input type={"hidden"} {...register("areaId")} />
+            <input type={'hidden'} {...register('areaId')} />
             <FilterSelect
               items={areas.map(areaToSelectItem)}
               placeholder="Vyberte oblast"
@@ -129,7 +127,7 @@ export default function CreateProposedJobForm({
             <input
               className="form-control p-1 ps-2"
               id="address"
-              {...register("address")}
+              {...register('address')}
             />
             {errors.address && (
               <div className="text-danger">Zadejte adresu</div>
@@ -140,7 +138,7 @@ export default function CreateProposedJobForm({
             <input
               className="form-control p-1 ps-2"
               id="contact"
-              {...register("contact")}
+              {...register('contact')}
             />
             {errors.contact && (
               <div className="text-danger">Zadejte kontaktní informace</div>
@@ -152,7 +150,7 @@ export default function CreateProposedJobForm({
               className="form-control p-1 ps-2"
               id="requiredDays"
               type="number"
-              {...register("requiredDays", { valueAsNumber: true })}
+              {...register('requiredDays', { valueAsNumber: true })}
             />
             {errors.requiredDays && (
               <div className="text-danger">Zadejte odhadovaný počet dnů</div>
@@ -167,7 +165,7 @@ export default function CreateProposedJobForm({
                 id="minWorkers"
                 type="number"
                 min={1}
-                {...register("minWorkers", { valueAsNumber: true })}
+                {...register('minWorkers', { valueAsNumber: true })}
               />
               /
               <input
@@ -175,7 +173,7 @@ export default function CreateProposedJobForm({
                 id="maxWorkers"
                 type="number"
                 min={1}
-                {...register("maxWorkers", { valueAsNumber: true })}
+                {...register('maxWorkers', { valueAsNumber: true })}
               />
               /
               <input
@@ -183,7 +181,7 @@ export default function CreateProposedJobForm({
                 id="strongWorkers"
                 type="number"
                 min={0}
-                {...register("strongWorkers", { valueAsNumber: true })}
+                {...register('strongWorkers', { valueAsNumber: true })}
               />
             </div>
             {(errors.minWorkers ||
@@ -198,39 +196,45 @@ export default function CreateProposedJobForm({
               Dostupné v následující dny
             </label>
             <DaysSelection
-              name={"availability"}
+              name={'availability'}
               days={allDates}
-              register={() => register("availability")}
+              register={() => register('availability')}
             />
             <div>
-            <label className="form-label fw-bold mt-4" htmlFor="area">
-              Typ práce
-            </label>
-            <input type={"hidden"} {...register("jobType")} />
-            <FilterSelect
-                items={Object.entries(jobTypeMapping).map(([jobTypeKey, jobTypeToSelectName]) => ({
-                  id: jobTypeKey,
-                  name: jobTypeToSelectName,
-                  searchable: jobTypeToSelectName,
-                  item: (<span> {jobTypeToSelectName} </span>),
-                }))}
+              <label className="form-label fw-bold mt-4" htmlFor="area">
+                Typ práce
+              </label>
+              <input type={'hidden'} {...register('jobType')} />
+              <FilterSelect
+                items={Object.entries(jobTypeMapping).map(
+                  ([jobTypeKey, jobTypeToSelectName]) => ({
+                    id: jobTypeKey,
+                    name: jobTypeToSelectName,
+                    searchable: jobTypeToSelectName,
+                    item: <span> {jobTypeToSelectName} </span>,
+                  })
+                )}
                 placeholder="Vyberte typ práce"
                 onSelected={selectJobType}
-            />
-            {errors.jobType && <div className="text-danger">Vyberte typ práce</div>}
+              />
+              {errors.jobType && (
+                <div className="text-danger">Vyberte typ práce</div>
+              )}
             </div>
             <label className="form-label d-block fw-bold mt-4" htmlFor="email">
               Alergie
             </label>
             <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
+              {Object.entries(allergyMapping).map(
+                ([allergyKey, allergyName]) => (
                   <AllergyPill
-                      key={allergyKey}
-                      allergyId={allergyKey}
-                      allergyName={allergyName}
-                      register={() => register("allergens")}
+                    key={allergyKey}
+                    allergyId={allergyKey}
+                    allergyName={allergyName}
+                    register={() => register('allergens')}
                   />
-              ))}
+                )
+              )}
             </div>
 
             <div className="form-check mt-4">
@@ -238,7 +242,7 @@ export default function CreateProposedJobForm({
                 className="form-check-input"
                 type="checkbox"
                 id="hasFood"
-                {...register("hasFood")}
+                {...register('hasFood')}
               />
               <label className="form-check-label" htmlFor="hasFood">
                 <i className="fa fa-utensils ms-2 me-2"></i>
@@ -250,7 +254,7 @@ export default function CreateProposedJobForm({
                 className="form-check-input"
                 type="checkbox"
                 id="hasShower"
-                {...register("hasShower")}
+                {...register('hasShower')}
               />
               <label className="form-check-label" htmlFor="hasShower">
                 <i className="fa fa-shower ms-2 me-2"></i>
@@ -267,9 +271,9 @@ export default function CreateProposedJobForm({
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isMutating}
               />
             </div>
@@ -279,7 +283,7 @@ export default function CreateProposedJobForm({
       {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
-  );
+  )
 }
 
 function areaToSelectItem(area: Area): FilterSelectItem {
@@ -288,5 +292,5 @@ function areaToSelectItem(area: Area): FilterSelectItem {
     searchable: `${area.name}`,
     name: area.name,
     item: <span>{area.name}</span>,
-  };
+  }
 }

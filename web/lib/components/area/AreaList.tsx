@@ -1,15 +1,15 @@
-import { useAPIAreaDelete } from "lib/fetcher/area";
-import { AreaComplete } from "lib/types/area";
-import Link from "next/link";
-import { useState } from "react";
-import DeleteIcon from "../forms/DeleteIcon";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
+import { useAPIAreaDelete } from 'lib/fetcher/area'
+import { AreaComplete } from 'lib/types/area'
+import Link from 'next/link'
+import { useState } from 'react'
+import DeleteIcon from '../forms/DeleteIcon'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 
 interface AreaListProps {
-  areas: AreaComplete[];
-  eventId: string;
-  onDataChanged: () => void;
+  areas: AreaComplete[]
+  eventId: string
+  onDataChanged: () => void
 }
 
 export default function AreaList({
@@ -38,7 +38,7 @@ export default function AreaList({
             </li>
           </>
         )}
-        {areas.map((area) => (
+        {areas.map(area => (
           <AreaRow
             key={area.id}
             area={area}
@@ -48,43 +48,43 @@ export default function AreaList({
         ))}
       </ul>
     </>
-  );
+  )
 }
 
 interface AreaRowProps {
-  area: AreaComplete;
-  eventId: string;
-  onDataChanged: () => void;
+  area: AreaComplete
+  eventId: string
+  onDataChanged: () => void
 }
 
 function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const { trigger, isMutating, error, reset } = useAPIAreaDelete(area, {
     onSuccess: onDataChanged,
-  });
+  })
 
   const triggerDelete = () => {
-    trigger();
-    setShowDeleteConfirmation(false);
-  };
+    trigger()
+    setShowDeleteConfirmation(false)
+  }
 
   const confirmDelete = () => {
-    setShowDeleteConfirmation(true);
-  };
+    setShowDeleteConfirmation(true)
+  }
 
   const onErrorMessageClose = () => {
-    reset();
-  };
+    reset()
+  }
   return (
     <li className="list-group-item list-group-item-action">
       <div className="d-flex justify-content-between align-items-center">
         <div className="d-flex flex-column pe-5">
           <label className="fs-5">{area.name}</label>
           <div className="text-muted">
-            Doprava nutná: {area.requiresCar ? "Ano" : "Ne"}
+            Doprava nutná: {area.requiresCar ? 'Ano' : 'Ne'}
           </div>
           <div className="text-muted mb-2">
-            Adorace: {area.supportsAdoration ? "Ano" : "Ne"}
+            Adorace: {area.supportsAdoration ? 'Ano' : 'Ne'}
           </div>
         </div>
         <div className="d-flex align-items-center gap-3">
@@ -116,9 +116,9 @@ function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
       {error && (
         <ErrorMessageModal
           onClose={onErrorMessageClose}
-          mainMessage={"Nepovedlo se odstranit oblast."}
+          mainMessage={'Nepovedlo se odstranit oblast.'}
         />
       )}
     </li>
-  );
+  )
 }

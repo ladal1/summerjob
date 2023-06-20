@@ -1,14 +1,14 @@
-"use client";
-import { useAPIPlansCreate } from "lib/fetcher/plan";
-import { useState } from "react";
-import SimpleDatePicker from "../date-picker/date-picker";
-import { PlanCreateSchema } from "lib/types/plan";
+'use client'
+import { useAPIPlansCreate } from 'lib/fetcher/plan'
+import { useState } from 'react'
+import SimpleDatePicker from '../date-picker/date-picker'
+import { PlanCreateSchema } from 'lib/types/plan'
 
 interface NewPlanFormProps {
-  initialDate: Date;
-  onCompleted: () => void;
-  from: Date;
-  to: Date;
+  initialDate: Date
+  onCompleted: () => void
+  from: Date
+  to: Date
 }
 
 export default function NewPlanForm({
@@ -17,26 +17,26 @@ export default function NewPlanForm({
   from,
   to,
 }: NewPlanFormProps) {
-  const [date, setDate] = useState(initialDate);
+  const [date, setDate] = useState(initialDate)
   const onDateChanged = (newDate: Date) => {
-    setDate(newDate);
-  };
+    setDate(newDate)
+  }
 
-  const { trigger, isMutating, error, reset } = useAPIPlansCreate();
+  const { trigger, isMutating, error, reset } = useAPIPlansCreate()
 
   const onSubmit = () => {
-    reset();
-    const parsed = PlanCreateSchema.safeParse({ day: date.toJSON() });
+    reset()
+    const parsed = PlanCreateSchema.safeParse({ day: date.toJSON() })
     if (!parsed.success) {
       // This should never happen, because the user is picking from a date picker.
-      return;
+      return
     }
     trigger(parsed.data, {
       onSuccess: () => {
-        onCompleted();
+        onCompleted()
       },
-    });
-  };
+    })
+  }
 
   return (
     <div className="container">
@@ -51,7 +51,7 @@ export default function NewPlanForm({
         <div className="row">
           <div className="col-1"></div>
           <div className="col text-danger">
-            {error.reason ?? "Invalid input data."}
+            {error.reason ?? 'Invalid input data.'}
           </div>
           <div className="col-1"></div>
         </div>
@@ -78,5 +78,5 @@ export default function NewPlanForm({
         </div>
       </div>
     </div>
-  );
+  )
 }

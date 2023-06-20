@@ -1,3 +1,3 @@
-export type Serialized<T> = {
-  data: string;
-};
+export type Serialized = {
+  data: string
+}

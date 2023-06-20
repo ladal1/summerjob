@@ -1,34 +1,34 @@
-"use client";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+'use client'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   deserializeWorker,
   WorkerComplete,
   WorkerUpdateSchema,
-} from "lib/types/worker";
-import { useState } from "react";
-import { useAPIWorkerUpdate } from "lib/fetcher/worker";
-import Link from "next/link";
-import AllergyPill from "../forms/AllergyPill";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { Serialized } from "lib/types/serialize";
-import DaysSelection from "../forms/DaysSelection";
-import { datesBetween, pick } from "lib/helpers/helpers";
-import { useRouter } from "next/navigation";
-import FormWarning from "../forms/FormWarning";
-import {Allergy} from "../../prisma/client";
-import { allergyMapping } from "lib/data/allergyMapping";
+} from 'lib/types/worker'
+import { useState } from 'react'
+import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
+import Link from 'next/link'
+import AllergyPill from '../forms/AllergyPill'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { Serialized } from 'lib/types/serialize'
+import DaysSelection from '../forms/DaysSelection'
+import { datesBetween, pick } from 'lib/helpers/helpers'
+import { useRouter } from 'next/navigation'
+import FormWarning from '../forms/FormWarning'
+import { Allergy } from '../../prisma/client'
+import { allergyMapping } from 'lib/data/allergyMapping'
 
-const schema = WorkerUpdateSchema;
-type WorkerForm = z.input<typeof schema>;
+const schema = WorkerUpdateSchema
+type WorkerForm = z.input<typeof schema>
 
 interface EditWorkerProps {
-  serializedWorker: Serialized<WorkerComplete>;
-  eventStartDate: string;
-  eventEndDate: string;
-  isProfilePage: boolean;
+  serializedWorker: Serialized<WorkerComplete>
+  eventStartDate: string
+  eventEndDate: string
+  isProfilePage: boolean
 }
 
 export default function EditWorker({
@@ -37,11 +37,11 @@ export default function EditWorker({
   eventEndDate,
   isProfilePage,
 }: EditWorkerProps) {
-  const worker = deserializeWorker(serializedWorker);
+  const worker = deserializeWorker(serializedWorker)
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
-  );
+  )
   const {
     formState: { dirtyFields },
     register,
@@ -57,34 +57,34 @@ export default function EditWorker({
       strong: worker.isStrong,
       allergyIds: worker.allergies as Allergy[],
       availability: {
-        workDays: worker.availability.workDays.map((day) => day.toJSON()),
-        adorationDays: worker.availability.adorationDays.map((day) =>
+        workDays: worker.availability.workDays.map(day => day.toJSON()),
+        adorationDays: worker.availability.adorationDays.map(day =>
           day.toJSON()
         ),
       },
     },
-  });
+  })
 
-  const router = useRouter();
-  const [saved, setSaved] = useState(false);
+  const router = useRouter()
+  const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
     onSuccess: () => {
-      setSaved(true);
-      router.refresh();
+      setSaved(true)
+      router.refresh()
     },
-  });
+  })
 
   const onSubmit = (data: WorkerForm) => {
-    const modified = pick(data, ...Object.keys(dirtyFields)) as WorkerForm;
-    trigger(modified);
-  };
+    const modified = pick(data, ...Object.keys(dirtyFields)) as WorkerForm
+    trigger(modified)
+  }
 
   const onConfirmationClosed = () => {
-    setSaved(false);
+    setSaved(false)
     if (!isProfilePage) {
-      router.back();
+      router.back()
     }
-  };
+  }
 
   return (
     <>
@@ -106,7 +106,7 @@ export default function EditWorker({
               className="form-control p-0 fs-5"
               type="text"
               placeholder="Jméno"
-              {...register("firstName")}
+              {...register('firstName')}
             />
             <FormWarning message={errors.firstName?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="surname">
@@ -117,7 +117,7 @@ export default function EditWorker({
               className="form-control p-0 fs-5"
               type="text"
               placeholder="Příjmení"
-              {...register("lastName")}
+              {...register('lastName')}
             />
             <FormWarning message={errors.lastName?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
@@ -130,7 +130,7 @@ export default function EditWorker({
               maxLength={20}
               pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               placeholder="(+420) 123 456 789"
-              {...register("phone")}
+              {...register('phone')}
             />
             <FormWarning message={errors.phone?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="email">
@@ -140,39 +140,39 @@ export default function EditWorker({
               id="email"
               className="form-control p-0 fs-5"
               type="email"
-              {...register("email")}
+              {...register('email')}
             />
             <FormWarning message={errors.email?.message} />
             <p className="text-muted mt-1">
               {isProfilePage
-                ? "Změnou e-mailu dojde k odhlášení z aplikace."
-                : "Změnou e-mailu dojde k odhlášení uživatele z aplikace."}
+                ? 'Změnou e-mailu dojde k odhlášení z aplikace.'
+                : 'Změnou e-mailu dojde k odhlášení uživatele z aplikace.'}
             </p>
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.workDays"
             >
               {isProfilePage
-                ? "Můžu pracovat v následující dny"
-                : "Může pracovat v následující dny"}
+                ? 'Můžu pracovat v následující dny'
+                : 'Může pracovat v následující dny'}
             </label>
             <DaysSelection
               name="availability.workDays"
               days={allDates}
-              register={() => register("availability.workDays")}
+              register={() => register('availability.workDays')}
             />
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.adorationDays"
             >
               {isProfilePage
-                ? "Chci adorovat v následující dny"
-                : "Chce adorovat v následující dny"}
+                ? 'Chci adorovat v následující dny'
+                : 'Chce adorovat v následující dny'}
             </label>
             <DaysSelection
               name="availability.adorationDays"
               days={allDates}
-              register={() => register("availability.adorationDays")}
+              register={() => register('availability.adorationDays')}
             />
             <label
               className="form-label d-block fw-bold mt-4"
@@ -181,14 +181,16 @@ export default function EditWorker({
               Alergie
             </label>
             <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
-                <AllergyPill
-                  key={allergyKey}
-                  allergyId={allergyKey}
-                  allergyName={allergyName}
-                  register={() => register("allergyIds")}
-                />
-              ))}
+              {Object.entries(allergyMapping).map(
+                ([allergyKey, allergyName]) => (
+                  <AllergyPill
+                    key={allergyKey}
+                    allergyId={allergyKey}
+                    allergyName={allergyName}
+                    register={() => register('allergyIds')}
+                  />
+                )
+              )}
             </div>
             <label className="form-label d-block fw-bold mt-4">
               Další vlastnosti
@@ -198,7 +200,7 @@ export default function EditWorker({
                 type="checkbox"
                 className="fs-5 form-check-input"
                 id="strong"
-                {...register("strong")}
+                {...register('strong')}
               />
               <label className="form-check-label" htmlFor="strong">
                 Silák
@@ -213,7 +215,7 @@ export default function EditWorker({
             )}
             {isProfilePage && worker.cars.length > 0 && (
               <div className="list-group">
-                {worker.cars.map((car) => (
+                {worker.cars.map(car => (
                   <div key={car.id} className="list-group-item ps-2 w-50">
                     {car.name}
                   </div>
@@ -223,7 +225,7 @@ export default function EditWorker({
             {!isProfilePage && worker.cars.length === 0 && <p>Žádná auta</p>}
             {!isProfilePage && worker.cars.length > 0 && (
               <div className="list-group">
-                {worker.cars.map((car) => (
+                {worker.cars.map(car => (
                   <Link
                     key={car.id}
                     href={`/cars/${car.id}`}
@@ -235,18 +237,20 @@ export default function EditWorker({
                 ))}
               </div>
             )}
-            {!isProfilePage && (<div>
-             <label className="form-label fw-bold mt-4" htmlFor="note">
-                Poznámka
-              </label>
-              <input
+            {!isProfilePage && (
+              <div>
+                <label className="form-label fw-bold mt-4" htmlFor="note">
+                  Poznámka
+                </label>
+                <input
                   id="note"
                   className="form-control p-0 fs-5"
                   type="text"
                   placeholder="Poznámka"
-                  {...register("note")}
-              />
-            </div>)}
+                  {...register('note')}
+                />
+              </div>
+            )}
 
             <div className="d-flex justify-content-between gap-3">
               <button
@@ -257,9 +261,9 @@ export default function EditWorker({
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isMutating}
               />
             </div>
@@ -269,5 +273,5 @@ export default function EditWorker({
         </div>
       </div>
     </>
-  );
+  )
 }

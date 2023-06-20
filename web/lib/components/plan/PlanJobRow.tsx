@@ -1,34 +1,34 @@
-import { ActiveJobNoPlan } from "lib/types/active-job";
-import { RideComplete, RidesForJob } from "lib/types/ride";
-import { WorkerComplete } from "lib/types/worker";
-import Link from "next/link";
-import { ExpandableRow } from "../table/ExpandableRow";
-import { SimpleRow } from "../table/SimpleRow";
-import type { Worker } from "lib/prisma/client";
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { RideComplete, RidesForJob } from 'lib/types/ride'
+import { WorkerComplete } from 'lib/types/worker'
+import Link from 'next/link'
+import { ExpandableRow } from '../table/ExpandableRow'
+import { SimpleRow } from '../table/SimpleRow'
+import type { Worker } from 'lib/prisma/client'
 import {
   useAPIActiveJobDelete,
   useAPIActiveJobUpdate,
-} from "lib/fetcher/active-job";
-import { useMemo, useState } from "react";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import AddRideButton from "./AddRideButton";
-import RideSelect from "./RideSelect";
-import MoveWorkerModal from "./MoveWorkerModal";
-import JobRideList from "./JobRideList";
-import { ActiveJobIssueBanner, ActiveJobIssueIcon } from "./ActiveJobIssue";
+} from 'lib/fetcher/active-job'
+import { useMemo, useState } from 'react'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import AddRideButton from './AddRideButton'
+import RideSelect from './RideSelect'
+import MoveWorkerModal from './MoveWorkerModal'
+import JobRideList from './JobRideList'
+import { ActiveJobIssueBanner, ActiveJobIssueIcon } from './ActiveJobIssue'
 
 interface PlanJobRowProps {
-  job: ActiveJobNoPlan;
-  day: Date;
-  plannedJobs: ActiveJobNoPlan[];
-  isDisplayed: boolean;
-  rides: RidesForJob[];
+  job: ActiveJobNoPlan
+  day: Date
+  plannedJobs: ActiveJobNoPlan[]
+  isDisplayed: boolean
+  rides: RidesForJob[]
   onWorkerDragStart: (
     worker: Worker,
     sourceId: string
-  ) => (e: React.DragEvent<HTMLTableRowElement>) => void;
-  reloadPlan: () => void;
+  ) => (e: React.DragEvent<HTMLTableRowElement>) => void
+  reloadPlan: () => void
 }
 
 export function PlanJobRow({
@@ -47,43 +47,41 @@ export function PlanJobRow({
     error: updatingError,
   } = useAPIActiveJobUpdate(job.id, job.planId, {
     onSuccess: () => {
-      reloadPlan();
+      reloadPlan()
     },
-  });
+  })
 
   const [workerToMove, setWorkerToMove] = useState<WorkerComplete | undefined>(
     undefined
-  );
+  )
 
   const onWorkerDropped =
     (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
       if (isBeingUpdated) {
-        return;
+        return
       }
-      const workerId = e.dataTransfer.getData("worker-id");
-      const fromJobId = e.dataTransfer.getData("source-id");
+      const workerId = e.dataTransfer.getData('worker-id')
+      const fromJobId = e.dataTransfer.getData('source-id')
       if (fromJobId === toJobId) {
-        return;
+        return
       }
 
-      const newWorkers = [...job.workers.map((w) => w.id), workerId];
-      triggerUpdate({ workerIds: newWorkers });
-    };
+      const newWorkers = [...job.workers.map(w => w.id), workerId]
+      triggerUpdate({ workerIds: newWorkers })
+    }
 
   const removeWorkerFromJob = (workerId: string) => {
     if (isBeingUpdated) {
-      return;
+      return
     }
-    const newWorkers = job.workers
-      .map((w) => w.id)
-      .filter((id) => id !== workerId);
-    triggerUpdate({ workerIds: newWorkers });
-  };
+    const newWorkers = job.workers.map(w => w.id).filter(id => id !== workerId)
+    triggerUpdate({ workerIds: newWorkers })
+  }
 
   const onWorkerMoved = () => {
-    setWorkerToMove(undefined);
-    reloadPlan();
-  };
+    setWorkerToMove(undefined)
+    reloadPlan()
+  }
 
   //#endregion
 
@@ -95,28 +93,28 @@ export function PlanJobRow({
     reset: resetDeleteError,
   } = useAPIActiveJobDelete(job.id, job.planId, {
     onSuccess: reloadPlan,
-  });
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  })
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
   const deleteJob = () => {
-    triggerDelete();
-    setShowDeleteConfirmation(false);
-  };
+    triggerDelete()
+    setShowDeleteConfirmation(false)
+  }
 
   const confirmDelete = () => {
-    setShowDeleteConfirmation(true);
-  };
+    setShowDeleteConfirmation(true)
+  }
 
   const onErrorMessageClose = () => {
-    resetDeleteError();
-  };
+    resetDeleteError()
+  }
 
   //#endregion
 
   const ridesForOtherJobs = useMemo(
-    () => rides.filter((r) => r.jobId !== job.id),
+    () => rides.filter(r => r.jobId !== job.id),
     [rides, job]
-  );
+  )
 
   return (
     <>
@@ -151,14 +149,14 @@ export function PlanJobRow({
 
               <JobRideList
                 job={job}
-                otherJobs={plannedJobs.filter((j) => j.id !== job.id)}
+                otherJobs={plannedJobs.filter(j => j.id !== job.id)}
                 reloadPlan={reloadPlan}
               />
               <br />
               <p>
                 <strong>Adorace v oblasti: </strong>
                 <span>
-                  {job.proposedJob.area.supportsAdoration ? "Ano" : "Ne"}
+                  {job.proposedJob.area.supportsAdoration ? 'Ano' : 'Ne'}
                 </span>
               </p>
               <p>
@@ -168,7 +166,7 @@ export function PlanJobRow({
               <p>
                 <strong>Pracantů (min/max/silných): </strong>
                 <span>
-                  {" "}
+                  {' '}
                   {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
                   {job.proposedJob.strongWorkers}
                 </span>
@@ -194,7 +192,7 @@ export function PlanJobRow({
                     <th>
                       <strong>Alergie</strong>
                     </th>
-                    <th style={{ width: "20%" }}>
+                    <th style={{ width: '20%' }}>
                       <strong>Doprava</strong>
                     </th>
                     <th>
@@ -211,7 +209,7 @@ export function PlanJobRow({
                     </tr>
                   )}
 
-                  {job.workers.map((worker) => (
+                  {job.workers.map(worker => (
                     <SimpleRow
                       data={formatWorkerData(
                         worker,
@@ -244,7 +242,7 @@ export function PlanJobRow({
           {deleteError && (
             <ErrorMessageModal
               onClose={onErrorMessageClose}
-              mainMessage={"Nepovedlo se odstranit job."}
+              mainMessage={'Nepovedlo se odstranit job.'}
             />
           )}
           {workerToMove && (
@@ -259,12 +257,12 @@ export function PlanJobRow({
         </ExpandableRow>
       )}
     </>
-  );
+  )
 }
 
 function responsibleWorkerName(job: ActiveJobNoPlan) {
-  if (!job.responsibleWorker) return "Není";
-  return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`;
+  if (!job.responsibleWorker) return 'Není'
+  return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`
 }
 
 function formatAmenities(job: ActiveJobNoPlan) {
@@ -272,17 +270,17 @@ function formatAmenities(job: ActiveJobNoPlan) {
     <>
       {job.proposedJob.hasFood && (
         <i className="fas fa-utensils me-2" title="Jídlo na místě"></i>
-      )}{" "}
+      )}{' '}
       {job.proposedJob.hasShower && (
         <i className="fas fa-shower" title="Sprcha na místě"></i>
       )}
     </>
-  );
+  )
 }
 
 function formatAllergens(job: ActiveJobNoPlan) {
-  if (job.proposedJob.allergens.length == 0) return "Žádné";
-  return job.proposedJob.allergens.join(", ");
+  if (job.proposedJob.allergens.length == 0) return 'Žádné'
+  return job.proposedJob.allergens.join(', ')
 }
 
 function formatRowData(
@@ -312,16 +310,16 @@ function formatRowData(
     <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
       <Link
         href={`/plans/${job.planId}/${job.id}`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
         className="smj-action-edit"
       >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
 
       {deleteJobIcon(deleteJob, isBeingDeleted)}
-      <span style={{ width: "0px" }}></span>
+      <span style={{ width: '0px' }}></span>
     </span>,
-  ];
+  ]
 }
 
 function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
@@ -332,12 +330,12 @@ function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
           <i
             className="fas fa-trash-alt smj-action-delete"
             title="Smazat"
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteJob();
+            onClick={e => {
+              e.stopPropagation()
+              deleteJob()
             }}
           ></i>
-          <span style={{ width: "0px" }}></span>
+          <span style={{ width: '0px' }}></span>
         </>
       )}
       {isBeingDeleted && (
@@ -347,7 +345,7 @@ function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
         ></i>
       )}
     </>
-  );
+  )
 }
 
 function formatWorkerData(
@@ -359,28 +357,27 @@ function formatWorkerData(
   requestMoveWorker: (worker: WorkerComplete) => void,
   reloadPlan: () => void
 ) {
-  const name = `${worker.firstName} ${worker.lastName}`;
-  const abilities = [];
-  const isDriver =
-    job?.rides.map((r) => r.driverId).includes(worker.id) || false;
+  const name = `${worker.firstName} ${worker.lastName}`
+  const abilities = []
+  const isDriver = job?.rides.map(r => r.driverId).includes(worker.id) || false
   const wantsAdoration = worker.availability.adorationDays
-    .map((d) => d.getTime())
-    .includes(day.getTime());
+    .map(d => d.getTime())
+    .includes(day.getTime())
 
-  if (worker.cars.length > 0) abilities.push("Auto");
-  if (worker.isStrong) abilities.push("Silák");
-  const allergies = worker.allergies;
+  if (worker.cars.length > 0) abilities.push('Auto')
+  if (worker.isStrong) abilities.push('Silák')
+  const allergies = worker.allergies
 
   return [
     <>
-      {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{" "}
+      {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
       {wantsAdoration && (
         <i className="fas fa-church ms-2" title="Chce adorovat"></i>
       )}
     </>,
     worker.phone,
-    abilities.join(", "),
-    allergies.join(", "),
+    abilities.join(', '),
+    allergies.join(', '),
     <RideSelect
       key={`rideselect-${worker.id}`}
       worker={worker}
@@ -395,7 +392,7 @@ function formatWorkerData(
       {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
       {removeWorkerIcon(() => removeWorker(worker.id))}
     </span>,
-  ];
+  ]
 }
 
 function moveWorkerToJobIcon(move: () => void) {
@@ -404,13 +401,13 @@ function moveWorkerToJobIcon(move: () => void) {
       <i
         className="fas fa-shuffle smj-action-edit cursor-pointer"
         title="Přesunout na jiný job"
-        onClick={(e) => {
-          e.stopPropagation();
-          move();
+        onClick={e => {
+          e.stopPropagation()
+          move()
         }}
       ></i>
     </>
-  );
+  )
 }
 
 function removeWorkerIcon(remove: () => void) {
@@ -419,11 +416,11 @@ function removeWorkerIcon(remove: () => void) {
       <i
         className="fas fa-trash-alt smj-action-delete cursor-pointer"
         title="Odstranit z jobu"
-        onClick={(e) => {
-          e.stopPropagation();
-          remove();
+        onClick={e => {
+          e.stopPropagation()
+          remove()
         }}
       ></i>
     </>
-  );
+  )
 }

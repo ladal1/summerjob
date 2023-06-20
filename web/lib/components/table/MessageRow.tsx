@@ -1,6 +1,6 @@
 interface RowProps {
-  message: string;
-  colspan: number;
+  message: string
+  colspan: number
 }
 
 export function MessageRow({ message, colspan }: RowProps) {
@@ -10,5 +10,5 @@ export function MessageRow({ message, colspan }: RowProps) {
         {message}
       </td>
     </tr>
-  );
+  )
 }

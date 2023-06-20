@@ -1,22 +1,22 @@
-import { APIAccessController } from "lib/api/APIAccessControler";
-import { APIMethodHandler } from "lib/api/MethodHandler";
-import { getActiveEventOrSendError } from "lib/api/validator";
-import { getMyPlans } from "lib/data/my-plan";
-import { ExtendedSession } from "lib/types/auth";
-import { NextApiRequest, NextApiResponse } from "next";
+import { APIAccessController } from 'lib/api/APIAccessControler'
+import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { getActiveEventOrSendError } from 'lib/api/validator'
+import { getMyPlans } from 'lib/data/my-plan'
+import { ExtendedSession } from 'lib/types/auth'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export type MyPlansAPIGetResponse = Awaited<ReturnType<typeof getMyPlans>>;
+export type MyPlansAPIGetResponse = Awaited<ReturnType<typeof getMyPlans>>
 async function get(
   req: NextApiRequest,
   res: NextApiResponse<MyPlansAPIGetResponse>,
   session: ExtendedSession
 ) {
-  const summerJobEvent = await getActiveEventOrSendError(res);
+  const summerJobEvent = await getActiveEventOrSendError(res)
   if (!summerJobEvent) {
-    return;
+    return
   }
-  const plans = await getMyPlans(session!.userID);
-  res.status(200).json(plans);
+  const plans = await getMyPlans(session!.userID)
+  res.status(200).json(plans)
 }
 
-export default APIAccessController([], APIMethodHandler({ get }));
+export default APIAccessController([], APIMethodHandler({ get }))

@@ -1,21 +1,21 @@
-import prisma from "lib/prisma/connection";
+import prisma from 'lib/prisma/connection'
 import {
   ActiveJobComplete,
   ActiveJobCreateData,
   ActiveJobCreateMultipleData,
   ActiveJobUpdateData,
-} from "lib/types/active-job";
-import type { Worker, Prisma } from "lib/prisma/client";
-import { cache_getActiveSummerJobEventId } from "./cache";
-import { InvalidDataError, NoActiveEventError } from "./internal-error";
-import { databaseWorkerToWorkerComplete } from "./workers";
+} from 'lib/types/active-job'
+import type { Worker, Prisma } from 'lib/prisma/client'
+import { cache_getActiveSummerJobEventId } from './cache'
+import { InvalidDataError, NoActiveEventError } from './internal-error'
+import { databaseWorkerToWorkerComplete } from './workers'
 
 export async function getActiveJobById(
   id: string
 ): Promise<ActiveJobComplete | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
-    throw new NoActiveEventError();
+    throw new NoActiveEventError()
   }
   const job = await prisma.activeJob.findFirst({
     where: {
@@ -57,21 +57,21 @@ export async function getActiveJobById(
       },
       plan: true,
     },
-  });
+  })
   if (!job) {
-    return null;
+    return null
   }
-  const workers = job.workers.map(databaseWorkerToWorkerComplete);
-  return { ...job, workers };
+  const workers = job.workers.map(databaseWorkerToWorkerComplete)
+  return { ...job, workers }
 }
 
 type ActiveJobSimplified = {
-  id: string;
-  responsibleWorkerId: string | null;
+  id: string
+  responsibleWorkerId: string | null
   workers: {
-    id: string;
-  }[];
-};
+    id: string
+  }[]
+}
 
 /**
  * Removes a worker from a job and all rides associated with the job.
@@ -87,7 +87,7 @@ async function removeWorkerFromJob(
   tx: Prisma.TransactionClient
 ) {
   const newResponsiblePersonId =
-    job.responsibleWorkerId === workerId ? null : job.responsibleWorkerId;
+    job.responsibleWorkerId === workerId ? null : job.responsibleWorkerId
   const updatedJob = await tx.activeJob.update({
     where: {
       id: job.id,
@@ -112,7 +112,7 @@ async function removeWorkerFromJob(
         },
       },
     },
-  });
+  })
 
   // Remove the worker from all rides of jobs in this day that they are a passenger of
   const jobsInPlan = await tx.activeJob.findMany({
@@ -125,11 +125,11 @@ async function removeWorkerFromJob(
         },
       },
     },
-  });
+  })
 
   for (const activeJob of jobsInPlan) {
     for (const ride of activeJob.rides) {
-      if (ride.passengers.some((p) => p.id === workerId)) {
+      if (ride.passengers.some(p => p.id === workerId)) {
         await tx.ride.update({
           where: {
             id: ride.id,
@@ -141,7 +141,7 @@ async function removeWorkerFromJob(
               },
             },
           },
-        });
+        })
       }
     }
   }
@@ -172,7 +172,7 @@ function getJobsWithWorkers(
         },
       },
     },
-  });
+  })
 }
 
 function getActiveJobDetailsById(
@@ -199,7 +199,7 @@ function getActiveJobDetailsById(
         },
       },
     },
-  });
+  })
 }
 
 export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
@@ -208,30 +208,28 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
     publicDescription,
     responsibleWorkerId,
     workerIds,
-  } = job;
-  return await prisma.$transaction(async (tx) => {
-    const existingActiveJob = await getActiveJobDetailsById(id, tx);
+  } = job
+  return await prisma.$transaction(async tx => {
+    const existingActiveJob = await getActiveJobDetailsById(id, tx)
     if (!existingActiveJob) {
-      throw new Error("Active job not found");
+      throw new Error('Active job not found')
     }
-    let workersCommand = {};
+    let workersCommand = {}
 
     // Remove new workers from other active jobs
-    const currentWorkerIds = existingActiveJob.workers.map((w) => w.id);
-    const workersToAdd = workerIds?.filter(
-      (id) => !currentWorkerIds.includes(id)
-    );
+    const currentWorkerIds = existingActiveJob.workers.map(w => w.id)
+    const workersToAdd = workerIds?.filter(id => !currentWorkerIds.includes(id))
     if (workersToAdd && workersToAdd.length > 0) {
       const previousJobsWithWorkers = await getJobsWithWorkers(
         workersToAdd,
         existingActiveJob?.planId,
         tx
-      );
+      )
       for (const previousJob of previousJobsWithWorkers) {
         if (previousJob.id !== id) {
           for (const workerId of workersToAdd) {
-            if (previousJob.workers.some((w) => w.id === workerId)) {
-              await removeWorkerFromJob(workerId, previousJob, tx);
+            if (previousJob.workers.some(w => w.id === workerId)) {
+              await removeWorkerFromJob(workerId, previousJob, tx)
             }
           }
         }
@@ -239,25 +237,23 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
     }
 
     // Remove old workers from this job if needed
-    let workersToRemove: string[] = [];
+    let workersToRemove: string[] = []
     if (workerIds) {
-      workersToRemove = currentWorkerIds.filter(
-        (id) => !workerIds?.includes(id)
-      );
+      workersToRemove = currentWorkerIds.filter(id => !workerIds?.includes(id))
       for (const workerId of workersToRemove) {
-        await removeWorkerFromJob(workerId, existingActiveJob, tx);
+        await removeWorkerFromJob(workerId, existingActiveJob, tx)
       }
     }
 
-    const addedWorkers = workersToAdd?.length ?? 0 > 0;
-    let removedWorkers = workersToRemove.length > 0;
+    const addedWorkers = workersToAdd?.length ?? 0 > 0
+    const removedWorkers = workersToRemove.length > 0
     if (workerIds && (addedWorkers || removedWorkers)) {
       workersCommand = {
         workers: {
-          connect: workersToAdd?.map((id) => ({ id })) ?? [],
-          disconnect: workersToRemove.map((id) => ({ id })),
+          connect: workersToAdd?.map(id => ({ id })) ?? [],
+          disconnect: workersToRemove.map(id => ({ id })),
         },
-      };
+      }
     }
 
     const activeJob = await tx.activeJob.update({
@@ -270,23 +266,23 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
         responsibleWorkerId,
         ...workersCommand,
       },
-    });
+    })
 
-    return activeJob;
-  });
+    return activeJob
+  })
 }
 
 export async function createActiveJob(job: ActiveJobCreateData) {
-  const { proposedJobId, privateDescription, publicDescription, planId } = job;
-  const activeJob = await prisma.$transaction(async (tx) => {
+  const { proposedJobId, privateDescription, publicDescription, planId } = job
+  const activeJob = await prisma.$transaction(async tx => {
     const existingActiveJob = await tx.activeJob.findFirst({
       where: {
         proposedJobId,
         planId,
       },
-    });
+    })
     if (existingActiveJob) {
-      throw new InvalidDataError("Active job already exists in this plan");
+      throw new InvalidDataError('Active job already exists in this plan')
     }
     const activeJob = await tx.activeJob.create({
       data: {
@@ -295,16 +291,16 @@ export async function createActiveJob(job: ActiveJobCreateData) {
         planId,
         proposedJobId,
       },
-    });
-    return activeJob;
-  });
+    })
+    return activeJob
+  })
 
-  return activeJob;
+  return activeJob
 }
 
 export async function createActiveJobs(data: ActiveJobCreateMultipleData) {
-  const proposedJobIds = data.jobs.map((j) => j.proposedJobId);
-  const activeJobs = await prisma.$transaction(async (tx) => {
+  const proposedJobIds = data.jobs.map(j => j.proposedJobId)
+  const activeJobs = await prisma.$transaction(async tx => {
     const existingActiveJobs = await tx.activeJob.findMany({
       where: {
         proposedJobId: {
@@ -312,22 +308,22 @@ export async function createActiveJobs(data: ActiveJobCreateMultipleData) {
         },
         planId: data.planId,
       },
-    });
+    })
     if (existingActiveJobs.length > 0) {
-      throw new Error("Active jobs already exist in this plan");
+      throw new Error('Active jobs already exist in this plan')
     }
     const activeJobs = await tx.activeJob.createMany({
-      data: data.jobs.map((job) => ({
+      data: data.jobs.map(job => ({
         privateDescription: job.privateDescription,
         publicDescription: job.publicDescription,
         planId: data.planId,
         proposedJobId: job.proposedJobId,
       })),
-    });
-    return activeJobs;
-  });
+    })
+    return activeJobs
+  })
 
-  return activeJobs;
+  return activeJobs
 }
 
 export function deleteActiveJob(id: string) {
@@ -335,5 +331,5 @@ export function deleteActiveJob(id: string) {
     where: {
       id,
     },
-  });
+  })
 }

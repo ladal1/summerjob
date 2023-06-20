@@ -1,10 +1,10 @@
-import { useAPIRideDelete } from "lib/fetcher/rides";
-import { RideComplete } from "lib/types/ride";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
+import { useAPIRideDelete } from 'lib/fetcher/rides'
+import { RideComplete } from 'lib/types/ride'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 
 interface DeleteRideButtonProps {
-  ride: RideComplete;
-  onSuccess: () => void;
+  ride: RideComplete
+  onSuccess: () => void
 }
 
 export default function DeleteRideButton({
@@ -13,10 +13,10 @@ export default function DeleteRideButton({
 }: DeleteRideButtonProps) {
   const { trigger, isMutating, error, reset } = useAPIRideDelete(ride, {
     onSuccess,
-  });
+  })
   const deleteRide = () => {
-    trigger();
-  };
+    trigger()
+  }
   return (
     <>
       {!isMutating && (
@@ -34,9 +34,9 @@ export default function DeleteRideButton({
       {error && (
         <ErrorMessageModal
           onClose={reset}
-          mainMessage={"Odstranění jízdy se nezdařilo."}
+          mainMessage={'Odstranění jízdy se nezdařilo.'}
         />
       )}
     </>
-  );
+  )
 }

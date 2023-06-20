@@ -1,24 +1,24 @@
-import { ActiveJobNoPlan } from "lib/types/active-job";
-import { WorkerComplete } from "lib/types/worker";
-import { ExpandableRow } from "../table/ExpandableRow";
-import { SimpleRow } from "../table/SimpleRow";
-import type { Worker } from "lib/prisma/client";
-import { useAPIActiveJobUpdateDynamic } from "lib/fetcher/active-job";
-import { useEffect, useState } from "react";
-import MoveWorkerModal from "./MoveWorkerModal";
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { WorkerComplete } from 'lib/types/worker'
+import { ExpandableRow } from '../table/ExpandableRow'
+import { SimpleRow } from '../table/SimpleRow'
+import type { Worker } from 'lib/prisma/client'
+import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
+import { useEffect, useState } from 'react'
+import MoveWorkerModal from './MoveWorkerModal'
 
-const NO_JOB = "NO_JOB";
+const NO_JOB = 'NO_JOB'
 
 interface PlanJoblessRowProps {
-  planId: string;
-  jobs: ActiveJobNoPlan[];
-  joblessWorkers: WorkerComplete[];
-  numColumns: number;
+  planId: string
+  jobs: ActiveJobNoPlan[]
+  joblessWorkers: WorkerComplete[]
+  numColumns: number
   onWorkerDragStart: (
     worker: Worker,
     sourceId: string
-  ) => (e: React.DragEvent<HTMLTableRowElement>) => void;
-  reloadPlan: () => void;
+  ) => (e: React.DragEvent<HTMLTableRowElement>) => void
+  reloadPlan: () => void
 }
 
 export function PlanJoblessRow({
@@ -29,62 +29,62 @@ export function PlanJoblessRow({
   onWorkerDragStart,
   reloadPlan,
 }: PlanJoblessRowProps) {
-  const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined);
-  const [workerIds, setWorkerIds] = useState<string[]>([]);
-  const getSourceJobId = () => sourceJobId;
+  const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined)
+  const [workerIds, setWorkerIds] = useState<string[]>([])
+  const getSourceJobId = () => sourceJobId
 
   const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
     getSourceJobId,
     planId,
     {
       onSuccess: () => {
-        reloadPlan();
+        reloadPlan()
       },
     }
-  );
+  )
 
   useEffect(() => {
     if (sourceJobId) {
-      trigger({ workerIds: workerIds });
-      setSourceJobId(undefined);
+      trigger({ workerIds: workerIds })
+      setSourceJobId(undefined)
     }
-  }, [sourceJobId, workerIds, trigger, reloadPlan]);
+  }, [sourceJobId, workerIds, trigger, reloadPlan])
 
   const onWorkerDropped = () => (e: React.DragEvent<HTMLTableRowElement>) => {
-    const workerId = e.dataTransfer.getData("worker-id");
-    const fromJobId = e.dataTransfer.getData("source-id");
+    const workerId = e.dataTransfer.getData('worker-id')
+    const fromJobId = e.dataTransfer.getData('source-id')
     if (fromJobId === NO_JOB) {
-      return;
+      return
     }
 
-    const job = jobs.find((j) => j.id === fromJobId);
+    const job = jobs.find(j => j.id === fromJobId)
 
     if (!job) {
-      return;
+      return
     }
     const newWorkers = [
-      ...job.workers.map((w) => w.id).filter((w) => w !== workerId),
-    ];
+      ...job.workers.map(w => w.id).filter(w => w !== workerId),
+    ]
 
-    setSourceJobId(fromJobId);
-    setWorkerIds(newWorkers);
-  };
+    setSourceJobId(fromJobId)
+    setWorkerIds(newWorkers)
+  }
 
   const [workerToMove, setWorkerToMove] = useState<WorkerComplete | undefined>(
     undefined
-  );
+  )
 
   const onWorkerMoved = () => {
-    setWorkerToMove(undefined);
-    reloadPlan();
-  };
+    setWorkerToMove(undefined)
+    reloadPlan()
+  }
 
   return (
     <>
       <ExpandableRow
         data={[`Bez práce (${joblessWorkers.length})`]}
         colspan={numColumns}
-        className={joblessWorkers.length > 0 ? "smj-background-error" : ""}
+        className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
         onDrop={onWorkerDropped()}
       >
         <div className="ms-2">
@@ -112,7 +112,7 @@ export function PlanJoblessRow({
               </tr>
             </thead>
             <tbody>
-              {joblessWorkers.map((worker) => (
+              {joblessWorkers.map(worker => (
                 <SimpleRow
                   data={formatWorkerData(worker, setWorkerToMove)}
                   key={worker.id}
@@ -133,32 +133,32 @@ export function PlanJoblessRow({
         )}
       </ExpandableRow>
     </>
-  );
+  )
 }
 
 function formatWorkerData(
   worker: WorkerComplete,
   requestMoveWorker: (worker: WorkerComplete) => void
 ) {
-  let name = `${worker.firstName} ${worker.lastName}`;
-  const abilities = [];
+  const name = `${worker.firstName} ${worker.lastName}`
+  const abilities = []
 
-  if (worker.cars.length > 0) abilities.push("Auto");
-  if (worker.isStrong) abilities.push("Silák");
-  const allergies = worker.allergies;
+  if (worker.cars.length > 0) abilities.push('Auto')
+  if (worker.isStrong) abilities.push('Silák')
+  const allergies = worker.allergies
 
   return [
     name,
     worker.phone,
-    abilities.join(", "),
-    allergies.join(", "),
+    abilities.join(', '),
+    allergies.join(', '),
     <span
       key={`actions-${worker.id}`}
       className="d-flex align-items-center gap-3"
     >
       {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
     </span>,
-  ];
+  ]
 }
 
 function moveWorkerToJobIcon(move: () => void) {
@@ -167,11 +167,11 @@ function moveWorkerToJobIcon(move: () => void) {
       <i
         className="fas fa-shuffle smj-action-edit cursor-pointer"
         title="Přesunout na jiný job"
-        onClick={(e) => {
-          e.stopPropagation();
-          move();
+        onClick={e => {
+          e.stopPropagation()
+          move()
         }}
       ></i>
     </>
-  );
+  )
 }

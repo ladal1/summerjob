@@ -1,41 +1,41 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useAPIActiveJobCreate,
   useAPIActiveJobCreateMultiple,
-} from "lib/fetcher/active-job";
-import { useAPIProposedJobsNotInPlan } from "lib/fetcher/proposed-job";
+} from 'lib/fetcher/active-job'
+import { useAPIProposedJobsNotInPlan } from 'lib/fetcher/proposed-job'
 import {
   ActiveJobCreateData,
   ActiveJobCreateSchema,
-} from "lib/types/active-job";
-import { ProposedJobComplete } from "lib/types/proposed-job";
-import { ReactNode, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
-import Select, { FormatOptionLabelMeta } from "react-select";
-import { z } from "zod";
-import ErrorPage from "../error-page/ErrorPage";
+} from 'lib/types/active-job'
+import { ProposedJobComplete } from 'lib/types/proposed-job'
+import { ReactNode, useMemo } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import Select, { FormatOptionLabelMeta } from 'react-select'
+import { z } from 'zod'
+import ErrorPage from '../error-page/ErrorPage'
 
 interface AddJobToPlanFormProps {
-  planId: string;
-  onComplete: () => void;
+  planId: string
+  onComplete: () => void
 }
 
-type ActiveJobCreateFormData = { jobs: Omit<ActiveJobCreateData, "planId">[] };
+type ActiveJobCreateFormData = { jobs: Omit<ActiveJobCreateData, 'planId'>[] }
 const ActiveJobCreateFormSchema = z.object({
   jobs: z.array(ActiveJobCreateSchema.omit({ planId: true })).min(1),
-});
+})
 
 export default function AddJobToPlanForm({
   planId,
   onComplete,
 }: AddJobToPlanFormProps) {
-  let { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId);
+  const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId)
   const { trigger, isMutating } = useAPIActiveJobCreateMultiple(planId, {
     onSuccess: () => {
-      onComplete();
+      onComplete()
     },
-  });
+  })
 
   const {
     register,
@@ -44,65 +44,65 @@ export default function AddJobToPlanForm({
     control,
   } = useForm<ActiveJobCreateFormData>({
     resolver: zodResolver(ActiveJobCreateFormSchema),
-  });
+  })
 
   const items = useMemo(() => {
     if (!data) {
-      return [];
+      return []
     }
-    const sorted = new Array(...data);
+    const sorted = new Array(...data)
     sorted.sort((a, b) => {
       if (a.pinned && !b.pinned) {
-        return -1;
+        return -1
       }
       if (!a.pinned && b.pinned) {
-        return 1;
+        return 1
       }
-      return a.name.localeCompare(b.name);
-    });
+      return a.name.localeCompare(b.name)
+    })
 
-    return sorted.map<SelectItem>(jobToSelectItem);
-  }, [data]);
+    return sorted.map<SelectItem>(jobToSelectItem)
+  }, [data])
 
   const itemToFormData = (item: SelectItem) => ({
     proposedJobId: item.id,
     publicDescription: item.publicDescription,
     privateDescription: item.privateDescription,
-  });
+  })
 
   const formDataToItem = (
-    formData: Omit<ActiveJobCreateData, "planId">
+    formData: Omit<ActiveJobCreateData, 'planId'>
   ): SelectItem => {
-    const job = data?.find((job) => job.id === formData.proposedJobId);
+    const job = data?.find(job => job.id === formData.proposedJobId)
     if (!job) {
       return {
         id: formData.proposedJobId,
-        name: "Unknown job",
-        searchable: "Unknown job",
-        publicDescription: "",
-        privateDescription: "",
+        name: 'Unknown job',
+        searchable: 'Unknown job',
+        publicDescription: '',
+        privateDescription: '',
         item: <></>,
-      };
+      }
     }
-    return jobToSelectItem(job);
-  };
+    return jobToSelectItem(job)
+  }
 
   const formatOptionLabel = (
     option: SelectItem,
     placement: FormatOptionLabelMeta<SelectItem>
   ) => {
-    if (placement.context === "menu") {
-      return option.item;
+    if (placement.context === 'menu') {
+      return option.item
     }
-    return option.name;
-  };
+    return option.name
+  }
 
   const onSubmit = (data: ActiveJobCreateFormData) => {
-    trigger(data);
-  };
+    trigger(data)
+  }
 
   if (error && !data) {
-    return <ErrorPage error={error} />;
+    return <ErrorPage error={error} />
   }
 
   return (
@@ -119,16 +119,16 @@ export default function AddJobToPlanForm({
               ref={ref}
               value={value?.map(formDataToItem)}
               options={items}
-              onChange={(val) => onChange(val.map((v) => itemToFormData(v)))}
-              placeholder={"Vyberte joby..."}
+              onChange={val => onChange(val.map(v => itemToFormData(v)))}
+              placeholder={'Vyberte joby...'}
               formatOptionLabel={formatOptionLabel}
               isMulti
-              getOptionValue={(option) => option.searchable}
+              getOptionValue={option => option.searchable}
             />
           )}
         />
 
-        <input type="hidden" {...register("jobs")} />
+        <input type="hidden" {...register('jobs')} />
         {errors.jobs && <div className="text-danger">Vyberte job!</div>}
 
         <button
@@ -140,7 +140,7 @@ export default function AddJobToPlanForm({
         </button>
       </form>
     </>
-  );
+  )
 }
 
 function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
@@ -156,7 +156,7 @@ function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
         Naplánováno: {job.activeJobs.length}/{job.requiredDays}
       </div>
     </>
-  );
+  )
 }
 
 function jobToSelectItem(job: ProposedJobComplete): SelectItem {
@@ -172,14 +172,14 @@ function jobToSelectItem(job: ProposedJobComplete): SelectItem {
     publicDescription: job.publicDescription,
     privateDescription: job.privateDescription,
     item: <AddJobSelectItem job={job} />,
-  };
+  }
 }
 
 type SelectItem = {
-  id: string;
-  name: string;
-  searchable: string;
-  item: ReactNode;
-  publicDescription: string;
-  privateDescription: string;
-};
+  id: string
+  name: string
+  searchable: string
+  item: ReactNode
+  publicDescription: string
+  privateDescription: string
+}

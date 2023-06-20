@@ -1,31 +1,31 @@
-"use client";
-import { Serialized } from "lib/types/serialize";
+'use client'
+import { Serialized } from 'lib/types/serialize'
 import {
   deserializeSummerJobEvent,
   SummerJobEventComplete,
-} from "lib/types/summerjob-event";
-import { useRouter } from "next/navigation";
-import AreaList from "../area/AreaList";
-import EditBox from "../forms/EditBox";
-import DeleteEventButton from "./DeleteEventButton";
-import SetEventActiveButton from "./SetEventActiveButton";
+} from 'lib/types/summerjob-event'
+import { useRouter } from 'next/navigation'
+import AreaList from '../area/AreaList'
+import EditBox from '../forms/EditBox'
+import DeleteEventButton from './DeleteEventButton'
+import SetEventActiveButton from './SetEventActiveButton'
 
 interface EventClientPageProps {
-  sEvent: Serialized<SummerJobEventComplete>;
+  sEvent: Serialized<SummerJobEventComplete>
 }
 
 export default function EventClientPage({ sEvent }: EventClientPageProps) {
-  const event = deserializeSummerJobEvent(sEvent);
+  const event = deserializeSummerJobEvent(sEvent)
 
-  const router = useRouter();
+  const router = useRouter()
   const onDataChanged = () => {
-    router.refresh();
-  };
+    router.refresh()
+  }
 
   const onEventDeleted = () => {
-    router.replace("/admin/events");
-    router.refresh();
-  };
+    router.replace('/admin/events')
+    router.refresh()
+  }
   return (
     <>
       <section>
@@ -67,5 +67,5 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
         </div>
       </section>
     </>
-  );
+  )
 }

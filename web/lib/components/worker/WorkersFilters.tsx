@@ -1,10 +1,10 @@
 interface WorkersFiltersProps {
-  search: string;
-  onSearchChanged: (search: string) => void;
-  onlyStrong: boolean;
-  onOnlyStrongChanged: (onlyStrong: boolean) => void;
-  onlyWithCar: boolean;
-  onOnlyWithCarChanged: (withCar: boolean) => void;
+  search: string
+  onSearchChanged: (search: string) => void
+  onlyStrong: boolean
+  onOnlyStrongChanged: (onlyStrong: boolean) => void
+  onlyWithCar: boolean
+  onOnlyWithCarChanged: (withCar: boolean) => void
 }
 
 export function WorkersFilters({
@@ -24,7 +24,7 @@ export function WorkersFilters({
             className="p-2 d-inline-block outline-none border-0 smj-filter-input"
             placeholder="Vyhledat..."
             value={search}
-            onChange={(e) => onSearchChanged(e.target.value)}
+            onChange={e => onSearchChanged(e.target.value)}
           />
         </div>
         <div className="col-auto mb-3 d-flex">
@@ -34,7 +34,7 @@ export function WorkersFilters({
               type="checkbox"
               id="onlyStrongCheckbox"
               checked={onlyStrong}
-              onChange={(e) => onOnlyStrongChanged(e.target.checked)}
+              onChange={e => onOnlyStrongChanged(e.target.checked)}
             />
             <label
               className="form-check-label fw-lighter fs-5"
@@ -51,7 +51,7 @@ export function WorkersFilters({
               type="checkbox"
               id="onlyWithCarCheckbox"
               checked={onlyWithCar}
-              onChange={(e) => onOnlyWithCarChanged(e.target.checked)}
+              onChange={e => onOnlyWithCarChanged(e.target.checked)}
             />
             <label
               className="form-check-label fw-lighter fs-5"
@@ -63,5 +63,5 @@ export function WorkersFilters({
         </div>
       </div>
     </>
-  );
+  )
 }

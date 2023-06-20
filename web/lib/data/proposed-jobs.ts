@@ -1,18 +1,18 @@
-import prisma from "lib/prisma/connection";
+import prisma from 'lib/prisma/connection'
 import {
   ProposedJobCreateData,
   type ProposedJobComplete,
   type ProposedJobUpdateData,
-} from "lib/types/proposed-job";
-import { cache_getActiveSummerJobEventId } from "./cache";
-import { InvalidDataError, NoActiveEventError } from "./internal-error";
+} from 'lib/types/proposed-job'
+import { cache_getActiveSummerJobEventId } from './cache'
+import { InvalidDataError, NoActiveEventError } from './internal-error'
 
 export async function getProposedJobById(
   id: string
 ): Promise<ProposedJobComplete | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
-    throw new NoActiveEventError();
+    throw new NoActiveEventError()
   }
   const job = await prisma.proposedJob.findUnique({
     where: {
@@ -22,8 +22,8 @@ export async function getProposedJobById(
       area: true,
       activeJobs: true,
     },
-  });
-  return job;
+  })
+  return job
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
@@ -41,11 +41,11 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     },
     orderBy: [
       {
-        name: "asc",
+        name: 'asc',
       },
     ],
-  });
-  return jobs;
+  })
+  return jobs
 }
 
 /**
@@ -63,7 +63,7 @@ export async function getProposedJobsAssignableTo(
     select: {
       day: true,
     },
-  });
+  })
   const jobs = await prisma.proposedJob.findMany({
     where: {
       NOT: {
@@ -85,23 +85,23 @@ export async function getProposedJobsAssignableTo(
     },
     orderBy: [
       {
-        name: "asc",
+        name: 'asc',
       },
     ],
-  });
-  return jobs;
+  })
+  return jobs
 }
 
 export async function updateProposedJob(
   id: string,
   proposedJobData: ProposedJobUpdateData
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
-    throw new NoActiveEventError();
+    throw new NoActiveEventError()
   }
-  const { allergens, ...rest } = proposedJobData;
-  const allergyUpdate = allergens ? { allergens: { set: allergens } } : {};
+  const { allergens, ...rest } = proposedJobData
+  const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
 
   const proposedJob = await prisma.proposedJob.update({
     where: {
@@ -111,15 +111,15 @@ export async function updateProposedJob(
       ...rest,
       ...allergyUpdate,
     },
-  });
-  return proposedJob;
+  })
+  return proposedJob
 }
 
 export async function createProposedJob(data: ProposedJobCreateData) {
   const proposedJob = await prisma.proposedJob.create({
     data: data,
-  });
-  return proposedJob;
+  })
+  return proposedJob
 }
 
 export async function deleteProposedJob(id: string) {
@@ -127,5 +127,5 @@ export async function deleteProposedJob(id: string) {
     where: {
       id,
     },
-  });
+  })
 }

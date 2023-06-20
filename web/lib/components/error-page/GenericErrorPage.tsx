@@ -1,6 +1,6 @@
 interface GenericErrorPageProps {
-  title: string;
-  message: string;
+  title: string
+  message: string
 }
 
 export default function GenericErrorPage({
@@ -18,5 +18,5 @@ export default function GenericErrorPage({
         </div>
       </div>
     </div>
-  );
+  )
 }

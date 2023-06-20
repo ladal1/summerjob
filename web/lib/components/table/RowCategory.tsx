@@ -1,13 +1,13 @@
-"use client";
-import { useState } from "react";
-import { Arrow, ExpandedArrow } from "./ExpandableRow";
+'use client'
+import { useState } from 'react'
+import { Arrow, ExpandedArrow } from './ExpandableRow'
 
 interface RowCategoryProps {
-  title: string;
-  secondaryTitle?: string;
-  children: React.ReactNode;
-  numCols: number;
-  className?: string;
+  title: string
+  secondaryTitle?: string
+  children: React.ReactNode
+  numCols: number
+  className?: string
 }
 
 export default function RowCategory({
@@ -17,11 +17,11 @@ export default function RowCategory({
   numCols,
   className,
 }: RowCategoryProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false)
   const toggleExpanded = () => {
-    setExpanded(!expanded);
-  };
-  const ArrowType = () => (expanded ? <ExpandedArrow /> : <Arrow />);
+    setExpanded(!expanded)
+  }
+  const ArrowType = () => (expanded ? <ExpandedArrow /> : <Arrow />)
 
   return (
     <>
@@ -41,5 +41,5 @@ export default function RowCategory({
       </tr>
       {expanded && <>{children}</>}
     </>
-  );
+  )
 }

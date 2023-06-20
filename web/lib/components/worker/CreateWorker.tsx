@@ -1,25 +1,25 @@
-"use client";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { WorkerCreateSchema } from "lib/types/worker";
-import { useState } from "react";
-import AllergyPill from "../forms/AllergyPill";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
-import DaysSelection from "../forms/DaysSelection";
-import { datesBetween } from "lib/helpers/helpers";
-import { useRouter } from "next/navigation";
-import { useAPIWorkerCreate } from "lib/fetcher/worker";
-import FormWarning from "../forms/FormWarning";
-import {allergyMapping} from "../../data/allergyMapping";
+'use client'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { WorkerCreateSchema } from 'lib/types/worker'
+import { useState } from 'react'
+import AllergyPill from '../forms/AllergyPill'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import DaysSelection from '../forms/DaysSelection'
+import { datesBetween } from 'lib/helpers/helpers'
+import { useRouter } from 'next/navigation'
+import { useAPIWorkerCreate } from 'lib/fetcher/worker'
+import FormWarning from '../forms/FormWarning'
+import { allergyMapping } from '../../data/allergyMapping'
 
-const schema = WorkerCreateSchema;
-type WorkerForm = z.input<typeof schema>;
+const schema = WorkerCreateSchema
+type WorkerForm = z.input<typeof schema>
 
 interface EditWorkerProps {
-  eventStartDate: string;
-  eventEndDate: string;
+  eventStartDate: string
+  eventEndDate: string
 }
 
 export default function CreateWorker({
@@ -29,7 +29,7 @@ export default function CreateWorker({
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
-  );
+  )
   const {
     register,
     handleSubmit,
@@ -43,24 +43,24 @@ export default function CreateWorker({
       },
       allergyIds: [],
     },
-  });
+  })
 
-  const router = useRouter();
-  const [saved, setSaved] = useState(false);
+  const router = useRouter()
+  const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
-      setSaved(true);
+      setSaved(true)
     },
-  });
+  })
 
   const onSubmit = (data: WorkerForm) => {
-    trigger(data);
-  };
+    trigger(data)
+  }
 
   const onConfirmationClosed = () => {
-    setSaved(false);
-    router.back();
-  };
+    setSaved(false)
+    router.back()
+  }
 
   return (
     <>
@@ -80,10 +80,10 @@ export default function CreateWorker({
               className="form-control p-0 fs-5"
               type="text"
               placeholder="Jméno"
-              {...register("firstName")}
+              {...register('firstName')}
             />
             <FormWarning
-              message={errors.firstName?.message ? "Zadejte jméno" : undefined}
+              message={errors.firstName?.message ? 'Zadejte jméno' : undefined}
             />
             <label className="form-label fw-bold mt-4" htmlFor="surname">
               Příjmení
@@ -93,11 +93,11 @@ export default function CreateWorker({
               className="form-control p-0 fs-5"
               type="text"
               placeholder="Příjmení"
-              {...register("lastName")}
+              {...register('lastName')}
             />
             <FormWarning
               message={
-                errors.lastName?.message ? "Zadejte příjmení" : undefined
+                errors.lastName?.message ? 'Zadejte příjmení' : undefined
               }
             />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
@@ -110,11 +110,11 @@ export default function CreateWorker({
               maxLength={20}
               pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               placeholder="(+420) 123 456 789"
-              {...register("phone")}
+              {...register('phone')}
             />
             <FormWarning
               message={
-                errors.phone?.message ? "Zadejte telefonní číslo" : undefined
+                errors.phone?.message ? 'Zadejte telefonní číslo' : undefined
               }
             />
             <label className="form-label fw-bold mt-4" htmlFor="email">
@@ -125,10 +125,10 @@ export default function CreateWorker({
               className="form-control p-0 fs-5"
               type="email"
               placeholder="uzivatel@example.cz"
-              {...register("email")}
+              {...register('email')}
             />
             <FormWarning
-              message={errors.email?.message ? "Zadejte e-mail" : undefined}
+              message={errors.email?.message ? 'Zadejte e-mail' : undefined}
             />
             <label
               className="form-label d-block fw-bold mt-4"
@@ -139,7 +139,7 @@ export default function CreateWorker({
             <DaysSelection
               name="availability.workDays"
               days={allDates}
-              register={() => register("availability.workDays")}
+              register={() => register('availability.workDays')}
             />
             <label
               className="form-label d-block fw-bold mt-4"
@@ -150,7 +150,7 @@ export default function CreateWorker({
             <DaysSelection
               name="availability.adorationDays"
               days={allDates}
-              register={() => register("availability.adorationDays")}
+              register={() => register('availability.adorationDays')}
             />
             <label
               className="form-label d-block fw-bold mt-4"
@@ -159,14 +159,16 @@ export default function CreateWorker({
               Alergie
             </label>
             <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(([allergyKey, allergyName]) => (
+              {Object.entries(allergyMapping).map(
+                ([allergyKey, allergyName]) => (
                   <AllergyPill
-                      key={allergyKey}
-                      allergyId={allergyKey}
-                      allergyName={allergyName}
-                      register={() => register("allergyIds")}
+                    key={allergyKey}
+                    allergyId={allergyKey}
+                    allergyName={allergyName}
+                    register={() => register('allergyIds')}
                   />
-              ))}
+                )
+              )}
             </div>
             <label className="form-label d-block fw-bold mt-4">
               Další vlastnosti
@@ -176,7 +178,7 @@ export default function CreateWorker({
                 type="checkbox"
                 className="fs-5 form-check-input"
                 id="strong"
-                {...register("strong")}
+                {...register('strong')}
               />
               <label className="form-check-label" htmlFor="strong">
                 Silák
@@ -198,9 +200,9 @@ export default function CreateWorker({
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isMutating}
               />
             </div>
@@ -210,5 +212,5 @@ export default function CreateWorker({
         </div>
       </div>
     </>
-  );
+  )
 }

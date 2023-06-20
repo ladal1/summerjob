@@ -1,10 +1,10 @@
-import EditBox from "../forms/EditBox";
-import PageHeader from "../page-header/PageHeader";
+import EditBox from '../forms/EditBox'
+import PageHeader from '../page-header/PageHeader'
 
 export default function MyPlanEmpty() {
   return (
     <>
-      <PageHeader title={"Můj plán"} isFluid={false}>
+      <PageHeader title={'Můj plán'} isFluid={false}>
         {}
       </PageHeader>
       <section>
@@ -15,5 +15,5 @@ export default function MyPlanEmpty() {
         </div>
       </section>
     </>
-  );
+  )
 }

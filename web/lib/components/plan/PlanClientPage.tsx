@@ -1,31 +1,31 @@
-"use client";
-import ErrorPage from "lib/components/error-page/ErrorPage";
-import AddJobToPlanForm from "lib/components/plan/AddJobToPlanForm";
-import { Modal, ModalSize } from "lib/components/modal/Modal";
-import PageHeader from "lib/components/page-header/PageHeader";
-import { PlanFilters } from "lib/components/plan/PlanFilters";
-import { PlanTable } from "lib/components/plan/PlanTable";
+'use client'
+import ErrorPage from 'lib/components/error-page/ErrorPage'
+import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
+import { Modal, ModalSize } from 'lib/components/modal/Modal'
+import PageHeader from 'lib/components/page-header/PageHeader'
+import { PlanFilters } from 'lib/components/plan/PlanFilters'
+import { PlanTable } from 'lib/components/plan/PlanTable'
 import {
   useAPIPlan,
   useAPIPlanDelete,
   useAPIPlanGenerate,
-} from "lib/fetcher/plan";
-import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
-import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
-import { ActiveJobNoPlan } from "lib/types/active-job";
-import { deserializePlan, PlanComplete } from "lib/types/plan";
-import { deserializeWorkers, WorkerComplete } from "lib/types/worker";
-import { useCallback, useMemo, useState } from "react";
-import ErrorPage404 from "../404/404";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import { Serialized } from "lib/types/serialize";
-import Link from "next/link";
+} from 'lib/fetcher/plan'
+import { useAPIWorkersWithoutJob } from 'lib/fetcher/worker'
+import { filterUniqueById, formatDateLong } from 'lib/helpers/helpers'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { deserializePlan, PlanComplete } from 'lib/types/plan'
+import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
+import { useCallback, useMemo, useState } from 'react'
+import ErrorPage404 from '../404/404'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import { Serialized } from 'lib/types/serialize'
+import Link from 'next/link'
 
 interface PlanClientPageProps {
-  id: string;
-  initialDataPlan: Serialized<PlanComplete>;
-  initialDataJoblessWorkers: Serialized<WorkerComplete[]>;
+  id: string
+  initialDataPlan: Serialized<PlanComplete>
+  initialDataJoblessWorkers: Serialized<WorkerComplete[]>
 }
 
 export default function PlanClientPage({
@@ -33,7 +33,7 @@ export default function PlanClientPage({
   initialDataPlan,
   initialDataJoblessWorkers,
 }: PlanClientPageProps) {
-  const initialDataPlanParsed = deserializePlan(initialDataPlan);
+  const initialDataPlanParsed = deserializePlan(initialDataPlan)
 
   const {
     data: planData,
@@ -41,36 +41,32 @@ export default function PlanClientPage({
     mutate,
   } = useAPIPlan(id, {
     fallbackData: initialDataPlanParsed,
-  });
-  const initialDataJoblessParsed = deserializeWorkers(
-    initialDataJoblessWorkers
-  );
+  })
+  const initialDataJoblessParsed = deserializeWorkers(initialDataJoblessWorkers)
   const { data: workersWithoutJobData, mutate: reloadJoblessWorkers } =
     useAPIWorkersWithoutJob(id, {
       fallbackData: initialDataJoblessParsed,
-    });
+    })
 
-  const reloadPlan = useCallback(() => mutate(), [mutate]);
+  const reloadPlan = useCallback(() => mutate(), [mutate])
 
   const workersWithoutJob = useMemo(() => {
-    if (!workersWithoutJobData) return [];
-    if (!planData) return workersWithoutJobData;
-    return workersWithoutJobData.filter((w) =>
-      isWorkerAvailable(w, planData.day)
-    );
-  }, [planData, workersWithoutJobData]);
+    if (!workersWithoutJobData) return []
+    if (!planData) return workersWithoutJobData
+    return workersWithoutJobData.filter(w => isWorkerAvailable(w, planData.day))
+  }, [planData, workersWithoutJobData])
 
-  const [isJobModalOpen, setIsJobModalOpen] = useState(false);
-  const openModal = () => setIsJobModalOpen(true);
+  const [isJobModalOpen, setIsJobModalOpen] = useState(false)
+  const openModal = () => setIsJobModalOpen(true)
   const closeModal = () => {
-    mutate();
-    setIsJobModalOpen(false);
-  };
+    mutate()
+    setIsJobModalOpen(false)
+  }
 
   //#region Generate plan
 
   const [showGenerateConfirmation, setShowGenerateConfirmation] =
-    useState(false);
+    useState(false)
 
   const {
     trigger: triggerGenerate,
@@ -79,24 +75,24 @@ export default function PlanClientPage({
     reset: resetGenerateError,
   } = useAPIPlanGenerate({
     onSuccess: () => {
-      setShowGenerateConfirmation(true);
+      setShowGenerateConfirmation(true)
     },
-  });
+  })
 
   const generatePlan = () => {
-    triggerGenerate({ planId: planData!.id });
-  };
+    triggerGenerate({ planId: planData!.id })
+  }
 
   const onGeneratingErrorMessageClose = () => {
-    resetGenerateError();
-    setShowGenerateConfirmation(false);
-  };
+    resetGenerateError()
+    setShowGenerateConfirmation(false)
+  }
 
   //#endregion
 
   //#region Delete plan
 
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const {
     trigger: triggerDelete,
     isMutating: isBeingDeleted,
@@ -104,31 +100,31 @@ export default function PlanClientPage({
     reset: resetDeleteError,
   } = useAPIPlanDelete(planData!.id, {
     onSuccess: () => window.history.back(),
-  });
+  })
 
   const deletePlan = () => {
-    triggerDelete();
-    setShowDeleteConfirmation(false);
-  };
+    triggerDelete()
+    setShowDeleteConfirmation(false)
+  }
 
   const confirmDelete = () => {
-    setShowDeleteConfirmation(true);
-  };
+    setShowDeleteConfirmation(true)
+  }
 
   const onErrorMessageClose = () => {
-    resetDeleteError();
-  };
+    resetDeleteError()
+  }
 
   //#endregion
 
   //#region Filter and search jobs
 
   const searchableJobs = useMemo(() => {
-    const map = new Map<string, string>();
-    planData?.jobs.forEach((job) => {
+    const map = new Map<string, string>()
+    planData?.jobs.forEach(job => {
       const workerNames = job.workers
-        .map((w) => `${w.firstName} ${w.lastName}`)
-        .join(" ");
+        .map(w => `${w.firstName} ${w.lastName}`)
+        .join(' ')
       map.set(
         job.id,
         (
@@ -138,41 +134,41 @@ export default function PlanClientPage({
           job.proposedJob.contact +
           workerNames
         ).toLocaleLowerCase()
-      );
-    });
-    return map;
-  }, [planData?.jobs]);
+      )
+    })
+    return map
+  }, [planData?.jobs])
 
   const areas = useMemo(
     () => getAvailableAreas(planData ?? undefined),
     [planData]
-  );
-  const [selectedArea, setSelectedArea] = useState(areas[0]);
+  )
+  const [selectedArea, setSelectedArea] = useState(areas[0])
 
   const onAreaSelected = (id: string) => {
-    setSelectedArea(areas.find((a) => a.id === id) || areas[0]);
-  };
+    setSelectedArea(areas.find(a => a.id === id) || areas[0])
+  }
 
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState('')
 
   const shouldShowJob = useCallback(
     (job: ActiveJobNoPlan) => {
       const isInArea =
         selectedArea.id === areas[0].id ||
-        job.proposedJob.area.id === selectedArea.id;
-      const text = searchableJobs.get(job.id);
+        job.proposedJob.area.id === selectedArea.id
+      const text = searchableJobs.get(job.id)
       if (text) {
-        return isInArea && text.includes(filter.toLowerCase());
+        return isInArea && text.includes(filter.toLowerCase())
       }
-      return isInArea;
+      return isInArea
     },
     [selectedArea, areas, searchableJobs, filter]
-  );
+  )
 
   //#endregion
 
   if (error && !planData) {
-    return <ErrorPage error={error} />;
+    return <ErrorPage error={error} />
   }
 
   return (
@@ -182,7 +178,7 @@ export default function PlanClientPage({
         <>
           <PageHeader
             title={
-              planData ? formatDateLong(planData?.day, true) : "Načítání..."
+              planData ? formatDateLong(planData?.day, true) : 'Načítání...'
             }
           >
             <button
@@ -249,7 +245,7 @@ export default function PlanClientPage({
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
                         Nasazených pracantů
                         <span>
-                          {planData?.jobs.flatMap((x) => x.workers).length}
+                          {planData?.jobs.flatMap(x => x.workers).length}
                         </span>
                       </li>
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
@@ -267,12 +263,12 @@ export default function PlanClientPage({
                         <span>
                           {planData &&
                             planData.jobs
-                              .map((j) => j.proposedJob.minWorkers)
-                              .reduce((a, b) => a + b, 0)}{" "}
-                          -{" "}
+                              .map(j => j.proposedJob.minWorkers)
+                              .reduce((a, b) => a + b, 0)}{' '}
+                          -{' '}
                           {planData &&
                             planData.jobs
-                              .map((j) => j.proposedJob.maxWorkers)
+                              .map(j => j.proposedJob.maxWorkers)
                               .reduce((a, b) => a + b, 0)}
                         </span>
                       </li>
@@ -283,7 +279,7 @@ export default function PlanClientPage({
             </div>
             {isJobModalOpen && (
               <Modal
-                title={"Přidat joby do plánu"}
+                title={'Přidat joby do plánu'}
                 size={ModalSize.LARGE}
                 onClose={closeModal}
               >
@@ -308,7 +304,7 @@ export default function PlanClientPage({
             {deleteError && (
               <ErrorMessageModal
                 onClose={onErrorMessageClose}
-                mainMessage={"Nepovedlo se odstranit plán."}
+                mainMessage={'Nepovedlo se odstranit plán.'}
               />
             )}
             {showGenerateConfirmation && !errorGenerating && (
@@ -329,29 +325,29 @@ export default function PlanClientPage({
             {errorGenerating && (
               <ErrorMessageModal
                 onClose={onGeneratingErrorMessageClose}
-                mainMessage={"Nepovedlo se vygenerovat plán."}
+                mainMessage={'Nepovedlo se vygenerovat plán.'}
               />
             )}
           </section>
         </>
       )}
     </>
-  );
+  )
 }
 
 function getAvailableAreas(plan?: PlanComplete) {
-  const ALL_AREAS = { id: "all", name: "Vyberte oblast" };
-  const jobs = plan?.jobs.flatMap((j) => j.proposedJob);
+  const ALL_AREAS = { id: 'all', name: 'Vyberte oblast' }
+  const jobs = plan?.jobs.flatMap(j => j.proposedJob)
   const areas = filterUniqueById(
-    jobs?.map((job) => ({ id: job.area.id, name: job.area.name })) || []
-  );
-  areas.sort((a, b) => a.name.localeCompare(b.name));
-  areas.unshift(ALL_AREAS);
-  return areas;
+    jobs?.map(job => ({ id: job.area.id, name: job.area.name })) || []
+  )
+  areas.sort((a, b) => a.name.localeCompare(b.name))
+  areas.unshift(ALL_AREAS)
+  return areas
 }
 
 function isWorkerAvailable(worker: WorkerComplete, day: Date) {
   return worker.availability.workDays
-    .map((d) => d.getTime())
-    .includes(day.getTime());
+    .map(d => d.getTime())
+    .includes(day.getTime())
 }

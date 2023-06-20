@@ -1,13 +1,13 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CarComplete, CarUpdateData, CarUpdateSchema } from "lib/types/car";
-import { useForm } from "react-hook-form";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { CarComplete, CarUpdateData, CarUpdateSchema } from 'lib/types/car'
+import { useForm } from 'react-hook-form'
 
 type CarEditFormProps = {
-  car: CarComplete;
-  onSubmit: (data: CarUpdateData) => void;
-  isSending: boolean;
-};
+  car: CarComplete
+  onSubmit: (data: CarUpdateData) => void
+  isSending: boolean
+}
 
 export default function CarEditForm({
   car,
@@ -22,14 +22,14 @@ export default function CarEditForm({
     resolver: zodResolver(CarUpdateSchema),
     defaultValues: {
       name: car.name,
-      description: car.description ?? "",
+      description: car.description ?? '',
       seats: car.seats,
       odometerStart: car.odometerStart,
       odometerEnd: car.odometerEnd,
       reimbursed: car.reimbursed,
       reimbursementAmount: car.reimbursementAmount,
     },
-  });
+  })
 
   return (
     <>
@@ -51,7 +51,7 @@ export default function CarEditForm({
               className="form-control p-0 fs-5"
               type="text"
               placeholder="Model auta, značka"
-              {...register("name")}
+              {...register('name')}
             />
             {errors.name?.message && (
               <p className="text-danger">{errors.name.message as string}</p>
@@ -64,7 +64,7 @@ export default function CarEditForm({
               className="form-control border p-1 fs-5"
               rows={3}
               placeholder="Popis"
-              {...register("description")}
+              {...register('description')}
             />
             <label className="form-label fw-bold mt-4" htmlFor="seats">
               Počet sedadel
@@ -75,7 +75,7 @@ export default function CarEditForm({
               type="number"
               placeholder="Počet sedadel"
               min="1"
-              {...register("seats", { valueAsNumber: true })}
+              {...register('seats', { valueAsNumber: true })}
             />
             {errors.seats?.message && (
               <p className="text-danger">{errors.seats.message as string}</p>
@@ -89,7 +89,7 @@ export default function CarEditForm({
               type="number"
               placeholder="Počáteční stav kilometrů"
               min="0"
-              {...register("odometerStart", { valueAsNumber: true })}
+              {...register('odometerStart', { valueAsNumber: true })}
             />
             {errors.odometerStart?.message && (
               <p className="text-danger">
@@ -105,7 +105,7 @@ export default function CarEditForm({
               type="number"
               placeholder="Konečný stav kilometrů"
               min="0"
-              {...register("odometerEnd", { valueAsNumber: true })}
+              {...register('odometerEnd', { valueAsNumber: true })}
             />
             {errors.odometerEnd?.message && (
               <p className="text-danger">
@@ -124,7 +124,7 @@ export default function CarEditForm({
               type="number"
               placeholder="Částka k proplacení"
               min="0"
-              {...register("reimbursementAmount", {
+              {...register('reimbursementAmount', {
                 valueAsNumber: true,
               })}
             />
@@ -133,7 +133,7 @@ export default function CarEditForm({
                 className="form-check-input me-2"
                 type="checkbox"
                 id="odometer-reimbursed"
-                {...register("reimbursed")}
+                {...register('reimbursed')}
               />
               <label
                 className="form-check-label form-label fw-bold"
@@ -151,9 +151,9 @@ export default function CarEditForm({
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isSending}
               />
             </div>
@@ -161,5 +161,5 @@ export default function CarEditForm({
         </div>
       </div>
     </>
-  );
+  )
 }

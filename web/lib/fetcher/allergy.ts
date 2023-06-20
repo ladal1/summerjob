@@ -1,6 +1,6 @@
-import { AllergiesAPIGetResponse } from "pages/api/allergies";
-import { useData } from "./fetcher";
+import { AllergiesAPIGetResponse } from 'pages/api/allergies'
+import { useData } from './fetcher'
 
 export function useAPIAllergies() {
-  return useData<AllergiesAPIGetResponse>("/api/allergies");
+  return useData<AllergiesAPIGetResponse>('/api/allergies')
 }

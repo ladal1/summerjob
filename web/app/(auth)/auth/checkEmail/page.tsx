@@ -1,21 +1,21 @@
-import { getSMJSession } from "lib/auth/auth";
-import CenteredBox from "lib/components/auth/CenteredBox";
-import { redirect } from "next/navigation";
-import Image from "next/image";
-import logoImage from "public/logo-smj-yellow.png";
-import { dev_createSession } from "lib/data/auth";
-import DevLogin from "lib/components/auth/DevLogin";
+import { getSMJSession } from 'lib/auth/auth'
+import CenteredBox from 'lib/components/auth/CenteredBox'
+import { redirect } from 'next/navigation'
+import Image from 'next/image'
+import logoImage from 'public/logo-smj-yellow.png'
+import { dev_createSession } from 'lib/data/auth'
+import DevLogin from 'lib/components/auth/DevLogin'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 export default async function SignInPage() {
-  const session = await getSMJSession();
+  const session = await getSMJSession()
   if (session) {
-    redirect("/");
+    redirect('/')
   }
-  let devSession = null;
-  if (process.env.NODE_ENV === "development") {
-    devSession = await dev_createSession();
+  let devSession = null
+  if (process.env.NODE_ENV === 'development') {
+    devSession = await dev_createSession()
   }
   return (
     <CenteredBox>
@@ -43,7 +43,7 @@ export default async function SignInPage() {
             <DevLogin
               cookies={[
                 {
-                  name: "next-auth.session-token",
+                  name: 'next-auth.session-token',
                   value: devSession.sessionToken,
                 },
               ]}
@@ -53,5 +53,5 @@ export default async function SignInPage() {
         </div>
       </div>
     </CenteredBox>
-  );
+  )
 }

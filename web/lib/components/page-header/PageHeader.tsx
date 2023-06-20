@@ -3,11 +3,11 @@ export default function PageHeader({
   title,
   isFluid = true,
 }: {
-  children: React.ReactNode;
-  title: string;
-  isFluid?: boolean;
+  children: React.ReactNode
+  title: string
+  isFluid?: boolean
 }) {
-  const containerClass = isFluid ? "container-fluid" : "container";
+  const containerClass = isFluid ? 'container-fluid' : 'container'
   return (
     <section className="mb-3 mt-3">
       <div className={containerClass}>
@@ -22,5 +22,5 @@ export default function PageHeader({
         </div>
       </div>
     </section>
-  );
+  )
 }

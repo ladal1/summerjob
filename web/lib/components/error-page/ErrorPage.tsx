@@ -1,22 +1,22 @@
-"use client";
+'use client'
 
-import { ApiError } from "lib/types/api-error";
-import { useEffect, useState } from "react";
+import { ApiError } from 'lib/types/api-error'
+import { useEffect, useState } from 'react'
 
 type ErrorPageProps = {
-  error: Error | string;
-};
+  error: Error | string
+}
 
 export default function ErrorPage({ error }: ErrorPageProps) {
-  const message = error instanceof Error ? error.message : error;
-  const isApiError = error instanceof ApiError;
-  const [isOffline, setIsOffline] = useState(false);
+  const message = error instanceof Error ? error.message : error
+  const isApiError = error instanceof ApiError
+  const [isOffline, setIsOffline] = useState(false)
 
   useEffect(() => {
     if (window.navigator) {
-      setIsOffline(!window.navigator.onLine);
+      setIsOffline(!window.navigator.onLine)
     }
-  }, [setIsOffline]);
+  }, [setIsOffline])
 
   return (
     <section className="mb-3 mt-3">
@@ -25,7 +25,7 @@ export default function ErrorPage({ error }: ErrorPageProps) {
           <div className="col">
             <h1>Došlo k chybě</h1>
             <p>
-              Chyba:{" "}
+              Chyba:{' '}
               {error && (
                 <span className="font-monospace">
                   {isApiError ? error.reason : message}
@@ -40,5 +40,5 @@ export default function ErrorPage({ error }: ErrorPageProps) {
         </div>
       </div>
     </section>
-  );
+  )
 }

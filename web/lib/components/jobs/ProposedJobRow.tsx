@@ -1,24 +1,24 @@
-"use client";
+'use client'
 import {
   useAPIProposedJobDelete,
   useAPIProposedJobUpdate,
-} from "lib/fetcher/proposed-job";
+} from 'lib/fetcher/proposed-job'
 import {
   capitalizeFirstLetter,
   datesAfterDate,
   formatDateShort,
-} from "lib/helpers/helpers";
-import { ProposedJobComplete } from "lib/types/proposed-job";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import DeleteIcon from "../forms/DeleteIcon";
-import ConfirmationModal from "../modal/ConfirmationModal";
-import ErrorMessageModal from "../modal/ErrorMessageModal";
-import { ExpandableRow } from "../table/ExpandableRow";
+} from 'lib/helpers/helpers'
+import { ProposedJobComplete } from 'lib/types/proposed-job'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import DeleteIcon from '../forms/DeleteIcon'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import { ExpandableRow } from '../table/ExpandableRow'
 
 interface ProposedJobRowData {
-  job: ProposedJobComplete;
-  reloadJobs: () => void;
+  job: ProposedJobComplete
+  reloadJobs: () => void
 }
 
 export default function ProposedJobRow({
@@ -27,21 +27,21 @@ export default function ProposedJobRow({
 }: ProposedJobRowData) {
   const { trigger: triggerUpdate } = useAPIProposedJobUpdate(job.id, {
     onSuccess: reloadJobs,
-  });
+  })
 
   const setJobPinned = (pinned: boolean) => {
-    triggerUpdate({ pinned });
-  };
+    triggerUpdate({ pinned })
+  }
 
   const setJobCompleted = (completed: boolean) => {
-    triggerUpdate({ completed });
-  };
+    triggerUpdate({ completed })
+  }
 
   const setJobHidden = (hidden: boolean) => {
-    triggerUpdate({ hidden });
-  };
+    triggerUpdate({ hidden })
+  }
 
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const {
     trigger: triggerDelete,
     isMutating: isBeingDeleted,
@@ -49,26 +49,26 @@ export default function ProposedJobRow({
     reset: resetDeleteError,
   } = useAPIProposedJobDelete(job.id, {
     onSuccess: reloadJobs,
-  });
+  })
 
   const deleteJob = () => {
-    triggerDelete();
-    setShowDeleteConfirmation(false);
-  };
+    triggerDelete()
+    setShowDeleteConfirmation(false)
+  }
 
   const confirmDelete = () => {
-    setShowDeleteConfirmation(true);
-  };
+    setShowDeleteConfirmation(true)
+  }
 
   const onErrorMessageClose = () => {
-    resetDeleteError();
-  };
+    resetDeleteError()
+  }
 
   const availableDays = useMemo(() => {
-    const days = [...job.availability];
-    days.sort((a, b) => a.getTime() - b.getTime());
-    return days.map(formatDateShort).map(capitalizeFirstLetter).join(", ");
-  }, [job.availability]);
+    const days = [...job.availability]
+    days.sort((a, b) => a.getTime() - b.getTime())
+    return days.map(formatDateShort).map(capitalizeFirstLetter).join(', ')
+  }, [job.availability])
 
   return (
     <ExpandableRow
@@ -93,11 +93,11 @@ export default function ProposedJobRow({
         </p>
         <p>
           <strong>Doprava do oblasti požadována: </strong>
-          {job.area.requiresCar ? "Ano" : "Ne"}
+          {job.area.requiresCar ? 'Ano' : 'Ne'}
         </p>
         <p>
           <strong>Alergeny: </strong>
-          {job.allergens.length > 0 ? job.allergens.join(", ") : "Žádné"}
+          {job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}
         </p>
         <p>
           <strong>Dostupné: </strong>
@@ -128,24 +128,24 @@ export default function ProposedJobRow({
       {deleteError && (
         <ErrorMessageModal
           onClose={onErrorMessageClose}
-          mainMessage={"Nepovedlo se odstranit job."}
+          mainMessage={'Nepovedlo se odstranit job.'}
         />
       )}
     </ExpandableRow>
-  );
+  )
 }
 
 function rowColorClass(job: ProposedJobComplete) {
   if (job.hidden) {
-    return "smj-hidden-job-row";
+    return 'smj-hidden-job-row'
   }
   if (job.completed) {
-    return "smj-completed-job-row";
+    return 'smj-completed-job-row'
   }
   if (job.pinned) {
-    return "smj-pinned-job-row";
+    return 'smj-pinned-job-row'
   }
-  return "";
+  return ''
 }
 
 function formatJobRow(
@@ -158,8 +158,8 @@ function formatJobRow(
 ) {
   // Show job as available today before 6:00
   // After that, show job as not available anymore
-  const now = new Date();
-  now.setHours(now.getHours() - 6);
+  const now = new Date()
+  now.setHours(now.getHours() - 6)
   return [
     job.name,
     job.area.name,
@@ -174,71 +174,71 @@ function formatJobRow(
       {hideJobIcon(job, setHidden)}
       <Link
         href={`/jobs/${job.id}`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
         className="smj-action-edit"
       >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
       <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
     </span>,
-  ];
+  ]
 }
 
 function markJobAsCompletedIcon(
   job: ProposedJobComplete,
   setCompleted: (completed: boolean) => void
 ) {
-  const color = job.completed ? "smj-action-completed" : "smj-action-complete";
+  const color = job.completed ? 'smj-action-completed' : 'smj-action-complete'
   const title = job.completed
-    ? "Označit jako nedokončený"
-    : "Označit jako dokončený";
-  const icon = job.completed ? "fa-times" : "fa-check";
+    ? 'Označit jako nedokončený'
+    : 'Označit jako dokončený'
+  const icon = job.completed ? 'fa-times' : 'fa-check'
   return (
     <i
       className={`fas ${icon} ${color}`}
       title={title}
-      onClick={(e) => {
-        e.stopPropagation();
-        setCompleted(!job.completed);
+      onClick={e => {
+        e.stopPropagation()
+        setCompleted(!job.completed)
       }}
     ></i>
-  );
+  )
 }
 
 function pinJobIcon(
   job: ProposedJobComplete,
   setPinned: (pinned: boolean) => void
 ) {
-  const color = job.pinned ? "smj-action-pinned" : "smj-action-pin";
-  const title = job.pinned ? "Odepnout" : "Připnout";
-  const icon = job.pinned ? "fa-thumbtack" : "fa-thumbtack";
+  const color = job.pinned ? 'smj-action-pinned' : 'smj-action-pin'
+  const title = job.pinned ? 'Odepnout' : 'Připnout'
+  const icon = job.pinned ? 'fa-thumbtack' : 'fa-thumbtack'
   return (
     <i
       className={`fas ${icon} ${color}`}
       title={title}
-      onClick={(e) => {
-        e.stopPropagation();
-        setPinned(!job.pinned);
+      onClick={e => {
+        e.stopPropagation()
+        setPinned(!job.pinned)
       }}
     ></i>
-  );
+  )
 }
 
 function hideJobIcon(
   job: ProposedJobComplete,
   setHidden: (hidden: boolean) => void
 ) {
-  const color = job.hidden ? "smj-action-hidden" : "smj-action-hide";
-  const title = job.hidden ? "Zobrazit" : "Skrýt";
-  const icon = job.hidden ? "fa-eye" : "fa-eye-slash";
+  const color = job.hidden ? 'smj-action-hidden' : 'smj-action-hide'
+  const title = job.hidden ? 'Zobrazit' : 'Skrýt'
+  const icon = job.hidden ? 'fa-eye' : 'fa-eye-slash'
   return (
     <i
       className={`fas ${icon} ${color}`}
       title={title}
-      onClick={(e) => {
-        e.stopPropagation();
-        setHidden(!job.hidden);
+      onClick={e => {
+        e.stopPropagation()
+        setHidden(!job.hidden)
       }}
     ></i>
-  );
+  )
 }

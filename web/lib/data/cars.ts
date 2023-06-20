@@ -1,5 +1,5 @@
-import prisma from "lib/prisma/connection";
-import { CarComplete, CarCreateData, CarUpdateData } from "lib/types/car";
+import prisma from 'lib/prisma/connection'
+import { CarComplete, CarCreateData, CarUpdateData } from 'lib/types/car'
 
 export async function getCarById(id: string): Promise<CarComplete | null> {
   const car = await prisma.car.findFirst({
@@ -14,8 +14,8 @@ export async function getCarById(id: string): Promise<CarComplete | null> {
       owner: true,
       rides: true,
     },
-  });
-  return car;
+  })
+  return car
 }
 
 export async function getCars(
@@ -51,8 +51,8 @@ export async function getCars(
         },
       },
     },
-  });
-  return cars;
+  })
+  return cars
 }
 
 export async function updateCar(carId: string, car: CarUpdateData) {
@@ -67,18 +67,18 @@ export async function updateCar(carId: string, car: CarUpdateData) {
       reimbursed: car.reimbursed,
       reimbursementAmount: car.reimbursementAmount,
     },
-  });
+  })
 }
 
 export async function createCar(carData: CarCreateData, eventId: string) {
   // Make sure the odometer start is not greater than the odometer end
   if (!carData.odometerEnd) {
-    carData.odometerEnd = carData.odometerStart;
+    carData.odometerEnd = carData.odometerStart
   } else {
     carData.odometerEnd =
       carData.odometerEnd < carData.odometerStart
         ? carData.odometerStart
-        : carData.odometerEnd;
+        : carData.odometerEnd
   }
 
   const car = await prisma.car.create({
@@ -93,12 +93,12 @@ export async function createCar(carData: CarCreateData, eventId: string) {
       ownerId: carData.ownerId,
       forEventId: eventId,
     },
-  });
-  return car;
+  })
+  return car
 }
 
 export async function deleteCar(carId: string) {
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async tx => {
     // Check if car has any rides associated with it
     // If not, delete the car
     const car = await tx.car.findUnique({
@@ -108,17 +108,17 @@ export async function deleteCar(carId: string) {
       include: {
         rides: true,
       },
-    });
+    })
     if (!car) {
-      return;
+      return
     }
     if (car.rides.length === 0) {
       await tx.car.delete({
         where: {
           id: carId,
         },
-      });
-      return;
+      })
+      return
     }
     // If the car has rides associated with it, anonymize the car instead and mark it as deleted
     await tx.car.update({
@@ -128,6 +128,6 @@ export async function deleteCar(carId: string) {
       data: {
         deleted: true,
       },
-    });
-  });
+    })
+  })
 }

@@ -1,25 +1,24 @@
-import { z } from "zod";
-import { Serialized } from "./serialize";
-import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from "lib/prisma/zod";
-import useZodOpenApi from "lib/api/useZodOpenApi";
-import {Allergy, JobType} from "../prisma/client";
+import { z } from 'zod'
+import { Serialized } from './serialize'
+import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+import { Allergy, JobType } from '../prisma/client'
 
-useZodOpenApi;
+useZodOpenApi
 
 export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
   area: AreaSchema,
-});
+})
 
-export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>;
+export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>
 
 export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   area: AreaSchema,
   activeJobs: z.array(ActiveJobSchema),
   availability: z.array(z.date()),
-});
+})
 
-export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>;
-
+export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
 export const ProposedJobCreateSchema = z
   .object({
@@ -39,20 +38,18 @@ export const ProposedJobCreateSchema = z
     availability: z
       .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
       .openapi({
-        type: "array",
+        type: 'array',
         items: {
-          type: "string",
-          format: "date",
+          type: 'string',
+          format: 'date',
         },
       }),
-      jobType: z.nativeEnum(JobType),
+    jobType: z.nativeEnum(JobType),
   })
-  .strict();
+  .strict()
 
-export type ProposedJobCreateDataInput = z.input<
-  typeof ProposedJobCreateSchema
->;
-export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>;
+export type ProposedJobCreateDataInput = z.input<typeof ProposedJobCreateSchema>
+export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>
 
 export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
   z.object({
@@ -62,23 +59,21 @@ export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
   })
 )
   .strict()
-  .partial();
+  .partial()
 
-export type ProposedJobUpdateDataInput = z.input<
-  typeof ProposedJobUpdateSchema
->;
-export type ProposedJobUpdateData = z.infer<typeof ProposedJobUpdateSchema>;
+export type ProposedJobUpdateDataInput = z.input<typeof ProposedJobUpdateSchema>
+export type ProposedJobUpdateData = z.infer<typeof ProposedJobUpdateSchema>
 
 export function serializeProposedJobs(
   jobs: ProposedJobComplete[]
 ): Serialized<ProposedJobComplete[]> {
-  return { data: JSON.stringify(jobs) };
+  return { data: JSON.stringify(jobs) }
 }
 
 export function deserializeProposedJobs(
   jobs: Serialized<ProposedJobComplete[]>
 ) {
-  return JSON.parse(jobs.data) as ProposedJobComplete[];
+  return JSON.parse(jobs.data) as ProposedJobComplete[]
 }
 
 export function serializeProposedJob(
@@ -86,15 +81,15 @@ export function serializeProposedJob(
 ): Serialized<ProposedJobComplete> {
   return {
     data: JSON.stringify(job),
-  };
+  }
 }
 
 export function deserializeProposedJob(job: Serialized<ProposedJobComplete>) {
-  const parsed = JSON.parse(job.data) as ProposedJobComplete;
-  return deserializeProposedJobAvailability(parsed);
+  const parsed = JSON.parse(job.data) as ProposedJobComplete
+  return deserializeProposedJobAvailability(parsed)
 }
 
 export function deserializeProposedJobAvailability(job: ProposedJobComplete) {
-  job.availability = job.availability.map((date) => new Date(date));
-  return job;
+  job.availability = job.availability.map(date => new Date(date))
+  return job
 }

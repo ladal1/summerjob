@@ -1,36 +1,36 @@
-import { ExtendedSession, Permission, UserSession } from "lib/types/auth";
-import { NextApiRequest, NextApiResponse } from "next";
-import { Session } from "next-auth";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "pages/api/auth/[...nextauth]";
+import { ExtendedSession, Permission, UserSession } from 'lib/types/auth'
+import { NextApiRequest, NextApiResponse } from 'next'
+import { Session } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from 'pages/api/auth/[...nextauth]'
 
 export async function getSMJSession() {
-  const session = await getServerSession(authOptions);
-  if (!session) return null;
-  return session as ExtendedSession;
+  const session = await getServerSession(authOptions)
+  if (!session) return null
+  return session as ExtendedSession
 }
 
 export async function getSMJSessionAPI(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = await getServerSession(req, res, authOptions);
-  if (!session) return null;
-  return session as ExtendedSession;
+  const session = await getServerSession(req, res, authOptions)
+  if (!session) return null
+  return session as ExtendedSession
 }
 
 export function toClientSession(session: Session): UserSession {
-  if (!session.user) return { workerId: "", name: "" };
+  if (!session.user) return { workerId: '', name: '' }
   return {
-    workerId: "WorkerId here",
-    name: session.user.email || "",
-  };
+    workerId: 'WorkerId here',
+    name: session.user.email || '',
+  }
 }
 
 export async function getClientSafeSession(): Promise<UserSession | null> {
-  const session = await getSMJSession();
-  if (!session) return null;
-  return toClientSession(session);
+  const session = await getSMJSession()
+  if (!session) return null
+  return toClientSession(session)
 }
 
 /**
@@ -43,9 +43,9 @@ export async function getClientSafeSession(): Promise<UserSession | null> {
 export async function withPermissions(
   permissions: Permission[]
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
-  const session = await getSMJSession();
-  const allowed = isAccessAllowed(permissions, session);
-  return allowed ? { success: true, session: session! } : { success: false };
+  const session = await getSMJSession()
+  const allowed = isAccessAllowed(permissions, session)
+  return allowed ? { success: true, session: session! } : { success: false }
 }
 
 /**
@@ -60,22 +60,22 @@ export async function withPermissionsAPI(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
-  const session = await getSMJSessionAPI(req, res);
-  const allowed = isAccessAllowed(permissions, session);
-  return allowed ? { success: true, session: session! } : { success: false };
+  const session = await getSMJSessionAPI(req, res)
+  const allowed = isAccessAllowed(permissions, session)
+  return allowed ? { success: true, session: session! } : { success: false }
 }
 
 export function isAccessAllowed(
   permissions: Permission[],
   session: ExtendedSession | null
 ): boolean {
-  if (!session) return false;
-  if (permissions.length === 0) return true;
-  if (session.permissions.includes(Permission.ADMIN)) return true;
+  if (!session) return false
+  if (permissions.length === 0) return true
+  if (session.permissions.includes(Permission.ADMIN)) return true
   for (const permission of permissions) {
-    if (session.permissions.includes(permission)) return true;
+    if (session.permissions.includes(permission)) return true
   }
-  return false;
+  return false
 }
 
 /**
@@ -87,19 +87,19 @@ export function isAccessAllowed(
  * @note We don't add the email address to avoid needing to escape it, if you do, remember to sanitize it!
  */
 export function emailHtml(params: { url: string; host: string }) {
-  const { url, host } = params;
+  const { url, host } = params
 
-  const escapedHost = host.replace(/\./g, "&#8203;.");
+  const escapedHost = host.replace(/\./g, '&#8203;.')
 
-  const brandColor = "#f9da68";
+  const brandColor = '#f9da68'
   const color = {
-    background: "#f9f9f9",
-    text: "#444",
-    mainBackground: "#fff",
+    background: '#f9f9f9',
+    text: '#444',
+    mainBackground: '#fff',
     buttonBackground: brandColor,
     buttonBorder: brandColor,
-    buttonText: "#000",
-  };
+    buttonText: '#000',
+  }
 
   return `
 <body style="background: ${color.background};">
@@ -130,10 +130,10 @@ export function emailHtml(params: { url: string; host: string }) {
     </tr>
   </table>
 </body>
-`;
+`
 }
 
 /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
 export function emailText({ url, host }: { url: string; host: string }) {
-  return `Přihlášení do aplikace SummerJob\n${url}\n\n`;
+  return `Přihlášení do aplikace SummerJob\n${url}\n\n`
 }

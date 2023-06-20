@@ -1,16 +1,16 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent } from 'react'
 
 export interface LogsFiltersEventType {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface LogsFiltersProps {
-  search: string;
-  onSearchChanged: (search: string) => void;
-  eventTypes: LogsFiltersEventType[];
-  selectedEventType: LogsFiltersEventType;
-  onEventTypeSelected: (id: string) => void;
+  search: string
+  onSearchChanged: (search: string) => void
+  eventTypes: LogsFiltersEventType[]
+  selectedEventType: LogsFiltersEventType
+  onEventTypeSelected: (id: string) => void
 }
 
 export function LogsFilters({
@@ -21,10 +21,10 @@ export function LogsFilters({
   onEventTypeSelected,
 }: LogsFiltersProps) {
   const eventTypeSelectChanged = (e: ChangeEvent<HTMLSelectElement>) => {
-    onEventTypeSelected(e.target.value);
-  };
+    onEventTypeSelected(e.target.value)
+  }
 
-  const isDefaultEventTypeSelected = selectedEventType.id === eventTypes[0].id;
+  const isDefaultEventTypeSelected = selectedEventType.id === eventTypes[0].id
 
   return (
     <>
@@ -35,7 +35,7 @@ export function LogsFilters({
             className="p-2 d-inline-block outline-none border-0 smj-filter-input"
             placeholder="Vyhledat..."
             value={search}
-            onChange={(e) => onSearchChanged(e.target.value)}
+            onChange={e => onSearchChanged(e.target.value)}
           />
         </div>
         <div className="col-auto mb-3">
@@ -44,13 +44,13 @@ export function LogsFilters({
               name="eventType"
               id="eventType"
               className={`form-select p-2 bg-white smj-filter-input ${
-                isDefaultEventTypeSelected ? "smj-default-option" : ""
+                isDefaultEventTypeSelected ? 'smj-default-option' : ''
               }`}
               value={selectedEventType.id}
               onChange={eventTypeSelectChanged}
             >
               {eventTypes &&
-                eventTypes.map((eventType) => (
+                eventTypes.map(eventType => (
                   <option value={eventType.id} key={eventType.id}>
                     {eventType.name}
                   </option>
@@ -60,5 +60,5 @@ export function LogsFilters({
         </div>
       </div>
     </>
-  );
+  )
 }

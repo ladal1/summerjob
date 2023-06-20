@@ -1,9 +1,9 @@
-import { Logging } from "lib/prisma/client";
-import { MessageRow } from "../table/MessageRow";
-import LogRow from "./LogRow";
+import { Logging } from 'lib/prisma/client'
+import { MessageRow } from '../table/MessageRow'
+import LogRow from './LogRow'
 
 interface LogsTableProps {
-  logs: Logging[];
+  logs: Logging[]
 }
 
 export default function LogsTable({ logs }: LogsTableProps) {
@@ -12,7 +12,7 @@ export default function LogsTable({ logs }: LogsTableProps) {
       <table className="table table-hover mb-0">
         <thead className="smj-table-header">
           <tr>
-            {_columns.map((column) => (
+            {_columns.map(column => (
               <th key={column}>{column}</th>
             ))}
           </tr>
@@ -21,13 +21,13 @@ export default function LogsTable({ logs }: LogsTableProps) {
           {logs.length === 0 && (
             <MessageRow message="Žádné logy" colspan={_columns.length} />
           )}
-          {logs.map((log) => (
+          {logs.map(log => (
             <LogRow key={log.id} log={log} />
           ))}
         </tbody>
       </table>
     </div>
-  );
+  )
 }
 
-const _columns = ["Čas", "Typ", "Autor", "Data"];
+const _columns = ['Čas', 'Typ', 'Autor', 'Data']

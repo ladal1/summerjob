@@ -1,7 +1,7 @@
-import { Prisma } from "lib/prisma/client";
-import prisma from "lib/prisma/connection";
-import { LogsResponse } from "lib/types/log";
-import { APILogEvent } from "lib/types/logger";
+import { Prisma } from 'lib/prisma/client'
+import prisma from 'lib/prisma/connection'
+import { LogsResponse } from 'lib/types/log'
+import { APILogEvent } from 'lib/types/logger'
 
 export async function addLogEvent(
   authorId: string,
@@ -18,32 +18,32 @@ export async function addLogEvent(
       eventType,
       message,
     },
-  });
+  })
 }
 
 type LogsSearchParams = {
-  text?: string;
-  type?: APILogEvent;
-  limit?: number;
-  offset?: number;
-};
+  text?: string
+  type?: APILogEvent
+  limit?: number
+  offset?: number
+}
 export async function getLogs({
   text,
   type,
   limit,
   offset,
 }: LogsSearchParams): Promise<LogsResponse> {
-  offset ??= 0;
-  limit ??= 5;
+  offset ??= 0
+  limit ??= 5
 
   const whereClause = Prisma.validator<Prisma.LoggingWhereInput>()({
     AND: [
       {
         OR: [
-          { authorId: { contains: text, mode: "insensitive" } },
-          { authorName: { contains: text, mode: "insensitive" } },
-          { resourceId: { contains: text, mode: "insensitive" } },
-          { message: { contains: text, mode: "insensitive" } },
+          { authorId: { contains: text, mode: 'insensitive' } },
+          { authorName: { contains: text, mode: 'insensitive' } },
+          { resourceId: { contains: text, mode: 'insensitive' } },
+          { message: { contains: text, mode: 'insensitive' } },
         ],
       },
       {
@@ -52,20 +52,20 @@ export async function getLogs({
         },
       },
     ],
-  });
+  })
 
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async tx => {
     const logs = await tx.logging.findMany({
       where: whereClause,
       orderBy: {
-        timestamp: "desc",
+        timestamp: 'desc',
       },
       skip: offset,
       take: limit,
-    });
+    })
     const totalLogs = await tx.logging.count({
       where: whereClause,
-    });
-    return { logs, total: totalLogs };
-  });
+    })
+    return { logs, total: totalLogs }
+  })
 }

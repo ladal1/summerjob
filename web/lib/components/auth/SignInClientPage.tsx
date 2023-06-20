@@ -1,17 +1,17 @@
-"use client";
-import { signIn } from "next-auth/react";
-import Image from "next/image";
-import logoImage from "public/logo-smj-yellow.png";
-import { useState } from "react";
+'use client'
+import { signIn } from 'next-auth/react'
+import Image from 'next/image'
+import logoImage from 'public/logo-smj-yellow.png'
+import { useState } from 'react'
 
 interface SignInClientPageProps {
-  errorMessage?: string;
+  errorMessage?: string
 }
 
 export default function SignInClientPage({
   errorMessage,
 }: SignInClientPageProps) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('')
   return (
     <div className="container maxwidth-500">
       <div className="row mb-4">
@@ -37,9 +37,9 @@ export default function SignInClientPage({
         <div className="col-12">
           <form
             action="#"
-            onSubmit={(e) => {
-              e.preventDefault();
-              signIn("email", { email: email });
+            onSubmit={e => {
+              e.preventDefault()
+              signIn('email', { email: email })
             }}
           >
             <label htmlFor="email">E-mail:</label>
@@ -49,7 +49,7 @@ export default function SignInClientPage({
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
             />
             <input
               className="mt-4 w-100 btn btn-light p-2"
@@ -60,5 +60,5 @@ export default function SignInClientPage({
         </div>
       </div>
     </div>
-  );
+  )
 }

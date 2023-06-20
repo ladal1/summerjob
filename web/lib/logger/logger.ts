@@ -1,7 +1,7 @@
-import { APILogEvent } from "lib/types/logger";
-import { pinoLogger } from "./pino";
-import { addLogEvent } from "lib/data/logs";
-import { ExtendedSession } from "lib/types/auth";
+import { APILogEvent } from 'lib/types/logger'
+import { pinoLogger } from './pino'
+import { addLogEvent } from 'lib/data/logs'
+import { ExtendedSession } from 'lib/types/auth'
 
 async function apiRequest(
   type: APILogEvent,
@@ -9,15 +9,15 @@ async function apiRequest(
   data: object,
   session: ExtendedSession
 ) {
-  const payload = JSON.stringify(data);
+  const payload = JSON.stringify(data)
   await addLogEvent(
     session.userID,
     session.username,
     resourceId,
     type,
-    payload === '""' ? "" : payload
-  );
-  pinoLogger.debug({ type, data });
+    payload === '""' ? '' : payload
+  )
+  pinoLogger.debug({ type, data })
 }
 
 const logger = {
@@ -27,6 +27,6 @@ const logger = {
   error: pinoLogger.error.bind(pinoLogger),
   warn: pinoLogger.warn.bind(pinoLogger),
   fatal: pinoLogger.fatal.bind(pinoLogger),
-};
+}
 
-export default logger;
+export default logger

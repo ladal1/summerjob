@@ -1,53 +1,53 @@
-"use client";
-import { useAPICars } from "lib/fetcher/car";
-import { useAPIRideCreate } from "lib/fetcher/rides";
-import { ActiveJobNoPlan } from "lib/types/active-job";
-import { RidesAPIPostData } from "pages/api/plans/[planId]/active-jobs/[jobId]/rides";
-import { useRef, useState } from "react";
-import { Modal, ModalSize } from "../modal/Modal";
+'use client'
+import { useAPICars } from 'lib/fetcher/car'
+import { useAPIRideCreate } from 'lib/fetcher/rides'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { RidesAPIPostData } from 'pages/api/plans/[planId]/active-jobs/[jobId]/rides'
+import { useRef, useState } from 'react'
+import { Modal, ModalSize } from '../modal/Modal'
 
-const NO_DRIVER_AVAILABLE = "NO_DRIVER_AVAILABLE";
+const NO_DRIVER_AVAILABLE = 'NO_DRIVER_AVAILABLE'
 
 interface AddRideButtonProps {
-  job: ActiveJobNoPlan;
+  job: ActiveJobNoPlan
 }
 
 export default function AddRideButton({ job }: AddRideButtonProps) {
-  const { data: cars, isLoading: isLoadingCars } = useAPICars();
-  const carsOfWorkers = cars?.filter((car) =>
-    job.workers.map((w) => w.id).includes(car.ownerId)
-  );
+  const { data: cars, isLoading: isLoadingCars } = useAPICars()
+  const carsOfWorkers = cars?.filter(car =>
+    job.workers.map(w => w.id).includes(car.ownerId)
+  )
   const unusedCars = carsOfWorkers?.filter(
-    (car) => !job.rides.map((r) => r.carId).includes(car.id)
-  );
+    car => !job.rides.map(r => r.carId).includes(car.id)
+  )
 
-  const selectRef = useRef<HTMLSelectElement>(null);
+  const selectRef = useRef<HTMLSelectElement>(null)
 
   const { trigger, isMutating, error, reset } = useAPIRideCreate(job, {
     onSuccess: () => {
-      setShowAddRideModal(false);
+      setShowAddRideModal(false)
     },
-  });
-  const [showAddRideModal, setShowAddRideModal] = useState(false);
+  })
+  const [showAddRideModal, setShowAddRideModal] = useState(false)
 
   const addRide = () => {
-    const carId = selectRef.current?.value;
+    const carId = selectRef.current?.value
     if (!carId) {
-      return;
+      return
     }
-    const car = unusedCars?.find((c) => c.id === carId);
+    const car = unusedCars?.find(c => c.id === carId)
     if (!car) {
-      return;
+      return
     }
     const payload: RidesAPIPostData = {
       carId: car.id,
       driverId: car.ownerId,
       passengerIds: [],
-    };
-    trigger(payload);
-  };
+    }
+    trigger(payload)
+  }
 
-  const areDriversAvailable = unusedCars && unusedCars.length > 0;
+  const areDriversAvailable = unusedCars && unusedCars.length > 0
   return (
     <>
       <i
@@ -56,7 +56,7 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
       />
       {showAddRideModal && (
         <Modal
-          title={"Přidat dopravu na job"}
+          title={'Přidat dopravu na job'}
           size={ModalSize.MEDIUM}
           onClose={() => setShowAddRideModal(false)}
         >
@@ -69,7 +69,7 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
               !areDriversAvailable ? NO_DRIVER_AVAILABLE : undefined
             }
           >
-            {unusedCars?.map((car) => (
+            {unusedCars?.map(car => (
               <option value={car.id} key={car.id}>
                 {car.owner.firstName} {car.owner.lastName}, {car.name}
               </option>
@@ -90,5 +90,5 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
         </Modal>
       )}
     </>
-  );
+  )
 }

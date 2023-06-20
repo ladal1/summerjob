@@ -1,9 +1,9 @@
-import { MessageRow } from "./MessageRow";
+import { MessageRow } from './MessageRow'
 
 interface RowProps {
-  colspan: number;
+  colspan: number
 }
 
 export function LoadingRow({ colspan }: RowProps) {
-  return <MessageRow message={"Načítání..."} colspan={colspan} />;
+  return <MessageRow message={'Načítání...'} colspan={colspan} />
 }

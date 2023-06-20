@@ -1,15 +1,15 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CarCreateData, CarCreateSchema } from "lib/types/car";
-import { WorkerBasicInfo } from "lib/types/worker";
-import { useForm } from "react-hook-form";
-import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
+'use client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { CarCreateData, CarCreateSchema } from 'lib/types/car'
+import { WorkerBasicInfo } from 'lib/types/worker'
+import { useForm } from 'react-hook-form'
+import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
 
 type CarEditFormProps = {
-  onSubmit: (data: CarCreateData) => void;
-  isSending: boolean;
-  owners: WorkerBasicInfo[];
-};
+  onSubmit: (data: CarCreateData) => void
+  isSending: boolean
+  owners: WorkerBasicInfo[]
+}
 
 export default function CarCreateForm({
   onSubmit,
@@ -26,13 +26,13 @@ export default function CarCreateForm({
     defaultValues: {
       seats: 4,
     },
-  });
+  })
 
-  const ownerItems = owners.map(workerToSelectItem);
+  const ownerItems = owners.map(workerToSelectItem)
 
   const onOwnerSelected = (item: FilterSelectItem) => {
-    setValue("ownerId", item.id);
-  };
+    setValue('ownerId', item.id)
+  }
 
   return (
     <>
@@ -52,7 +52,7 @@ export default function CarCreateForm({
               className="form-control p-2 fs-5"
               type="text"
               placeholder="Model auta, značka"
-              {...register("name")}
+              {...register('name')}
             />
             {errors.name?.message && (
               <p className="text-danger">{errors.name.message as string}</p>
@@ -65,7 +65,7 @@ export default function CarCreateForm({
               className="form-control border p-2 fs-5"
               rows={3}
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
-              {...register("description")}
+              {...register('description')}
             />
             <label className="form-label fw-bold mt-4" htmlFor="seats">
               Počet sedadel
@@ -76,7 +76,7 @@ export default function CarCreateForm({
               type="number"
               placeholder="Počet sedadel"
               min="1"
-              {...register("seats", { valueAsNumber: true })}
+              {...register('seats', { valueAsNumber: true })}
             />
             {errors.seats?.message && (
               <p className="text-danger">{errors.seats.message as string}</p>
@@ -90,7 +90,7 @@ export default function CarCreateForm({
               items={ownerItems}
               onSelected={onOwnerSelected}
             />
-            <input type={"hidden"} {...register("ownerId")} />
+            <input type={'hidden'} {...register('ownerId')} />
             {errors.ownerId?.message && (
               <p className="text-danger">Vyberte majitele auta.</p>
             )}
@@ -104,7 +104,7 @@ export default function CarCreateForm({
               type="number"
               placeholder="Počáteční stav kilometrů"
               min="0"
-              {...register("odometerStart", { valueAsNumber: true })}
+              {...register('odometerStart', { valueAsNumber: true })}
             />
             {errors.odometerStart?.message && (
               <p className="text-danger">
@@ -121,9 +121,9 @@ export default function CarCreateForm({
                 Zpět
               </button>
               <input
-                type={"submit"}
+                type={'submit'}
                 className="btn btn-primary mt-4"
-                value={"Uložit"}
+                value={'Uložit'}
                 disabled={isSending}
               />
             </div>
@@ -131,7 +131,7 @@ export default function CarCreateForm({
         </div>
       </div>
     </>
-  );
+  )
 }
 
 function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
@@ -144,5 +144,5 @@ function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
         {worker.firstName} {worker.lastName}
       </div>
     ),
-  };
+  }
 }

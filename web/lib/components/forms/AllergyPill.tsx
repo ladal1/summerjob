@@ -1,13 +1,13 @@
-import { UseFormRegisterReturn } from "react-hook-form";
+import { UseFormRegisterReturn } from 'react-hook-form'
 
 export default function AllergyPill({
   allergyId,
   allergyName,
   register,
 }: {
-  allergyId: string;
-  allergyName: string;
-  register: () => UseFormRegisterReturn;
+  allergyId: string
+  allergyName: string
+  register: () => UseFormRegisterReturn
 }) {
   return (
     <div className="d-inline-block me-3">
@@ -25,5 +25,5 @@ export default function AllergyPill({
         {allergyName}
       </label>
     </div>
-  );
+  )
 }
