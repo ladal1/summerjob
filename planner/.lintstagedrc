@@ -1,6 +1,6 @@
 {
     "*.ts": [
-      "prettier --write",
+      "prettier --write --ignore-path .gitignore",
       "eslint --fix"
     ]
 }

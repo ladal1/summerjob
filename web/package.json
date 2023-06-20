@@ -13,6 +13,8 @@
     "create-session": "ts-node --skip-project scripts/create-session.ts",
     "create-admin": "ts-node --skip-project scripts/create-admin.ts",
     "test": "ts-mocha -p 'test/tsconfig.json' 'test/**/*.spec.ts'",
+    "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
+    "prettier:write": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prepare": "cd .. && husky install web/.husky"
   },
   "dependencies": {

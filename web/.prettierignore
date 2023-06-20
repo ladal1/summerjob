@@ -1,0 +1,4 @@
+.vscode
+.husky
+build
+node_modules
