@@ -4,6 +4,8 @@ import EditProposedJobForm from 'lib/components/jobs/EditProposedJobForm'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getProposedJobById } from 'lib/data/proposed-jobs'
 import { serializeProposedJob } from 'lib/types/proposed-job'
+import { serializeAreas } from '../../../../../lib/types/area'
+import { getAreas } from '../../../../../lib/data/areas'
 
 type PathProps = {
   params: {
@@ -17,7 +19,8 @@ export default async function EditProposedJobPage({ params }: PathProps) {
     return <ErrorPage404 message="Job nenalezen."></ErrorPage404>
   }
   const serialized = serializeProposedJob(job)
-
+  const areas = await getAreas()
+  const serializedAreas = serializeAreas(areas)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
   const { startDate, endDate } = summerJobEvent!
 
@@ -26,6 +29,7 @@ export default async function EditProposedJobPage({ params }: PathProps) {
       <EditBox>
         <EditProposedJobForm
           serializedJob={serialized}
+          serializedAreas={serializedAreas}
           eventStartDate={startDate.toJSON()}
           eventEndDate={endDate.toJSON()}
         />

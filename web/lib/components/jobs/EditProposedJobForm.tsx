@@ -20,9 +20,12 @@ import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { allergyMapping } from 'lib/data/allergyMapping'
 import { jobTypeMapping } from '../../data/jobTypeMapping'
 import { JobType } from '../../prisma/client'
+import { Area } from '../../prisma/zod'
+import { deserializeAreas } from '../../types/area'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
+  serializedAreas: Serialized
   eventStartDate: string
   eventEndDate: string
 }
@@ -32,10 +35,12 @@ type ProposedJobForm = z.input<typeof schema>
 
 export default function EditProposedJobForm({
   serializedJob,
+  serializedAreas,
   eventStartDate,
   eventEndDate,
 }: EditProposedJobProps) {
   const job = deserializeProposedJob(serializedJob)
+  const areas = deserializeAreas(serializedAreas)
   const { trigger, error, isMutating, reset } = useAPIProposedJobUpdate(job.id)
   const [saved, setSaved] = useState(false)
   const {
@@ -60,6 +65,7 @@ export default function EditProposedJobForm({
       hasShower: job.hasShower,
       availability: job.availability.map(day => day.toJSON()),
       jobType: job.jobType,
+      areaId: job.areaId,
     },
   })
 
@@ -71,6 +77,11 @@ export default function EditProposedJobForm({
   const selectJobType = (item: FilterSelectItem) => {
     setValue('jobType', item.id as JobType)
   }
+
+  const selectArea = (item: FilterSelectItem) => {
+    setValue('areaId', item.id as string)
+  }
+
   const onSubmit = (data: ProposedJobForm) => {
     trigger(data, {
       onSuccess: () => {
@@ -121,6 +132,15 @@ export default function EditProposedJobForm({
               rows={3}
               {...register('privateDescription')}
             ></textarea>
+            <label className="form-label fw-bold mt-4" htmlFor="area">
+              Oblast jobu
+            </label>
+            <input type={'hidden'} {...register('areaId')} />
+            <FilterSelect
+              items={areas.map(areaToSelectItem)}
+              placeholder={job.area.name}
+              onSelected={selectArea}
+            />
             <label className="form-label fw-bold mt-4" htmlFor="address">
               Adresa
             </label>
@@ -270,6 +290,15 @@ export default function EditProposedJobForm({
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   )
+}
+
+function areaToSelectItem(area: Area): FilterSelectItem {
+  return {
+    id: area.id,
+    searchable: `${area.name}`,
+    name: area.name,
+    item: <span>{area.name}</span>,
+  }
 }
 
 function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
