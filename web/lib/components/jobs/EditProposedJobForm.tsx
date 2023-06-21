@@ -22,7 +22,7 @@ import { jobTypeMapping } from '../../data/jobTypeMapping'
 import { JobType } from '../../prisma/client'
 
 interface EditProposedJobProps {
-  serializedJob: Serialized<ProposedJobComplete>
+  serializedJob: Serialized
   eventStartDate: string
   eventEndDate: string
 }

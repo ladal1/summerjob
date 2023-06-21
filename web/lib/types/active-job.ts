@@ -59,15 +59,13 @@ export type ActiveJobCreateMultipleData = z.infer<
   typeof ActiveJobCreateMultipleSchema
 >
 
-export function serializeActiveJob(
-  job: ActiveJobComplete
-): Serialized<ActiveJobComplete> {
+export function serializeActiveJob(job: ActiveJobComplete): Serialized {
   return {
     data: JSON.stringify(job),
   }
 }
 
-export function deserializeActiveJob(job: Serialized<ActiveJobComplete>) {
+export function deserializeActiveJob(job: Serialized) {
   const parsed = JSON.parse(job.data) as ActiveJobComplete
   parsed.plan.day = new Date(parsed.plan.day)
   return parsed

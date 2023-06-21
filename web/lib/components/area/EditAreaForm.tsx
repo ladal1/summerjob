@@ -15,7 +15,7 @@ import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { Area } from 'lib/prisma/zod'
 
 interface EditAreaProps {
-  sArea: Serialized<Area>
+  sArea: Serialized
 }
 
 export default function EditAreaForm({ sArea }: EditAreaProps) {

@@ -9,7 +9,7 @@ import { CarsFilters } from './CarsFilters'
 import { CarsTable } from './CarsTable'
 
 interface CarsClientPageProps {
-  initialData: Serialized<CarComplete[]>
+  initialData: Serialized
 }
 
 export default function CarsClientPage({ initialData }: CarsClientPageProps) {

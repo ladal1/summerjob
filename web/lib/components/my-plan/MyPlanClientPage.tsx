@@ -6,7 +6,7 @@ import MyPlanBrowser from './MyPlanBrowser'
 import MyPlanEmpty from './MyPlanEmpty'
 
 interface MyPlanProps {
-  sPlan: Serialized<MyPlan[]>
+  sPlan: Serialized
 }
 
 export default function MyPlanClientPage({ sPlan }: MyPlanProps) {

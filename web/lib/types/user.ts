@@ -29,24 +29,18 @@ export const UserUpdateSchema = z
 
 export type UserUpdateData = z.infer<typeof UserUpdateSchema>
 
-export function serializeUser(user: UserComplete): Serialized<UserComplete> {
+export function serializeUser(user: UserComplete): Serialized {
   return { data: JSON.stringify(user) }
 }
 
-export function deserializeUser(
-  serialized: Serialized<UserComplete>
-): UserComplete {
+export function deserializeUser(serialized: Serialized): UserComplete {
   return JSON.parse(serialized.data)
 }
 
-export function serializeUsers(
-  users: UserComplete[]
-): Serialized<UserComplete[]> {
+export function serializeUsers(users: UserComplete[]): Serialized {
   return { data: JSON.stringify(users) }
 }
 
-export function deserializeUsers(
-  serialized: Serialized<UserComplete[]>
-): UserComplete[] {
+export function deserializeUsers(serialized: Serialized): UserComplete[] {
   return JSON.parse(serialized.data)
 }

@@ -12,15 +12,13 @@ export const CarCompleteSchema = CarSchema.extend({
 
 export type CarComplete = z.infer<typeof CarCompleteSchema>
 
-export function serializeCars(cars: CarComplete[]): Serialized<CarComplete[]> {
+export function serializeCars(cars: CarComplete[]): Serialized {
   return {
     data: JSON.stringify(cars),
   }
 }
 
-export function deserializeCars(
-  cars: Serialized<CarComplete[]>
-): CarComplete[] {
+export function deserializeCars(cars: Serialized): CarComplete[] {
   return JSON.parse(cars.data)
 }
 

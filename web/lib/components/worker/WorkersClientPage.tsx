@@ -10,7 +10,7 @@ import { WorkersFilters } from './WorkersFilters'
 import WorkersTable from './WorkersTable'
 
 interface WorkersClientPageProps {
-  sWorkers: Serialized<WorkerComplete[]>
+  sWorkers: Serialized
 }
 
 export default function WorkersClientPage({

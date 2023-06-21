@@ -27,26 +27,22 @@ export const AreaCompleteSchema = AreaSchema.extend({
 
 export type AreaComplete = z.infer<typeof AreaCompleteSchema>
 
-export function serializeAreaComp(
-  area: AreaComplete
-): Serialized<AreaComplete> {
+export function serializeAreaComp(area: AreaComplete): Serialized {
   return {
     data: JSON.stringify(area),
   }
 }
 
-export function deserializeAreaComp(
-  data: Serialized<AreaComplete>
-): AreaComplete {
+export function deserializeAreaComp(data: Serialized): AreaComplete {
   return JSON.parse(data.data)
 }
 
-export function serializeAreas(areas: Area[]): Serialized<Area[]> {
+export function serializeAreas(areas: Area[]): Serialized {
   return {
     data: JSON.stringify(areas),
   }
 }
 
-export function deserializeAreas(data: Serialized<Area[]>): Area[] {
+export function deserializeAreas(data: Serialized): Area[] {
   return JSON.parse(data.data)
 }

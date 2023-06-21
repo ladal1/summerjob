@@ -10,7 +10,7 @@ import { UsersFilters, UsersFiltersPermission } from './UsersFilters'
 import UsersTable from './UsersTable'
 
 interface UsersClientPageProps {
-  sUsers: Serialized<UserComplete[]>
+  sUsers: Serialized
 }
 
 export default function UsersClientPage({ sUsers }: UsersClientPageProps) {

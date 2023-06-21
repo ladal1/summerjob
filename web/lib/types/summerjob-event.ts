@@ -55,14 +55,14 @@ export type SummerJobEventUpdateData = z.infer<
 
 export function serializeSummerJobEvent(
   event: SummerJobEventComplete
-): Serialized<SummerJobEventComplete> {
+): Serialized {
   return {
     data: JSON.stringify(event),
   }
 }
 
 export function deserializeSummerJobEvent(
-  event: Serialized<SummerJobEventComplete>
+  event: Serialized
 ): SummerJobEventComplete {
   const dEvent = JSON.parse(event.data) as SummerJobEventComplete
   dEvent.startDate = new Date(dEvent.startDate)
@@ -72,14 +72,14 @@ export function deserializeSummerJobEvent(
 
 export function serializeSummerJobEvents(
   events: SummerJobEventComplete[]
-): Serialized<SummerJobEventComplete[]> {
+): Serialized {
   return {
     data: JSON.stringify(events),
   }
 }
 
 export function deserializeSummerJobEvents(
-  event: Serialized<SummerJobEventComplete[]>
+  event: Serialized
 ): SummerJobEventComplete[] {
   const dEvents = JSON.parse(event.data) as SummerJobEventComplete[]
   for (const dEvent of dEvents) {

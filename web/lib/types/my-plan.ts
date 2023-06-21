@@ -47,25 +47,25 @@ export const MyPlanSchema = z.object({
 
 export type MyPlan = z.infer<typeof MyPlanSchema>
 
-export function serializeMyPlan(plan: MyPlan): Serialized<MyPlan> {
+export function serializeMyPlan(plan: MyPlan): Serialized {
   return {
     data: JSON.stringify(plan),
   }
 }
 
-export function deserializeMyPlan(serialized: Serialized<MyPlan>): MyPlan {
+export function deserializeMyPlan(serialized: Serialized): MyPlan {
   const myPlan = JSON.parse(serialized.data)
   myPlan.day = new Date(myPlan.day)
   return myPlan
 }
 
-export function serializeMyPlans(plans: MyPlan[]): Serialized<MyPlan[]> {
+export function serializeMyPlans(plans: MyPlan[]): Serialized {
   return {
     data: JSON.stringify(plans),
   }
 }
 
-export function deserializeMyPlans(serialized: Serialized<MyPlan[]>): MyPlan[] {
+export function deserializeMyPlans(serialized: Serialized): MyPlan[] {
   const myPlans = JSON.parse(serialized.data)
   for (const myPlan of myPlans) {
     myPlan.day = new Date(myPlan.day)

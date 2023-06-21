@@ -20,7 +20,7 @@ import { allergyMapping } from '../../data/allergyMapping'
 import { jobTypeMapping } from '../../data/jobTypeMapping'
 
 interface CreateProposedJobProps {
-  serializedAreas: Serialized<Area[]>
+  serializedAreas: Serialized
   eventStartDate: string
   eventEndDate: string
 }

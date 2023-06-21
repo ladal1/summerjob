@@ -35,15 +35,13 @@ export type FilteredLogs = {
   total: number
 }
 
-export function serializeLogs(logs: FilteredLogs): Serialized<FilteredLogs> {
+export function serializeLogs(logs: FilteredLogs): Serialized {
   return {
     data: JSON.stringify(logs),
   }
 }
 
-export function deserializeLogs(
-  serialized: Serialized<FilteredLogs>
-): FilteredLogs {
+export function deserializeLogs(serialized: Serialized): FilteredLogs {
   const data = JSON.parse(serialized.data) as FilteredLogs
   return deserializeLogsTime(data)
 }

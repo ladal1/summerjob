@@ -19,7 +19,7 @@ import SuccessProceedModal from '../modal/SuccessProceedModal'
 import RidesList from './RidesList'
 
 interface EditActiveJobProps {
-  serializedJob: Serialized<ActiveJobComplete>
+  serializedJob: Serialized
 }
 
 export default function EditActiveJobForm({

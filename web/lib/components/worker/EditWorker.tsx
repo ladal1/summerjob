@@ -25,7 +25,7 @@ const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
 
 interface EditWorkerProps {
-  serializedWorker: Serialized<WorkerComplete>
+  serializedWorker: Serialized
   eventStartDate: string
   eventEndDate: string
   isProfilePage: boolean

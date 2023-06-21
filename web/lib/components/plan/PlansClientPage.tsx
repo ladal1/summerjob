@@ -11,7 +11,7 @@ import { Modal, ModalSize } from '../modal/Modal'
 import NewPlanForm from './NewPlanForm'
 
 interface PlansClientPageProps {
-  initialData: Serialized<PlanWithJobs[]>
+  initialData: Serialized
   startDate: string
   endDate: string
 }

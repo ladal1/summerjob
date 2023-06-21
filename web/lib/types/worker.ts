@@ -69,29 +69,25 @@ export type WorkerUpdateData = z.infer<typeof WorkerUpdateSchema>
 
 export type WorkerBasicInfo = Pick<Worker, 'id' | 'firstName' | 'lastName'>
 
-export function serializeWorker(
-  data: WorkerComplete
-): Serialized<WorkerComplete> {
+export function serializeWorker(data: WorkerComplete): Serialized {
   return {
     data: JSON.stringify(data),
   }
 }
 
-export function deserializeWorker(data: Serialized<WorkerComplete>) {
+export function deserializeWorker(data: Serialized) {
   let worker = JSON.parse(data.data) as WorkerComplete
   worker = deserializeWorkerAvailability(worker)
   return worker
 }
 
-export function serializeWorkers(
-  data: WorkerComplete[]
-): Serialized<WorkerComplete[]> {
+export function serializeWorkers(data: WorkerComplete[]): Serialized {
   return {
     data: JSON.stringify(data),
   }
 }
 
-export function deserializeWorkers(data: Serialized<WorkerComplete[]>) {
+export function deserializeWorkers(data: Serialized) {
   let workers = JSON.parse(data.data) as WorkerComplete[]
   workers = workers.map(deserializeWorkerAvailability)
   return workers

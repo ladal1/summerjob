@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { Serialized } from 'lib/types/serialize'
 
 interface ProposedJobsClientPage {
-  initialData: Serialized<ProposedJobComplete[]>
+  initialData: Serialized
   startDate: string
   endDate: string
 }

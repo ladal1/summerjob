@@ -11,7 +11,7 @@ import DeleteEventButton from './DeleteEventButton'
 import SetEventActiveButton from './SetEventActiveButton'
 
 interface EventClientPageProps {
-  sEvent: Serialized<SummerJobEventComplete>
+  sEvent: Serialized
 }
 
 export default function EventClientPage({ sEvent }: EventClientPageProps) {

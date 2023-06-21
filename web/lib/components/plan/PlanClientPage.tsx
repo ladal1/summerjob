@@ -24,8 +24,8 @@ import Link from 'next/link'
 
 interface PlanClientPageProps {
   id: string
-  initialDataPlan: Serialized<PlanComplete>
-  initialDataJoblessWorkers: Serialized<WorkerComplete[]>
+  initialDataPlan: Serialized
+  initialDataJoblessWorkers: Serialized
 }
 
 export default function PlanClientPage({

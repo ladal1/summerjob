@@ -64,27 +64,21 @@ export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
 export type ProposedJobUpdateDataInput = z.input<typeof ProposedJobUpdateSchema>
 export type ProposedJobUpdateData = z.infer<typeof ProposedJobUpdateSchema>
 
-export function serializeProposedJobs(
-  jobs: ProposedJobComplete[]
-): Serialized<ProposedJobComplete[]> {
+export function serializeProposedJobs(jobs: ProposedJobComplete[]): Serialized {
   return { data: JSON.stringify(jobs) }
 }
 
-export function deserializeProposedJobs(
-  jobs: Serialized<ProposedJobComplete[]>
-) {
+export function deserializeProposedJobs(jobs: Serialized) {
   return JSON.parse(jobs.data) as ProposedJobComplete[]
 }
 
-export function serializeProposedJob(
-  job: ProposedJobComplete
-): Serialized<ProposedJobComplete> {
+export function serializeProposedJob(job: ProposedJobComplete): Serialized {
   return {
     data: JSON.stringify(job),
   }
 }
 
-export function deserializeProposedJob(job: Serialized<ProposedJobComplete>) {
+export function deserializeProposedJob(job: Serialized) {
   const parsed = JSON.parse(job.data) as ProposedJobComplete
   return deserializeProposedJobAvailability(parsed)
 }
