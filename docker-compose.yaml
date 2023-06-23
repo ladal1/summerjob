@@ -4,7 +4,7 @@ services:
   summerjob-web:
     container_name: summerjob-web
     hostname: summerjob-web
-    image: summerjob/web
+    image: summerjob-web
     restart: unless-stopped
     networks:
       - summerjob-network
@@ -48,7 +48,7 @@ services:
   summerjob-planner:
     container_name: summerjob-planner
     hostname: summerjob-planner
-    image: summerjob/planner
+    image: summerjob-planner
     restart: on-failure:5
     environment:
       - AMQP_URL=amqp://summerjob-amqp

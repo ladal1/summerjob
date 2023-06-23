@@ -31,7 +31,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ env.REGISTRY }}/summerjob/web
+          images: ${{ env.REGISTRY }}/summerjob-web
 
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
@@ -63,7 +63,7 @@ jobs:
           id: meta
           uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
           with:
-            images: ${{ env.REGISTRY }}/summerjob/planner
+            images: ${{ env.REGISTRY }}/summerjob-planner
 
         - name: Build and push Docker image
           uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
