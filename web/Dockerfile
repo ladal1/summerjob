@@ -43,6 +43,7 @@ RUN apt-get update -y && apt-get install -y openssl
 COPY --from=builder --chown=nextjs:nodejs /app/build/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/build/static ./build/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+RUN mkdir /web-storage && chmod 777 /web-storage
 
 USER nextjs
 
