@@ -27,7 +27,8 @@ docker cp summerjob-db:/$filename backup/$filename
 # Download new docker manifest
 echo "🔖 Downloading new docker compose manifest"
 mv docker-compose.yaml docker-compose.yaml.old
-curl https://raw.githubusercontent.com/ladal1/summerjob/main/docker-compose.yaml -O -s
+curl https://raw.githubusercontent.com/ladal1/summerjob/main/docker-compose.deploy.yaml -O -s
+mv docker-compose.deploy.yaml docker-compose.yaml
 
 # Download updated containers
 echo "🎉 Pulling containers"

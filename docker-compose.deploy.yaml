@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     networks:
       - summerjob-network
+      - webserver
       # - additional networks for reverse proxy or specify open ports below
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@summerjob-db:5432/${POSTGRES_DB}?schema=public
@@ -80,6 +81,8 @@ services:
 
 networks:
   summerjob-network:
+  webserver:
+    external: true
 
 volumes:
   postgres:
