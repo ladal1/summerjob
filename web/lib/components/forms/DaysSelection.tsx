@@ -16,6 +16,7 @@ export default function DaysSelection({
   return (
     <div
       className="btn-group"
+      style={{ flexWrap: 'wrap' }}
       role="group"
       aria-label="Select from available days"
     >
