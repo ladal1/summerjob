@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import FormWarning from '../forms/FormWarning'
 import { Allergy } from '../../prisma/client'
 import { allergyMapping } from 'lib/data/allergyMapping'
+import ImageUploader from '../forms/ImageUpload'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -69,6 +70,7 @@ export default function EditWorker({
   const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
     onSuccess: () => {
+      uploadFile()
       setSaved(true)
       router.refresh()
     },
@@ -86,6 +88,18 @@ export default function EditWorker({
     }
   }
 
+  const [file, setFile] = useState<File | null>(null)
+
+  const uploadFile = async () => {
+    const formData = new FormData()
+    if (!file) return
+
+    formData.append('image', file)
+    await fetch(`/api/workers/${worker.id}/image`, {
+      method: 'POST',
+      body: formData,
+    })
+  }
   return (
     <>
       <div className="row">
@@ -207,6 +221,7 @@ export default function EditWorker({
                 <i className="fas fa-dumbbell ms-2"></i>
               </label>
             </div>
+            <ImageUploader file={file} setFile={setFile} />
             <label className="form-label d-block fw-bold mt-4" htmlFor="car">
               Auta
             </label>

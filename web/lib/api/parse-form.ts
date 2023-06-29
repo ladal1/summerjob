@@ -9,7 +9,7 @@ export const parseForm = async (
   req: NextApiRequest
 ): Promise<{ fields: formidable.Fields; files: formidable.Files }> => {
   return await new Promise(async (resolve, reject) => {
-    const uploadDir = '../web-storage'
+    const uploadDir = process.env.UPLOAD_DIR || '/web-storage'
 
     try {
       await stat(uploadDir)
@@ -35,7 +35,7 @@ export const parseForm = async (
       },
       filter: part => {
         return (
-          part.name === 'photo' && (part.mimetype?.includes('image') || false)
+          part.name === 'image' && (part.mimetype?.includes('image') || false)
         )
       },
     })
