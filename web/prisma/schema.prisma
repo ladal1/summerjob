@@ -107,8 +107,8 @@ model ProposedJob {
   contact            String
   hasFood            Boolean     @default(false)
   hasShower          Boolean     @default(false)
-  area               Area        @relation(fields: [areaId], references: [id], onDelete: Cascade)
-  areaId             String
+  area               Area?       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId             String?
   activeJobs         ActiveJob[]
   allergens          Allergy[]
   availability       DateTime[]  @db.Date

@@ -93,7 +93,7 @@ export default function ProposedJobRow({
         </p>
         <p>
           <strong>Doprava do oblasti požadována: </strong>
-          {job.area.requiresCar ? 'Ano' : 'Ne'}
+          {job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}
         </p>
         <p>
           <strong>Alergeny: </strong>
@@ -162,7 +162,7 @@ function formatJobRow(
   now.setHours(now.getHours() - 6)
   return [
     job.name,
-    job.area.name,
+    job.area?.name,
     job.contact,
     job.address,
     `${job.activeJobs.length} / ${job.requiredDays}`,

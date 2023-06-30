@@ -136,7 +136,7 @@ function missingResponsible(job: ActiveJobNoPlan) {
 }
 
 function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
-  if (!job.proposedJob.area.requiresCar) {
+  if (!job.proposedJob.area?.requiresCar) {
     return false
   }
   const passengers = ridesForOtherJobs
@@ -160,7 +160,7 @@ function allergies(job: ActiveJobNoPlan) {
 }
 
 function adorations(job: ActiveJobNoPlan, day: Date) {
-  if (job.proposedJob.area.supportsAdoration) {
+  if (job.proposedJob.area?.supportsAdoration) {
     return false
   }
   for (const worker of job.workers) {

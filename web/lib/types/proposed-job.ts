@@ -7,13 +7,13 @@ import { Allergy, JobType } from '../prisma/client'
 useZodOpenApi
 
 export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
-  area: AreaSchema,
+  area: AreaSchema.nullable(),
 })
 
 export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>
 
 export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
-  area: AreaSchema,
+  area: AreaSchema.nullable(),
   activeJobs: z.array(ActiveJobSchema),
   availability: z.array(z.date()),
 })
@@ -22,7 +22,7 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
 export const ProposedJobCreateSchema = z
   .object({
-    areaId: z.string().min(1),
+    areaId: z.string().nullable(),
     allergens: z.array(z.nativeEnum(Allergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),

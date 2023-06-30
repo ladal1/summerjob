@@ -147,7 +147,7 @@ function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
   return (
     <>
       <div className="text-wrap">
-        {job.name} ({job.area.name})
+        {job.name} ({job.area?.name})
         {job.pinned && (
           <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
         )}
@@ -165,7 +165,7 @@ function jobToSelectItem(job: ProposedJobComplete): SelectItem {
     name: job.name,
     searchable: (
       job.name +
-      job.area.name +
+      job.area?.name +
       job.privateDescription +
       job.publicDescription
     ).toLocaleLowerCase(),

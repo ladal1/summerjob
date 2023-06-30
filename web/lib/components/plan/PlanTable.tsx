@@ -115,7 +115,7 @@ function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
     [b: string]: (job: ActiveJobNoPlan) => string | number
   } = {
     name: job => job.proposedJob.name,
-    area: job => job.proposedJob.area.name,
+    area: job => job.proposedJob.area?.name ?? -1,
     address: job => job.proposedJob.address,
     days: job => job.proposedJob.requiredDays,
     contact: job => job.proposedJob.contact,

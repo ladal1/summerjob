@@ -105,7 +105,7 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
     w => !localPassengerIds.includes(w.id) && !otherPassengerIds.includes(w.id)
   )
 
-  const explanationForWorkersWithoutRide = job.proposedJob.area.requiresCar
+  const explanationForWorkersWithoutRide = job.proposedJob.area?.requiresCar
     ? '- Chybí doprava!'
     : ''
 

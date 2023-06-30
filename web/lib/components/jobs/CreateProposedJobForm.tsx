@@ -43,11 +43,16 @@ export default function CreateProposedJobForm({
     defaultValues: {
       availability: [],
       allergens: [],
+      areaId: undefined,
+      jobType: JobType.OTHER,
     },
   })
 
   const onSubmit = (data: ProposedJobCreateData) => {
     trigger(data, {
+      onError: e => {
+        console.log(e)
+      },
       onSuccess: () => {
         setSaved(true)
       },
@@ -64,6 +69,15 @@ export default function CreateProposedJobForm({
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
+  )
+
+  const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
+    ([jobTypeKey, jobTypeToSelectName]) => ({
+      id: jobTypeKey,
+      name: jobTypeToSelectName,
+      searchable: jobTypeToSelectName,
+      item: <span> {jobTypeToSelectName} </span>,
+    })
   )
 
   return (
@@ -206,16 +220,12 @@ export default function CreateProposedJobForm({
               </label>
               <input type={'hidden'} {...register('jobType')} />
               <FilterSelect
-                items={Object.entries(jobTypeMapping).map(
-                  ([jobTypeKey, jobTypeToSelectName]) => ({
-                    id: jobTypeKey,
-                    name: jobTypeToSelectName,
-                    searchable: jobTypeToSelectName,
-                    item: <span> {jobTypeToSelectName} </span>,
-                  })
-                )}
+                items={jobTypeSelectItems}
                 placeholder="Vyberte typ práce"
                 onSelected={selectJobType}
+                defaultSelected={jobTypeSelectItems.find(
+                  item => item.id === JobType.OTHER
+                )}
               />
               {errors.jobType && (
                 <div className="text-danger">Vyberte typ práce</div>

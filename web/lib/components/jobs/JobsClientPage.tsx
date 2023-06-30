@@ -56,7 +56,7 @@ export default function ProposedJobsClientPage({
 
   function shouldShowJob(job: ProposedJobComplete) {
     const area =
-      selectedArea.id === areas[0].id || job.area.id === selectedArea.id
+      selectedArea.id === areas[0].id || job.area?.id === selectedArea.id
     const fulltext =
       fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false
     const day =
@@ -113,8 +113,11 @@ export default function ProposedJobsClientPage({
 
 function getAvailableAreas(jobs?: ProposedJobComplete[]) {
   const ALL_AREAS = { id: 'all', name: 'Vyberte oblast' }
+  const UNKNOWN_AREA = { id: 'unknown', name: 'Neznámá oblast' }
   const areas = filterUniqueById(
-    jobs?.map(job => ({ id: job.area.id, name: job.area.name })) || []
+    jobs?.map(job =>
+      job.area ? { id: job.area.id, name: job.area.name } : UNKNOWN_AREA
+    ) || []
   )
   areas.sort((a, b) => a.name.localeCompare(b.name))
   areas.unshift(ALL_AREAS)
@@ -138,7 +141,7 @@ function getFulltextData(jobs?: ProposedJobComplete[]) {
       job.id,
       (
         job.name +
-        job.area.name +
+        job.area?.name +
         job.address +
         job.contact +
         job.publicDescription +

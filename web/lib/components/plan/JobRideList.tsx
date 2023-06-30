@@ -14,6 +14,11 @@ export default function JobRideList({
   reloadPlan,
 }: JobRideListProps) {
   if (!job.rides || job.rides.length == 0) {
+    if (!job.proposedJob.area) {
+      return (
+        <div className="text-muted">Tato práce nemá přiřazenou oblast.</div>
+      )
+    }
     if (!job.proposedJob.area.requiresCar) {
       return <div className="text-muted">Tato oblast nevyžaduje dopravu.</div>
     }

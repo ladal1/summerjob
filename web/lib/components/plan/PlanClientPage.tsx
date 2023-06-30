@@ -147,11 +147,11 @@ export default function PlanClientPage({
       map.set(
         job.id,
         (
-          job.proposedJob.name +
-          job.proposedJob.area.name +
-          job.proposedJob.address +
-          job.proposedJob.contact +
-          workerNames
+          job.proposedJob.name + job.proposedJob.area?.name ??
+          'Nezadaná oblast' +
+            job.proposedJob.address +
+            job.proposedJob.contact +
+            workerNames
         ).toLocaleLowerCase()
       )
     })
@@ -174,7 +174,7 @@ export default function PlanClientPage({
     (job: ActiveJobNoPlan) => {
       const isInArea =
         selectedArea.id === areas[0].id ||
-        job.proposedJob.area.id === selectedArea.id
+        job.proposedJob.area?.id === selectedArea.id
       const text = searchableJobs.get(job.id)
       if (text) {
         return isInArea && text.includes(filter.toLowerCase())
@@ -372,9 +372,12 @@ export default function PlanClientPage({
 
 function getAvailableAreas(plan?: PlanComplete) {
   const ALL_AREAS = { id: 'all', name: 'Vyberte oblast' }
+  const UNKNOWN_AREA = { id: 'unknown', name: 'Neznámá oblast' }
   const jobs = plan?.jobs.flatMap(j => j.proposedJob)
   const areas = filterUniqueById(
-    jobs?.map(job => ({ id: job.area.id, name: job.area.name })) || []
+    jobs?.map(job =>
+      job.area ? { id: job.area.id, name: job.area.name } : UNKNOWN_AREA
+    ) || []
   )
   areas.sort((a, b) => a.name.localeCompare(b.name))
   areas.unshift(ALL_AREAS)

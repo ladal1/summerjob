@@ -151,7 +151,7 @@ function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
     [b: string]: (job: ProposedJobComplete) => string | number
   } = {
     name: job => job.name,
-    area: job => job.area.name,
+    area: job => job.area?.name ?? -1,
     address: job => job.address,
     daysPlanned: job => job.activeJobs.length,
     daysLeft: job => job.availability.length,

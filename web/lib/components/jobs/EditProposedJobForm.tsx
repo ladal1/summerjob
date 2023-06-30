@@ -138,7 +138,7 @@ export default function EditProposedJobForm({
             <input type={'hidden'} {...register('areaId')} />
             <FilterSelect
               items={areas.map(areaToSelectItem)}
-              placeholder={job.area.name}
+              placeholder={job.area?.name ?? 'Vyberte oblast'}
               onSelected={selectArea}
             />
             <label className="form-label fw-bold mt-4" htmlFor="address">

@@ -81,7 +81,8 @@ function JobInfo({
           </div>
           <div>
             <i className="fas fa-house me-1"></i>
-            {job.proposedJob.address}, {job.proposedJob.area.name}
+            {job.proposedJob.address},{' '}
+            {job.proposedJob.area?.name ?? 'Nezadaná oblast'}
           </div>
           <div>
             <i className="fas fa-phone me-1"></i>

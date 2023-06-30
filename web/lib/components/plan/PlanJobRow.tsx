@@ -156,7 +156,7 @@ export function PlanJobRow({
               <p>
                 <strong>Adorace v oblasti: </strong>
                 <span>
-                  {job.proposedJob.area.supportsAdoration ? 'Ano' : 'Ne'}
+                  {job.proposedJob.area?.supportsAdoration ? 'Ano' : 'Ne'}
                 </span>
               </p>
               <p>
@@ -304,7 +304,7 @@ function formatRowData(
     </span>,
     `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`,
     job.proposedJob.contact,
-    job.proposedJob.area.name,
+    job.proposedJob.area?.name,
     job.proposedJob.address,
     formatAmenities(job),
     <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">

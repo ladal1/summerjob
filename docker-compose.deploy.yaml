@@ -74,6 +74,8 @@ services:
     restart: unless-stopped
     networks:
       - summerjob-network
+    ports:
+      - 127.0.0.1:5672:5672
     healthcheck:
       test: rabbitmq-diagnostics check_port_connectivity
       interval: 15s

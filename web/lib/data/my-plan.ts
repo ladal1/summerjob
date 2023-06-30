@@ -63,7 +63,7 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
       contact: myJob.proposedJob.contact,
       allergens: myJob.proposedJob.allergens,
       location: {
-        name: myJob.proposedJob.area.name,
+        name: myJob.proposedJob.area?.name ?? 'Zatím neznáma',
         address: myJob.proposedJob.address,
       },
       hasFood: myJob.proposedJob.hasFood,
