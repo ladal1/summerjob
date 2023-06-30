@@ -165,6 +165,17 @@ export async function createPlan(date: Date): Promise<Plan> {
   return plan
 }
 
+export async function updatePlanById(
+  id: string,
+  newPlan: Partial<Plan>
+): Promise<Plan> {
+  const plan = await prisma.plan.update({
+    where: { id },
+    data: newPlan,
+  })
+  return plan
+}
+
 export async function deletePlan(id: string) {
   await prisma.plan.delete({
     where: { id },

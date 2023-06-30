@@ -8,7 +8,8 @@ import { PlanTable } from 'lib/components/plan/PlanTable'
 import {
   useAPIPlan,
   useAPIPlanDelete,
-  useAPIPlanGenerate, useAPIPlanPublish,
+  useAPIPlanGenerate,
+  useAPIPlanPublish,
 } from 'lib/fetcher/plan'
 import { useAPIWorkersWithoutJob } from 'lib/fetcher/worker'
 import { filterUniqueById, formatDateLong } from 'lib/helpers/helpers'
@@ -68,17 +69,6 @@ export default function PlanClientPage({
   const [showGenerateConfirmation, setShowGenerateConfirmation] =
     useState(false)
 
-  const {
-    trigger: triggerGenerate,
-    isMutating: isSendingGenerate,
-    error: errorGenerating,
-    reset: resetGenerateError,
-  } = useAPIPlanGenerate({
-    onSuccess: () => {
-      setShowGenerateConfirmation(true)
-    },
-  })
-
   const generatePlan = () => {
     triggerGenerate({ planId: planData!.id })
   }
@@ -95,7 +85,6 @@ export default function PlanClientPage({
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const {
     trigger: triggerDelete,
-    isMutating: isBeingDeleted,
     error: deleteError,
     reset: resetDeleteError,
   } = useAPIPlanDelete(planData!.id, {
@@ -116,6 +105,36 @@ export default function PlanClientPage({
   }
 
   //#endregion
+
+  //#region Publish plan
+  const {
+    trigger: triggerGenerate,
+    isMutating: isSendingGenerate,
+    error: errorGenerating,
+    reset: resetGenerateError,
+  } = useAPIPlanGenerate({
+    onSuccess: () => {
+      setShowGenerateConfirmation(true)
+    },
+  })
+
+  const {
+    trigger: triggerPublish,
+    error: publishError,
+    reset: resetPublishError,
+  } = useAPIPlanPublish(planData!.id, {})
+
+  const switchPublish = () => {
+    if (!planData) return
+    planData.published = !planData.published
+    triggerPublish({ published: planData.published })
+  }
+
+  const onPublishErrorMessageClose = () => {
+    resetPublishError()
+  }
+
+  //#endregion Publish plan
 
   //#region Filter and search jobs
 
@@ -167,22 +186,6 @@ export default function PlanClientPage({
 
   //#endregion
 
-  //
-  // const {
-  //   trigger: triggerDelete,
-  //   isMutating: isBeingDeleted,
-  //   error: deleteError,
-  //   reset: resetDeleteError,
-  // } = useAPIPlanPublish(planData!.id, {
-  // })
-  //
-  //
-  // const switchPublish = () => {
-  //   planData.published = !planData.published
-  //   const{} = useAPIPlanPublish()
-  // }
-
-
   if (error && !planData) {
     return <ErrorPage error={error} />
   }
@@ -215,12 +218,14 @@ export default function PlanClientPage({
               <span>Vygenerovat plán</span>
             </button>
             <button
-                className="btn btn-primary btn-with-icon"
-                type="button"
-                onClick={() => switchPublish()}
+              className="btn btn-primary btn-with-icon"
+              type="button"
+              onClick={switchPublish}
             >
               <i className="fas fa-briefcase"></i>
-              <span>(Od)zveřejnit job</span>
+              <span>
+                {!planData?.published ? 'Zveřejnit plán' : 'Odzveřejnit plán'}
+              </span>
             </button>
             <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
               <button className="btn btn-secondary btn-with-icon" type="button">
@@ -329,6 +334,12 @@ export default function PlanClientPage({
               <ErrorMessageModal
                 onClose={onErrorMessageClose}
                 mainMessage={'Nepovedlo se odstranit plán.'}
+              />
+            )}
+            {publishError && (
+              <ErrorMessageModal
+                onClose={onErrorMessageClose}
+                mainMessage={'Nepovedlo se (od)zveřejnit plán.'}
               />
             )}
             {showGenerateConfirmation && !errorGenerating && (
