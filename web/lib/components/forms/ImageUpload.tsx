@@ -1,24 +1,20 @@
-import { ChangeEvent, useState } from 'react'
+/* eslint-disable @next/next/no-img-element */
+import { ChangeEvent } from 'react'
 
 export default function ImageUploader({
-  file,
+  previewUrl,
+  setPreviewUrl,
   setFile,
 }: {
-  file: File | null
+  previewUrl: string | null
+  setPreviewUrl: (url: string | null) => void
   setFile: (file: File | null) => void
 }) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('File upload change')
     const fileInput = e.target
 
-    if (!fileInput.files) {
-      alert('No file was chosen')
-      return
-    }
-
     if (!fileInput.files || fileInput.files.length === 0) {
-      alert('Files list is empty')
+      setPreviewUrl(null)
       return
     }
 
@@ -27,6 +23,7 @@ export default function ImageUploader({
     /** File validation */
     if (!file.type.startsWith('image')) {
       alert('Please select a valid image')
+      setPreviewUrl(null)
       return
     }
 
@@ -43,18 +40,33 @@ export default function ImageUploader({
         style={{ display: 'inline-grid' }}
       >
         <strong>Fotografie</strong>
-        <svg
-          width="300px"
-          height="300px"
-          viewBox="0 0 64 64"
-          xmlns="http://www.w3.org/2000/svg"
-          strokeWidth="3"
-          stroke="#000000"
-          fill="none"
-        >
-          <circle cx="32" cy="18.14" r="11.14" />
-          <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
-        </svg>
+        {previewUrl ? (
+          <div className="mx-auto w-80">
+            <img
+              alt="file uploader preview"
+              style={{ objectFit: 'cover', fill: 'fixed' }}
+              src={previewUrl}
+              width={320}
+              height={320}
+              loading="eager"
+              key={Date.now()}
+            />
+          </div>
+        ) : (
+          <svg
+            width="300px"
+            height="300px"
+            viewBox="0 0 64 64"
+            xmlns="http://www.w3.org/2000/svg"
+            strokeWidth="3"
+            stroke="#000000"
+            fill="none"
+          >
+            <circle cx="32" cy="18.14" r="11.14" />
+            <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
+          </svg>
+        )}
+
         <input
           className="block w-0 h-0"
           name="file"

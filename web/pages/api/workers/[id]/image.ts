@@ -3,6 +3,8 @@ import { parseForm, FormidableError } from 'lib/api/parse-form'
 import prisma from 'lib/prisma/connection'
 import { createReadStream, statSync } from 'fs'
 import { Prisma } from 'lib/prisma/client'
+import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
+import { Permission } from 'lib/types/auth'
 
 const getHandler = async (
   req: NextApiRequest,
@@ -30,6 +32,7 @@ const getHandler = async (
   res.writeHead(200, {
     'Content-Type': `image/${worker?.photoPath?.split('.').pop()}`,
     'Content-Length': fileStat.size,
+    'Cache-Control': 'public, max-age=10, must-revalidate',
   })
   const readStream = createReadStream(worker.photoPath)
   readStream.pipe(res)
@@ -42,6 +45,17 @@ const postHandler = async (
     error: string | null
   }>
 ) => {
+  const session = await getSMJSessionAPI(req, res)
+  if (
+    !session ||
+    !session.user ||
+    !isAccessAllowed([Permission.WORKERS], session)
+  ) {
+    return res.status(401).json({
+      data: null,
+      error: 'Unauthorized',
+    })
+  }
   try {
     await prisma.worker.findUniqueOrThrow({
       where: {

@@ -89,6 +89,9 @@ export default function EditWorker({
   }
 
   const [file, setFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    worker.photoPath ? `/api/workers/${worker.id}/image` : null
+  )
 
   const uploadFile = async () => {
     const formData = new FormData()
@@ -221,7 +224,13 @@ export default function EditWorker({
                 <i className="fas fa-dumbbell ms-2"></i>
               </label>
             </div>
-            <ImageUploader file={file} setFile={setFile} />
+            {!isProfilePage && (
+              <ImageUploader
+                previewUrl={previewUrl}
+                setPreviewUrl={setPreviewUrl}
+                setFile={setFile}
+              />
+            )}
             <label className="form-label d-block fw-bold mt-4" htmlFor="car">
               Auta
             </label>

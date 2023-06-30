@@ -8,9 +8,14 @@ import { SimpleRow } from '../table/SimpleRow'
 interface WorkerRowProps {
   worker: WorkerComplete
   onUpdated: () => void
+  onHover: (url: string | null) => void
 }
 
-export default function WorkerRow({ worker, onUpdated }: WorkerRowProps) {
+export default function WorkerRow({
+  worker,
+  onUpdated,
+  onHover,
+}: WorkerRowProps) {
   const { trigger, isMutating, error, reset } = useAPIWorkerDelete(worker.id, {
     onSuccess: onUpdated,
   })
@@ -18,6 +23,8 @@ export default function WorkerRow({ worker, onUpdated }: WorkerRowProps) {
     <SimpleRow
       key={worker.id}
       data={formatWorkerRow(worker, trigger, isMutating, error, reset)}
+      onMouseEnter={() => onHover(`/api/workers/${worker.id}/image`)}
+      onMouseLeave={() => onHover(null)}
     />
   )
 }

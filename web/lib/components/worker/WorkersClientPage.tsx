@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { WorkersFilters } from './WorkersFilters'
 import WorkersTable from './WorkersTable'
+import Image from 'next/image'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
@@ -30,6 +31,7 @@ export default function WorkersClientPage({
     () => filterWorkers(filter, fulltextData, onlyStrong, onlyWithCar, data),
     [fulltextData, filter, onlyStrong, onlyWithCar, data]
   )
+  const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
 
   if (error && !data) {
     return <ErrorPage error={error} />
@@ -74,7 +76,11 @@ export default function WorkersClientPage({
           </div>
           <div className="row gx-3">
             <div className="col-sm-12 col-lg-10">
-              <WorkersTable workers={filteredData || []} onUpdated={mutate} />
+              <WorkersTable
+                workers={filteredData || []}
+                onUpdated={mutate}
+                onHover={setWorkerPhotoURL}
+              />
             </div>
             <div className="col-sm-12 col-lg-2">
               <div className="vstack smj-search-stack smj-shadow rounded-3">
@@ -86,6 +92,39 @@ export default function WorkersClientPage({
                     <span>{data?.length}</span>
                   </li>
                 </ul>
+              </div>
+              <div
+                className="smj-search-stack smj-shadow rounded-3"
+                style={{ width: '100%', maxWidth: '100%', padding: '10px' }}
+              >
+                <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
+                  Foto
+                </h5>
+                <hr />
+                {workerPhotoURL ? (
+                  <Image
+                    src={workerPhotoURL}
+                    alt="Pracant"
+                    style={{
+                      objectFit: 'cover',
+                      width: '100%',
+                      height: '100%',
+                    }}
+                    width={500}
+                    height={500}
+                  />
+                ) : (
+                  <svg
+                    viewBox="0 0 64 64"
+                    xmlns="http://www.w3.org/2000/svg"
+                    strokeWidth="3"
+                    stroke="#000000"
+                    fill="none"
+                  >
+                    <circle cx="32" cy="18.14" r="11.14" />
+                    <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
+                  </svg>
+                )}
               </div>
             </div>
           </div>

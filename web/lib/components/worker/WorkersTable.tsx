@@ -5,11 +5,13 @@ import WorkerRow from './WorkerRow'
 interface WorkersTableProps {
   workers: WorkerComplete[]
   onUpdated: () => void
+  onHover: (url: string | null) => void
 }
 
 export default function WorkersTable({
   workers,
   onUpdated,
+  onHover,
 }: WorkersTableProps) {
   return (
     <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
@@ -26,7 +28,12 @@ export default function WorkersTable({
             <MessageRow message="Žádní pracanti" colspan={_columns.length} />
           )}
           {workers.map(worker => (
-            <WorkerRow key={worker.id} worker={worker} onUpdated={onUpdated} />
+            <WorkerRow
+              key={worker.id}
+              worker={worker}
+              onUpdated={onUpdated}
+              onHover={onHover}
+            />
           ))}
         </tbody>
       </table>
