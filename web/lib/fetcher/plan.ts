@@ -35,6 +35,9 @@ export function useAPIPlan(id: string, options?: any) {
   }
   return properties
 }
+export function useAPIPlanPublish(id: string, options?: any) {
+  return useDataPartialUpdate(`/api/plans/${id}`, options)
+}
 
 export function useAPIPlanMoveWorker(id: string, options?: any) {
   return useDataPartialUpdate(`/api/plans/${id}`, options)

@@ -147,6 +147,7 @@ model Plan {
   jobs             ActiveJob[]
   summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
   summerJobEventId String
+  published        Boolean        @default(false)
 }
 
 model Area {

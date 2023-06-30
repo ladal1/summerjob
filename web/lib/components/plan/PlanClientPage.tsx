@@ -8,7 +8,7 @@ import { PlanTable } from 'lib/components/plan/PlanTable'
 import {
   useAPIPlan,
   useAPIPlanDelete,
-  useAPIPlanGenerate,
+  useAPIPlanGenerate, useAPIPlanPublish,
 } from 'lib/fetcher/plan'
 import { useAPIWorkersWithoutJob } from 'lib/fetcher/worker'
 import { filterUniqueById, formatDateLong } from 'lib/helpers/helpers'
@@ -167,6 +167,22 @@ export default function PlanClientPage({
 
   //#endregion
 
+  //
+  // const {
+  //   trigger: triggerDelete,
+  //   isMutating: isBeingDeleted,
+  //   error: deleteError,
+  //   reset: resetDeleteError,
+  // } = useAPIPlanPublish(planData!.id, {
+  // })
+  //
+  //
+  // const switchPublish = () => {
+  //   planData.published = !planData.published
+  //   const{} = useAPIPlanPublish()
+  // }
+
+
   if (error && !planData) {
     return <ErrorPage error={error} />
   }
@@ -197,6 +213,14 @@ export default function PlanClientPage({
             >
               <i className="fas fa-cog"></i>
               <span>Vygenerovat plán</span>
+            </button>
+            <button
+                className="btn btn-primary btn-with-icon"
+                type="button"
+                onClick={() => switchPublish()}
+            >
+              <i className="fas fa-briefcase"></i>
+              <span>(Od)zveřejnit job</span>
             </button>
             <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
               <button className="btn btn-secondary btn-with-icon" type="button">

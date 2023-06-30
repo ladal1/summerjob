@@ -13,7 +13,7 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
   const myJob = plan.jobs.find(job =>
     job.workers.map(worker => worker.id).includes(workerId)
   )
-  if (!myJob) {
+  if (!myJob || !plan.published) {
     return {
       day: plan.day,
     }
