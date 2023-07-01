@@ -212,18 +212,20 @@ export default function EditWorker({
             <label className="form-label d-block fw-bold mt-4">
               Další vlastnosti
             </label>
-            <div className="form-check align-self-center align-items-center d-flex gap-2 ms-2">
-              <input
-                type="checkbox"
-                className="fs-5 form-check-input"
-                id="strong"
-                {...register('strong')}
-              />
-              <label className="form-check-label" htmlFor="strong">
-                Silák
-                <i className="fas fa-dumbbell ms-2"></i>
-              </label>
-            </div>
+            {!isProfilePage && (
+              <div className="form-check align-self-center align-items-center d-flex gap-2 ms-2">
+                <input
+                  type="checkbox"
+                  className="fs-5 form-check-input"
+                  id="strong"
+                  {...register('strong')}
+                />
+                <label className="form-check-label" htmlFor="strong">
+                  Silák
+                  <i className="fas fa-dumbbell ms-2"></i>
+                </label>
+              </div>
+            )}
             {!isProfilePage && (
               <ImageUploader
                 previewUrl={previewUrl}
