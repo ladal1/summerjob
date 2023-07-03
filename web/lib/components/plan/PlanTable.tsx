@@ -94,6 +94,7 @@ export function PlanTable({
       {joblessWorkers && plan && (
         <PlanJoblessRow
           planId={plan.id}
+          planDay={plan.day}
           jobs={sortedJobs}
           joblessWorkers={joblessWorkers}
           numColumns={_columns.length}

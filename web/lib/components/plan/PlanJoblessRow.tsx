@@ -11,6 +11,7 @@ const NO_JOB = 'NO_JOB'
 
 interface PlanJoblessRowProps {
   planId: string
+  planDay: Date
   jobs: ActiveJobNoPlan[]
   joblessWorkers: WorkerComplete[]
   numColumns: number
@@ -23,6 +24,7 @@ interface PlanJoblessRowProps {
 
 export function PlanJoblessRow({
   planId,
+  planDay,
   jobs,
   joblessWorkers,
   numColumns,
@@ -114,7 +116,7 @@ export function PlanJoblessRow({
             <tbody>
               {joblessWorkers.map(worker => (
                 <SimpleRow
-                  data={formatWorkerData(worker, setWorkerToMove)}
+                  data={formatWorkerData(worker, planDay, setWorkerToMove)}
                   key={worker.id}
                   draggable={true}
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
@@ -138,6 +140,7 @@ export function PlanJoblessRow({
 
 function formatWorkerData(
   worker: WorkerComplete,
+  planDay: Date,
   requestMoveWorker: (worker: WorkerComplete) => void
 ) {
   const name = `${worker.firstName} ${worker.lastName}`
@@ -145,6 +148,8 @@ function formatWorkerData(
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')
+  if (worker.availability.adorationDays.includes(planDay))
+    abilities.push('Adoruje')
   const allergies = worker.allergies
 
   return [
