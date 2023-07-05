@@ -21,6 +21,7 @@ import ErrorPage404 from '../404/404'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface PlanClientPageProps {
@@ -170,6 +171,8 @@ export default function PlanClientPage({
 
   const [filter, setFilter] = useState('')
 
+  const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
+
   const shouldShowJob = useCallback(
     (job: ActiveJobNoPlan) => {
       const isInArea =
@@ -264,6 +267,7 @@ export default function PlanClientPage({
                     joblessWorkers={workersWithoutJob || []}
                     reloadJoblessWorkers={reloadJoblessWorkers}
                     reloadPlan={reloadPlan}
+                    onHover={setWorkerPhotoURL}
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">
@@ -302,6 +306,45 @@ export default function PlanClientPage({
                         </span>
                       </li>
                     </ul>
+                  </div>
+                  <div
+                    className="smj-search-stack smj-shadow rounded-3"
+                    style={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      padding: '10px',
+                      top: '20px',
+                      position: 'sticky',
+                    }}
+                  >
+                    <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
+                      Foto
+                    </h5>
+                    <hr />
+                    {workerPhotoURL ? (
+                      <Image
+                        src={workerPhotoURL}
+                        alt="Pracant"
+                        style={{
+                          objectFit: 'cover',
+                          width: '100%',
+                          height: '100%',
+                        }}
+                        width={500}
+                        height={500}
+                      />
+                    ) : (
+                      <svg
+                        viewBox="0 0 64 64"
+                        xmlns="http://www.w3.org/2000/svg"
+                        strokeWidth="3"
+                        stroke="#000000"
+                        fill="none"
+                      >
+                        <circle cx="32" cy="18.14" r="11.14" />
+                        <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
+                      </svg>
+                    )}
                   </div>
                 </div>
               </div>

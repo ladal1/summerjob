@@ -20,6 +20,7 @@ interface PlanJoblessRowProps {
     sourceId: string
   ) => (e: React.DragEvent<HTMLTableRowElement>) => void
   reloadPlan: () => void
+  onWorkerHover: (url: string | null) => void
 }
 
 export function PlanJoblessRow({
@@ -30,6 +31,7 @@ export function PlanJoblessRow({
   numColumns,
   onWorkerDragStart,
   reloadPlan,
+  onWorkerHover,
 }: PlanJoblessRowProps) {
   const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined)
   const [workerIds, setWorkerIds] = useState<string[]>([])
@@ -120,6 +122,12 @@ export function PlanJoblessRow({
                   key={worker.id}
                   draggable={true}
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
+                  onMouseEnter={() =>
+                    worker.photoPath
+                      ? onWorkerHover(`/api/workers/${worker.id}/image`)
+                      : onWorkerHover(null)
+                  }
+                  onMouseLeave={() => onWorkerHover(null)}
                 />
               ))}
             </tbody>

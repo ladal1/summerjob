@@ -28,6 +28,7 @@ interface PlanTableProps {
   joblessWorkers: WorkerComplete[]
   reloadJoblessWorkers: () => void
   reloadPlan: () => void
+  onHover: (url: string | null) => void
 }
 
 export function PlanTable({
@@ -36,6 +37,7 @@ export function PlanTable({
   joblessWorkers,
   reloadJoblessWorkers,
   reloadPlan,
+  onHover,
 }: PlanTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: 'name',
@@ -89,6 +91,7 @@ export function PlanTable({
             rides={rides}
             onWorkerDragStart={onWorkerDragStart}
             reloadPlan={reload}
+            onWorkerHover={onHover}
           />
         ))}
       {joblessWorkers && plan && (
@@ -100,6 +103,7 @@ export function PlanTable({
           numColumns={_columns.length}
           onWorkerDragStart={onWorkerDragStart}
           reloadPlan={reload}
+          onWorkerHover={onHover}
         />
       )}
     </SortableTable>

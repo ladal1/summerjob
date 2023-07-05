@@ -29,6 +29,7 @@ interface PlanJobRowProps {
     sourceId: string
   ) => (e: React.DragEvent<HTMLTableRowElement>) => void
   reloadPlan: () => void
+  onWorkerHover: (url: string | null) => void
 }
 
 export function PlanJobRow({
@@ -39,6 +40,7 @@ export function PlanJobRow({
   rides,
   onWorkerDragStart,
   reloadPlan,
+  onWorkerHover,
 }: PlanJobRowProps) {
   //#region Update job
   const {
@@ -220,6 +222,12 @@ export function PlanJobRow({
                         setWorkerToMove,
                         reloadPlan
                       )}
+                      onMouseEnter={() =>
+                        worker.photoPath
+                          ? onWorkerHover(`/api/workers/${worker.id}/image`)
+                          : onWorkerHover(null)
+                      }
+                      onMouseLeave={() => onWorkerHover(null)}
                       key={worker.id}
                       draggable={true}
                       onDragStart={onWorkerDragStart(worker, job.id)}
