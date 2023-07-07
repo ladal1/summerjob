@@ -100,6 +100,17 @@ export default function CreateWorker({
                 errors.lastName?.message ? 'Zadejte příjmení' : undefined
               }
             />
+            <label className="form-label fw-bold mt-4" htmlFor="seats">
+              Věk
+            </label>
+            <input
+              id="age"
+              className="form-control p-2 fs-5"
+              type="number"
+              placeholder="Věk"
+              min="1"
+              {...register('age', { valueAsNumber: true })}
+            />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>

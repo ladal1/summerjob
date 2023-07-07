@@ -57,6 +57,7 @@ export default function EditWorker({
       phone: worker.phone,
       strong: worker.isStrong,
       allergyIds: worker.allergies as Allergy[],
+      age: worker.age,
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
         adorationDays: worker.availability.adorationDays.map(day =>
@@ -137,6 +138,17 @@ export default function EditWorker({
               {...register('lastName')}
             />
             <FormWarning message={errors.lastName?.message} />
+            <label className="form-label fw-bold mt-4" htmlFor="seats">
+              Věk
+            </label>
+            <input
+              id="age"
+              className="form-control p-2 fs-5"
+              type="number"
+              placeholder="Věk"
+              min="1"
+              {...register('age', { valueAsNumber: true })}
+            />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>

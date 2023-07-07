@@ -236,6 +236,7 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      age: data.age,
       blocked: false,
       availability: {
         create: {
@@ -259,6 +260,7 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      age: data.age,
       availability: {
         create: {
           workDays: data.availability?.workDays ?? [],
@@ -319,6 +321,7 @@ export async function internal_updateWorker(
       phone: data.phone,
       isStrong: data.strong,
       ...allergyUpdate,
+      age: data.age,
       availability: {
         update: {
           where: {
