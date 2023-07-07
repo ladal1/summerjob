@@ -180,7 +180,15 @@ export default function PlanClientPage({
         job.proposedJob.area?.id === selectedArea.id
       const text = searchableJobs.get(job.id)
       if (text) {
-        return isInArea && text.includes(filter.toLowerCase())
+        return (
+          isInArea &&
+          (text.includes(filter.toLowerCase()) ||
+            job.workers.some(
+              w =>
+                w.firstName.toLowerCase().includes(filter.toLowerCase()) ||
+                w.lastName.toLowerCase().includes(filter.toLowerCase())
+            ))
+        )
       }
       return isInArea
     },
