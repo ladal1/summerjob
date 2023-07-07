@@ -54,6 +54,7 @@ model Worker {
   permissionsId  String               @unique
   note           String               @default("")
   photoPath      String?
+  age            Int?
 }
 
 model WorkerPermissions {
