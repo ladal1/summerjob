@@ -8,11 +8,11 @@ import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import DaysSelection from '../forms/DaysSelection'
-import { datesBetween } from 'lib/helpers/helpers'
+import { datesBetween, formatPhoneNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
-import FormWarning from '../forms/FormWarning'
 import { allergyMapping } from '../../data/allergyMapping'
+import { TextInput } from '../forms/input/TextInput'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -31,6 +31,7 @@ export default function CreateWorker({
     new Date(eventEndDate)
   )
   const {
+    setValue,
     register,
     handleSubmit,
     formState: { errors },
@@ -62,6 +63,15 @@ export default function CreateWorker({
     router.back()
   }
 
+  const [phoneNumber, setPhoneNumber] = useState('')
+
+  const handlePhoneChange = (e: { target: { value: string } }) => {
+    const formattedValue = formatPhoneNumber(e.target.value)
+    setPhoneNumber(formattedValue)
+    // Set phone to dirtyFields
+    setValue('phone', phoneNumber, { shouldDirty: true })
+  }
+
   return (
     <>
       <div className="row">
@@ -72,63 +82,44 @@ export default function CreateWorker({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Jméno
-            </label>
-            <input
-              id="name"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="firstName"
+              label="Jméno"
               type="text"
               placeholder="Jméno"
-              {...register('firstName')}
+              maxLength={50}
+              errors={errors}
+              register={register}
             />
-            <FormWarning
-              message={errors.firstName?.message ? 'Zadejte jméno' : undefined}
-            />
-            <label className="form-label fw-bold mt-4" htmlFor="surname">
-              Příjmení
-            </label>
-            <input
-              id="surname"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="lastName"
+              label="Příjmení"
               type="text"
               placeholder="Příjmení"
-              {...register('lastName')}
+              maxLength={50}
+              errors={errors}
+              register={register}
             />
-            <FormWarning
-              message={
-                errors.lastName?.message ? 'Zadejte příjmení' : undefined
-              }
-            />
-            <label className="form-label fw-bold mt-4" htmlFor="phone">
-              Telefonní číslo
-            </label>
-            <input
+            <TextInput
               id="phone"
-              className="form-control p-0 fs-5"
+              label="Telefonní číslo"
               type="tel"
-              maxLength={20}
-              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               placeholder="(+420) 123 456 789"
-              {...register('phone')}
+              maxLength={16}
+              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
+              value={phoneNumber}
+              onChange={handlePhoneChange}
+              errors={errors}
+              register={register}
             />
-            <FormWarning
-              message={
-                errors.phone?.message ? 'Zadejte telefonní číslo' : undefined
-              }
-            />
-            <label className="form-label fw-bold mt-4" htmlFor="email">
-              E-mail
-            </label>
-            <input
+            <TextInput
               id="email"
-              className="form-control p-0 fs-5"
+              label="Email"
               type="email"
               placeholder="uzivatel@example.cz"
-              {...register('email')}
-            />
-            <FormWarning
-              message={errors.email?.message ? 'Zadejte e-mail' : undefined}
+              maxLength={320}
+              errors={errors}
+              register={register}
             />
             <label
               className="form-label d-block fw-bold mt-4"

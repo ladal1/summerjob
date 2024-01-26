@@ -7,7 +7,7 @@ import {
   WorkerComplete,
   WorkerUpdateSchema,
 } from 'lib/types/worker'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import Link from 'next/link'
 import AllergyPill from '../forms/AllergyPill'
@@ -15,7 +15,7 @@ import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { Serialized } from 'lib/types/serialize'
 import DaysSelection from '../forms/DaysSelection'
-import { datesBetween, pick } from 'lib/helpers/helpers'
+import { datesBetween, formatPhoneNumber, pick } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import FormWarning from '../forms/FormWarning'
 import { Allergy } from '../../prisma/client'
@@ -45,6 +45,7 @@ export default function EditWorker({
   )
   const {
     formState: { dirtyFields },
+    setValue,
     register,
     handleSubmit,
     formState: { errors },
@@ -54,7 +55,6 @@ export default function EditWorker({
       firstName: worker.firstName,
       lastName: worker.lastName,
       email: worker.email,
-      phone: worker.phone,
       strong: worker.isStrong,
       allergyIds: worker.allergies as Allergy[],
       availability: {
@@ -65,7 +65,6 @@ export default function EditWorker({
       },
     },
   })
-
   const router = useRouter()
   const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
@@ -103,6 +102,22 @@ export default function EditWorker({
       body: formData,
     })
   }
+
+  const [phoneNumber, setPhoneNumber] = useState('')
+
+  // Format phone number in first load of page
+  useEffect(() => {
+    const initialPhoneNumber = formatPhoneNumber(worker.phone)
+    setPhoneNumber(initialPhoneNumber)
+  }, [])
+
+  const handlePhoneChange = (e: { target: { value: string } }) => {
+    const formattedValue = formatPhoneNumber(e.target.value)
+    setPhoneNumber(formattedValue)
+    // Set phone from dirtyFields
+    setValue('phone', phoneNumber, { shouldDirty: true })
+  }
+
   return (
     <>
       <div className="row">
@@ -145,9 +160,10 @@ export default function EditWorker({
               className="form-control p-0 fs-5"
               type="tel"
               maxLength={20}
-              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               placeholder="(+420) 123 456 789"
               {...register('phone')}
+              value={phoneNumber}
+              onChange={handlePhoneChange}
             />
             <FormWarning message={errors.phone?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="email">

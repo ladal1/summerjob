@@ -2,6 +2,8 @@ import { z } from 'zod'
 import type { Worker } from '../../lib/prisma/client'
 import { Serialized } from './serialize'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
+import { customErrorMessages } from 'lib/lang/error-messages'
+
 import {
   CarSchema,
   WorkerAvailabilitySchema,
@@ -22,7 +24,10 @@ export const WorkerCreateSchema = z
   .object({
     firstName: z.string().min(1),
     lastName: z.string().min(1),
-    email: z.string().min(1).email(),
+    email: z
+      .string()
+      .min(1, { message: customErrorMessages.emptyEmail })
+      .email({ message: customErrorMessages.invalidEmail }),
     phone: z.string().min(1),
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),

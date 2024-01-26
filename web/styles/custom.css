@@ -384,3 +384,14 @@ img.smj-nav-logo {
   color: #888;
   pointer-events: none;
 }
+
+.hover-text {
+  display: none;
+  background-color: #f9f9f9;
+  color: #333;
+  margin-left: 5px
+}
+
+.btn:hover .hover-text {
+  display: inline-block;
+}

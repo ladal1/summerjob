@@ -10,7 +10,7 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/my-plan',
+        destination: '/home',
         permanent: true,
       },
     ]

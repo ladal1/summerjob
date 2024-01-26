@@ -93,3 +93,19 @@ export function pick<
     keys.map(key => [key, obj[key as unknown as keyof T]])
   ) as { [key in K]: key extends keyof T ? T[key] : undefined }
 }
+
+export function formatPhoneNumber(value: string) {
+  // Remove any existing spaces and non-numeric characters
+  const phoneNumber = value.replace(/\D/g, '')
+  // Start with +
+  const startsWithPlus = value.startsWith('+')
+  // Limitation
+  const maxDigits = startsWithPlus ? 12 : 9
+  const limitedPhoneNumber = phoneNumber.slice(0, maxDigits)
+  // Add spaces after every third digit
+  const formattedPhoneNumber = limitedPhoneNumber.replace(
+    /(\d{3})(?=\d)/g,
+    '$1 '
+  )
+  return startsWithPlus ? `+${formattedPhoneNumber}` : formattedPhoneNumber
+}
