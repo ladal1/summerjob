@@ -7,7 +7,7 @@ import {
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 
-interface TextInputProps<FormData extends FieldValues>
+interface DateInputProps<FormData extends FieldValues>
   extends DetailedHTMLProps<
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
@@ -16,28 +16,27 @@ interface TextInputProps<FormData extends FieldValues>
   label: string
   register: UseFormRegister<FormData>
   errors: FieldErrors<FormData>
-  margin?: boolean
 }
 
-export const TextInput = <FormData extends FieldValues>({
+export const DateInput = <FormData extends FieldValues>({
   id,
   label,
   errors,
   register,
-  margin = true,
   ...rest
-}: TextInputProps<FormData>) => {
+}: DateInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
 
   return (
     <>
-      <label
-        className={'form-label fw-bold' + (margin ? ' mt-4' : '')}
-        htmlFor={id}
-      >
+      <label className="form-label fw-bold mt-4 d-block d-md-none" htmlFor={id}>
         {label}
       </label>
-      <input className="form-control p-0 fs-5" {...register(id)} {...rest} />
+      <input
+        className="form-control p-1 fs-5"
+        {...register(id, { valueAsDate: true })}
+        {...rest}
+      />
       <FormWarning message={error} />
     </>
   )

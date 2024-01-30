@@ -1,4 +1,5 @@
 'use client'
+
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -46,6 +47,7 @@ export default function EditWorker({
   const {
     formState: { dirtyFields },
     setValue,
+    getValues,
     register,
     handleSubmit,
     formState: { errors },
@@ -55,6 +57,7 @@ export default function EditWorker({
       firstName: worker.firstName,
       lastName: worker.lastName,
       email: worker.email,
+      phone: formatPhoneNumber(worker.phone),
       strong: worker.isStrong,
       allergyIds: worker.allergies as Allergy[],
       availability: {
@@ -103,12 +106,11 @@ export default function EditWorker({
     })
   }
 
-  const [phoneNumber, setPhoneNumber] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState(getValues('phone')!)
 
   // Format phone number in first load of page
   useEffect(() => {
-    const initialPhoneNumber = formatPhoneNumber(worker.phone)
-    setPhoneNumber(initialPhoneNumber)
+    setValue('phone', phoneNumber, { shouldDirty: true })
   }, [])
 
   const handlePhoneChange = (e: { target: { value: string } }) => {

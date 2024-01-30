@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Nástěnka',
+  title: 'Domovská stránka',
 }
 
 export const dynamic = 'force-dynamic'

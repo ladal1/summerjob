@@ -17,7 +17,7 @@ import { TextInput } from '../forms/input/TextInput'
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
 
-interface EditWorkerProps {
+interface CreateWorkerProps {
   eventStartDate: string
   eventEndDate: string
 }
@@ -25,11 +25,12 @@ interface EditWorkerProps {
 export default function CreateWorker({
   eventStartDate,
   eventEndDate,
-}: EditWorkerProps) {
+}: CreateWorkerProps) {
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
   )
+
   const {
     setValue,
     register,
@@ -47,7 +48,9 @@ export default function CreateWorker({
   })
 
   const router = useRouter()
+
   const [saved, setSaved] = useState(false)
+
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true)

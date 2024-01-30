@@ -20,7 +20,7 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
     <>
       <nav className="navbar navbar-light navbar-expand-md smj-gray pt-2 pb-2 mb-0">
         <div className="container-fluid">
-          <a className="navbar-brand d-flex align-items-center" href="/home">
+          <Link className="navbar-brand d-flex align-items-center" href="/home">
             <Image
               src={logoImage}
               className="smj-nav-logo"
@@ -28,7 +28,7 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
               quality={98}
               priority={true}
             />
-          </a>
+          </Link>
           <button
             data-bs-toggle="collapse"
             className="navbar-toggler"
