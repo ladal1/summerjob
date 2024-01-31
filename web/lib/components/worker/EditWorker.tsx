@@ -15,35 +15,30 @@ import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { Serialized } from 'lib/types/serialize'
-import DaysSelection from '../forms/DaysSelection'
 import { datesBetween, formatPhoneNumber, pick } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import FormWarning from '../forms/FormWarning'
 import { Allergy } from '../../prisma/client'
 import { allergyMapping } from 'lib/data/allergyMapping'
 import ImageUploader from '../forms/ImageUpload'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
 
 interface EditWorkerProps {
   serializedWorker: Serialized
-  eventStartDate: string
-  eventEndDate: string
+  allDates: DateBool[][]
   isProfilePage: boolean
 }
 
 export default function EditWorker({
   serializedWorker,
-  eventStartDate,
-  eventEndDate,
+  allDates,
   isProfilePage,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker)
-  const allDates = datesBetween(
-    new Date(eventStartDate),
-    new Date(eventEndDate)
-  )
+
   const {
     formState: { dirtyFields },
     setValue,
@@ -111,7 +106,7 @@ export default function EditWorker({
   // Format phone number in first load of page
   useEffect(() => {
     setValue('phone', phoneNumber, { shouldDirty: true })
-  }, [])
+  }, [phoneNumber, setValue])
 
   const handlePhoneChange = (e: { target: { value: string } }) => {
     const formattedValue = formatPhoneNumber(e.target.value)
@@ -183,32 +178,23 @@ export default function EditWorker({
                 ? 'Změnou e-mailu dojde k odhlášení z aplikace.'
                 : 'Změnou e-mailu dojde k odhlášení uživatele z aplikace.'}
             </p>
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability.workDays"
-            >
-              {isProfilePage
-                ? 'Můžu pracovat v následující dny'
-                : 'Může pracovat v následující dny'}
-            </label>
-            <DaysSelection
-              name="availability.workDays"
-              days={allDates}
-              register={() => register('availability.workDays')}
-            />
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability.adorationDays"
-            >
-              {isProfilePage
-                ? 'Chci adorovat v následující dny'
-                : 'Chce adorovat v následující dny'}
-            </label>
-            <DaysSelection
-              name="availability.adorationDays"
-              days={allDates}
-              register={() => register('availability.adorationDays')}
-            />
+
+            <div className="d-flex flex-row flex-wrap">
+              <div className="me-5">
+                <DateSelectionInput
+                  id="availability.workDays"
+                  label="Pracovní dostupnost"
+                  register={register}
+                  days={allDates}
+                />
+              </div>
+              <DateSelectionInput
+                id="availability.adorationDays"
+                label="Dny adorace"
+                register={register}
+                days={allDates}
+              />
+            </div>
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="allergy"

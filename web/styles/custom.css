@@ -274,19 +274,14 @@ img.smj-nav-logo {
 .btn-day-select {
   --bs-btn-color: #000000;
   --bs-btn-active-bg: #ffe9b8;
-  aspect-ratio: "1/1";
-  display: "flex";
-  align-items: "center";
-  justify-content: "center";
   width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .btn-day-select {
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.45rem;
   }
 }
-
 
 .btn-disabled {
   background-color: #adadad;
@@ -411,20 +406,3 @@ img.smj-nav-logo {
 .btn:hover .hover-text {
   display: inline-block;
 }
-
-.test-1 {
-  background: rgb(191, 245, 199);
-}
-
-.test-2 {
-  background: rgb(119, 174, 236);
-}
-
-.test-3 {
-  background: rgb(236, 119, 183);
-}
-
-.test-4 {
-  background: rgb(235, 255, 54);
-}
-

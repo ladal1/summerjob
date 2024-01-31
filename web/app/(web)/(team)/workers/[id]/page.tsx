@@ -1,4 +1,5 @@
 import ErrorPage404 from 'lib/components/404/404'
+import dateSelectionMaker from 'lib/components/date-picker/dateSelectionMaker'
 import EditBox from 'lib/components/forms/EditBox'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
@@ -20,14 +21,15 @@ export default async function EditWorkerPage({ params }: Params) {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
   const { startDate, endDate } = summerJobEvent!
 
+  const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
+
   return (
     <>
       <section className="mb-3">
         <EditBox>
           <EditWorker
             serializedWorker={serializedWorker}
-            eventStartDate={startDate.toJSON()}
-            eventEndDate={endDate.toJSON()}
+            allDates={allDates}
             isProfilePage={false}
           />
         </EditBox>

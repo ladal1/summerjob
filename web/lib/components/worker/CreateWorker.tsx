@@ -7,7 +7,7 @@ import { useState } from 'react'
 import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { datesBetween, formatPhoneNumber } from 'lib/helpers/helpers'
+import { formatPhoneNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import { allergyMapping } from '../../data/allergyMapping'
@@ -18,19 +18,10 @@ const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
 
 interface CreateWorkerProps {
-  eventStartDate: string
-  eventEndDate: string
+  allDates: DateBool[][]
 }
 
-export default function CreateWorker({
-  eventStartDate,
-  eventEndDate,
-}: CreateWorkerProps) {
-  const allDates = datesBetween(
-    new Date(eventStartDate),
-    new Date(eventEndDate)
-  )
-
+export default function CreateWorker({ allDates }: CreateWorkerProps) {
   const {
     setValue,
     register,
@@ -125,12 +116,14 @@ export default function CreateWorker({
               register={register}
             />
             <div className="d-flex flex-row flex-wrap">
-              <DateSelectionInput
-                id="availability.workDays"
-                label="Pracovní dostupnost"
-                register={register}
-                days={allDates}
-              />
+              <div className="me-5">
+                <DateSelectionInput
+                  id="availability.workDays"
+                  label="Pracovní dostupnost"
+                  register={register}
+                  days={allDates}
+                />
+              </div>
               <DateSelectionInput
                 id="availability.adorationDays"
                 label="Dny adorace"

@@ -10,7 +10,7 @@ interface DateSelectionInputProps<FormData extends FieldValues>
   id: Path<FormData>
   label: string
   register: UseFormRegister<FormData>
-  days: Date[]
+  days: DateBool[][]
 }
 
 export const DateSelectionInput = <FormData extends FieldValues>({
@@ -20,7 +20,7 @@ export const DateSelectionInput = <FormData extends FieldValues>({
   days,
 }: DateSelectionInputProps<FormData>) => {
   return (
-    <div className="d-flex flex-column m-0 me-5">
+    <div className="d-flex flex-column m-0">
       <label className="form-label d-block fw-bold mt-4" htmlFor={id}>
         {label}
       </label>

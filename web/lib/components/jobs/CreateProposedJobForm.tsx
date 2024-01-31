@@ -13,22 +13,20 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
 import AllergyPill from '../forms/AllergyPill'
-import DaysSelection from '../forms/DaysSelection'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { allergyMapping } from '../../data/allergyMapping'
 import { jobTypeMapping } from '../../data/jobTypeMapping'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
-  eventStartDate: string
-  eventEndDate: string
+  allDates: DateBool[][]
 }
 
 export default function CreateProposedJobForm({
   serializedAreas,
-  eventStartDate,
-  eventEndDate,
+  allDates,
 }: CreateProposedJobProps) {
   const areas = deserializeAreas(serializedAreas)
   const { trigger, error, isMutating, reset } = useAPIProposedJobCreate()
@@ -65,11 +63,6 @@ export default function CreateProposedJobForm({
   const selectJobType = (item: FilterSelectItem) => {
     setValue('jobType', item.id as JobType)
   }
-
-  const allDates = datesBetween(
-    new Date(eventStartDate),
-    new Date(eventEndDate)
-  )
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
     ([jobTypeKey, jobTypeToSelectName]) => ({
@@ -203,17 +196,14 @@ export default function CreateProposedJobForm({
               errors.strongWorkers) && (
               <div className="text-danger">Zadejte počty pracantů</div>
             )}
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability"
-            >
-              Dostupné v následující dny
-            </label>
-            <DaysSelection
-              name={'availability'}
-              days={allDates}
-              register={() => register('availability')}
-            />
+            <div className="d-flex flex-row">
+              <DateSelectionInput
+                id="availability"
+                label="Časová dostupnost"
+                register={register}
+                days={allDates}
+              />
+            </div>
             <div>
               <label className="form-label fw-bold mt-4" htmlFor="area">
                 Typ práce

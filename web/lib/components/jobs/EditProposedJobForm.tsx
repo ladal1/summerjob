@@ -14,7 +14,6 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
 import AllergyPill from '../forms/AllergyPill'
-import DaysSelection from '../forms/DaysSelection'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { allergyMapping } from 'lib/data/allergyMapping'
@@ -22,12 +21,12 @@ import { jobTypeMapping } from '../../data/jobTypeMapping'
 import { JobType } from '../../prisma/client'
 import { Area } from '../../prisma/zod'
 import { deserializeAreas } from '../../types/area'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
   serializedAreas: Serialized
-  eventStartDate: string
-  eventEndDate: string
+  allDates: DateBool[][]
 }
 
 const schema = ProposedJobUpdateSchema
@@ -36,8 +35,7 @@ type ProposedJobForm = z.input<typeof schema>
 export default function EditProposedJobForm({
   serializedJob,
   serializedAreas,
-  eventStartDate,
-  eventEndDate,
+  allDates,
 }: EditProposedJobProps) {
   const job = deserializeProposedJob(serializedJob)
   const areas = deserializeAreas(serializedAreas)
@@ -68,11 +66,6 @@ export default function EditProposedJobForm({
       areaId: job.areaId,
     },
   })
-
-  const allDates = datesBetween(
-    new Date(eventStartDate),
-    new Date(eventEndDate)
-  )
 
   const selectJobType = (item: FilterSelectItem) => {
     setValue('jobType', item.id as JobType)
@@ -194,17 +187,14 @@ export default function EditProposedJobForm({
                 {...register('strongWorkers', { valueAsNumber: true })}
               />
             </div>
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability"
-            >
-              Dostupné v následující dny
-            </label>
-            <DaysSelection
-              name="availability"
-              days={allDates}
-              register={() => register('availability')}
-            />
+            <div className="d-flex flex-row">
+              <DateSelectionInput
+                id="availability"
+                label="Časová dostupnost"
+                register={register}
+                days={allDates}
+              />
+            </div>
             <div>
               <label className="form-label fw-bold mt-4" htmlFor="area">
                 Typ práce
