@@ -20,11 +20,11 @@ export const DateSelectionInput = <FormData extends FieldValues>({
   days,
 }: DateSelectionInputProps<FormData>) => {
   return (
-    <>
+    <div className="d-flex flex-column m-0 me-5">
       <label className="form-label d-block fw-bold mt-4" htmlFor={id}>
         {label}
       </label>
       <DateSelection name={id} days={days} register={() => register(id)} />
-    </>
+    </div>
   )
 }

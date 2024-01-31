@@ -124,7 +124,7 @@ export default function CreateWorker({
               errors={errors}
               register={register}
             />
-            <div className="d-flex p-2 flex-row test-1">
+            <div className="d-flex flex-row flex-wrap">
               <DateSelectionInput
                 id="availability.workDays"
                 label="Pracovní dostupnost"

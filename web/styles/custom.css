@@ -274,6 +274,22 @@ img.smj-nav-logo {
 .btn-day-select {
   --bs-btn-color: #000000;
   --bs-btn-active-bg: #ffe9b8;
+  aspect-ratio: "1/1";
+  display: "flex";
+  align-items: "center";
+  justify-content: "center";
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .btn-day-select {
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+
+.btn-disabled {
+  background-color: #adadad;
 }
 
 .btn-check:checked + .btn-day-select {
@@ -407,3 +423,8 @@ img.smj-nav-logo {
 .test-3 {
   background: rgb(236, 119, 183);
 }
+
+.test-4 {
+  background: rgb(235, 255, 54);
+}
+

@@ -94,23 +94,21 @@ export default function DateSelection({
   }
 
   return (
-    <div className="d-flex p-2 flex-column test-1">
+    <div className="container p-0 m-0">
       <label className="form-label fw-normal fs-5">{labelSecondary}</label>
-      <div className="container test-2">
-        <div className="row">
-          {weekDays.map(day => (
-            <React.Fragment key={day}>
-              <div className="col">{day}</div>
-            </React.Fragment>
-          ))}
-        </div>
+      <div className="row gx-2">
+        {weekDays.map(day => (
+          <React.Fragment key={day}>
+            <div className="col">{day}</div>
+          </React.Fragment>
+        ))}
       </div>
       {daysFill.map(week => (
         <React.Fragment key={makeWeekKey(week)}>
-          <div className="row">
+          <div className="row gx-2">
             {week.map(day => (
               <React.Fragment key={day.date.toJSON()}>
-                <div className="col">
+                <div className="col gy-2">
                   <input
                     type="checkbox"
                     className="btn-check"
@@ -121,7 +119,9 @@ export default function DateSelection({
                     disabled={day.isDisabled}
                   />
                   <label
-                    className="btn btn-sm btn-day-select"
+                    className={`btn btn-day-select ${
+                      day.isDisabled ? 'smj-action-hidden' : ''
+                    }`}
                     htmlFor={`${name}-${day.date.toJSON()}`}
                   >
                     {day.date.getDate()}
