@@ -36,7 +36,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
   }, [date, sortedPlans])
   return (
     <>
-      <PageHeader title={formatDateLong(date, true)} isFluid={false}>
+      <PageHeader title={formatDateLong(date)} isFluid={false}>
         <div className="bg-white">
           <SimpleDatePicker initialDate={date} onDateChanged={onDateChanged} />
         </div>

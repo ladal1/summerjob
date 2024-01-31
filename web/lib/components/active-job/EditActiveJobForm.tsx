@@ -65,9 +65,7 @@ export default function EditActiveJobForm({
       <div className="row">
         <div className="col">
           <h3>{job.proposedJob.name}</h3>
-          <small className="text-muted">
-            {formatDateLong(job.plan.day, true)}
-          </small>
+          <small className="text-muted">{formatDateLong(job.plan.day)}</small>
         </div>
       </div>
       <div className="row">

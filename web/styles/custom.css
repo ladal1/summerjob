@@ -395,3 +395,15 @@ img.smj-nav-logo {
 .btn:hover .hover-text {
   display: inline-block;
 }
+
+.test-1 {
+  background: rgb(191, 245, 199);
+}
+
+.test-2 {
+  background: rgb(119, 174, 236);
+}
+
+.test-3 {
+  background: rgb(236, 119, 183);
+}

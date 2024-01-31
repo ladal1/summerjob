@@ -28,7 +28,7 @@ export default async function PrintPlanPage({ params }: PathProps) {
     <>
       <div className="print-a4">
         <div className="header">
-          <h1>{formatDateLong(plan.day, true)}</h1>
+          <h1>{formatDateLong(plan.day)}</h1>
           <Image
             src={logoImage}
             className="smj-logo"

@@ -2,12 +2,12 @@ export const capitalizeFirstLetter = (text: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-export const formatDateLong = (date: Date, capitalize: boolean) => {
+export const formatDateLong = (date: Date, capitalize = true) => {
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'Europe/Prague',
   }
   const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
   return capitalize ? capitalizeFirstLetter(formatted) : formatted
@@ -18,7 +18,7 @@ export const formatDateNumeric = (date: Date) => {
     month: 'numeric',
     day: 'numeric',
     year: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'Europe/Prague',
   }
   const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
   return formatted
@@ -29,9 +29,40 @@ export const formatDateShort = (date: Date) => {
     month: 'numeric',
     weekday: 'short',
     day: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'Europe/Prague',
   }
   return new Intl.DateTimeFormat('cs-CZ', options).format(date)
+}
+
+export const getMonthName = (date: Date, capitalize = true) => {
+  const options: Intl.DateTimeFormatOptions = {
+    month: 'long',
+    timeZone: 'Europe/Prague',
+  }
+  const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
+  return capitalize ? capitalizeFirstLetter(formatted) : formatted
+}
+
+export const getWeekdayName = (date: Date, capitalize = true) => {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    timeZone: 'Europe/Prague',
+  }
+  const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
+  return capitalize ? capitalizeFirstLetter(formatted) : formatted
+}
+
+export const getWeekdayNames = (capitalize = true) => {
+  const weekdayNames: string[] = []
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(2024, 0, 29) // Day starting with monday
+    date.setDate(date.getDate() + i)
+    const formatted = getWeekdayName(date, capitalize)
+    weekdayNames.push(formatted)
+  }
+
+  return weekdayNames
 }
 
 export function datesBetween(start: Date, end: Date) {

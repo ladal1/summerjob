@@ -87,9 +87,7 @@ export function JobsFilters({
               {days &&
                 days.map(day => (
                   <option value={day.id} key={day.id}>
-                    {day.id === 'all'
-                      ? 'Vyberte den'
-                      : formatDateLong(day.day, true)}
+                    {day.id === 'all' ? 'Vyberte den' : formatDateLong(day.day)}
                   </option>
                 ))}
             </select>

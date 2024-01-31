@@ -212,9 +212,7 @@ export default function PlanClientPage({
       {planData !== null && (
         <>
           <PageHeader
-            title={
-              planData ? formatDateLong(planData?.day, true) : 'Načítání...'
-            }
+            title={planData ? formatDateLong(planData?.day) : 'Načítání...'}
           >
             <button
               className="btn btn-primary btn-with-icon"

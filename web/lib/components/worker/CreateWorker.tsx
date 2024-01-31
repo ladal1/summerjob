@@ -7,12 +7,12 @@ import { useState } from 'react'
 import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import DaysSelection from '../forms/DaysSelection'
 import { datesBetween, formatPhoneNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import { allergyMapping } from '../../data/allergyMapping'
 import { TextInput } from '../forms/input/TextInput'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -124,28 +124,20 @@ export default function CreateWorker({
               errors={errors}
               register={register}
             />
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability.workDays"
-            >
-              Může pracovat v následující dny
-            </label>
-            <DaysSelection
-              name="availability.workDays"
-              days={allDates}
-              register={() => register('availability.workDays')}
-            />
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability.adorationDays"
-            >
-              Chce adorovat v následující dny
-            </label>
-            <DaysSelection
-              name="availability.adorationDays"
-              days={allDates}
-              register={() => register('availability.adorationDays')}
-            />
+            <div className="d-flex p-2 flex-row test-1">
+              <DateSelectionInput
+                id="availability.workDays"
+                label="Pracovní dostupnost"
+                register={register}
+                days={allDates}
+              />
+              <DateSelectionInput
+                id="availability.adorationDays"
+                label="Dny adorace"
+                register={register}
+                days={allDates}
+              />
+            </div>
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="allergy"
