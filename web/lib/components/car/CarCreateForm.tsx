@@ -3,9 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import { useForm } from 'react-hook-form'
-import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
 import { TextInput } from '../forms/input/TextInput'
 import { NoteInput } from '../forms/input/NoteInput'
+import { FilterSelectInput } from '../forms/input/FilterSelectInput'
+import { FilterSelectItem } from '../filter-select/FilterSelect'
 
 type CarEditFormProps = {
   onSubmit: (data: CarCreateData) => void
@@ -29,8 +30,6 @@ export default function CarCreateForm({
       seats: 4,
     },
   })
-
-  const ownerItems = owners.map(workerToSelectItem)
 
   const onOwnerSelected = (item: FilterSelectItem) => {
     setValue('ownerId', item.id)
@@ -72,20 +71,15 @@ export default function CarCreateForm({
               errors={errors}
               register={register}
             />
-
-            <label className="form-label fw-bold mt-4" htmlFor="owner">
-              Majitel
-            </label>
-            <FilterSelect
+            <FilterSelectInput
+              id="ownerId"
+              label="Majitel"
               placeholder="Vyberte majitele"
-              items={ownerItems}
-              onSelected={onOwnerSelected}
+              owners={owners}
+              onSelect={onOwnerSelected}
+              errors={errors}
+              register={() => register('ownerId')}
             />
-            <input type={'hidden'} {...register('ownerId')} />
-            {errors.ownerId?.message && (
-              <p className="text-danger">Vyberte majitele auta.</p>
-            )}
-
             <TextInput
               id="odometerStart"
               label="Počáteční stav kilometrů"
@@ -118,28 +112,3 @@ export default function CarCreateForm({
     </>
   )
 }
-
-function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
-  return {
-    id: worker.id,
-    name: `${worker.firstName} ${worker.lastName}`,
-    searchable: `${worker.firstName} ${worker.lastName}`,
-    item: (
-      <div>
-        {worker.firstName} {worker.lastName}
-      </div>
-    ),
-  }
-}
-
-/*
-<FilterSelect
-  id="ownerId"
-  label="Majitel"
-  placeholder="Vyberte majitele"
-  owners={owners}
-  setValue={setValue}
-  errors={errors}
-  register={() => register("ownerId")}
-/>
-*/

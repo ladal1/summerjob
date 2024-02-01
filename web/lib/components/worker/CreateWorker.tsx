@@ -14,6 +14,7 @@ import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
+import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -32,7 +33,6 @@ export default function CreateWorker({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -72,6 +72,20 @@ export default function CreateWorker({
     setValue('phone', phoneNumber, { shouldDirty: true })
   }
 
+  /* TODO: Finish AddCarModal or remove 
+  const {
+    setValue: setValueCar,
+    register: registerCar,
+    handleSubmit: handleSubmitCar,
+    formState: { errors: errorsCar },
+  } = useForm<CarCreateData>({
+    resolver: zodResolver(CarCreateSchema),
+    defaultValues: {
+      seats: 4,
+    },
+  })
+
+
   const firstName = watch('firstName')
   const lastName = watch('lastName')
 
@@ -84,6 +98,22 @@ export default function CreateWorker({
   const closeAddCarModal = () => {
     setAddCarModalOpen(false)
   }
+
+  <button
+    className="btn btn-light pt-2 pb-2 align-self-start"
+    onClick={openAddCarModal}
+  >
+    <i className="fas fa-plus me-2"></i>
+    Přidat auto
+  </button>
+  {isAddCarModalOpen && (
+    <AddCarModal 
+      onClose={closeAddCarModal} 
+      errors={errorsCar}
+      register={registerCar}
+    />
+  )}
+  */
 
   return (
     <>
@@ -168,17 +198,9 @@ export default function CreateWorker({
                 >
                   Auta
                 </label>
-                <button
-                  className="btn btn-light pt-2 pb-2 align-self-start"
-                  disabled={!firstName || !lastName}
-                  onClick={openAddCarModal}
-                >
-                  <i className="fas fa-plus me-2"></i>
-                  Přidat auto
-                </button>
-                {isAddCarModalOpen && (
-                  <AddCarModal onClose={closeAddCarModal} />
-                )}
+                <p>
+                  Auta je možné přiřadit v záložce Auta po vytvořeni pracanta.
+                </p>
               </>
             )}
 

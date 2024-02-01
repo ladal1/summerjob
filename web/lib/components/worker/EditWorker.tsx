@@ -3,10 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import {
-  deserializeWorker,
-  WorkerUpdateSchema,
-} from 'lib/types/worker'
+import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
 import { useEffect, useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import Link from 'next/link'
@@ -100,7 +97,7 @@ export default function EditWorker({
     })
   }
 
-  const [phoneNumber, setPhoneNumber] = useState(getValues('phone')!)
+  const [phoneNumber, setPhoneNumber] = useState(getValues('phone') || '')
 
   // Format phone number in first load of page
   useEffect(() => {
