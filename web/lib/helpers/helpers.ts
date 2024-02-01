@@ -77,6 +77,10 @@ export function datesBetween(start: Date, end: Date) {
   return dates
 }
 
+export function isBetweenDates(start: Date, end: Date, date: Date) {
+  return date >= start && date <= end
+}
+
 export function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
   return Array.from(new Map(elements.map(item => [item.id, item])).values())
 }

@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   deserializeWorker,
-  WorkerComplete,
   WorkerUpdateSchema,
 } from 'lib/types/worker'
 import { useEffect, useState } from 'react'
@@ -15,7 +14,7 @@ import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { Serialized } from 'lib/types/serialize'
-import { datesBetween, formatPhoneNumber, pick } from 'lib/helpers/helpers'
+import { formatPhoneNumber, pick } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import FormWarning from '../forms/FormWarning'
 import { Allergy } from '../../prisma/client'
