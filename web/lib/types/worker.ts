@@ -22,13 +22,15 @@ export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 
 export const WorkerCreateSchema = z
   .object({
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
+    firstName: z
+      .string()
+      .min(1, { message: customErrorMessages.emptyFirstName }),
+    lastName: z.string().min(1, { message: customErrorMessages.emptyLastName }),
     email: z
       .string()
       .min(1, { message: customErrorMessages.emptyEmail })
       .email({ message: customErrorMessages.invalidEmail }),
-    phone: z.string().min(1),
+    phone: z.string().min(1, { message: customErrorMessages.emptyPhone }),
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),

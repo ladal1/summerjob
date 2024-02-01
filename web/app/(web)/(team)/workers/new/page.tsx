@@ -1,7 +1,9 @@
-import dateSelectionMaker from 'lib/components/date-picker/dateSelectionMaker'
+import { withPermissions } from 'lib/auth/auth'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditBox from 'lib/components/forms/EditBox'
 import CreateWorker from 'lib/components/worker/CreateWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
+import { Permission } from 'lib/types/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,11 +13,16 @@ export default async function CreateWorkerPage() {
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
 
+  const isCarAccessAllowed = await withPermissions([Permission.CARS])
+
   return (
     <>
       <section className="mb-3">
         <EditBox>
-          <CreateWorker allDates={allDates} />
+          <CreateWorker
+            allDates={allDates}
+            carAccess={isCarAccessAllowed.success}
+          />
         </EditBox>
       </section>
     </>

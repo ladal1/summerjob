@@ -6,7 +6,7 @@ import { getProposedJobById } from 'lib/data/proposed-jobs'
 import { serializeProposedJob } from 'lib/types/proposed-job'
 import { serializeAreas } from '../../../../../lib/types/area'
 import { getAreas } from '../../../../../lib/data/areas'
-import dateSelectionMaker from 'lib/components/date-picker/dateSelectionMaker'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 
 type PathProps = {
   params: {

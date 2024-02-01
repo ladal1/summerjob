@@ -4,29 +4,35 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useState } from 'react'
-import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { formatPhoneNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
-import { allergyMapping } from '../../data/allergyMapping'
 import { TextInput } from '../forms/input/TextInput'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { AlergyPillInput } from '../forms/input/AlergyPillInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import AddCarModal from '../modal/AddCarModal'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
 
 interface CreateWorkerProps {
   allDates: DateBool[][]
+  carAccess: boolean
 }
 
-export default function CreateWorker({ allDates }: CreateWorkerProps) {
+export default function CreateWorker({
+  allDates,
+  carAccess,
+}: CreateWorkerProps) {
   const {
     setValue,
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -64,6 +70,19 @@ export default function CreateWorker({ allDates }: CreateWorkerProps) {
     setPhoneNumber(formattedValue)
     // Set phone to dirtyFields
     setValue('phone', phoneNumber, { shouldDirty: true })
+  }
+
+  const firstName = watch('firstName')
+  const lastName = watch('lastName')
+
+  const [isAddCarModalOpen, setAddCarModalOpen] = useState(false)
+
+  const openAddCarModal = () => {
+    setAddCarModalOpen(true)
+  }
+
+  const closeAddCarModal = () => {
+    setAddCarModalOpen(false)
   }
 
   return (
@@ -131,44 +150,37 @@ export default function CreateWorker({ allDates }: CreateWorkerProps) {
                 days={allDates}
               />
             </div>
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="allergy"
-            >
-              Alergie
-            </label>
-            <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(
-                ([allergyKey, allergyName]) => (
-                  <AllergyPill
-                    key={allergyKey}
-                    allergyId={allergyKey}
-                    allergyName={allergyName}
-                    register={() => register('allergyIds')}
-                  />
-                )
-              )}
-            </div>
-            <label className="form-label d-block fw-bold mt-4">
-              Další vlastnosti
-            </label>
-            <div className="form-check align-self-center align-items-center d-flex gap-2 ms-2">
-              <input
-                type="checkbox"
-                className="fs-5 form-check-input"
-                id="strong"
-                {...register('strong')}
-              />
-              <label className="form-check-label" htmlFor="strong">
-                Silák
-                <i className="fas fa-dumbbell ms-2"></i>
-              </label>
-            </div>
+            <AlergyPillInput
+              id="allergyIds"
+              label="Alergie"
+              register={register}
+            />
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+            />
 
-            <label className="form-label d-block fw-bold mt-4" htmlFor="car">
-              Auta
-            </label>
-            <p>Auta je možné přiřadit v záložce Auta po vytvoření pracanta.</p>
+            {carAccess && (
+              <>
+                <label
+                  className="form-label d-block fw-bold mt-4"
+                  htmlFor="car"
+                >
+                  Auta
+                </label>
+                <button
+                  className="btn btn-light pt-2 pb-2 align-self-start"
+                  disabled={!firstName || !lastName}
+                  onClick={openAddCarModal}
+                >
+                  <i className="fas fa-plus me-2"></i>
+                  Přidat auto
+                </button>
+                {isAddCarModalOpen && (
+                  <AddCarModal onClose={closeAddCarModal} />
+                )}
+              </>
+            )}
 
             <div className="d-flex justify-content-between gap-3">
               <button

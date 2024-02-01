@@ -4,6 +4,8 @@ import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import { useForm } from 'react-hook-form'
 import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
+import { TextInput } from '../forms/input/TextInput'
+import { NoteInput } from '../forms/input/NoteInput'
 
 type CarEditFormProps = {
   onSubmit: (data: CarCreateData) => void
@@ -44,43 +46,32 @@ export default function CarCreateForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Název
-            </label>
-            <input
+            <TextInput
               id="name"
-              className="form-control p-2 fs-5"
+              label="Název"
               type="text"
               placeholder="Model auta, značka"
-              {...register('name')}
+              maxLength={50}
+              errors={errors}
+              register={register}
             />
-            {errors.name?.message && (
-              <p className="text-danger">{errors.name.message as string}</p>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="description">
-              Poznámka pro organizátory
-            </label>
-            <textarea
+            <NoteInput
               id="description"
-              className="form-control border p-2 fs-5"
-              rows={3}
+              label="Poznámka pro organizátory"
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
-              {...register('description')}
+              rows={3}
+              register={register}
             />
-            <label className="form-label fw-bold mt-4" htmlFor="seats">
-              Počet sedadel
-            </label>
-            <input
+            <TextInput
               id="seats"
-              className="form-control p-2 fs-5"
+              label="Počet sedadel"
+              isNumber={true}
               type="number"
               placeholder="Počet sedadel"
-              min="1"
-              {...register('seats', { valueAsNumber: true })}
+              min={1}
+              errors={errors}
+              register={register}
             />
-            {errors.seats?.message && (
-              <p className="text-danger">{errors.seats.message as string}</p>
-            )}
 
             <label className="form-label fw-bold mt-4" htmlFor="owner">
               Majitel
@@ -95,22 +86,16 @@ export default function CarCreateForm({
               <p className="text-danger">Vyberte majitele auta.</p>
             )}
 
-            <label className="form-label fw-bold mt-4" htmlFor="odometer-start">
-              Počáteční stav kilometrů
-            </label>
-            <input
-              id="odometer-start"
-              className="form-control p-2 fs-5"
+            <TextInput
+              id="odometerStart"
+              label="Počáteční stav kilometrů"
+              isNumber={true}
               type="number"
               placeholder="Počáteční stav kilometrů"
-              min="0"
-              {...register('odometerStart', { valueAsNumber: true })}
+              min={0}
+              errors={errors}
+              register={register}
             />
-            {errors.odometerStart?.message && (
-              <p className="text-danger">
-                {errors.odometerStart.message as string}
-              </p>
-            )}
 
             <div className="d-flex justify-content-between gap-3">
               <button
@@ -146,3 +131,15 @@ function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
     ),
   }
 }
+
+/*
+<FilterSelect
+  id="ownerId"
+  label="Majitel"
+  placeholder="Vyberte majitele"
+  owners={owners}
+  setValue={setValue}
+  errors={errors}
+  register={() => register("ownerId")}
+/>
+*/

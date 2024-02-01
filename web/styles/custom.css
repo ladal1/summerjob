@@ -266,7 +266,7 @@ img.smj-nav-logo {
   background-color: #fadaaa;
 }
 
-.btn-check:checked + .allergy-checkbox-label {
+.btn-light:checked + .allergy-checkbox-label {
   box-shadow: inset 3px 3px 1px 0px #d7c59d;
   background-color: #ffe9b8 !important;
 }
@@ -274,12 +274,13 @@ img.smj-nav-logo {
 .btn-day-select {
   --bs-btn-color: #000000;
   --bs-btn-active-bg: #ffe9b8;
-  width: 100%;
+  width: 50px;
 }
 
 @media (max-width: 480px) {
   .btn-day-select {
     padding: 0.25rem 0.45rem;
+    width: 30px;
   }
 }
 
@@ -294,6 +295,21 @@ img.smj-nav-logo {
 
 .checkbox-white:not(:checked) {
   background-color: white;
+}
+
+.smj-checkbox {
+  width: 25px;
+  height: 25px;
+}
+
+.smj-checkbox:focus {
+  border: #adadad;
+  box-shadow: 0 0 4px #fdc345;
+}
+
+.smj-checkbox:checked {
+  border-color: #fdc345;
+  background-color: #fdc345;
 }
 
 .text-small {

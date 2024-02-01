@@ -1,5 +1,5 @@
 import ErrorPage404 from 'lib/components/404/404'
-import dateSelectionMaker from 'lib/components/date-picker/dateSelectionMaker'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditBox from 'lib/components/forms/EditBox'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'

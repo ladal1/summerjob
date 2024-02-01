@@ -60,7 +60,7 @@ export default function DateSelection({
                     disabled={day.isDisabled}
                   />
                   <label
-                    className={`btn btn-day-select ${
+                    className={`btn btn-day-select btn-light ${
                       day.isDisabled ? 'smj-action-hidden' : ''
                     }`}
                     htmlFor={`${name}-${day.date.toJSON()}`}

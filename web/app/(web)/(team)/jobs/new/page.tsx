@@ -1,4 +1,4 @@
-import dateSelectionMaker from 'lib/components/date-picker/dateSelectionMaker'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditBox from 'lib/components/forms/EditBox'
 import CreateProposedJobForm from 'lib/components/jobs/CreateProposedJobForm'
 import { getAreas } from 'lib/data/areas'

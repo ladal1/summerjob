@@ -29,7 +29,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
                   className="btn-close"
                   onClick={() => onClose()}
                   aria-label="Close"
-                ></button>
+                />
               )}
             </div>
             <div className="modal-body text-wrap">{children}</div>

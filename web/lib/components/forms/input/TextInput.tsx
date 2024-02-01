@@ -17,6 +17,7 @@ interface TextInputProps<FormData extends FieldValues>
   register: UseFormRegister<FormData>
   errors: FieldErrors<FormData>
   margin?: boolean
+  isNumber?: boolean
 }
 
 export const TextInput = <FormData extends FieldValues>({
@@ -25,6 +26,7 @@ export const TextInput = <FormData extends FieldValues>({
   errors,
   register,
   margin = true,
+  isNumber = false,
   ...rest
 }: TextInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
@@ -37,7 +39,11 @@ export const TextInput = <FormData extends FieldValues>({
       >
         {label}
       </label>
-      <input className="form-control p-0 fs-5" {...register(id)} {...rest} />
+      <input
+        className="form-control p-0 fs-5"
+        {...register(id, { valueAsNumber: isNumber })}
+        {...rest}
+      />
       <FormWarning message={error} />
     </>
   )
