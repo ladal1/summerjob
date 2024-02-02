@@ -1,23 +1,16 @@
-import { FieldValues, Path, UseFormRegister } from 'react-hook-form'
-import { DetailedHTMLProps, InputHTMLAttributes } from 'react'
+import { UseFormRegisterReturn } from 'react-hook-form'
 import { allergyMapping } from 'lib/data/allergyMapping'
 import AllergyPill from '../AllergyPill'
 
-interface AlergyPillInputProps<FormData extends FieldValues>
-  extends DetailedHTMLProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
-  > {
-  id: Path<FormData>
+interface AlergyPillInputProps {
   label: string
-  register: UseFormRegister<FormData>
+  register: () => UseFormRegisterReturn
 }
 
-export const AlergyPillInput = <FormData extends FieldValues>({
-  id,
+export const AlergyPillInput = ({
   label,
   register,
-}: AlergyPillInputProps<FormData>) => {
+}: AlergyPillInputProps) => {
   return (
     <>
       <label className="form-label d-block fw-bold mt-4" htmlFor="allergy">
@@ -29,7 +22,7 @@ export const AlergyPillInput = <FormData extends FieldValues>({
             key={allergyKey}
             allergyId={allergyKey}
             allergyName={allergyName}
-            register={() => register(id)}
+            register={register}
           />
         ))}
       </div>

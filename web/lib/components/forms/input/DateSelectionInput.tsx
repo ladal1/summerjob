@@ -1,30 +1,25 @@
-import { FieldValues, Path, UseFormRegister } from 'react-hook-form'
+import { UseFormRegisterReturn } from 'react-hook-form'
 import DateSelection from '../DateSelection'
-import { DetailedHTMLProps, InputHTMLAttributes } from 'react'
 
-interface DateSelectionInputProps<FormData extends FieldValues>
-  extends DetailedHTMLProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
-  > {
-  id: Path<FormData>
+interface DateSelectionInputProps {
+  id: string
   label: string
-  register: UseFormRegister<FormData>
+  register: () => UseFormRegisterReturn
   days: DateBool[][]
 }
 
-export const DateSelectionInput = <FormData extends FieldValues>({
+export const DateSelectionInput = ({
   id,
   label,
   register,
   days,
-}: DateSelectionInputProps<FormData>) => {
+}: DateSelectionInputProps) => {
   return (
     <div className="d-flex flex-column m-0">
       <label className="form-label d-block fw-bold mt-4" htmlFor={id}>
         {label}
       </label>
-      <DateSelection name={id} days={days} register={() => register(id)} />
+      <DateSelection name={id} days={days} register={register} />
     </div>
   )
 }

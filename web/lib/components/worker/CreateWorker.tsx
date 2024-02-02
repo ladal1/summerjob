@@ -15,6 +15,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
+import FormWarning from '../forms/FormWarning'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -29,7 +30,6 @@ export default function CreateWorker({
   carAccess,
 }: CreateWorkerProps) {
   const {
-    setValue,
     register,
     handleSubmit,
     formState: { errors },
@@ -63,14 +63,120 @@ export default function CreateWorker({
     router.back()
   }
 
-  const [phoneNumber, setPhoneNumber] = useState('')
+  return (
+    <>
+      <div className="row">
+        <div className="col">
+          <h3>Přidat pracanta</h3>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <TextInput
+              id="firstName"
+              label="Jméno"
+              type="text"
+              placeholder="Jméno"
+              register={() => register("firstName")}
+              errors={errors}
+            />
+            <TextInput
+              id="lastName"
+              label="Příjmení"
+              type="text"
+              placeholder="Příjmení"
+              maxLength={50}
+              errors={errors}
+              register={() => register("lastName")}
+            />
+            <TextInput
+              id="phone"
+              label="Telefonní číslo"
+              type="tel"
+              placeholder="(+420) 123 456 789"
+              maxLength={16}
+              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
+              onChange={(e) => e.target.value = formatPhoneNumber(e.target.value)}
+              errors={errors}
+              register={() => register("phone")}
+            />
+            <TextInput
+              id="email"
+              label="Email"
+              type="email"
+              placeholder="uzivatel@example.cz"
+              maxLength={320}
+              errors={errors}
+              register={() => register("email")}
+            />
+            <div className="d-flex flex-row flex-wrap">
+              <div className="me-5">
+                <DateSelectionInput
+                  id="availability.workDays"
+                  label="Pracovní dostupnost"
+                  register={() => register("availability.workDays")}
+                  days={allDates}
+                />
+              </div>
+              <DateSelectionInput
+                id="availability.adorationDays"
+                label="Dny adorace"
+                register={() => register("availability.adorationDays")}
+                days={allDates}
+              />
+            </div>
+            <AlergyPillInput
+              label="Alergie"
+              register={() => register("allergyIds")}
+            />
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+            />
 
-  const handlePhoneChange = (e: { target: { value: string } }) => {
-    const formattedValue = formatPhoneNumber(e.target.value)
-    setPhoneNumber(formattedValue)
-    // Set phone to dirtyFields
-    setValue('phone', phoneNumber, { shouldDirty: true })
-  }
+            {carAccess && (
+              <>
+                <label
+                  className="form-label d-block fw-bold mt-4"
+                  htmlFor="car"
+                >
+                  Auta
+                </label>
+                <p>
+                  <i>
+                    Auta je možné přiřadit v záložce Auta po vytvořeni pracanta.
+                  </i>
+                </p>
+              </>
+            )}
+
+            <div className="d-flex justify-content-between gap-3">
+              <button
+                className="btn btn-secondary mt-4"
+                type="button"
+                onClick={() => router.back()}
+              >
+                Zpět
+              </button>
+              <input
+                type={'submit'}
+                className="btn btn-primary mt-4"
+                value={'Uložit'}
+                disabled={isMutating}
+              />
+            </div>
+            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
+            {error && <ErrorMessageModal onClose={reset} />}
+          </form>
+        </div>
+      </div>
+    </>
+  )
+}
+
+
+
 
   /* TODO: Finish AddCarModal or remove 
   const {
@@ -114,116 +220,3 @@ export default function CreateWorker({
     />
   )}
   */
-
-  return (
-    <>
-      <div className="row">
-        <div className="col">
-          <h3>Přidat pracanta</h3>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <TextInput
-              id="firstName"
-              label="Jméno"
-              type="text"
-              placeholder="Jméno"
-              maxLength={50}
-              errors={errors}
-              register={register}
-            />
-            <TextInput
-              id="lastName"
-              label="Příjmení"
-              type="text"
-              placeholder="Příjmení"
-              maxLength={50}
-              errors={errors}
-              register={register}
-            />
-            <TextInput
-              id="phone"
-              label="Telefonní číslo"
-              type="tel"
-              placeholder="(+420) 123 456 789"
-              maxLength={16}
-              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              errors={errors}
-              register={register}
-            />
-            <TextInput
-              id="email"
-              label="Email"
-              type="email"
-              placeholder="uzivatel@example.cz"
-              maxLength={320}
-              errors={errors}
-              register={register}
-            />
-            <div className="d-flex flex-row flex-wrap">
-              <div className="me-5">
-                <DateSelectionInput
-                  id="availability.workDays"
-                  label="Pracovní dostupnost"
-                  register={register}
-                  days={allDates}
-                />
-              </div>
-              <DateSelectionInput
-                id="availability.adorationDays"
-                label="Dny adorace"
-                register={register}
-                days={allDates}
-              />
-            </div>
-            <AlergyPillInput
-              id="allergyIds"
-              label="Alergie"
-              register={register}
-            />
-            <OtherAttributesInput
-              label="Další vlastnosti"
-              register={register}
-            />
-
-            {carAccess && (
-              <>
-                <label
-                  className="form-label d-block fw-bold mt-4"
-                  htmlFor="car"
-                >
-                  Auta
-                </label>
-                <p>
-                  Auta je možné přiřadit v záložce Auta po vytvořeni pracanta.
-                </p>
-              </>
-            )}
-
-            <div className="d-flex justify-content-between gap-3">
-              <button
-                className="btn btn-secondary mt-4"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Zpět
-              </button>
-              <input
-                type={'submit'}
-                className="btn btn-primary mt-4"
-                value={'Uložit'}
-                disabled={isMutating}
-              />
-            </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
-            {error && <ErrorMessageModal onClose={reset} />}
-          </form>
-        </div>
-      </div>
-    </>
-  )
-}

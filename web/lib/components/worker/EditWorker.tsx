@@ -18,6 +18,9 @@ import { Allergy } from '../../prisma/client'
 import { allergyMapping } from 'lib/data/allergyMapping'
 import ImageUploader from '../forms/ImageUpload'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { TextInput } from '../forms/input/TextInput'
+import { AlergyPillInput } from '../forms/input/AlergyPillInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -26,12 +29,14 @@ interface EditWorkerProps {
   serializedWorker: Serialized
   allDates: DateBool[][]
   isProfilePage: boolean
+  carAccess: boolean
 }
 
 export default function EditWorker({
   serializedWorker,
   allDates,
   isProfilePage,
+  carAccess,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker)
 
@@ -74,6 +79,11 @@ export default function EditWorker({
     trigger(modified)
   }
 
+  const handleAddCar = async () => {
+    await handleSubmit(onSubmit)();
+    router.push('/cars/new');
+  };
+
   const onConfirmationClosed = () => {
     setSaved(false)
     if (!isProfilePage) {
@@ -97,20 +107,6 @@ export default function EditWorker({
     })
   }
 
-  const [phoneNumber, setPhoneNumber] = useState(getValues('phone') || '')
-
-  // Format phone number in first load of page
-  useEffect(() => {
-    setValue('phone', phoneNumber, { shouldDirty: true })
-  }, [phoneNumber, setValue])
-
-  const handlePhoneChange = (e: { target: { value: string } }) => {
-    const formattedValue = formatPhoneNumber(e.target.value)
-    setPhoneNumber(formattedValue)
-    // Set phone from dirtyFields
-    setValue('phone', phoneNumber, { shouldDirty: true })
-  }
-
   return (
     <>
       <div className="row">
@@ -123,108 +119,73 @@ export default function EditWorker({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Jméno
-            </label>
-            <input
-              id="name"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="firstName"
+              label="Jméno"
               type="text"
               placeholder="Jméno"
-              {...register('firstName')}
+              register={() => register("firstName")}
+              errors={errors}
             />
-            <FormWarning message={errors.firstName?.message} />
-            <label className="form-label fw-bold mt-4" htmlFor="surname">
-              Příjmení
-            </label>
-            <input
-              id="surname"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="lastName"
+              label="Příjmení"
               type="text"
               placeholder="Příjmení"
-              {...register('lastName')}
+              maxLength={50}
+              errors={errors}
+              register={() => register("lastName")}
             />
-            <FormWarning message={errors.lastName?.message} />
-            <label className="form-label fw-bold mt-4" htmlFor="phone">
-              Telefonní číslo
-            </label>
-            <input
+            <TextInput
               id="phone"
-              className="form-control p-0 fs-5"
+              label="Telefonní číslo"
               type="tel"
-              maxLength={20}
               placeholder="(+420) 123 456 789"
-              {...register('phone')}
-              value={phoneNumber}
-              onChange={handlePhoneChange}
+              maxLength={16}
+              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
+              onChange={(e) => e.target.value = formatPhoneNumber(e.target.value)}
+              errors={errors}
+              register={() => register("phone")}
             />
-            <FormWarning message={errors.phone?.message} />
-            <label className="form-label fw-bold mt-4" htmlFor="email">
-              E-mail
-            </label>
-            <input
+            <TextInput
               id="email"
-              className="form-control p-0 fs-5"
+              label="Email"
               type="email"
-              {...register('email')}
+              placeholder="uzivatel@example.cz"
+              maxLength={320}
+              errors={errors}
+              register={() => register("email")}
             />
-            <FormWarning message={errors.email?.message} />
             <p className="text-muted mt-1">
               {isProfilePage
                 ? 'Změnou e-mailu dojde k odhlášení z aplikace.'
                 : 'Změnou e-mailu dojde k odhlášení uživatele z aplikace.'}
             </p>
-
             <div className="d-flex flex-row flex-wrap">
               <div className="me-5">
                 <DateSelectionInput
                   id="availability.workDays"
                   label="Pracovní dostupnost"
-                  register={register}
+                  register={() => register("availability.workDays")}
                   days={allDates}
                 />
               </div>
               <DateSelectionInput
                 id="availability.adorationDays"
                 label="Dny adorace"
-                register={register}
+                register={() => register("availability.adorationDays")}
                 days={allDates}
               />
             </div>
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="allergy"
-            >
-              Alergie
-            </label>
-            <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(
-                ([allergyKey, allergyName]) => (
-                  <AllergyPill
-                    key={allergyKey}
-                    allergyId={allergyKey}
-                    allergyName={allergyName}
-                    register={() => register('allergyIds')}
-                  />
-                )
-              )}
-            </div>
-            <label className="form-label d-block fw-bold mt-4">
-              Další vlastnosti
-            </label>
+            <AlergyPillInput
+              label="Alergie"
+              register={() => register("allergyIds")}
+            />
             {!isProfilePage && (
-              <div className="form-check align-self-center align-items-center d-flex gap-2 ms-2">
-                <input
-                  type="checkbox"
-                  className="fs-5 form-check-input"
-                  id="strong"
-                  {...register('strong')}
-                />
-                <label className="form-check-label" htmlFor="strong">
-                  Silák
-                  <i className="fas fa-dumbbell ms-2"></i>
-                </label>
-              </div>
+              <OtherAttributesInput
+                label="Další vlastnosti"
+                register={register}
+              />
             )}
             {!isProfilePage && (
               <ImageUploader
@@ -233,36 +194,75 @@ export default function EditWorker({
                 setFile={setFile}
               />
             )}
-            <label className="form-label d-block fw-bold mt-4" htmlFor="car">
-              Auta
-            </label>
-            {isProfilePage && worker.cars.length === 0 && (
-              <p>Pro přiřazení auta kontaktujte tým SummerJob.</p>
+            {(carAccess || isProfilePage) && (
+              <>
+                <label
+                  className="form-label d-block fw-bold mt-4"
+                  htmlFor="car"
+                >
+                  Auta
+                </label>
+              </>
             )}
-            {isProfilePage && worker.cars.length > 0 && (
-              <div className="list-group">
-                {worker.cars.map(car => (
-                  <div key={car.id} className="list-group-item ps-2 w-50">
-                    {car.name}
+
+            {carAccess ? (
+              <>
+                {worker.cars.length === 0 && <p>Žádná auta</p>}
+                {worker.cars.length > 0 && (
+                  <div className="list-group">
+                    {worker.cars.map(car => (
+                      <Link
+                        key={car.id}
+                        href={`/cars/${car.id}`}
+                        className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
+                      >
+                        {car.name}
+                        <i className="fas fa-angle-right ms-2"></i>
+                      </Link>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
+            ) : (
+              isProfilePage && (
+                <>
+                  {worker.cars.length > 0 && (
+                    <div className="list-group">
+                      {worker.cars.map(car => (
+                        <div key={car.id} className="list-group-item ps-2 w-50">
+                          {car.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )
             )}
-            {!isProfilePage && worker.cars.length === 0 && <p>Žádná auta</p>}
-            {!isProfilePage && worker.cars.length > 0 && (
-              <div className="list-group">
-                {worker.cars.map(car => (
-                  <Link
-                    key={car.id}
-                    href={`/cars/${car.id}`}
-                    className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
-                  >
-                    {car.name}
-                    <i className="fas fa-angle-right ms-2"></i>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <div className="mt-2">
+              {carAccess ? (
+                  <div className="d-flex align-items-baseline flex-wrap">
+                    <div className="me-3">
+                      <i>Auta je možné přiřadit v záložce Auta: </i> 
+                    </div>
+                    <button 
+                      className="btn btn-light pt-2 pb-2"
+                      onClick={handleAddCar}
+                    >
+                      <div className="d-flex align-items-center">
+                        <i className="fas fa-plus me-2"/>
+                        Přidat auto
+                      </div>
+                    </button>
+                  </div>
+              ) : (
+                isProfilePage && (
+                  <p>
+                    <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
+                  </p>
+                )
+              )}
+            </div>
+
             {!isProfilePage && (
               <div>
                 <label className="form-label fw-bold mt-4" htmlFor="note">

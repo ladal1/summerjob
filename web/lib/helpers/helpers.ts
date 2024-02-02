@@ -138,9 +138,6 @@ export function formatPhoneNumber(value: string) {
   const maxDigits = startsWithPlus ? 12 : 9
   const limitedPhoneNumber = phoneNumber.slice(0, maxDigits)
   // Add spaces after every third digit
-  const formattedPhoneNumber = limitedPhoneNumber.replace(
-    /(\d{3})(?=\d)/g,
-    '$1 '
-  )
-  return startsWithPlus ? `+${formattedPhoneNumber}` : formattedPhoneNumber
+  const formattedPhoneNumber = limitedPhoneNumber.replace(/(\d{3})(?=\d)/g, '$1 ')
+  return startsWithPlus ? `+${formattedPhoneNumber}` : formattedPhoneNumber || ""
 }

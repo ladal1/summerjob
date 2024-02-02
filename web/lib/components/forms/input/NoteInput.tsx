@@ -1,24 +1,23 @@
 import { type DetailedHTMLProps, type TextareaHTMLAttributes } from 'react'
-import { FieldValues, Path, UseFormRegister } from 'react-hook-form'
+import { UseFormRegisterReturn } from 'react-hook-form'
 
-interface NoteInputProps<FormData extends FieldValues>
-  extends DetailedHTMLProps<
+interface NoteInputProps extends DetailedHTMLProps<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
     HTMLTextAreaElement
   > {
-  id: Path<FormData>
+  id: string
   label: string
-  register: UseFormRegister<FormData>
+  register: () => UseFormRegisterReturn
   margin?: boolean
 }
 
-export const NoteInput = <FormData extends FieldValues>({
+export const NoteInput = ({
   id,
   label,
   register,
   margin = true,
   ...rest
-}: NoteInputProps<FormData>) => {
+}: NoteInputProps) => {
   return (
     <>
       <label
@@ -30,7 +29,7 @@ export const NoteInput = <FormData extends FieldValues>({
       <textarea
         id={id}
         className="form-control border p-2 fs-5"
-        {...register(id)}
+        {...register()}
         {...rest}
       />
     </>

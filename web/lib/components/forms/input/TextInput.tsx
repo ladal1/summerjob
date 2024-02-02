@@ -2,8 +2,7 @@ import { type DetailedHTMLProps, type InputHTMLAttributes } from 'react'
 import {
   FieldErrors,
   FieldValues,
-  Path,
-  UseFormRegister,
+  UseFormRegisterReturn,
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 
@@ -12,21 +11,19 @@ interface TextInputProps<FormData extends FieldValues>
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   > {
-  id: Path<FormData>
+  id: string
   label: string
-  register: UseFormRegister<FormData>
+  register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   margin?: boolean
-  isNumber?: boolean
 }
 
 export const TextInput = <FormData extends FieldValues>({
   id,
   label,
-  errors,
   register,
+  errors,
   margin = true,
-  isNumber = false,
   ...rest
 }: TextInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
@@ -41,7 +38,7 @@ export const TextInput = <FormData extends FieldValues>({
       </label>
       <input
         className="form-control p-0 fs-5"
-        {...register(id, { valueAsNumber: isNumber })}
+        {...register()}
         {...rest}
       />
       <FormWarning message={error} />

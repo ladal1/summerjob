@@ -1,11 +1,6 @@
 import { FieldValues, Path, UseFormRegister } from 'react-hook-form'
-import { DetailedHTMLProps, InputHTMLAttributes } from 'react'
 
-interface OtherAttributesInputProps<FormData extends FieldValues>
-  extends DetailedHTMLProps<
-    InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
-  > {
+interface OtherAttributesInputProps<FormData extends FieldValues> {
   label: string
   register: UseFormRegister<FormData>
 }

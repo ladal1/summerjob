@@ -2,8 +2,7 @@ import { type DetailedHTMLProps, type InputHTMLAttributes } from 'react'
 import {
   FieldErrors,
   FieldValues,
-  Path,
-  UseFormRegister,
+  UseFormRegisterReturn,
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 
@@ -12,9 +11,9 @@ interface DateInputProps<FormData extends FieldValues>
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
   > {
-  id: Path<FormData>
+  id: string
   label: string
-  register: UseFormRegister<FormData>
+  register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
 }
 
@@ -34,7 +33,7 @@ export const DateInput = <FormData extends FieldValues>({
       </label>
       <input
         className="form-control p-1 fs-5"
-        {...register(id, { valueAsDate: true })}
+        {...register()}
         {...rest}
       />
       <FormWarning message={error} />

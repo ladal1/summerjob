@@ -200,7 +200,7 @@ export default function CreateProposedJobForm({
               <DateSelectionInput
                 id="availability"
                 label="Časová dostupnost"
-                register={register}
+                register={() => register("availability")}
                 days={allDates}
               />
             </div>
