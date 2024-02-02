@@ -15,6 +15,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
+import { NoteInput } from '../forms/input/NoteInput'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -150,6 +151,13 @@ export default function CreateWorker({
                 </p>
               </>
             )}
+            <NoteInput
+              id="note"
+              label="Poznámka"
+              placeholder="Poznámka"
+              rows={1}
+              register={() => register("note")}
+            />
 
             <div className="d-flex justify-content-between gap-3">
               <button

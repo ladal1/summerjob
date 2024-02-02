@@ -16,6 +16,7 @@ useZodOpenApi
 export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
+  photoFile: z.any(),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
@@ -34,6 +35,7 @@ export const WorkerCreateSchema = z
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
+    photoFile: z.any().optional(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

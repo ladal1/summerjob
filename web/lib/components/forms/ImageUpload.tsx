@@ -1,15 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 import { ChangeEvent } from 'react'
+import { UseFormRegisterReturn } from 'react-hook-form'
 
-export default function ImageUploader({
-  previewUrl,
-  setPreviewUrl,
-  setFile,
-}: {
+interface ImageUploaderProps {
   previewUrl: string | null
   setPreviewUrl: (url: string | null) => void
-  setFile: (file: File | null) => void
-}) {
+  register: () => UseFormRegisterReturn
+}
+
+export const ImageUploader = ({
+  previewUrl,
+  setPreviewUrl,
+  register,
+}: ImageUploaderProps) => {
+  
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target
 
@@ -28,7 +32,7 @@ export default function ImageUploader({
     }
 
     /** Setting file state */
-    setFile(file) // we will use the file state, to send it later to the server
+     // we will use the file state, to send it later to the server
     setPreviewUrl(URL.createObjectURL(file)) // we will use this to show the preview of the image
   }
 
@@ -69,8 +73,8 @@ export default function ImageUploader({
 
         <input
           className="block w-0 h-0"
-          name="file"
           type="file"
+          {...register()}
           onChange={onFileUploadChange}
         />
       </label>

@@ -4,24 +4,20 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
-import Link from 'next/link'
-import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { Serialized } from 'lib/types/serialize'
 import { formatPhoneNumber, pick } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
-import FormWarning from '../forms/FormWarning'
 import { Allergy } from '../../prisma/client'
-import { allergyMapping } from 'lib/data/allergyMapping'
-import ImageUploader from '../forms/ImageUpload'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { NoteInput } from '../forms/input/NoteInput'
+import { ImageUploader } from '../forms/ImageUpload'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -44,6 +40,7 @@ export default function EditWorker({
   const {
     formState: { dirtyFields },
     register,
+    getValues,
     handleSubmit,
     formState: { errors },
   } = useForm<WorkerForm>({
@@ -54,6 +51,8 @@ export default function EditWorker({
       email: worker.email,
       phone: formatPhoneNumber(worker.phone),
       strong: worker.isStrong,
+      note: worker.note,
+      photoFile: worker.photoFile,
       allergyIds: worker.allergies as Allergy[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
@@ -63,6 +62,8 @@ export default function EditWorker({
       },
     },
   })
+
+  //#region Form
   const router = useRouter()
   const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
@@ -87,7 +88,9 @@ export default function EditWorker({
       router.back()
     }
   }
+  //#endregion
 
+  //#region Car
   const [isHandlingCar, setIsHandlingCar] = useState(false);
   const [carRoute, setCarRoute] = useState('new')
 
@@ -99,22 +102,24 @@ export default function EditWorker({
     setIsHandlingCar(true)
     setCarRoute(route)
   }
+  //#endregion
 
-  const [file, setFile] = useState<File | null>(null)
+  //#region File
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     worker.photoPath ? `/api/workers/${worker.id}/image` : null
   )
 
   const uploadFile = async () => {
+    console.log(getValues("photoFile"))
+    if (!getValues("photoFile")) return
     const formData = new FormData()
-    if (!file) return
-
-    formData.append('image', file)
+    formData.append('image', getValues("photoFile"))
     await fetch(`/api/workers/${worker.id}/image`, {
       method: 'POST',
       body: formData,
     })
   }
+  //#endregion
 
   return (
     <>
@@ -200,25 +205,25 @@ export default function EditWorker({
               <ImageUploader
                 previewUrl={previewUrl}
                 setPreviewUrl={setPreviewUrl}
-                setFile={setFile}
+                register={() => register("photoFile")}
               />
             )}
             {(carAccess || isProfilePage) && (
               <>
                 <label
-                  className="form-label d-block fw-bold mt-4"
+                  className="form-label d-block fw-bold"
                   htmlFor="car"
                 >
                   Auta
                 </label>
               </>
             )}
-
+          
             {carAccess ? (
               <>
                 {worker.cars.length === 0 && <p>Žádná auta</p>}
                 {worker.cars.length > 0 && (
-                  <div className="list-group">
+                  <div className="list-group mb-2">
                     {worker.cars.map(car => (
                       <input
                         key={car.id}
@@ -234,7 +239,7 @@ export default function EditWorker({
               </>
             ) : (
               isProfilePage && (
-                <>
+                <div className="mb-2">
                   {worker.cars.length > 0 && (
                     <div className="list-group">
                       {worker.cars.map(car => (
@@ -244,36 +249,34 @@ export default function EditWorker({
                       ))}
                     </div>
                   )}
-                </>
+                </div>
               )
             )}
-            
-            <div className="mt-2">
-              {carAccess ? (
-                  <div className="d-flex align-items-baseline flex-wrap">
-                    <div className="me-3">
-                      <i>Auta je možné přiřadit v záložce Auta: </i> 
-                    </div>
-                    <button
-                      type={'submit'}
-                      className="btn btn-light pt-2 pb-2"
-                      disabled={isMutating}
-                      onClick={handleAddCar}
-                    >
-                      <div className="d-flex align-items-center">
-                        <i className="fas fa-plus me-2" />
-                        Přidat auto
-                      </div>
-                    </button>
+          
+            {carAccess ? (
+                <div className="d-flex align-items-baseline flex-wrap">
+                  <div className="me-3">
+                    <i>Auta je možné přiřadit v záložce Auta: </i> 
                   </div>
-              ) : (
-                isProfilePage && (
-                  <p>
-                    <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
-                  </p>
-                )
-              )}
-            </div>
+                  <button
+                    type={'submit'}
+                    className="btn btn-light pt-2 pb-2"
+                    disabled={isMutating}
+                    onClick={handleAddCar}
+                  >
+                    <div className="d-flex align-items-center">
+                      <i className="fas fa-plus me-2" />
+                      Přidat auto
+                    </div>
+                  </button>
+                </div>
+            ) : (
+              isProfilePage && (
+                <p>
+                  <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
+                </p>
+              )
+            )}
 
             {!isProfilePage && (
               <NoteInput
