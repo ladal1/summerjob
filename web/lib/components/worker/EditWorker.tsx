@@ -21,6 +21,7 @@ import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { NoteInput } from '../forms/input/NoteInput'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -42,8 +43,6 @@ export default function EditWorker({
 
   const {
     formState: { dirtyFields },
-    setValue,
-    getValues,
     register,
     handleSubmit,
     formState: { errors },
@@ -79,16 +78,26 @@ export default function EditWorker({
     trigger(modified)
   }
 
-  const handleAddCar = async () => {
-    await handleSubmit(onSubmit)();
-    router.push('/cars/new');
-  };
-
   const onConfirmationClosed = () => {
     setSaved(false)
+    if (isHandlingCar) {
+      router.push(`/cars/${carRoute}`)
+    }
     if (!isProfilePage) {
       router.back()
     }
+  }
+
+  const [isHandlingCar, setIsHandlingCar] = useState(false);
+  const [carRoute, setCarRoute] = useState('new')
+
+  const handleAddCar = () => {
+    setIsHandlingCar(true)
+  }
+
+  const handleEditCar = (route: string) => {
+    setIsHandlingCar(true)
+    setCarRoute(route)
   }
 
   const [file, setFile] = useState<File | null>(null)
@@ -211,14 +220,14 @@ export default function EditWorker({
                 {worker.cars.length > 0 && (
                   <div className="list-group">
                     {worker.cars.map(car => (
-                      <Link
+                      <input
                         key={car.id}
-                        href={`/cars/${car.id}`}
+                        type={'submit'}
                         className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
-                      >
-                        {car.name}
-                        <i className="fas fa-angle-right ms-2"></i>
-                      </Link>
+                        value={car.name}
+                        disabled={isMutating}
+                        onClick={() => handleEditCar(car.id)}
+                      />
                     ))}
                   </div>
                 )}
@@ -238,18 +247,21 @@ export default function EditWorker({
                 </>
               )
             )}
+            
             <div className="mt-2">
               {carAccess ? (
                   <div className="d-flex align-items-baseline flex-wrap">
                     <div className="me-3">
                       <i>Auta je možné přiřadit v záložce Auta: </i> 
                     </div>
-                    <button 
+                    <button
+                      type={'submit'}
                       className="btn btn-light pt-2 pb-2"
+                      disabled={isMutating}
                       onClick={handleAddCar}
                     >
                       <div className="d-flex align-items-center">
-                        <i className="fas fa-plus me-2"/>
+                        <i className="fas fa-plus me-2" />
                         Přidat auto
                       </div>
                     </button>
@@ -264,28 +276,27 @@ export default function EditWorker({
             </div>
 
             {!isProfilePage && (
-              <div>
-                <label className="form-label fw-bold mt-4" htmlFor="note">
-                  Poznámka
-                </label>
-                <input
-                  id="note"
-                  className="form-control p-0 fs-5"
-                  type="text"
-                  placeholder="Poznámka"
-                  {...register('note')}
-                />
-              </div>
+              <NoteInput
+                id="note"
+                label="Poznámka"
+                placeholder="Poznámka"
+                rows={1}
+                register={() => register("note")}
+              />
             )}
 
-            <div className="d-flex justify-content-between gap-3">
-              <button
-                className="btn btn-secondary mt-4"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Zpět
-              </button>
+            <div className={`d-flex ${
+                isProfilePage ? 'justify-content-end' : 'justify-content-between gap-3'
+              }`}>
+              {!isProfilePage && (
+                <button
+                  className="btn btn-secondary mt-4"
+                  type="button"
+                  onClick={() => router.back()}
+                >
+                  Zpět
+                </button>
+              )}
               <input
                 type={'submit'}
                 className="btn btn-primary mt-4"
@@ -301,3 +312,9 @@ export default function EditWorker({
     </>
   )
 }
+
+/*
+
+            
+
+*/

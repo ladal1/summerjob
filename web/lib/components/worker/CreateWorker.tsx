@@ -15,7 +15,6 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
-import FormWarning from '../forms/FormWarning'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -51,6 +50,7 @@ export default function CreateWorker({
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true)
+      router.refresh()
     },
   })
 
@@ -174,8 +174,6 @@ export default function CreateWorker({
     </>
   )
 }
-
-
 
 
   /* TODO: Finish AddCarModal or remove 
