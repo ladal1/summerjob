@@ -1,7 +1,9 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { validateOrSendError } from 'lib/api/validator'
+import { registerImage } from 'lib/data/photo'
 import { createWorker, createWorkers, getWorkers } from 'lib/data/workers'
+import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
@@ -34,6 +36,9 @@ async function post(
   const singleWorker = WorkerCreateSchema.safeParse(req.body)
   if (singleWorker.success) {
     const worker = await createWorker(singleWorker.data)
+
+    await registerImage(worker.id, singleWorker.data.photoFile)
+
     await logger.apiRequest(
       APILogEvent.WORKER_CREATE,
       'workers',

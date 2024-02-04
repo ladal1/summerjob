@@ -8,6 +8,7 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { registerImage } from 'lib/data/photo'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -41,7 +42,10 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, req.body, session!)
-  await updateWorker(id, workerData)
+  const updatedWorker = await updateWorker(id, workerData)
+
+  await registerImage(updatedWorker?.id, workerData.photoFile)
+
   res.status(204).end()
 }
 
