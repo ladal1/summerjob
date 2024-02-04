@@ -5,6 +5,7 @@ import {
   UseFormRegisterReturn,
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'
+import { Label } from './Label'
 
 interface TextInputProps<FormData extends FieldValues>
   extends DetailedHTMLProps<
@@ -30,12 +31,11 @@ export const TextInput = <FormData extends FieldValues>({
 
   return (
     <>
-      <label
-        className={'form-label fw-bold' + (margin ? ' mt-4' : '')}
-        htmlFor={id}
-      >
-        {label}
-      </label>
+      <Label
+        id={id}
+        label={label}
+        margin={margin}
+      />
       <input
         className="form-control p-0 fs-5"
         {...register()}

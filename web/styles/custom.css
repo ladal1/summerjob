@@ -266,6 +266,15 @@ img.smj-nav-logo {
   background-color: #fadaaa;
 }
 
+.btn-light {
+  background-color: #f8f9fa !important;
+}
+
+.btn-light:hover {
+  background-color: #b1b1b1 !important;
+}
+
+
 .btn-light:checked + .allergy-checkbox-label {
   box-shadow: inset 3px 3px 1px 0px #d7c59d;
   background-color: #ffe9b8 !important;
@@ -421,4 +430,27 @@ img.smj-nav-logo {
 
 .btn:hover .hover-text {
   display: inline-block;
+}
+
+.photo-default {
+  width: 200px;
+  height: 200px;
+}
+
+.photo-uploaded {
+  width: 320px;
+  height: 320px;
+  object-fit: 'cover';
+  fill: 'fixed';
+}
+
+@media (max-width: 390px) {
+  .photo-default {
+    width: 100px;
+    height: 100px;
+  }
+  .photo-uploaded {
+    width: 220px;
+    height: 220px;
+  }
 }

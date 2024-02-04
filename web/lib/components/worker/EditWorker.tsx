@@ -18,6 +18,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { NoteInput } from '../forms/input/NoteInput'
 import { ImageUploader } from '../forms/ImageUpload'
+import { Label } from '../forms/input/Label'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -40,6 +41,7 @@ export default function EditWorker({
   const {
     formState: { dirtyFields },
     register,
+    setValue,
     getValues,
     handleSubmit,
     formState: { errors },
@@ -105,20 +107,22 @@ export default function EditWorker({
   //#endregion
 
   //#region File
-  const [previewUrl, setPreviewUrl] = useState<string | null>(
-    worker.photoPath ? `/api/workers/${worker.id}/image` : null
-  )
-
+  
   const uploadFile = async () => {
     console.log(getValues("photoFile"))
     if (!getValues("photoFile")) return
-    const formData = new FormData()
+    /*const formData = new FormData()
     formData.append('image', getValues("photoFile"))
     await fetch(`/api/workers/${worker.id}/image`, {
       method: 'POST',
       body: formData,
-    })
+    })*/
   }
+
+  const removePhoto = ( ) => {
+    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true})
+  }
+
   //#endregion
 
   return (
@@ -203,20 +207,18 @@ export default function EditWorker({
             )}
             {!isProfilePage && (
               <ImageUploader
-                previewUrl={previewUrl}
-                setPreviewUrl={setPreviewUrl}
-                register={() => register("photoFile")}
+                id="photoFile"
+                photoPath={worker.photoPath ? `/api/workers/${worker.id}/image` : null}
+                errors={errors}
+                register={register}
+                removePhoto={removePhoto}
               />
             )}
             {(carAccess || isProfilePage) && (
-              <>
-                <label
-                  className="form-label d-block fw-bold"
-                  htmlFor="car"
-                >
-                  Auta
-                </label>
-              </>
+              <Label
+                id="car"
+                label="Auta"
+              />
             )}
           
             {carAccess ? (

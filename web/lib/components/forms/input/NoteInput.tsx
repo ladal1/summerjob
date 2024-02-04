@@ -1,5 +1,6 @@
 import { type DetailedHTMLProps, type TextareaHTMLAttributes } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
+import { Label } from './Label'
 
 interface NoteInputProps extends DetailedHTMLProps<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
@@ -20,12 +21,11 @@ export const NoteInput = ({
 }: NoteInputProps) => {
   return (
     <>
-      <label
-        className={'form-label fw-bold' + (margin ? ' mt-4' : '')}
-        htmlFor={id}
-      >
-        {label}
-      </label>
+      <Label
+        id={id}
+        label={label}
+        margin={margin}
+      />
       <textarea
         id={id}
         className="form-control border p-2 fs-5"

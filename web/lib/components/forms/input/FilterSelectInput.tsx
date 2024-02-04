@@ -9,6 +9,7 @@ import {
 } from 'lib/components/filter-select/FilterSelect'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import FormWarning from '../FormWarning'
+import { Label } from './Label'
 
 interface FilterSelectInputProps<FormData extends FieldValues> {
   id: string
@@ -48,9 +49,10 @@ export const FilterSelectInput = <FormData extends FieldValues>({
 
   return (
     <div className="d-flex flex-column m-0">
-      <label className="form-label d-block fw-bold mt-4" htmlFor={id}>
-        {label}
-      </label>
+      <Label
+        id={id}
+        label={label}
+      />
       <FilterSelect
         placeholder={placeholder}
         items={ownerItems}

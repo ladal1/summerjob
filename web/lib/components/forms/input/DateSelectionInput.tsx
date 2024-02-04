@@ -1,5 +1,6 @@
 import { UseFormRegisterReturn } from 'react-hook-form'
 import DateSelection from '../DateSelection'
+import { Label } from './Label'
 
 interface DateSelectionInputProps {
   id: string
@@ -16,9 +17,10 @@ export const DateSelectionInput = ({
 }: DateSelectionInputProps) => {
   return (
     <div className="d-flex flex-column m-0">
-      <label className="form-label d-block fw-bold mt-4" htmlFor={id}>
-        {label}
-      </label>
+      <Label
+        id={id}
+        label={label}
+      />
       <DateSelection name={id} days={days} register={register} />
     </div>
   )

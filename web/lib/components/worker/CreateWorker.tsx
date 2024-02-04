@@ -16,6 +16,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { NoteInput } from '../forms/input/NoteInput'
+import { ImageUploader } from '../forms/ImageUpload'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -32,6 +33,7 @@ export default function CreateWorker({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
@@ -62,6 +64,10 @@ export default function CreateWorker({
   const onConfirmationClosed = () => {
     setSaved(false)
     router.back()
+  }
+
+  const removePhoto = ( ) => {
+    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true})
   }
 
   return (
@@ -134,6 +140,12 @@ export default function CreateWorker({
             <OtherAttributesInput
               label="Další vlastnosti"
               register={register}
+            />
+            <ImageUploader
+              id="photoFile"
+              errors={errors}
+              register={register}
+              removePhoto={removePhoto}
             />
 
             {carAccess && (

@@ -5,6 +5,7 @@ import {
   UseFormRegisterReturn,
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'
+import { Label } from './Label'
 
 interface DateInputProps<FormData extends FieldValues>
   extends DetailedHTMLProps<
@@ -28,9 +29,11 @@ export const DateInput = <FormData extends FieldValues>({
 
   return (
     <>
-      <label className="form-label fw-bold mt-4 d-block d-md-none" htmlFor={id}>
-        {label}
-      </label>
+      <Label
+        id={id}
+        label={label}
+        mdNone={true}
+      />
       <input
         className="form-control p-1 fs-5"
         {...register()}

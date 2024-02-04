@@ -35,7 +35,12 @@ export const WorkerCreateSchema = z
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
-    photoFile: z.any().optional(),
+    photoFile: z
+      .custom<FileList>()
+      .transform((file) => file.length > 0 && file.item(0))
+      .refine((file) => !file || (!!file && file.size <= 1024*1024*10), customErrorMessages.maxCapacityImage) // 10 mB = 1024*1024*10
+      .refine((file) => !file || (!!file && file.type?.startsWith("image")), customErrorMessages.unsuportedTypeImage) // any image
+      .optional(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
