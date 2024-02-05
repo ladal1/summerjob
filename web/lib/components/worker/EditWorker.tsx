@@ -54,7 +54,6 @@ export default function EditWorker({
       phone: formatPhoneNumber(worker.phone),
       strong: worker.isStrong,
       note: worker.note,
-      photoFile: worker.photoFile,
       allergyIds: worker.allergies as Allergy[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
@@ -76,8 +75,9 @@ export default function EditWorker({
     },
   })
 
-  const onSubmit = (data: WorkerForm) => {
-    const modified = pick(data, ...Object.keys(dirtyFields)) as WorkerForm
+  const onSubmit = (dataForm: WorkerForm) => {
+    const {photoFile, ...rest} = dataForm
+    const modified = pick(rest, ...Object.keys(dirtyFields)) as WorkerForm
     trigger(modified)
   }
 
@@ -109,17 +109,18 @@ export default function EditWorker({
   //#region File
   
   const uploadFile = async () => {
-    console.log(getValues("photoFile"))
-    if (!getValues("photoFile")) return
-    /*const formData = new FormData()
-    formData.append('image', getValues("photoFile"))
+    const photoFile = getValues("photoFile")
+    console.log(photoFile)
+    if (!photoFile) return
+    const formData = new FormData()
+    formData.append('image', photoFile[0])
     await fetch(`/api/workers/${worker.id}/image`, {
       method: 'POST',
       body: formData,
-    })*/
+    })
   }
 
-  const removePhoto = ( ) => {
+  const removePhoto = () => {
     setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true})
   }
 

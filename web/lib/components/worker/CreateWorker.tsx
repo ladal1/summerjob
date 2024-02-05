@@ -17,6 +17,7 @@ import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { NoteInput } from '../forms/input/NoteInput'
 import { ImageUploader } from '../forms/ImageUpload'
+import { useAPIWorkerUpdatePhoto } from 'lib/fetcher/photo'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -34,6 +35,7 @@ export default function CreateWorker({
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
@@ -50,20 +52,35 @@ export default function CreateWorker({
 
   const [saved, setSaved] = useState(false)
 
-  const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
+  const { trigger, isMutating, reset, error, data } = useAPIWorkerCreate({
     onSuccess: () => {
+      uploadFile(data?.id) // FIXME: data is always undefined
       setSaved(true)
       router.refresh()
     },
   })
 
-  const onSubmit = (data: WorkerForm) => {
-    trigger(data)
+  const onSubmit = (dataForm: WorkerForm) => {
+    const {photoFile, ...rest} = dataForm
+    trigger(dataForm)
   }
 
   const onConfirmationClosed = () => {
     setSaved(false)
     router.back()
+  }
+
+  const uploadFile = async (workerId: string | undefined) => {
+    const photoFile = getValues("photoFile")
+    console.log(photoFile)
+    console.log(workerId)
+    if (!photoFile || !workerId) return
+    const formData = new FormData()
+    formData.append('image', photoFile[0])
+    await fetch(`/api/workers/${workerId}/image`, {
+      method: 'POST',
+      body: formData,
+    })
   }
 
   const removePhoto = ( ) => {
