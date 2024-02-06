@@ -37,6 +37,7 @@ export const WorkerCreateSchema = z
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
     photoFile: photoFile.optional(),
+    photoPath: z.string().optional(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

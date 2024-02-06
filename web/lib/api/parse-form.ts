@@ -2,25 +2,23 @@ import type { NextApiRequest } from 'next'
 import mime from 'mime'
 import formidable from 'formidable'
 import { mkdir, stat } from 'fs/promises'
+import path from 'path'
 
 export const FormidableError = formidable.errors.FormidableError
 
-export const parseForm = async (
-  req: NextApiRequest
-): Promise<{ fields: formidable.Fields; files: formidable.Files }> => {
-  return await new Promise(async (resolve, reject) => {
-    const uploadDir = process.env.UPLOAD_DIR || '/web-storage'
+export function parseForm(req: NextApiRequest) {
+  return new Promise<{ fields: formidable.Fields; files: formidable.Files }>((resolve, reject) => {
+    const form = formidable({})
+    form.parse(req, (err, fields, files) => {
+      if (err) reject({ err })
+      resolve({ fields, files })
+    })
+  })
+}
 
-    try {
-      await stat(uploadDir)
-    } catch (e: any) {
-      if (e.code === 'ENOENT') {
-        await mkdir(uploadDir, { recursive: true })
-      } else {
-        reject(e)
-        return
-      }
-    }
+export async function parseFormWithSingleImage(req: NextApiRequest) {
+  return await new Promise<{ fields: formidable.Fields; files: formidable.Files }>(async (resolve, reject) => {
+    const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
 
     const form = formidable({
       maxFiles: 1,
@@ -34,7 +32,7 @@ export const parseForm = async (
       },
       filter: part => {
         return (
-          part.name === 'image' && (part.mimetype?.includes('image') || false)
+          part.mimetype?.includes('image') || false
         )
       },
     })

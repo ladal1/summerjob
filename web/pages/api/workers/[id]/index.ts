@@ -8,8 +8,8 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
-import formidable, { Formidable, IncomingForm } from 'formidable'
-import { getFormData } from 'lib/api/getFormData'
+import { parseForm, parseFormWithSingleImage } from 'lib/api/parse-form'
+import path from 'path'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -32,6 +32,7 @@ async function get(
 
 export type WorkerAPIPatchData = WorkerUpdateDataInput
 async function patch(req: NextApiRequest, res: NextApiResponse) {
+  console.log("-------------------------------")
   const id = req.query.id as string
   const session = await getSMJSessionAPI(req, res)
   const allowed = await isAllowedToAccessWorker(session, id, res)
@@ -39,13 +40,17 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
   
-  const data = await getFormData(req)
-  const combined = {...data.fields, ...data.files}
+  const { fields, files } = await parseFormWithSingleImage(req)
+  const combined = {...fields, ...files}
 
-  const workerData = validateOrSendError(WorkerUpdateSchema, combined, res)
+  const workerData = validateOrSendError(WorkerUpdateSchema, fields, res)
   if (!workerData) {
     return
   }
+  if (files.photoFile) {
+  }
+  
+
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, combined, session!)
   await updateWorker(id, workerData)
 

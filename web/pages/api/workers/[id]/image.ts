@@ -1,10 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm, FormidableError } from 'lib/api/parse-form'
+import { FormidableError, parseFormWithSingleImage } from 'lib/api/parse-form'
 import prisma from 'lib/prisma/connection'
 import { createReadStream, statSync } from 'fs'
 import { Prisma } from 'lib/prisma/client'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { Permission } from 'lib/types/auth'
+import logger from 'lib/logger/logger'
+import { APILogEvent } from 'lib/types/logger'
 
 const getHandler = async (
   req: NextApiRequest,
@@ -38,7 +40,7 @@ const getHandler = async (
   readStream.pipe(res)
 }
 
-const postHandler = async (
+export const postHandler = async (
   req: NextApiRequest,
   res: NextApiResponse<{
     data: string | null
@@ -62,8 +64,9 @@ const postHandler = async (
         id: req.query.id as string,
       },
     })
+    const { files } = await parseFormWithSingleImage(req)
 
-    const { files } = await parseForm(req)
+    await logger.apiRequest(APILogEvent.WORKER_MODIFY, req.query.id as string, files, session!)
     if (!files.image) {
       return res.status(400).json({
         data: null,
@@ -83,7 +86,7 @@ const postHandler = async (
         photoPath: filePath,
       },
     })
-
+    
     res.status(200).json({
       data: 'File successfully uploaded',
       error: null,
