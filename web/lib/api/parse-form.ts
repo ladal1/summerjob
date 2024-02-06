@@ -16,10 +16,9 @@ export function parseForm(req: NextApiRequest) {
   })
 }
 
-export async function parseFormWithSingleImage(req: NextApiRequest) {
-  return await new Promise<{ fields: formidable.Fields; files: formidable.Files }>(async (resolve, reject) => {
-    const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
-
+export async function parseFormWithSingleImage(req: NextApiRequest, uploadDir: string) {
+  return await new Promise<{ fields: formidable.Fields; files: formidable.Files, fileName: string }>(async (resolve, reject) => {
+    let fileName = "" 
     const form = formidable({
       maxFiles: 1,
       maxFileSize: 1024 * 1024 * 10, // 10mb
@@ -28,6 +27,7 @@ export async function parseFormWithSingleImage(req: NextApiRequest) {
         const filename = `${req.query.id as string}.${
           mime.getExtension(part.mimetype || '') || 'unknown'
         }`
+        fileName = filename
         return filename
       },
       filter: part => {
@@ -39,7 +39,7 @@ export async function parseFormWithSingleImage(req: NextApiRequest) {
 
     form.parse(req, function (err, fields, files) {
       if (err) reject(err)
-      else resolve({ fields, files })
+      else resolve({ fields, files, fileName })
     })
   })
 }

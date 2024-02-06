@@ -19,7 +19,7 @@ export default function AllergyPill({
         {...register()}
       />
       <label
-        className="form-label btn btn-light p-2 allergy-checkbox-label"
+        className="form-label btn btn-allergy-select btn-light p-2"
         htmlFor={allergyId}
       >
         {allergyName}

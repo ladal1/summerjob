@@ -21,7 +21,6 @@ export const WorkerCompleteSchema = WorkerSchema.extend({
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 
-
 export const WorkerCreateSchema = z
   .object({
     firstName: z

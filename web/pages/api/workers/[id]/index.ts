@@ -10,6 +10,7 @@ import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { parseForm, parseFormWithSingleImage } from 'lib/api/parse-form'
 import path from 'path'
+import fs from 'fs'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -40,18 +41,27 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
   
-  const { fields, files } = await parseFormWithSingleImage(req)
-  const combined = {...fields, ...files}
+  const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
+  const { fields, files, fileName } = await parseFormWithSingleImage(req, uploadDir)
+
+  console.log(fields)
 
   const workerData = validateOrSendError(WorkerUpdateSchema, fields, res)
   if (!workerData) {
     return
   }
-  if (files.photoFile) {
-  }
-  
 
-  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, combined, session!)
+  console.log(workerData)
+
+  if (files.photoFile) {
+    workerData.photoPath = uploadDir + '/' + fileName
+    const worker = await getWorkerById(id)
+    if(worker?.photoPath) {
+      fs.unlink(worker.photoPath, err => {if(err) throw err})
+    }
+  }
+
+  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, {...fields, ...files}, session!)
   await updateWorker(id, workerData)
 
   res.status(204).end()

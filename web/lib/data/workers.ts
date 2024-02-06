@@ -318,6 +318,7 @@ export async function internal_updateWorker(
       email: data.email,
       phone: data.phone,
       isStrong: data.strong,
+      photoPath: data.photoPath,
       ...allergyUpdate,
       availability: {
         update: {
