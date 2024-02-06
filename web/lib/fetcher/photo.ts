@@ -7,3 +7,15 @@ export function useAPIWorkerUpdatePhoto(workerId: string, options?: any) {
     options
   )
 }
+
+const uploadFile = async () => {
+  const photoFile = undefined
+  console.log(photoFile)
+  if (!photoFile) return
+  const formData = new FormData()
+  formData.append('image', photoFile[0])
+  await fetch(`/api/workers/TODO/image`, {
+    method: 'POST',
+    body: formData,
+  })
+}

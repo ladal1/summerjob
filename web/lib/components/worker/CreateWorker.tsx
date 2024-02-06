@@ -121,9 +121,8 @@ export default function CreateWorker({
               placeholder="(+420) 123 456 789"
               maxLength={16}
               pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
-              onChange={(e) => e.target.value = formatPhoneNumber(e.target.value)}
               errors={errors}
-              register={() => register("phone")}
+              register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
             />
             <TextInput
               id="email"

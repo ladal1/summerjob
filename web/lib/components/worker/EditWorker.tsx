@@ -42,7 +42,6 @@ export default function EditWorker({
     formState: { dirtyFields },
     register,
     setValue,
-    getValues,
     handleSubmit,
     formState: { errors },
   } = useForm<WorkerForm>({
@@ -69,15 +68,13 @@ export default function EditWorker({
   const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
     onSuccess: () => {
-      uploadFile()
       setSaved(true)
       router.refresh()
     },
   })
 
   const onSubmit = (dataForm: WorkerForm) => {
-    const {photoFile, ...rest} = dataForm
-    const modified = pick(rest, ...Object.keys(dirtyFields)) as WorkerForm
+    const modified = pick(dataForm, ...Object.keys(dirtyFields)) as WorkerForm
     trigger(modified)
   }
 
@@ -107,18 +104,6 @@ export default function EditWorker({
   //#endregion
 
   //#region File
-  
-  const uploadFile = async () => {
-    const photoFile = getValues("photoFile")
-    console.log(photoFile)
-    if (!photoFile) return
-    const formData = new FormData()
-    formData.append('image', photoFile[0])
-    await fetch(`/api/workers/${worker.id}/image`, {
-      method: 'POST',
-      body: formData,
-    })
-  }
 
   const removePhoto = () => {
     setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true})
@@ -162,9 +147,8 @@ export default function EditWorker({
               placeholder="(+420) 123 456 789"
               maxLength={16}
               pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
-              onChange={(e) => e.target.value = formatPhoneNumber(e.target.value)}
               errors={errors}
-              register={() => register("phone")}
+              register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
             />
             <TextInput
               id="email"

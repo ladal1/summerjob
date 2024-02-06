@@ -8,6 +8,8 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
+import formidable, { Formidable, IncomingForm } from 'formidable'
+import { getFormData } from 'lib/api/getFormData'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -36,14 +38,18 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed) {
     return
   }
-  const workerData = validateOrSendError(WorkerUpdateSchema, req.body, res)
+  
+  const data = await getFormData(req)
+  const combined = {...data.fields, ...data.files}
+
+  const workerData = validateOrSendError(WorkerUpdateSchema, combined, res)
   if (!workerData) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, req.body, session!)
+  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, combined, session!)
   await updateWorker(id, workerData)
 
-  res.status(200).json(id)
+  res.status(204).end()
 }
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
@@ -96,3 +102,9 @@ async function isAllowedToDeleteWorker(
 
 // Access control is done individually in this case to allow users to access their own data
 export default APIMethodHandler({ get, patch, del })
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

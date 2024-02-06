@@ -99,8 +99,7 @@ export const ImageUploader = <FormData extends FieldValues> ({
             <input
               className="block w-0 h-0"
               type="file"
-              {...register(id)} // we will use the file state, to send it later to the server
-              onChange={onFileUploadChange}
+              {...register(id, {onChange: (e) => {onFileUploadChange(e)}})} // we will use the file state, to send it later to the server
             />
           </div>
         </label>

@@ -10,12 +10,15 @@ const send = (method: string) => async (url: string) => {
 const sendData =
   (method: string) =>
   async (url: string, { arg }: { arg: any }) => {
+    const formData = new FormData();
+    Object.keys(arg).forEach(key => {
+      formData.append(key, arg[key]);
+    })
+    console.log(arg)
+    console.log(formData)
     const res = await fetch(url, {
       method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(arg),
+      body: formData,
     })
     return resultResolver(res, 'An error occurred while submitting the data.')
   }
