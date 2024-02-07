@@ -7,44 +7,31 @@ const send = (method: string) => async (url: string) => {
   return resultResolver(res, 'An error occurred during this request.')
 }
 
-const sendData3 =
-  (method: string) =>
-  async (url: string, { arg }: { arg: any }) => {
-    const formData = new FormData();
-    Object.keys(arg).forEach(key => {
-      formData.append(key, arg[key]);
-    })
-    console.log(arg)
-    console.log(formData)
-    const res = await fetch(url, {
-      method: method,
-      body: formData,
-    })
-    return resultResolver(res, 'An error occurred while submitting the data.')
-  }
-
 const sendData =
   (method: string) =>
   async (url: string, { arg }: { arg: any }) => {
     const formData = new FormData()
 
-    let jsonFile = ""
+    let jsonData = ""
     let first = true
     const convertData = (key: string, value: any) => {
       if (value instanceof File) {
         formData.append(key, value)
       } 
       else {
-        jsonFile += (first ? '{' : ',') + '"' + key + '"' + ':' + (JSON.stringify(value))
+        jsonData += (first ? '{' : ',') + '"' + key + '"' + ':' + (JSON.stringify(value))
         first = false
       }
     }
     Object.entries(arg).forEach(([key, value]) => {
       convertData(key, value)
     })
-    jsonFile += '}'
+    jsonData += '}'
 
-    formData.append('jsonFile', new Blob([jsonFile], { type: 'application/json' })) // JSON.stringify(arg) could be used here, but among arg can be file too
+    // JSON.stringify(arg) could be used here, but among arg can be file or blob too, so we want to avoid those keys
+    formData.append('jsonData', jsonData)
+
+    console.log(formData)
 
     const res = await fetch(url, {
       method: method,
@@ -53,25 +40,8 @@ const sendData =
     return resultResolver(res, 'An error occurred while submitting the data.')
   }
 
-
-
-const sendData2 =
-  (method: string) =>
-  async (url: string, { arg }: { arg: any }) => {
-    console.log(arg)
-    console.log(JSON.stringify(arg))
-    const res = await fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(arg),
-    })
-    return resultResolver(res, 'An error occurred while submitting the data.')
-  }
-
 const get = send('GET')
-const post = sendData2('POST')
+const post = sendData('POST')
 const patch = sendData('PATCH')
 const del = send('DELETE')
 

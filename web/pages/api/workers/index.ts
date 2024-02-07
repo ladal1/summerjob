@@ -1,5 +1,7 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { generateFileName } from 'lib/api/fileManager'
+import { parseForm, parseFormWithSingleImage } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { createWorker, createWorkers, getWorkers } from 'lib/data/workers'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
@@ -26,22 +28,24 @@ async function get(
   res.status(200).json(users)
 }
 
+//TODO: divide single worker from multiple workers and create support for photo uploads
 export type WorkersAPIPostData = WorkerCreateDataInput | WorkersCreateDataInput
 async function post(
   req: NextApiRequest,
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  console.log(".................................")
-  const singleWorker = WorkerCreateSchema.safeParse(req.body)
-  console.log(req.body)
-  console.log(singleWorker)
-  if (singleWorker.success) {
-    const worker = await createWorker(singleWorker.data)
+  const temporaryName = generateFileName()
+  const { files, json } = await parseFormWithSingleImage(req, temporaryName) // TODO: manage file
+  console.log(json)
+
+  const singleWorker = validateOrSendError(WorkerCreateSchema, json, res)
+  if (singleWorker) {
+    const worker = await createWorker(singleWorker)
     await logger.apiRequest(
       APILogEvent.WORKER_CREATE,
       'workers',
-      req.body,
+      singleWorker,
       session
     )
     res.status(201).json(worker)
@@ -49,7 +53,7 @@ async function post(
   }
   const multipleWorkers = validateOrSendError(
     WorkersCreateSchema,
-    req.body,
+    json,
     res
   )
   if (!multipleWorkers) {
@@ -58,7 +62,7 @@ async function post(
   await logger.apiRequest(
     APILogEvent.WORKER_CREATE,
     'workers',
-    req.body,
+    multipleWorkers,
     session
   )
   const workers = await createWorkers(multipleWorkers)
@@ -69,3 +73,9 @@ export default APIAccessController(
   [Permission.WORKERS, Permission.PLANS],
   APIMethodHandler({ get, post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

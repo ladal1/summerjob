@@ -8,9 +8,10 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm, parseFormJsonFile, parseFormWithSingleImage } from 'lib/api/parse-form'
+import { getPhotoPath, parseFormWithSingleImage } from 'lib/api/parse-form'
 import path from 'path'
 import fs, { promises } from 'fs'
+import { deleteOriginalImage } from 'lib/api/fileManager'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -40,16 +41,9 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const { files } = await parseFormWithSingleImage(req)
+  const { files, json } = await parseFormWithSingleImage(req, id)
 
-  /* Get simple data from json file. */
-  const jsonPath = Array.isArray(files.jsonFile)
-      ? files.jsonFile[0].filepath
-      : files.jsonFile.filepath
-  const jsonFile = await promises.readFile(jsonPath, 'utf8') // read temporary file with json
-  await promises.unlink(jsonPath) // delete temporary file with json
-  const json = JSON.parse(jsonFile)
-
+  /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
@@ -57,14 +51,8 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
   /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
   if (files.photoFile) {
-    const photoPath = Array.isArray(files.photoFile)
-      ? files.photoFile[0].filepath
-      : files.photoFile.filepath
-    workerData.photoPath = photoPath
-    const worker = await getWorkerById(id)
-    if(worker?.photoPath) {
-      await promises.unlink(worker.photoPath) // delete replaced/original image
-    }
+    workerData.photoPath = getPhotoPath(files.photoFile) // update photoPath
+    deleteOriginalImage(id, workerData.photoPath) // delete original image if necessary
   }
 
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)

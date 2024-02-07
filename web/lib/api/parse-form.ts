@@ -5,72 +5,65 @@ import path from 'path'
 
 export const FormidableError = formidable.errors.FormidableError
 
-export function parseForm(req: NextApiRequest) {
-  return new Promise<{ fields: formidable.Fields; files: formidable.Files }>((resolve, reject) => {
+/* Get simple data from string jsonData containing json data. */
+const getJson = (
+  fieldsJsonData: string | string[]
+): string => {
+  console.log("json")
+  const jsonData = Array.isArray(fieldsJsonData)
+      ? fieldsJsonData[0]
+      : fieldsJsonData
+  return JSON.parse(jsonData)
+}
+
+/* Get photoPath from uploaded photoFile. */
+export const getPhotoPath = (
+  filesPhotoFile: formidable.File | formidable.File[]
+): string => {
+  return Array.isArray(filesPhotoFile)
+      ? filesPhotoFile[0].filepath
+      : filesPhotoFile.filepath
+}
+
+export const parseForm = async (
+  req: NextApiRequest,
+): Promise<{ fields: formidable.Fields; files: formidable.Files; json: string }> => {
+  return await new Promise(async (resolve, reject) => {
     const form = formidable({})
     form.parse(req, (err, fields, files) => {
       if (err) reject({ err })
-      resolve({ fields, files })
+      const json = getJson(fields.jsonData)
+      resolve({ fields, files, json })
     })
   })
 }
-
-const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
-
-export const parseFormJsonFile = async (
-  req: NextApiRequest,
-): Promise<{ fields: formidable.Fields; files: formidable.Files }> => {
-  return await new Promise(async (resolve, reject) => {
-    const form = formidable({
-      maxFiles: 1,
-      maxFileSize: 1024 * 1024 * 1, 
-      uploadDir,
-      filename: (_name, _ext, part) => {
-        const filename = `${req.query.id as string}.${
-          mime.getExtension(part.mimetype || '') || 'unknown'
-        }`
-        return filename
-      },
-      filter: part => {
-        return (
-          part.mimetype?.includes('json') || false
-        )
-      },
-    })
-    
-    form.parse(req, function (err, fields, files) {
-      if (err) reject(err)
-      else resolve({ fields, files })
-    })
-  })
-}
-
 
 export const parseFormWithSingleImage = async (
   req: NextApiRequest,
-): Promise<{ fields: formidable.Fields; files: formidable.Files }> => {
+  nameOfImage: string
+): Promise<{ fields: formidable.Fields; files: formidable.Files; json: string }> => {
+    const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
+    
     return await new Promise(async (resolve, reject) => {
     const form = formidable({
-      maxFiles: 2,
-      maxFileSize: 1024 * 1024 * 10, 
-      maxTotalFileSize: 1024 * 1024 * 11, // 10mb picture + 1mb json
+      maxFiles: 1,
+      maxTotalFileSize: 1024 * 1024 * 10, // 10mb picture
       uploadDir,
       filename: (_name, _ext, part) => {
-        const filename = `${req.query.id as string}.${
-          mime.getExtension(part.mimetype || '') || 'unknown'
-        }`
+        const filename = `${nameOfImage}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
         return filename
       },
       filter: part => {
         return (
-          part.mimetype?.includes('image') || part.mimetype?.includes('json') || false
+          part.mimetype?.includes('image') || false
         )
       },
     })
 
     form.parse(req, function (err, fields, files) {
       if (err) reject(err)
-      else resolve({ fields, files })
+      const json = getJson(fields.jsonData)
+      resolve({ fields, files, json })
     })
   })
 }

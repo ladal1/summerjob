@@ -52,7 +52,7 @@ export default function CreateWorker({
 
   const [saved, setSaved] = useState(false)
 
-  const { trigger, isMutating, reset, error, data } = useAPIWorkerCreate({
+  const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       //uploadFile(data?.id) // FIXME: data is always undefined
       setSaved(true)
