@@ -8,9 +8,9 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm, parseFormWithSingleImage } from 'lib/api/parse-form'
+import { parseForm, parseFormJsonFile, parseFormWithSingleImage } from 'lib/api/parse-form'
 import path from 'path'
-import fs from 'fs'
+import fs, { promises } from 'fs'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -33,35 +33,41 @@ async function get(
 
 export type WorkerAPIPatchData = WorkerUpdateDataInput
 async function patch(req: NextApiRequest, res: NextApiResponse) {
-  console.log("-------------------------------")
   const id = req.query.id as string
   const session = await getSMJSessionAPI(req, res)
   const allowed = await isAllowedToAccessWorker(session, id, res)
   if (!allowed) {
     return
   }
-  
-  const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
-  const { fields, files, fileName } = await parseFormWithSingleImage(req, uploadDir)
 
-  console.log(fields)
+  const { files } = await parseFormWithSingleImage(req)
 
-  const workerData = validateOrSendError(WorkerUpdateSchema, fields, res)
+  /* Get simple data from json file. */
+  const jsonPath = Array.isArray(files.jsonFile)
+      ? files.jsonFile[0].filepath
+      : files.jsonFile.filepath
+  const jsonFile = await promises.readFile(jsonPath, 'utf8') // read temporary file with json
+  await promises.unlink(jsonPath) // delete temporary file with json
+  const json = JSON.parse(jsonFile)
+
+  const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
   }
 
-  console.log(workerData)
-
+  /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
   if (files.photoFile) {
-    workerData.photoPath = uploadDir + '/' + fileName
+    const photoPath = Array.isArray(files.photoFile)
+      ? files.photoFile[0].filepath
+      : files.photoFile.filepath
+    workerData.photoPath = photoPath
     const worker = await getWorkerById(id)
     if(worker?.photoPath) {
-      fs.unlink(worker.photoPath, err => {if(err) throw err})
+      await promises.unlink(worker.photoPath) // delete replaced/original image
     }
   }
 
-  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, {...fields, ...files}, session!)
+  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
   await updateWorker(id, workerData)
 
   res.status(204).end()

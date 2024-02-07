@@ -54,14 +54,13 @@ export default function CreateWorker({
 
   const { trigger, isMutating, reset, error, data } = useAPIWorkerCreate({
     onSuccess: () => {
-      uploadFile(data?.id) // FIXME: data is always undefined
+      //uploadFile(data?.id) // FIXME: data is always undefined
       setSaved(true)
       router.refresh()
     },
   })
 
   const onSubmit = (dataForm: WorkerForm) => {
-    const {photoFile, ...rest} = dataForm
     trigger(dataForm)
   }
 

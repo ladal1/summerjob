@@ -32,7 +32,10 @@ async function post(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
+  console.log(".................................")
   const singleWorker = WorkerCreateSchema.safeParse(req.body)
+  console.log(req.body)
+  console.log(singleWorker)
   if (singleWorker.success) {
     const worker = await createWorker(singleWorker.data)
     await logger.apiRequest(
