@@ -12,14 +12,14 @@ const sendData =
   async (url: string, { arg }: { arg: any }) => {
     const formData = new FormData()
 
-    let jsonData = ""
+    let jsonData = "{"
     let first = true
     const convertData = (key: string, value: any) => {
-      if (value instanceof File) {
+      if (value instanceof (File || Blob)) {
         formData.append(key, value)
       } 
       else {
-        jsonData += (first ? '{' : ',') + '"' + key + '"' + ':' + (JSON.stringify(value))
+        jsonData += (first ? '' : ',') + '"' + key + '"' + ':' + (JSON.stringify(value))
         first = false
       }
     }

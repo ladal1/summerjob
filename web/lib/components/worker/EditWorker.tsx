@@ -9,7 +9,7 @@ import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { Serialized } from 'lib/types/serialize'
-import { formatPhoneNumber, pick } from 'lib/helpers/helpers'
+import { formatName, formatPhoneNumber, pick } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { Allergy } from '../../prisma/client'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
@@ -126,36 +126,28 @@ export default function EditWorker({
             <TextInput
               id="firstName"
               label="Jméno"
-              type="text"
               placeholder="Jméno"
-              register={() => register("firstName")}
+              register={() => register("firstName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
               errors={errors}
             />
             <TextInput
               id="lastName"
               label="Příjmení"
-              type="text"
               placeholder="Příjmení"
-              maxLength={50}
               errors={errors}
-              register={() => register("lastName")}
+              register={() => register("lastName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
             />
             <TextInput
               id="phone"
               label="Telefonní číslo"
-              type="tel"
               placeholder="(+420) 123 456 789"
-              maxLength={16}
-              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               errors={errors}
               register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
             />
             <TextInput
               id="email"
               label="Email"
-              type="email"
               placeholder="uzivatel@example.cz"
-              maxLength={320}
               errors={errors}
               register={() => register("email")}
             />
@@ -294,7 +286,7 @@ export default function EditWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
+            {saved && <SuccessProceedModal onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

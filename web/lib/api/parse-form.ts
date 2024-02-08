@@ -9,7 +9,6 @@ export const FormidableError = formidable.errors.FormidableError
 const getJson = (
   fieldsJsonData: string | string[]
 ): string => {
-  console.log("json")
   const jsonData = Array.isArray(fieldsJsonData)
       ? fieldsJsonData[0]
       : fieldsJsonData
@@ -40,10 +39,9 @@ export const parseForm = async (
 
 export const parseFormWithSingleImage = async (
   req: NextApiRequest,
-  nameOfImage: string
+  nameOfImage: string,
+  uploadDir: string
 ): Promise<{ fields: formidable.Fields; files: formidable.Files; json: string }> => {
-    const uploadDir = path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
-    
     return await new Promise(async (resolve, reject) => {
     const form = formidable({
       maxFiles: 1,

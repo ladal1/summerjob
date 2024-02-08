@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { Worker } from '../../lib/prisma/client'
 import { Serialized } from './serialize'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
-import { customErrorMessages } from 'lib/lang/error-messages'
+import { customErrorMessages as err } from 'lib/lang/error-messages'
 
 import {
   CarSchema,
@@ -11,6 +11,8 @@ import {
 } from 'lib/prisma/zod'
 import { Allergy } from '../../lib/prisma/client'
 import { photoFile } from './photo'
+import { nameRegex, phoneRegex } from 'lib/helpers/regex'
+
 
 useZodOpenApi
 
@@ -25,13 +27,20 @@ export const WorkerCreateSchema = z
   .object({
     firstName: z
       .string()
-      .min(1, { message: customErrorMessages.emptyFirstName }),
-    lastName: z.string().min(1, { message: customErrorMessages.emptyLastName }),
+      .min(1, { message: err.emptyFirstName })
+      .refine((name) => nameRegex.test(name), { message: err.invalidRegexName }),
+    lastName: z
+      .string()
+      .min(1, { message: err.emptyLastName })
+      .refine((name) => nameRegex.test(name), { message: err.invalidRegexName }),
     email: z
       .string()
-      .min(1, { message: customErrorMessages.emptyEmail })
-      .email({ message: customErrorMessages.invalidEmail }),
-    phone: z.string().min(1, { message: customErrorMessages.emptyPhone }),
+      .min(1, { message: err.emptyEmail })
+      .email({ message: err.invalidEmail }),
+    phone: z
+      .string()
+      .min(1, { message: err.emptyPhone })
+      .refine((phone) => phoneRegex.test(phone), { message: err.invalidRegexPhone }),
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),

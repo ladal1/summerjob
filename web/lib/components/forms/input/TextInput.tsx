@@ -37,7 +37,7 @@ export const TextInput = <FormData extends FieldValues>({
         margin={margin}
       />
       <input
-        className="form-control p-0 fs-5"
+        className="form-control smj-input p-0 fs-5"
         {...register()}
         {...rest}
       />

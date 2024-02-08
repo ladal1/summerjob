@@ -28,7 +28,7 @@ export const NoteInput = ({
       />
       <textarea
         id={id}
-        className="form-control border p-2 fs-5"
+        className="form-control border smj-textarea p-2 fs-5"
         {...register()}
         {...rest}
       />

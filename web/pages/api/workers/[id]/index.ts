@@ -11,7 +11,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getPhotoPath, parseFormWithSingleImage } from 'lib/api/parse-form'
 import path from 'path'
 import fs, { promises } from 'fs'
-import { deleteOriginalImage } from 'lib/api/fileManager'
+import { deleteOriginalImage, getUploadDirForImages } from 'lib/api/fileManager'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -41,18 +41,23 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const { files, json } = await parseFormWithSingleImage(req, id)
+  console.log("here")
+  const { files, json } = await parseFormWithSingleImage(req, id, getUploadDirForImages())
 
+  console.log("here")
   /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
   }
 
+  console.log("here")
+
   /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
   if (files.photoFile) {
     workerData.photoPath = getPhotoPath(files.photoFile) // update photoPath
-    deleteOriginalImage(id, workerData.photoPath) // delete original image if necessary
+    const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
+    deleteOriginalImage(worker?.photoPath, workerData.photoPath) // delete original image if necessary
   }
 
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
