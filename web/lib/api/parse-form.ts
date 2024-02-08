@@ -1,8 +1,6 @@
 import type { NextApiRequest } from 'next'
 import mime from 'mime'
 import formidable from 'formidable'
-import path from 'path'
-
 export const FormidableError = formidable.errors.FormidableError
 
 /* Get simple data from string jsonData containing json data. */

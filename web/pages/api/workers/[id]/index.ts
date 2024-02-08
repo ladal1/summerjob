@@ -9,9 +9,8 @@ import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getPhotoPath, parseFormWithSingleImage } from 'lib/api/parse-form'
-import path from 'path'
-import fs, { promises } from 'fs'
-import { deleteOriginalImage, getUploadDirForImages } from 'lib/api/fileManager'
+import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
+import formidable from 'formidable'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -41,24 +40,16 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  console.log("here")
   const { files, json } = await parseFormWithSingleImage(req, id, getUploadDirForImages())
 
-  console.log("here")
   /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
   }
 
-  console.log("here")
-
-  /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
-  if (files.photoFile) {
-    workerData.photoPath = getPhotoPath(files.photoFile) // update photoPath
-    const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
-    deleteOriginalImage(worker?.photoPath, workerData.photoPath) // delete original image if necessary
-  }
+  /* Manage what to do with photo file, such as save photoPath, delete old file etc. */
+  workerData.photoPath = await managePhotoFile(id, files.photoFile, workerData.photoFileRemoved )
 
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
   await updateWorker(id, workerData)
@@ -73,8 +64,15 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_DELETE, id, req.body, session!)
+
+  const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
+  if(worker?.photoPath) { 
+    deleteFile(worker.photoPath) // delete original image if it exists
+  }
+
+  await logger.apiRequest(APILogEvent.WORKER_DELETE, id, {worker}, session!)
   await deleteWorker(id)
+
   res.status(204).end()
 }
 
@@ -112,6 +110,33 @@ async function isAllowedToDeleteWorker(
     res.status(403).end()
   }
   return true
+}
+
+async function managePhotoFile (
+  id: string,
+  file: formidable.File | formidable.File[],
+  photoFileRemoved: boolean | undefined
+)
+{
+  let photoPath = ""
+  /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
+  if (file) {
+    photoPath = getPhotoPath(file) // update photoPath
+    const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
+    if(worker?.photoPath && worker?.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithSingleImage) delete it 
+      deleteFile(worker.photoPath) // delete original image if necessary
+    }
+  }
+  /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
+  else if (photoFileRemoved) {
+    photoPath = ''
+    const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
+    if(worker?.photoPath) { 
+      deleteFile(worker.photoPath) // delete original image if necessary
+    }
+  }
+
+  return photoPath
 }
 
 // Access control is done individually in this case to allow users to access their own data

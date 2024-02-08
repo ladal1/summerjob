@@ -1,6 +1,4 @@
 import { promises } from "fs"
-import { getWorkerById } from "lib/data/workers"
-
 import crypto from "crypto"
 import path from "path"
 
@@ -8,13 +6,10 @@ export const generateFileName = (length: number): string => {
   return crypto.randomBytes(length).toString('hex') 
 }
 
-export const deleteOriginalImage = async (
-  oldPhotoPath: string | undefined,
-  newPhotoPath: string
+export const deleteFile = async (
+  oldPhotoPath: string
 ) => {
-  if(oldPhotoPath && oldPhotoPath !== newPhotoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithSingleImage) delete it 
-    await promises.unlink(oldPhotoPath) // delete replaced/original image
-  }
+  await promises.unlink(oldPhotoPath) // delete replaced/original file
 } 
 
 export const renameFile = async (
@@ -28,3 +23,23 @@ export const getUploadDirForImages = (
 ): string => {
   return path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
 }
+
+export const updatePhotoPathByNewFilename = (
+  originalPath: string,
+  newFilename: string
+): string | undefined => {
+  const lastSlashIndex = originalPath.lastIndexOf('/')
+  const lastDotIndex = originalPath.lastIndexOf('.')
+
+  // check if both chars / . were found
+  if (lastSlashIndex === -1 || lastDotIndex === -1) {
+    return ''
+  }
+
+  // get part before and after replaced part
+  const directory = originalPath.slice(0, lastSlashIndex + 1) // directory part
+  const fileType = originalPath.slice(lastDotIndex) // type part
+
+  // create new path
+  return `${directory}${newFilename}${fileType}`
+} 

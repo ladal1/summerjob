@@ -66,8 +66,8 @@ export default function CreateWorker({
     router.back()
   }
 
-  const removePhoto = ( ) => {
-    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true})
+  const removePhoto = () => {
+    setValue('photoFile', undefined, { shouldDirty: false, shouldValidate: false})
   }
 
   return (
@@ -185,7 +185,7 @@ export default function CreateWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
+            {saved && <SuccessProceedModal onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

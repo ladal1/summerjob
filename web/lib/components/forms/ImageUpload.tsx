@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react'
-import { FieldErrors, FieldValues, Path, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+import { FieldErrors, FieldValues, Path, UseFormRegister } from 'react-hook-form'
 import FormWarning from './FormWarning'
 import { Label } from './input/Label'
 import Image from 'next/image'
@@ -7,6 +7,7 @@ import Image from 'next/image'
 interface ImageUploaderProps<FormData extends FieldValues> {
   id: Path<FormData>
   photoPath?: string | null
+  setPhotoFileState?: (state: boolean) => void
   errors: FieldErrors<FormData>
   register: UseFormRegister<FormData>
   removePhoto: () => void
@@ -15,6 +16,7 @@ interface ImageUploaderProps<FormData extends FieldValues> {
 export const ImageUploader = <FormData extends FieldValues> ({
   id,
   photoPath = null,
+  setPhotoFileState,
   errors,
   register,
   removePhoto
@@ -42,6 +44,8 @@ export const ImageUploader = <FormData extends FieldValues> ({
 
     /** Setting file state */
     setPreviewUrl(URL.createObjectURL(file)) // we will use this to show the preview of the image
+    if(setPhotoFileState)
+      setPhotoFileState(false) // this indicates that file was uploaded and not removed
   }
 
   const onRemoveImage = () => {

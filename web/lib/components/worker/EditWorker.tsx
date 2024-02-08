@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { boolean, z } from 'zod'
 import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
@@ -105,8 +105,14 @@ export default function EditWorker({
 
   //#region File
 
+  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on.  */
+  const setPhotoFileState = (state: boolean) => {
+    setValue('photoFileRemoved', state, { shouldDirty: state, shouldValidate: state })
+  }
+ 
   const removePhoto = () => {
-    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true})
+    setValue('photoFile', undefined, { shouldDirty: false, shouldValidate: false })
+    setPhotoFileState(true)
   }
 
   //#endregion
@@ -186,6 +192,7 @@ export default function EditWorker({
               <ImageUploader
                 id="photoFile"
                 photoPath={worker.photoPath ? `/api/workers/${worker.id}/image` : null}
+                setPhotoFileState={setPhotoFileState}
                 errors={errors}
                 register={register}
                 removePhoto={removePhoto}

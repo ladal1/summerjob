@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { boolean, z } from 'zod'
 import type { Worker } from '../../lib/prisma/client'
 import { Serialized } from './serialize'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
@@ -45,6 +45,7 @@ export const WorkerCreateSchema = z
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
     photoFile: photoFile.optional(),
+    photoFileRemoved: z.boolean().optional(),
     photoPath: z.string().optional(),
     availability: z.object({
       workDays: z
