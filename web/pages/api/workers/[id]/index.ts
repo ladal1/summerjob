@@ -2,7 +2,7 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ApiError, WrappedError } from 'lib/types/api-error'
-import { deleteWorker, getWorkerById, updateWorker } from 'lib/data/workers'
+import { deleteWorker, getWorkerById, getWorkerPhotoById, updateWorker } from 'lib/data/workers'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
@@ -49,7 +49,9 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   }
 
   /* Manage what to do with photo file, such as save photoPath, delete old file etc. */
-  workerData.photoPath = await managePhotoFile(id, files.photoFile, workerData.photoFileRemoved )
+  const photoPath = await managePhotoFile(id, files.photoFile, workerData.photoFileRemoved)
+  if(photoPath) // if photoPath should be udpated
+    workerData.photoPath = photoPath 
 
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
   await updateWorker(id, workerData)
@@ -65,8 +67,8 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
-  if(worker?.photoPath) { 
+  const worker = await getWorkerPhotoById(id)
+  if (worker && worker.photoPath) {
     deleteFile(worker.photoPath) // delete original image if it exists
   }
 
@@ -118,25 +120,26 @@ async function managePhotoFile (
   photoFileRemoved: boolean | undefined
 )
 {
-  let photoPath = ""
-  /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
-  if (file) {
-    photoPath = getPhotoPath(file) // update photoPath
-    const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
-    if(worker?.photoPath && worker?.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithSingleImage) delete it 
+  if(file || photoFileRemoved) {
+    const worker = await getWorkerPhotoById(id)
+    if (!worker || !worker.photoPath) {
+      return undefined // nothing will change because worker doesn't have photoPath defined
+    }
+    /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
+    if(file) {
+      const photoPath = getPhotoPath(file) // update photoPath
+      if(worker.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithSingleImage) delete it 
+        deleteFile(worker.photoPath) // delete original image if necessary
+      }
+      return photoPath
+    }
+    /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
+    else if (photoFileRemoved) {
       deleteFile(worker.photoPath) // delete original image if necessary
+      return ''
     }
   }
-  /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
-  else if (photoFileRemoved) {
-    photoPath = ''
-    const worker = await getWorkerById(id) // FIXME: return specifically only photoPath
-    if(worker?.photoPath) { 
-      deleteFile(worker.photoPath) // delete original image if necessary
-    }
-  }
-
-  return photoPath
+  return undefined
 }
 
 // Access control is done individually in this case to allow users to access their own data

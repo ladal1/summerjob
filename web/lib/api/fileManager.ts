@@ -2,6 +2,13 @@ import { promises } from "fs"
 import crypto from "crypto"
 import path from "path"
 
+
+export const getUploadDirForImages = (
+): string => {
+  return path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
+}
+
+
 export const generateFileName = (length: number): string => {
   return crypto.randomBytes(length).toString('hex') 
 }
@@ -19,10 +26,6 @@ export const renameFile = async (
   await promises.rename(oldPhotoPath, newPhotoPath)
 } 
 
-export const getUploadDirForImages = (
-): string => {
-  return path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
-}
 
 export const updatePhotoPathByNewFilename = (
   originalPath: string,

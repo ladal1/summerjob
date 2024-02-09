@@ -27,7 +27,7 @@ const sendData =
       convertData(key, value)
     })
     jsonData += '}'
-
+    
     // JSON.stringify(arg) could be used here, but among arg can be file or blob too, so we want to avoid those keys
     formData.append('jsonData', jsonData)
 
@@ -41,12 +41,17 @@ const sendData =
   }
 
 const get = send('GET')
+const getWithBody = sendData('GET')
 const post = sendData('POST')
 const patch = sendData('PATCH')
 const del = send('DELETE')
 
 export function useData<T>(url: string, options?: any) {
   return useSWR<T, Error>(url, get, options)
+}
+
+export function useDataWithBody<T>(url: string, options?: any) {
+  return useSWRMutation<T, Error>(url, getWithBody, options)
 }
 
 export function useDataPartialUpdate<T>(url: string, options?: any) {

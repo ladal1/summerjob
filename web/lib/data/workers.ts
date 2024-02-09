@@ -10,6 +10,7 @@ import {
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
 import { deleteUserSessions } from './users'
+import { PhotoPathData } from 'lib/types/photo'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -64,6 +65,25 @@ export async function getWorkers(
   >[0][]
   const res = correctType.map(databaseWorkerToWorkerComplete)
   return res
+}
+
+export async function getWorkerPhotoById(
+  id: string
+): Promise<PhotoPathData | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const worker = await prisma.worker.findUnique({
+    where: {
+      id: id,
+    },
+    select: {
+      photoPath: true,
+    },
+  })
+  
+  return worker
 }
 
 export async function getWorkerById(
@@ -319,6 +339,7 @@ export async function internal_updateWorker(
       phone: data.phone,
       isStrong: data.strong,
       photoPath: data.photoPath,
+      note: data.note,
       ...allergyUpdate,
       availability: {
         update: {

@@ -124,7 +124,7 @@ export function PlanJoblessRow({
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
                   onMouseEnter={() =>
                     worker.photoPath
-                      ? onWorkerHover(`/api/workers/${worker.id}/image`)
+                      ? onWorkerHover(`/api/workers/${worker.id}/photo`)
                       : onWorkerHover(null)
                   }
                   onMouseLeave={() => onWorkerHover(null)}

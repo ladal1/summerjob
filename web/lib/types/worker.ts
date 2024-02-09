@@ -10,9 +10,8 @@ import {
   WorkerSchema,
 } from 'lib/prisma/zod'
 import { Allergy } from '../../lib/prisma/client'
-import { photoFile } from './photo'
+import { photoFile, photoPath } from './photo'
 import { nameRegex, phoneRegex } from 'lib/helpers/regex'
-
 
 useZodOpenApi
 
@@ -44,9 +43,9 @@ export const WorkerCreateSchema = z
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
-    photoFile: photoFile.optional(),
+    photoFile: photoFile,
     photoFileRemoved: z.boolean().optional(),
-    photoPath: z.string().optional(),
+    photoPath: photoPath,
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

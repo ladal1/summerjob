@@ -25,7 +25,7 @@ export default function WorkerRow({
       data={formatWorkerRow(worker, trigger, isMutating, error, reset)}
       onMouseEnter={() =>
         worker.photoPath
-          ? onHover(`/api/workers/${worker.id}/image`)
+          ? onHover(`/api/workers/${worker.id}/photo`)
           : onHover(null)
       }
       onMouseLeave={() => onHover(null)}

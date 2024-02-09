@@ -224,7 +224,7 @@ export function PlanJobRow({
                       )}
                       onMouseEnter={() =>
                         worker.photoPath
-                          ? onWorkerHover(`/api/workers/${worker.id}/image`)
+                          ? onWorkerHover(`/api/workers/${worker.id}/photo`)
                           : onWorkerHover(null)
                       }
                       onMouseLeave={() => onWorkerHover(null)}

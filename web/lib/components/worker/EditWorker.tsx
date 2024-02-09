@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
@@ -191,7 +191,7 @@ export default function EditWorker({
             {!isProfilePage && (
               <ImageUploader
                 id="photoFile"
-                photoPath={worker.photoPath ? `/api/workers/${worker.id}/image` : null}
+                photoInit={worker.photoPath ? `/api/workers/${worker.id}/photo` : null}
                 setPhotoFileState={setPhotoFileState}
                 errors={errors}
                 register={register}

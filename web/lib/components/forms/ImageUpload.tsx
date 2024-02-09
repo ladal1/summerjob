@@ -6,7 +6,7 @@ import Image from 'next/image'
 
 interface ImageUploaderProps<FormData extends FieldValues> {
   id: Path<FormData>
-  photoPath?: string | null
+  photoInit?: string | null
   setPhotoFileState?: (state: boolean) => void
   errors: FieldErrors<FormData>
   register: UseFormRegister<FormData>
@@ -15,7 +15,7 @@ interface ImageUploaderProps<FormData extends FieldValues> {
 
 export const ImageUploader = <FormData extends FieldValues> ({
   id,
-  photoPath = null,
+  photoInit = null,
   setPhotoFileState,
   errors,
   register,
@@ -23,8 +23,7 @@ export const ImageUploader = <FormData extends FieldValues> ({
 }: ImageUploaderProps<FormData>) => {
 
   const error = errors?.[id]?.message as string | undefined
-
-  const [previewUrl, setPreviewUrl] = useState<string | null>(photoPath)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(photoInit)
   
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target
