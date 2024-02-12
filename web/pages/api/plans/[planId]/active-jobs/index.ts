@@ -13,6 +13,7 @@ import {
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { parseForm } from 'lib/api/parse-form'
 
 export type ActiveJobsAPIPostData =
   | Omit<ActiveJobCreateData, 'planId'>
@@ -25,8 +26,9 @@ async function post(
   res: NextApiResponse<ActiveJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
+  const { json } = await parseForm(req)
   const createSingle = ActiveJobCreateSchema.safeParse({
-    ...req.body,
+    ...json,
     planId: req.query.planId,
   })
   if (createSingle.success) {
@@ -37,7 +39,7 @@ async function post(
 
   const createMultiple = validateOrSendError(
     ActiveJobCreateMultipleSchema,
-    { ...req.body, planId: req.query.planId },
+    { ...json, planId: req.query.planId },
     res
   )
   if (!createMultiple) {
@@ -46,7 +48,7 @@ async function post(
   await logger.apiRequest(
     APILogEvent.PLAN_JOB_ADD,
     `plans/${req.query.planId}/active-jobs`,
-    req.body,
+    json,
     session
   )
   await createActiveJobs(createMultiple)
@@ -57,3 +59,9 @@ export default APIAccessController(
   [Permission.PLANS],
   APIMethodHandler({ post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

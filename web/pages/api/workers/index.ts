@@ -1,7 +1,6 @@
-import formidable from 'formidable'
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { generateFileName, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
+import { generateFileName, getUploadDirForImages, renameFile } from 'lib/api/fileManager'
 import { getPhotoPath, parseFormWithSingleImage } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { createWorker, createWorkers, getWorkers, updateWorker } from 'lib/data/workers'
@@ -49,6 +48,9 @@ async function post(
       renameFile(temporaryPhotoPath, singleWorker.photoPath)
       await updateWorker(worker.id, singleWorker)
     }
+    else {
+      singleWorker.photoPath = ''
+    }
     await logger.apiRequest(
       APILogEvent.WORKER_CREATE,
       'workers',
@@ -69,7 +71,7 @@ async function post(
   await logger.apiRequest(
     APILogEvent.WORKER_CREATE,
     'workers',
-    multipleWorkers,
+    json,
     session
   )
   const workers = await createWorkers(multipleWorkers)

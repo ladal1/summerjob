@@ -15,6 +15,7 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { parseForm } from 'lib/api/parse-form'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -42,14 +43,15 @@ async function post(
   res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const result = validateOrSendError(ProposedJobCreateSchema, req.body, res)
+  const { json } = await parseForm(req)
+  const result = validateOrSendError(ProposedJobCreateSchema, json, res)
   if (!result) {
     return
   }
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
-    req.body,
+    json,
     session
   )
   const job = await createProposedJob(result)
@@ -60,3 +62,9 @@ export default APIAccessController(
   [Permission.JOBS, Permission.PLANS],
   APIMethodHandler({ get, post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

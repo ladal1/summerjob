@@ -6,7 +6,7 @@ export const FormidableError = formidable.errors.FormidableError
 /* Get simple data from string jsonData containing json data. */
 const getJson = (
   fieldsJsonData: string | string[]
-): string => {
+): any => {
   const jsonData = Array.isArray(fieldsJsonData)
       ? fieldsJsonData[0]
       : fieldsJsonData
@@ -24,7 +24,7 @@ export const getPhotoPath = (
 
 export const parseForm = async (
   req: NextApiRequest,
-): Promise<{ fields: formidable.Fields; files: formidable.Files; json: string }> => {
+): Promise<{ fields: formidable.Fields; files: formidable.Files; json: any }> => {
   return await new Promise(async (resolve, reject) => {
     const form = formidable({})
     form.parse(req, (err, fields, files) => {
@@ -39,7 +39,7 @@ export const parseFormWithSingleImage = async (
   req: NextApiRequest,
   nameOfImage: string,
   uploadDir: string
-): Promise<{ fields: formidable.Fields; files: formidable.Files; json: string }> => {
+): Promise<{ fields: formidable.Fields; files: formidable.Files; json: any }> => {
     return await new Promise(async (resolve, reject) => {
     const form = formidable({
       maxFiles: 1,

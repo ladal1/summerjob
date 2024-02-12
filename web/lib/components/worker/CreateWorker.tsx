@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { formatPhoneNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
@@ -17,6 +16,7 @@ import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { NoteInput } from '../forms/input/NoteInput'
 import { ImageUploader } from '../forms/ImageUpload'
+import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -83,7 +83,6 @@ export default function CreateWorker({
             <TextInput
               id="firstName"
               label="Jméno"
-              type="text"
               placeholder="Jméno"
               register={() => register("firstName")}
               errors={errors}
@@ -91,18 +90,14 @@ export default function CreateWorker({
             <TextInput
               id="lastName"
               label="Příjmení"
-              type="text"
               placeholder="Příjmení"
-              maxLength={50}
               errors={errors}
               register={() => register("lastName")}
             />
             <TextInput
               id="phone"
               label="Telefonní číslo"
-              type="tel"
               placeholder="(+420) 123 456 789"
-              maxLength={16}
               pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               errors={errors}
               register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
@@ -110,9 +105,7 @@ export default function CreateWorker({
             <TextInput
               id="email"
               label="Email"
-              type="email"
               placeholder="uzivatel@example.cz"
-              maxLength={320}
               errors={errors}
               register={() => register("email")}
             />
@@ -185,7 +178,7 @@ export default function CreateWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModal onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
+            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

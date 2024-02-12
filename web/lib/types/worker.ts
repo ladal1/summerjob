@@ -1,4 +1,4 @@
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 import type { Worker } from '../../lib/prisma/client'
 import { Serialized } from './serialize'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
@@ -10,8 +10,8 @@ import {
   WorkerSchema,
 } from 'lib/prisma/zod'
 import { Allergy } from '../../lib/prisma/client'
-import { photoFile, photoPath } from './photo'
 import { nameRegex, phoneRegex } from 'lib/helpers/regex'
+import { photoPath } from './photo'
 
 useZodOpenApi
 
@@ -43,9 +43,15 @@ export const WorkerCreateSchema = z
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
-    photoFile: photoFile,
+    photoFile: z
+      .custom<File[]>()
+      .transform((file) => (file && file.length > 0) && file[0])
+      .refine((file) => !file || (!!file && file.size <= 1024*1024*10), err.maxCapacityImage) // 10 mB = 1024*1024*10
+      .refine((file) => !file || (!!file && file.type?.startsWith("image")), err.unsuportedTypeImage) // any image
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
+      .optional(),
     photoFileRemoved: z.boolean().optional(),
-    photoPath: photoPath,
+    photoPath: photoPath.optional(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

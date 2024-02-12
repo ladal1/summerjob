@@ -8,7 +8,6 @@ export const getUploadDirForImages = (
   return path.resolve(process.cwd() + '/../') + (process.env.UPLOAD_DIR || '/web-storage')
 }
 
-
 export const generateFileName = (length: number): string => {
   return crypto.randomBytes(length).toString('hex') 
 }

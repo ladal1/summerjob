@@ -8,6 +8,7 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { RideCreateData, RideCreateSchema } from 'lib/types/ride'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { parseForm } from 'lib/api/parse-form'
 
 export type RidesAPIPostData = RideCreateData
 export type RidesAPIPostResponse = Awaited<ReturnType<typeof createRide>>
@@ -16,14 +17,15 @@ async function post(
   res: NextApiResponse<RidesAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const result = validateOrSendError(RideCreateSchema, req.body, res)
+  const { json } = await parseForm(req)
+  const result = validateOrSendError(RideCreateSchema, json, res)
   if (!result) {
     return
   }
   await logger.apiRequest(
     APILogEvent.PLAN_RIDE_ADD,
     `plans/${req.query.planId}/active-jobs/${req.query.jobId}/rides`,
-    req.body,
+    json,
     session
   )
   const ride = await createRide(result, req.query.jobId as string)
@@ -34,3 +36,9 @@ export default APIAccessController(
   [Permission.PLANS],
   APIMethodHandler({ post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

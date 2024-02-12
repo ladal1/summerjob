@@ -28,7 +28,7 @@ const get = async (
   res.writeHead(200, {
     'Content-Type': `image/${worker?.photoPath?.split('.').pop()}`,
     'Content-Length': fileStat.size,
-    'Cache-Control': 'public, max-age=10, must-revalidate',
+    'Cache-Control': 'public, max-age=5, must-revalidate',
   })
   const readStream = createReadStream(worker.photoPath)
   readStream.pipe(res)

@@ -7,7 +7,7 @@ import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
+import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { Serialized } from 'lib/types/serialize'
 import { formatName, formatPhoneNumber, pick } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
@@ -293,7 +293,7 @@ export default function EditWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModal onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
+            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>
