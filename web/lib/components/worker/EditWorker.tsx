@@ -16,9 +16,9 @@ import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { NoteInput } from '../forms/input/NoteInput'
 import { ImageUploader } from '../forms/ImageUpload'
-import { Label } from '../forms/input/Label'
+import { Label } from '../forms/Label'
+import { TextAreInput } from '../forms/input/TextAreaInput'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -265,7 +265,7 @@ export default function EditWorker({
             )}
 
             {!isProfilePage && (
-              <NoteInput
+              <TextAreInput
                 id="note"
                 label="Poznámka"
                 placeholder="Poznámka"

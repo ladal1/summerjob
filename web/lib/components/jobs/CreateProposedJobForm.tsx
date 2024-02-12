@@ -1,7 +1,6 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
-import { datesBetween } from 'lib/helpers/helpers'
 import { Area, JobType } from 'lib/prisma/client'
 import { deserializeAreas } from 'lib/types/area'
 import {
@@ -18,6 +17,10 @@ import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { allergyMapping } from '../../data/allergyMapping'
 import { jobTypeMapping } from '../../data/jobTypeMapping'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { TextInput } from '../forms/input/TextInput'
+import { TextAreInput } from '../forms/input/TextAreaInput'
+import { FilterSelectInput } from '../forms/input/FilterSelectInput'
+import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -83,85 +86,60 @@ export default function CreateProposedJobForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Název jobu
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="name"
-              {...register('name')}
+              label="Název jobu"
+              placeholder="Název"
+              register={() => register("name")}
+              errors={errors}
             />
-            {errors.name && (
-              <div className="text-danger">Zadejte název jobu</div>
-            )}
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="publicDescription"
-            >
-              Popis navrhované práce
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
+            <TextAreInput
               id="publicDescription"
-              rows={3}
-              {...register('publicDescription')}
-            ></textarea>
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="privateDescription"
-            >
-              Poznámka pro organizátory
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
+              label="Popis navrhované práce"
+              placeholder="Popis"
+              rows={4}
+              register={() => register("publicDescription")}
+            />
+            <TextAreInput
               id="privateDescription"
-              rows={3}
-              {...register('privateDescription')}
-            ></textarea>
-            <label className="form-label fw-bold mt-4" htmlFor="area">
-              Oblast jobu
-            </label>
-            <input type={'hidden'} {...register('areaId')} />
-            <FilterSelect
-              items={areas.map(areaToSelectItem)}
+              label="Poznámka pro organizátory"
+              placeholder="Poznámka"
+              rows={4}
+              register={() => register("privateDescription")}
+            />
+            <FilterSelectInput
+              id="areaId"
+              label="Oblast jobu"
               placeholder="Vyberte oblast"
-              onSelected={selectArea}
+              items={areas.map(areaToSelectItem)}
+              onSelect={selectArea}
+              errors={errors}
+              register={() => register('areaId')}
             />
-            {errors.areaId && <div className="text-danger">Vyberte oblast</div>}
-            <label className="form-label fw-bold mt-4" htmlFor="address">
-              Adresa
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="address"
-              {...register('address')}
+              label="Adresa"
+              placeholder="Adresa"
+              register={() => register("address")}
+              errors={errors}
             />
-            {errors.address && (
-              <div className="text-danger">Zadejte adresu</div>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="contact">
-              Kontakt
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="contact"
-              {...register('contact')}
+              label="Kontakt"
+              placeholder="Kontakt"
+              register={() => register("contact")}
+              errors={errors}
             />
-            {errors.contact && (
-              <div className="text-danger">Zadejte kontaktní informace</div>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="requiredDays">
-              Celkový počet dnů na splnění
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="requiredDays"
+              label="Celkový počet dní na splnění"
+              placeholder="Počet dní"
               type="number"
-              {...register('requiredDays', { valueAsNumber: true })}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("requiredDays", {onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              errors={errors}
             />
-            {errors.requiredDays && (
-              <div className="text-danger">Zadejte odhadovaný počet dnů</div>
-            )}
+
             <label className="form-label fw-bold mt-4" htmlFor="minWorkers">
               Počet pracantů minimálně / maximálně / z toho silných
             </label>

@@ -1,8 +1,8 @@
 import { type DetailedHTMLProps, type TextareaHTMLAttributes } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
-import { Label } from './Label'
+import { Label } from '../Label'
 
-interface NoteInputProps extends DetailedHTMLProps<
+interface TextAreaProps extends DetailedHTMLProps<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
     HTMLTextAreaElement
   > {
@@ -12,13 +12,13 @@ interface NoteInputProps extends DetailedHTMLProps<
   margin?: boolean
 }
 
-export const NoteInput = ({
+export const TextAreInput = ({
   id,
   label,
   register,
   margin = true,
   ...rest
-}: NoteInputProps) => {
+}: TextAreaProps) => {
   return (
     <>
       <Label

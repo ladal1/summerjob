@@ -69,7 +69,7 @@ export function FilterSelect({
     <div className="dropdown" onBlur={onBlur}>
       <div className="p-0" aria-expanded="false">
         <input
-          className="p-2 w-100"
+          className="smj-input p-2 w-100"
           type="text"
           placeholder={placeholder}
           style={{ border: '0px', outline: '0px' }}
@@ -90,7 +90,7 @@ export function FilterSelect({
             shouldShowItem(item) && (
               <li key={item.id}>
                 <button
-                  className="dropdown-item"
+                  className="smj-dropdown-item dropdown-item"
                   type="button"
                   onClick={() => selectItem(item)}
                 >

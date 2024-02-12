@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from 'react'
 import { FieldErrors, FieldValues, Path, UseFormRegister } from 'react-hook-form'
 import FormWarning from './FormWarning'
-import { Label } from './input/Label'
+import { Label } from './Label'
 import Image from 'next/image'
 
 interface ImageUploaderProps<FormData extends FieldValues> {

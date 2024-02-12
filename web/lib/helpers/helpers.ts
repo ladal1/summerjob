@@ -148,3 +148,16 @@ export function formatPhoneNumber(value: string) {
 export function formatName(value: string) {
   return XRegExp.replace(value, XRegExp('[^\\p{L}\\s]+', 'g'), '').replace(/\s+/g, ' ').trimStart()
 }
+
+// Get rid of anything that isn't positive number
+export function formatNumber(value: string) {
+  return value.replace(/\D/g, '')
+}
+
+export function allowForNumber(e: React.KeyboardEvent<HTMLInputElement>) {
+  const allowedChars = "0123456789"
+  const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"]
+  if (!allowedChars.includes(e.key) && !allowedKeys.includes(e.key)) {
+    e.preventDefault();
+  }
+}

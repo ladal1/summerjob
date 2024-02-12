@@ -22,6 +22,7 @@ import { JobType } from '../../prisma/client'
 import { Area } from '../../prisma/zod'
 import { deserializeAreas } from '../../types/area'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { TextInput } from '../forms/input/TextInput'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -93,6 +94,13 @@ export default function EditProposedJobForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
+            <TextInput
+              id="name"
+              label="Název jobu"
+              placeholder="Jméno"
+              register={() => register("name")}
+              errors={errors}
+            />
             <label className="form-label fw-bold mt-4" htmlFor="name">
               Název jobu
             </label>

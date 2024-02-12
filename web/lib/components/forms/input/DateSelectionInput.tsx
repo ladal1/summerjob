@@ -1,6 +1,6 @@
 import { UseFormRegisterReturn } from 'react-hook-form'
 import DateSelection from '../DateSelection'
-import { Label } from './Label'
+import { Label } from '../Label'
 
 interface DateSelectionInputProps {
   id: string

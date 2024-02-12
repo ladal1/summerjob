@@ -50,9 +50,7 @@ export default function NewEventModal({
         <TextInput
           id="name"
           label="Název ročníku"
-          type="text"
           placeholder="Název ročníku"
-          maxLength={50}
           errors={errors}
           register={() => register("name")}
           margin={false}

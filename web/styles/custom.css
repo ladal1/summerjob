@@ -163,6 +163,14 @@ img.smj-nav-logo {
   max-height: 15rem;
 }
 
+.smj-dropdown-item:hover {
+  background-color: #adadad;
+}
+
+.smj-dropdown-item:active {
+  background-color: #fdc345;
+}
+
 .outline-none {
   outline: none;
 }
@@ -296,10 +304,6 @@ img.smj-nav-logo {
   background-color: #adadad;
 }
 
-.checkbox-white:not(:checked) {
-  background-color: white;
-}
-
 .smj-checkbox {
   width: 25px;
   height: 25px;
@@ -308,6 +312,10 @@ img.smj-nav-logo {
 .smj-checkbox:focus {
   border: #adadad;
   box-shadow: 0 0 4px #fdc345;
+}
+
+.smj-checkbox:not(:checked) {
+  background-color: white;
 }
 
 .smj-checkbox:checked {

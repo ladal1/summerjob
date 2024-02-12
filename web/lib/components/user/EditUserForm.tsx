@@ -47,7 +47,7 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
               <input
                 type="checkbox"
                 value={permission}
-                className="form-check-input fs-5 checkbox-white"
+                className="form-check-input fs-5 smj-checkbox"
                 {...register('permissions')}
               />{' '}
               <span className="d-inline-block fs-5">{permission}</span>

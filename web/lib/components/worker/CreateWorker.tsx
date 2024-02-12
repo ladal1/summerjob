@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { formatPhoneNumber } from 'lib/helpers/helpers'
+import { formatName, formatPhoneNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import { TextInput } from '../forms/input/TextInput'
@@ -14,9 +14,9 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
-import { NoteInput } from '../forms/input/NoteInput'
 import { ImageUploader } from '../forms/ImageUpload'
 import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
+import { TextAreInput } from '../forms/input/TextAreaInput'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -84,7 +84,7 @@ export default function CreateWorker({
               id="firstName"
               label="Jméno"
               placeholder="Jméno"
-              register={() => register("firstName")}
+              register={() => register("firstName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
               errors={errors}
             />
             <TextInput
@@ -92,13 +92,12 @@ export default function CreateWorker({
               label="Příjmení"
               placeholder="Příjmení"
               errors={errors}
-              register={() => register("lastName")}
+              register={() => register("lastName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
             />
             <TextInput
               id="phone"
               label="Telefonní číslo"
               placeholder="(+420) 123 456 789"
-              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               errors={errors}
               register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
             />
@@ -155,7 +154,7 @@ export default function CreateWorker({
                 </p>
               </>
             )}
-            <NoteInput
+            <TextAreInput
               id="note"
               label="Poznámka"
               placeholder="Poznámka"

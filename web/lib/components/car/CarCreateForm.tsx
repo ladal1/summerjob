@@ -4,9 +4,9 @@ import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import { useForm } from 'react-hook-form'
 import { TextInput } from '../forms/input/TextInput'
-import { NoteInput } from '../forms/input/NoteInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
+import { TextAreInput } from '../forms/input/TextAreaInput'
 
 type CarEditFormProps = {
   onSubmit: (data: CarCreateData) => void
@@ -54,11 +54,11 @@ export default function CarCreateForm({
               errors={errors}
               register={() => register("name")}
             />
-            <NoteInput
+            <TextAreInput
               id="description"
               label="Poznámka pro organizátory"
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
-              rows={3}
+              rows={4}
               register={() => register("description")}
             />
             <TextInput
@@ -74,7 +74,7 @@ export default function CarCreateForm({
               id="ownerId"
               label="Majitel"
               placeholder="Vyberte majitele"
-              owners={owners}
+              items={owners.map(workerToSelectItem)}
               onSelect={onOwnerSelected}
               errors={errors}
               register={() => register('ownerId')}
@@ -109,4 +109,17 @@ export default function CarCreateForm({
       </div>
     </>
   )
+}
+
+function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
+  return {
+    id: worker.id,
+    name: `${worker.firstName} ${worker.lastName}`,
+    searchable: `${worker.firstName} ${worker.lastName}`,
+    item: (
+      <div>
+        {worker.firstName} {worker.lastName}
+      </div>
+    ),
+  }
 }

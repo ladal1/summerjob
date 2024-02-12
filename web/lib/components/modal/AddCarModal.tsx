@@ -1,5 +1,5 @@
 import { FieldErrors, UseFormRegister } from 'react-hook-form'
-import { NoteInput } from '../forms/input/NoteInput'
+import { NoteInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Modal, ModalSize } from './Modal'
 import { CarCreateData } from 'lib/types/car'
@@ -27,12 +27,10 @@ export default function AddCarModal({
           <TextInput
             id="name"
             label="Název"
-            type="text"
-            margin={false}
             placeholder="Model auta, značka"
-            maxLength={50}
             errors={errors}
             register={() => register("name")}
+            margin={false}
           />
           <NoteInput
             id="description"

@@ -5,7 +5,7 @@ import {
   UseFormRegisterReturn,
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'
-import { Label } from './Label'
+import { Label } from '../Label'
 
 interface TextInputProps<FormData extends FieldValues>
   extends DetailedHTMLProps<

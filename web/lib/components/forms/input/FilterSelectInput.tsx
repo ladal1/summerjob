@@ -7,15 +7,14 @@ import {
   FilterSelect,
   FilterSelectItem,
 } from 'lib/components/filter-select/FilterSelect'
-import { WorkerBasicInfo } from 'lib/types/worker'
 import FormWarning from '../FormWarning'
-import { Label } from './Label'
+import { Label } from '../Label'
 
 interface FilterSelectInputProps<FormData extends FieldValues> {
   id: string
   label: string
   placeholder: string
-  owners: WorkerBasicInfo[]
+  items: FilterSelectItem[]
   register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   onSelect: (item: FilterSelectItem) => void
@@ -25,27 +24,12 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   id,
   label,
   placeholder,
-  owners,
+  items,
   register,
   errors,
   onSelect,
 }: FilterSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
-
-  function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
-    return {
-      id: worker.id,
-      name: `${worker.firstName} ${worker.lastName}`,
-      searchable: `${worker.firstName} ${worker.lastName}`,
-      item: (
-        <div>
-          {worker.firstName} {worker.lastName}
-        </div>
-      ),
-    }
-  }
-
-  const ownerItems = owners.map(workerToSelectItem)
 
   return (
     <div className="d-flex flex-column m-0">
@@ -55,7 +39,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
       />
       <FilterSelect
         placeholder={placeholder}
-        items={ownerItems}
+        items={items}
         onSelected={onSelect}
       />
       <input type={'hidden'} {...register()} />
