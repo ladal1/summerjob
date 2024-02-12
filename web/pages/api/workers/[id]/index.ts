@@ -54,11 +54,8 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     const worker = await getWorkerPhotoById(id)
     if(worker?.photoPath && worker?.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithSingleImage) delete it 
       deleteFile(worker.photoPath) // delete original image if necessary
-      console.log("here")
     }
     workerData.photoPath = photoPath
-    console.log(photoPath)
-    
   }
   /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
   else if (workerData.photoFileRemoved) {
