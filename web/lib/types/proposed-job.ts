@@ -3,6 +3,7 @@ import { Serialized } from './serialize'
 import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { Allergy, JobType } from '../prisma/client'
+import { customErrorMessages as err } from 'lib/lang/error-messages'
 
 useZodOpenApi
 
@@ -22,17 +23,32 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
 export const ProposedJobCreateSchema = z
   .object({
-    areaId: z.string().nullable(),
+    areaId: z.string().min(1, { message: err.emptyAreaId }),
     allergens: z.array(z.nativeEnum(Allergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
-    name: z.string().min(1),
-    address: z.string().min(1),
-    contact: z.string().min(1),
-    maxWorkers: z.number().min(1),
-    minWorkers: z.number().min(1),
-    strongWorkers: z.number().nonnegative(),
-    requiredDays: z.number().min(1),
+    name: z.string().min(1, { message: err.emptyProposedJobName }),
+    address: z.string().min(1, { message: err.emptyAdress }),
+    contact: z.string().min(1, { message: err.emptyContactInformation }),
+    maxWorkers: z
+      .number({ invalid_type_error: err.invalidTypeMaxWorkers })
+      .min(1, {message: err.emptyMaxWorkers })
+      .positive({ message: err.nonPositiveMaxWorkers })
+      .default(1),
+    minWorkers: z
+      .number({ invalid_type_error: err.invalidTypeMinWorkers })
+      .min(1, { message: err.emptyMinWorkers })
+      .positive({ message: err.nonPositiveMinWorkers })
+      .default(1),
+    strongWorkers: z
+      .number({ invalid_type_error: err.invalidTypeStrongWorkers })
+      .nonnegative({ message: err.nonNonNegativeStrongWorkers })
+      .default(0),
+    requiredDays: z
+      .number({ invalid_type_error: err.invalidTypeNumber })
+      .min(1, { message: err.emptyRequiredDays })
+      .positive({ message: err.nonPositiveNumber })
+      .default(1),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
     availability: z

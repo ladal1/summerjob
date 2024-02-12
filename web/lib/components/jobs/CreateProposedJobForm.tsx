@@ -21,6 +21,8 @@ import { TextInput } from '../forms/input/TextInput'
 import { TextAreInput } from '../forms/input/TextAreaInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { Label } from '../forms/Label'
+import FormWarning from '../forms/FormWarning'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -135,22 +137,26 @@ export default function CreateProposedJobForm({
               label="Celkový počet dní na splnění"
               placeholder="Počet dní"
               type="number"
+              min={1}
+              defaultValue={1}
               onKeyDown={(e) => allowForNumber(e)}
-              register={() => register("requiredDays", {onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
 
-            <label className="form-label fw-bold mt-4" htmlFor="minWorkers">
-              Počet pracantů minimálně / maximálně / z toho silných
-            </label>
-
+            <Label
+              id="minWorkers"
+              label="Počet pracantů minimálně / maximálně / z toho silných"
+            />
             <div className="d-flex w-50">
               <input
                 className="form-control p-1 ps-2"
                 id="minWorkers"
                 type="number"
                 min={1}
-                {...register('minWorkers', { valueAsNumber: true })}
+                defaultValue={1}
+                onKeyDown={(e) => allowForNumber(e)}
+                {...register('minWorkers', { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
@@ -158,7 +164,9 @@ export default function CreateProposedJobForm({
                 id="maxWorkers"
                 type="number"
                 min={1}
-                {...register('maxWorkers', { valueAsNumber: true })}
+                defaultValue={1}
+                onKeyDown={(e) => allowForNumber(e)}
+                {...register('maxWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
@@ -166,14 +174,20 @@ export default function CreateProposedJobForm({
                 id="strongWorkers"
                 type="number"
                 min={0}
-                {...register('strongWorkers', { valueAsNumber: true })}
+                defaultValue={0}
+                onKeyDown={(e) => allowForNumber(e)}
+                {...register('strongWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
             </div>
             {(errors.minWorkers ||
               errors.maxWorkers ||
-              errors.strongWorkers) && (
-              <div className="text-danger">Zadejte počty pracantů</div>
-            )}
+              errors.strongWorkers) && (<FormWarning message={
+                errors?.minWorkers?.message as string | undefined ||
+                errors?.maxWorkers?.message as string | undefined ||
+                errors?.strongWorkers?.message as string | undefined
+              } />)}
+
+
             <div className="d-flex flex-row">
               <DateSelectionInput
                 id="availability"

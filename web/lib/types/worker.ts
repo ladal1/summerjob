@@ -27,10 +27,12 @@ export const WorkerCreateSchema = z
     firstName: z
       .string()
       .min(1, { message: err.emptyFirstName })
+      .trim()
       .refine((name) => nameRegex.test(name), { message: err.invalidRegexName }),
     lastName: z
       .string()
       .min(1, { message: err.emptyLastName })
+      .trim()
       .refine((name) => nameRegex.test(name), { message: err.invalidRegexName }),
     email: z
       .string()
