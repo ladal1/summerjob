@@ -45,6 +45,7 @@ async function post(
 ) {
   const { json } = await parseForm(req)
   const result = validateOrSendError(ProposedJobCreateSchema, json, res)
+  console.log(result)
   if (!result) {
     return
   }
@@ -55,6 +56,7 @@ async function post(
     session
   )
   const job = await createProposedJob(result)
+  console.log(job)
   res.status(201).json(job)
 }
 

@@ -16,7 +16,7 @@ import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { ImageUploader } from '../forms/ImageUpload'
 import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
-import { TextAreInput } from '../forms/input/TextAreaInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -131,6 +131,13 @@ export default function CreateWorker({
             <OtherAttributesInput
               label="Další vlastnosti"
               register={register}
+              objects={[
+                {
+                  id: "strong",
+                  icon: "fas fa-dumbbell",
+                  label: "Silák",
+                }
+              ]}
             />
             <ImageUploader
               id="photoFile"
@@ -154,7 +161,7 @@ export default function CreateWorker({
                 </p>
               </>
             )}
-            <TextAreInput
+            <TextAreaInput
               id="note"
               label="Poznámka"
               placeholder="Poznámka"

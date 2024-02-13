@@ -5,7 +5,7 @@ import {
   type ProposedJobUpdateData,
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
-import { InvalidDataError, NoActiveEventError } from './internal-error'
+import { NoActiveEventError } from './internal-error'
 
 export async function getProposedJobById(
   id: string

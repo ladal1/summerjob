@@ -2,7 +2,6 @@ import { serializeProposedJobs } from 'lib/types/proposed-job'
 import { getProposedJobs } from 'lib/data/proposed-jobs'
 import ProposedJobsClientPage from 'lib/components/jobs/JobsClientPage'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
-import ErrorPage404 from 'lib/components/404/404'
 
 export const dynamic = 'force-dynamic'
 

@@ -17,6 +17,10 @@ import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import RidesList from './RidesList'
+import { TextInput } from '../forms/input/TextInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { FilterSelectInput } from '../forms/input/FilterSelectInput'
+import { useRouter } from 'next/navigation'
 
 interface EditActiveJobProps {
   serializedJob: Serialized
@@ -45,6 +49,8 @@ export default function EditActiveJobForm({
     },
   })
 
+  const router = useRouter()
+
   const onSubmit = (data: ActiveJobUpdateData) => {
     if (data.responsibleWorkerId === '') {
       delete data.responsibleWorkerId
@@ -56,10 +62,28 @@ export default function EditActiveJobForm({
     })
   }
 
+  const onConfirmationClosed = () => {
+    setSaved(false)
+    router.back()
+  }
+
   const selectResponsibleWorker = (item: FilterSelectItem) => {
     setValue('responsibleWorkerId', item.id)
   }
 
+  function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
+    return {
+      id: worker.id,
+      searchable: `${worker.firstName} ${worker.lastName}`,
+      name: `${worker.firstName} ${worker.lastName}`,
+      item: (
+        <span>
+          {worker.firstName} {worker.lastName}
+        </span>
+      ),
+    }
+  }
+  
   return (
     <>
       <div className="row">
@@ -71,31 +95,20 @@ export default function EditActiveJobForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="hidden" />
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="public-description"
-            >
-              Popis
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
-              id="public-description"
-              rows={3}
-              {...register('publicDescription')}
-            ></textarea>
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="private-description"
-            >
-              Poznámka pro organizátory
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
-              id="private-description"
-              rows={3}
-              {...register('privateDescription')}
-            ></textarea>
+            <TextAreaInput
+              id="publicDescription"
+              label="Veřejný popis"
+              placeholder="Popis"
+              rows={4}
+              register={() => register("publicDescription")}
+            />
+            <TextAreaInput
+              id="privateDescription"
+              label="Poznámka pro organizátory"
+              placeholder="Poznámka"
+              rows={4}
+              register={() => register("privateDescription")}
+            />
             <div>
               <small className="text-muted mt-2">
                 Popis a poznámka pro organizátory se vztahují jen k aktuálně
@@ -105,21 +118,19 @@ export default function EditActiveJobForm({
               <pre className="d-inline m-2">Upravit další parametry jobu</pre>
               <small className="text-muted mt-2">níže.</small>
             </div>
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="responsible-worker"
-            >
-              Zodpovědný pracant
-            </label>
-            <input type={'hidden'} {...register('responsibleWorkerId')} />
-            <FilterSelect
-              items={job.workers.map(workerToSelectItem)}
+            <FilterSelectInput
+              id="responsibleWorkerId"
+              label="Zodpovědný pracant"
               placeholder="Vyberte pracanta"
-              onSelected={selectResponsibleWorker}
+              items={job.workers.map(workerToSelectItem)}
+              onSelect={selectResponsibleWorker}
               {...(job.responsibleWorker && {
                 defaultSelected: workerToSelectItem(job.responsibleWorker),
               })}
+              errors={errors}
+              register={() => register('responsibleWorkerId')}
             />
+            
             <label className="form-label fw-bold mt-4" htmlFor="rides">
               Přiřazené jízdy
             </label>
@@ -143,7 +154,7 @@ export default function EditActiveJobForm({
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               >
                 Zpět
               </button>
@@ -157,21 +168,8 @@ export default function EditActiveJobForm({
           </form>
         </div>
       </div>
-      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   )
-}
-
-function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
-  return {
-    id: worker.id,
-    searchable: `${worker.firstName} ${worker.lastName}`,
-    name: `${worker.firstName} ${worker.lastName}`,
-    item: (
-      <span>
-        {worker.firstName} {worker.lastName}
-      </span>
-    ),
-  }
 }

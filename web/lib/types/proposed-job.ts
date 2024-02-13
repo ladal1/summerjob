@@ -23,7 +23,7 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
 export const ProposedJobCreateSchema = z
   .object({
-    areaId: z.string().min(1, { message: err.emptyAreaId }),
+    areaId: z.string().min(1, { message: err.emptyAreaId }).nullable(),
     allergens: z.array(z.nativeEnum(Allergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
@@ -60,7 +60,7 @@ export const ProposedJobCreateSchema = z
           format: 'date',
         },
       }),
-    jobType: z.nativeEnum(JobType),
+    jobType: z.nativeEnum(JobType, { required_error: err.emptyJobType }),
   })
   .strict()
 

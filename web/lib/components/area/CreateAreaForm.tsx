@@ -8,10 +8,15 @@ import { useForm } from 'react-hook-form'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { z } from 'zod'
+import { TextInput } from '../forms/input/TextInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 
 interface CreateAreaProps {
   eventId: string
 }
+
+const schema = AreaCreateSchema.omit({ summerJobEventId: true })
+type FormData = z.infer<typeof schema>
 
 export default function CreateAreaForm({ eventId }: CreateAreaProps) {
   const { trigger, error, isMutating, reset } = useAPIAreaCreate(eventId)
@@ -23,7 +28,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
   } = useForm<AreaCreateData>({
     resolver: zodResolver(schema),
   })
-
+  
   const onSubmit = (data: FormData) => {
     trigger(data, {
       onSuccess: () => {
@@ -34,6 +39,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
 
   const router = useRouter()
   const onSuccessMessageClose = () => {
+    setSaved(false)
     router.back()
     router.refresh()
   }
@@ -48,49 +54,33 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Název oblasti
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="name"
-              {...register('name')}
+              label="Název oblasti"
+              placeholder="Název oblasti"
+              register={() => register("name")}
+              errors={errors}
             />
-            {errors.name && (
-              <div className="text-danger">Zadejte název oblasti</div>
-            )}
-
-            <div className="form-check mt-4">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="requiresCar"
-                {...register('requiresCar')}
-              />
-              <label className="form-check-label" htmlFor="requiresCar">
-                <i className="fa fa-car ms-2 me-2"></i>
-                Do oblasti je nutné dojet autem
-              </label>
-            </div>
-
-            <div className="form-check mt-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="supportsAdoration"
-                {...register('supportsAdoration')}
-              />
-              <label className="form-check-label" htmlFor="supportsAdoration">
-                <i className="fa fa-church ms-2 me-2"></i>V oblasti je možné
-                adorovat
-              </label>
-            </div>
-
+            <OtherAttributesInput
+              register={register}
+              objects={[
+                {
+                  id: "requiresCar",
+                  icon: "fa fa-car",
+                  label: "Do oblasti je nutné dojet autem",
+                }, 
+                {
+                  id: "supportsAdoration",
+                  icon: "fa fa-church",
+                  label: "V oblasti je možné adorovat",
+                }
+              ]}
+            />
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               >
                 Zpět
               </button>
@@ -109,6 +99,3 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
     </>
   )
 }
-
-const schema = AreaCreateSchema.omit({ summerJobEventId: true })
-type FormData = z.infer<typeof schema>

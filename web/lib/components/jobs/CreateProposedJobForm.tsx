@@ -10,19 +10,20 @@ import {
 import { Serialized } from 'lib/types/serialize'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
-import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { allergyMapping } from '../../data/allergyMapping'
 import { jobTypeMapping } from '../../data/jobTypeMapping'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
-import { TextAreInput } from '../forms/input/TextAreaInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
 import { Label } from '../forms/Label'
 import FormWarning from '../forms/FormWarning'
+import { AlergyPillInput } from '../forms/input/AlergyPillInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { FilterSelectItem } from '../filter-select/FilterSelect'
+import { useRouter } from 'next/navigation'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -51,6 +52,8 @@ export default function CreateProposedJobForm({
     },
   })
 
+  const router = useRouter()
+  
   const onSubmit = (data: ProposedJobCreateData) => {
     trigger(data, {
       onError: e => {
@@ -60,6 +63,11 @@ export default function CreateProposedJobForm({
         setSaved(true)
       },
     })
+  }
+
+  const onConfirmationClosed = () => {
+    setSaved(false)
+    router.back()
   }
 
   const selectArea = (item: FilterSelectItem) => {
@@ -78,6 +86,15 @@ export default function CreateProposedJobForm({
     })
   )
 
+  function areaToSelectItem(area: Area): FilterSelectItem {
+    return {
+      id: area.id,
+      searchable: `${area.name}`,
+      name: area.name,
+      item: <span>{area.name}</span>,
+    }
+  }
+  
   return (
     <>
       <div className="row">
@@ -95,14 +112,14 @@ export default function CreateProposedJobForm({
               register={() => register("name")}
               errors={errors}
             />
-            <TextAreInput
+            <TextAreaInput
               id="publicDescription"
               label="Popis navrhované práce"
               placeholder="Popis"
               rows={4}
               register={() => register("publicDescription")}
             />
-            <TextAreInput
+            <TextAreaInput
               id="privateDescription"
               label="Poznámka pro organizátory"
               placeholder="Poznámka"
@@ -187,7 +204,6 @@ export default function CreateProposedJobForm({
                 errors?.strongWorkers?.message as string | undefined
               } />)}
 
-
             <div className="d-flex flex-row">
               <DateSelectionInput
                 id="availability"
@@ -196,69 +212,44 @@ export default function CreateProposedJobForm({
                 days={allDates}
               />
             </div>
-            <div>
-              <label className="form-label fw-bold mt-4" htmlFor="area">
-                Typ práce
-              </label>
-              <input type={'hidden'} {...register('jobType')} />
-              <FilterSelect
-                items={jobTypeSelectItems}
-                placeholder="Vyberte typ práce"
-                onSelected={selectJobType}
-                defaultSelected={jobTypeSelectItems.find(
-                  item => item.id === JobType.OTHER
-                )}
-              />
-              {errors.jobType && (
-                <div className="text-danger">Vyberte typ práce</div>
+            <FilterSelectInput
+              id="jobType"
+              label="Typ práce"
+              placeholder="Vyberte typ práce"
+              items={jobTypeSelectItems}
+              onSelect={selectJobType}
+              defaultSelected={jobTypeSelectItems.find(
+                item => item.id === JobType.OTHER
               )}
-            </div>
-            <label className="form-label d-block fw-bold mt-4" htmlFor="email">
-              Alergie
-            </label>
-            <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(
-                ([allergyKey, allergyName]) => (
-                  <AllergyPill
-                    key={allergyKey}
-                    allergyId={allergyKey}
-                    allergyName={allergyName}
-                    register={() => register('allergens')}
-                  />
-                )
-              )}
-            </div>
-
-            <div className="form-check mt-4">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="hasFood"
-                {...register('hasFood')}
-              />
-              <label className="form-check-label" htmlFor="hasFood">
-                <i className="fa fa-utensils ms-2 me-2"></i>
-                Strava na místě
-              </label>
-            </div>
-            <div className="form-check mt-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="hasShower"
-                {...register('hasShower')}
-              />
-              <label className="form-check-label" htmlFor="hasShower">
-                <i className="fa fa-shower ms-2 me-2"></i>
-                Sprcha na místě
-              </label>
-            </div>
+              errors={errors}
+              register={() => register('jobType')}
+            />
+            <AlergyPillInput
+              label="Alergeny"
+              register={() => register("allergens")}
+            />
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+              objects={[
+                {
+                  id: "hasFood",
+                  icon: "fa fa-utensils",
+                  label: "Strava na místě",
+                }, 
+                {
+                  id: "hasShower",
+                  icon: "fa fa-shower",
+                  label: "Sprcha na místě",
+                }
+              ]}
+            />
 
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               >
                 Zpět
               </button>
@@ -272,17 +263,8 @@ export default function CreateProposedJobForm({
           </form>
         </div>
       </div>
-      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   )
-}
-
-function areaToSelectItem(area: Area): FilterSelectItem {
-  return {
-    id: area.id,
-    searchable: `${area.name}`,
-    name: area.name,
-    item: <span>{area.name}</span>,
-  }
 }

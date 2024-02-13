@@ -1,14 +1,14 @@
 
 interface LabelProps {
   id: string
-  label: string
+  label?: string
   margin?: boolean
   mdNone?: boolean
 }
 
 export const Label = ({
   id,
-  label,
+  label = '',
   margin = true,
   mdNone = false
 }: LabelProps) => {

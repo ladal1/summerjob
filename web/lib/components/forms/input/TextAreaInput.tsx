@@ -12,7 +12,7 @@ interface TextAreaProps extends DetailedHTMLProps<
   margin?: boolean
 }
 
-export const TextAreInput = ({
+export const TextAreaInput = ({
   id,
   label,
   register,

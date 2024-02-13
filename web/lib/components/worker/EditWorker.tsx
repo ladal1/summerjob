@@ -18,7 +18,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { ImageUploader } from '../forms/ImageUpload'
 import { Label } from '../forms/Label'
-import { TextAreInput } from '../forms/input/TextAreaInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -186,6 +186,13 @@ export default function EditWorker({
               <OtherAttributesInput
                 label="Další vlastnosti"
                 register={register}
+                objects={[
+                  {
+                    id: "strong",
+                    icon: "fas fa-dumbbell",
+                    label: "Silák",
+                  }
+                ]}
               />
             )}
             {!isProfilePage && (
@@ -265,7 +272,7 @@ export default function EditWorker({
             )}
 
             {!isProfilePage && (
-              <TextAreInput
+              <TextAreaInput
                 id="note"
                 label="Poznámka"
                 placeholder="Poznámka"
@@ -293,7 +300,7 @@ export default function EditWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
+            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => {setSaved(false)}} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

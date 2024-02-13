@@ -6,7 +6,9 @@ import { useForm } from 'react-hook-form'
 import { TextInput } from '../forms/input/TextInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
-import { TextAreInput } from '../forms/input/TextAreaInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { useRouter } from 'next/navigation'
+import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
 
 type CarEditFormProps = {
   onSubmit: (data: CarCreateData) => void
@@ -31,8 +33,23 @@ export default function CarCreateForm({
     },
   })
 
+  const router = useRouter()
+
   const onOwnerSelected = (item: FilterSelectItem) => {
     setValue('ownerId', item.id)
+  }
+
+  function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
+    return {
+      id: worker.id,
+      name: `${worker.firstName} ${worker.lastName}`,
+      searchable: `${worker.firstName} ${worker.lastName}`,
+      item: (
+        <div>
+          {worker.firstName} {worker.lastName}
+        </div>
+      ),
+    }
   }
 
   return (
@@ -48,13 +65,11 @@ export default function CarCreateForm({
             <TextInput
               id="name"
               label="Název"
-              type="text"
               placeholder="Model auta, značka"
-              maxLength={50}
               errors={errors}
               register={() => register("name")}
             />
-            <TextAreInput
+            <TextAreaInput
               id="description"
               label="Poznámka pro organizátory"
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
@@ -67,8 +82,10 @@ export default function CarCreateForm({
               type="number"
               placeholder="Počet sedadel"
               min={1}
+              defaultValue={4}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("seats", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
-              register={() => register("seats", { valueAsNumber: true })}
             />
             <FilterSelectInput
               id="ownerId"
@@ -76,8 +93,8 @@ export default function CarCreateForm({
               placeholder="Vyberte majitele"
               items={owners.map(workerToSelectItem)}
               onSelect={onOwnerSelected}
-              errors={errors}
               register={() => register('ownerId')}
+              errors={errors}
             />
             <TextInput
               id="odometerStart"
@@ -85,15 +102,16 @@ export default function CarCreateForm({
               type="number"
               placeholder="Počáteční stav kilometrů"
               min={0}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("odometerStart", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
-              register={() => register("odometerStart", { valueAsNumber: true })}
             />
 
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               >
                 Zpět
               </button>
@@ -109,17 +127,4 @@ export default function CarCreateForm({
       </div>
     </>
   )
-}
-
-function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
-  return {
-    id: worker.id,
-    name: `${worker.firstName} ${worker.lastName}`,
-    searchable: `${worker.firstName} ${worker.lastName}`,
-    item: (
-      <div>
-        {worker.firstName} {worker.lastName}
-      </div>
-    ),
-  }
 }

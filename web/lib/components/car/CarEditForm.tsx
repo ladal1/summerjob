@@ -2,6 +2,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CarComplete, CarUpdateData, CarUpdateSchema } from 'lib/types/car'
 import { useForm } from 'react-hook-form'
+import { TextInput } from '../forms/input/TextInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { Router } from 'next/router'
+import { useRouter } from 'next/navigation'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 
 type CarEditFormProps = {
   car: CarComplete
@@ -31,6 +37,8 @@ export default function CarEditForm({
     },
   })
 
+  const router = useRouter()
+
   return (
     <>
       <div className="row">
@@ -43,110 +51,75 @@ export default function CarEditForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Název
-            </label>
-            <input
+            <TextInput
               id="name"
-              className="form-control p-0 fs-5"
-              type="text"
+              label="Název"
               placeholder="Model auta, značka"
-              {...register('name')}
+              errors={errors}
+              register={() => register("name")}
             />
-            {errors.name?.message && (
-              <p className="text-danger">{errors.name.message as string}</p>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="description">
-              Poznámka pro organizátory
-            </label>
-            <textarea
+            <TextAreaInput
               id="description"
-              className="form-control border p-1 fs-5"
-              rows={3}
-              placeholder="Popis"
-              {...register('description')}
+              label="Poznámka pro organizátory"
+              placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
+              rows={4}
+              register={() => register("description")}
             />
-            <label className="form-label fw-bold mt-4" htmlFor="seats">
-              Počet sedadel
-            </label>
-            <input
+            <TextInput
               id="seats"
-              className="form-control p-0 fs-5"
+              label="Počet sedadel"
               type="number"
               placeholder="Počet sedadel"
-              min="1"
-              {...register('seats', { valueAsNumber: true })}
+              min={1}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("seats", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              errors={errors}
             />
-            {errors.seats?.message && (
-              <p className="text-danger">{errors.seats.message as string}</p>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="odometer-start">
-              Počáteční stav kilometrů
-            </label>
-            <input
-              id="odometer-start"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="odometerStart"
+              label="Počáteční stav kilometrů"
               type="number"
               placeholder="Počáteční stav kilometrů"
-              min="0"
-              {...register('odometerStart', { valueAsNumber: true })}
+              min={0}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("odometerStart", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              errors={errors}
             />
-            {errors.odometerStart?.message && (
-              <p className="text-danger">
-                {errors.odometerStart.message as string}
-              </p>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="odometer-end">
-              Konečný stav kilometrů
-            </label>
-            <input
-              id="odometer-end"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="odometerEnd"
+              label="Konečný stav kilometrů"
               type="number"
               placeholder="Konečný stav kilometrů"
-              min="0"
-              {...register('odometerEnd', { valueAsNumber: true })}
+              min={0}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("odometerEnd", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              errors={errors}
             />
-            {errors.odometerEnd?.message && (
-              <p className="text-danger">
-                {errors.odometerEnd.message as string}
-              </p>
-            )}
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="odometer-reimbursementAmount"
-            >
-              Částka k proplacení
-            </label>
-            <input
-              id="odometer-reimbursementAmount"
-              className="form-control p-0 fs-5"
+            <TextInput
+              id="reimbursementAmount"
+              label="Částka k proplacení"
               type="number"
               placeholder="Částka k proplacení"
-              min="0"
-              {...register('reimbursementAmount', {
-                valueAsNumber: true,
-              })}
+              min={0}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("reimbursementAmount", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              errors={errors}
             />
-            <div className="form-check mt-4">
-              <input
-                className="form-check-input me-2"
-                type="checkbox"
-                id="odometer-reimbursed"
-                {...register('reimbursed')}
-              />
-              <label
-                className="form-check-label form-label fw-bold"
-                htmlFor="odometer-reimbursed"
-              >
-                Proplaceno
-              </label>
-            </div>
+            <OtherAttributesInput
+              register={register}
+              objects={[
+                {
+                  id: "reimbursed",
+                  icon: "fa-solid fa-hand-holding-dollar",
+                  label: "Proplaceno",
+                },
+              ]}
+            />
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               >
                 Zpět
               </button>

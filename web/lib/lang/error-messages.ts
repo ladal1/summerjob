@@ -25,6 +25,14 @@ export const customErrorMessages = {
   nonPositiveMaxWorkers: 'Zadejte kladný počet max. pracantů',
   nonPositiveMinWorkers: 'Zadejte kladný počet min. pracantů',
   nonNonNegativeStrongWorkers: 'Zadejte nezáporný počet silných pracantů',
+  emptyJobType: 'Vyberte typ práce',
+
+  emptyOwnerOfCar: 'Zadejte vlastníka auta',
+  emptyCarName: 'Zadejte název, model auta, značku',
+  emptyCarSeats: 'Zadejte počet sedadel',
+  emptyOdometerStart: 'Zadejte počáteční stav tachometru',
+
+  emptyAreaName: 'Zadejte název oblasti',
 
   nonPositiveNumber: 'Zadejte kladné číslo',
   nonNonNegativeNumber: 'Zadejte nezáporné číslo',
