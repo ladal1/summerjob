@@ -83,6 +83,8 @@ export default function EditActiveJobForm({
       ),
     }
   }
+
+  const workerSelectItems = job.workers.map(workerToSelectItem)
   
   return (
     <>
@@ -122,11 +124,14 @@ export default function EditActiveJobForm({
               id="responsibleWorkerId"
               label="Zodpovědný pracant"
               placeholder="Vyberte pracanta"
-              items={job.workers.map(workerToSelectItem)}
+              items={workerSelectItems}
               onSelect={selectResponsibleWorker}
               {...(job.responsibleWorker && {
                 defaultSelected: workerToSelectItem(job.responsibleWorker),
               })}
+              defaultSelected={workerSelectItems.find(
+                item => item.id === job.responsibleWorkerId
+              )}
               errors={errors}
               register={() => register('responsibleWorkerId')}
             />

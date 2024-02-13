@@ -87,29 +87,27 @@ export default function EditProposedJobForm({
     router.back()
   }
 
-  const selectJobType = (item: FilterSelectItem) => {
-    setValue('jobType', item.id as JobType)
+  const selectJobType = (id: string) => {
+    setValue('jobType', id as JobType)
   }
 
-  const selectArea = (item: FilterSelectItem) => {
-    setValue('areaId', item.id as string)
+  const selectArea = (id: string) => {
+    setValue('areaId', id)
   }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
     ([jobTypeKey, jobTypeToSelectName]) => ({
       id: jobTypeKey,
       name: jobTypeToSelectName,
-      searchable: jobTypeToSelectName,
-      item: <span> {jobTypeToSelectName} </span>,
     })
   )
+
+  const areaSelectItems = areas.map(areaToSelectItem)
 
   function areaToSelectItem(area: Area): FilterSelectItem {
     return {
       id: area.id,
-      searchable: `${area.name}`,
       name: area.name,
-      item: <span>{area.name}</span>,
     }
   }
 
@@ -148,8 +146,11 @@ export default function EditProposedJobForm({
               id="areaId"
               label="Oblast jobu"
               placeholder={ job.area?.name ?? "Vyberte oblast" }
-              items={areas.map(areaToSelectItem)}
-              onSelect={selectArea}
+              items={areaSelectItems}
+              onSelected={selectArea}
+              defaultSelected={areaSelectItems.find(
+                item => item.id === job.areaId
+              )}
               errors={errors}
               register={() => register('areaId')}
             />
@@ -236,7 +237,7 @@ export default function EditProposedJobForm({
               label="Typ práce"
               placeholder={jobTypeMapping[job.jobType] ?? "Vyberte typ práce"}
               items={jobTypeSelectItems}
-              onSelect={selectJobType}
+              onSelected={selectJobType}
               defaultSelected={jobTypeSelectItems.find(
                 item => item.id === JobType.OTHER
               )}

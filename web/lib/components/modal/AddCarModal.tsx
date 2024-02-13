@@ -1,8 +1,8 @@
 import { FieldErrors, UseFormRegister } from 'react-hook-form'
-import { NoteInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Modal, ModalSize } from './Modal'
 import { CarCreateData } from 'lib/types/car'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
 
 // TODO: Finish AddCarModal or remove
 
@@ -32,11 +32,11 @@ export default function AddCarModal({
             register={() => register("name")}
             margin={false}
           />
-          <NoteInput
+          <TextAreaInput
             id="description"
             label="Poznámka pro organizátory"
             placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
-            rows={3}
+            rows={4}
             register={() => register("description")}
           />
           <TextInput

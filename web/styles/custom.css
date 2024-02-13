@@ -156,6 +156,47 @@ img.smj-nav-logo {
   background-color: #ffd9d9;
 }
 
+.outline-none {
+  outline: none;
+}
+
+.smj-filter-input {
+  min-width: 200px;
+}
+
+.smj-filter-input option:first-of-type {
+  color: #888;
+}
+
+.smj-filter-input option {
+  color: #000;
+}
+
+.smj-filter-select:focus {
+  box-shadow: inset 0 -2px 0 #fdc345; 
+}
+
+.smj-filter-select {
+  outline: none;
+  width: 100%;
+  padding:0 30px 0 10px;
+  -webkit-padding-end: 30px;
+  -webkit-padding-start: 10px;
+}
+
+.smj-filter-select option {
+  width: 100%;
+  color: white !important;
+}
+
+.smj-filter-select option:hover {
+  background-color: #888 !important;
+}
+
+.smj-filter-select option:checked {
+  background-color: #fdc345 !important;
+}
+
 .smj-dropdown-menu {
   position: absolute;
   inset: 0px auto auto 0px;
@@ -171,24 +212,8 @@ img.smj-nav-logo {
   background-color: #fdc345;
 }
 
-.outline-none {
-  outline: none;
-}
-
-.smj-filter-input {
-  min-width: 200px;
-}
-
-.smj-filter-input option:first-of-type {
-  color: #888;
-}
-
 .smj-default-option {
   color: #888;
-}
-
-.smj-filter-input option {
-  color: #000;
 }
 
 .sort-inactive {

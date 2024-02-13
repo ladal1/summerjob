@@ -17,7 +17,7 @@ interface FilterSelectInputProps<FormData extends FieldValues> {
   items: FilterSelectItem[]
   register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
-  onSelect: (item: FilterSelectItem) => void
+  onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem
 }
 
@@ -28,7 +28,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   items,
   register,
   errors,
-  onSelect,
+  onSelected,
   defaultSelected,
 }: FilterSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
@@ -40,9 +40,10 @@ export const FilterSelectInput = <FormData extends FieldValues>({
         label={label}
       />
       <FilterSelect
+        id={id}
         placeholder={placeholder}
         items={items}
-        onSelected={onSelect}
+        onSelected={onSelected}
         defaultSelected={defaultSelected}
       />
       <input type={'hidden'} {...register()} />
