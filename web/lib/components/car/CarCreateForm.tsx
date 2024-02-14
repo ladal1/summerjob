@@ -35,8 +35,8 @@ export default function CarCreateForm({
 
   const router = useRouter()
 
-  const onOwnerSelected = (item: FilterSelectItem) => {
-    setValue('ownerId', item.id)
+  const onOwnerSelected = (id: string) => {
+    setValue('ownerId', id)
   }
 
   function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
@@ -44,11 +44,6 @@ export default function CarCreateForm({
       id: worker.id,
       name: `${worker.firstName} ${worker.lastName}`,
       searchable: `${worker.firstName} ${worker.lastName}`,
-      item: (
-        <div>
-          {worker.firstName} {worker.lastName}
-        </div>
-      ),
     }
   }
 
@@ -92,7 +87,7 @@ export default function CarCreateForm({
               label="Majitel"
               placeholder="Vyberte majitele"
               items={owners.map(workerToSelectItem)}
-              onSelect={onOwnerSelected}
+              onSelected={onOwnerSelected}
               register={() => register('ownerId')}
               errors={errors}
             />

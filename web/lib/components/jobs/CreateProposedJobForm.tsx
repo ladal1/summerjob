@@ -70,11 +70,11 @@ export default function CreateProposedJobForm({
     router.back()
   }
 
-  const selectArea = (item: FilterSelectItem) => {
-    setValue('areaId', item.id)
+  const selectArea = (id: string) => {
+    setValue('areaId', id)
   }
-  const selectJobType = (item: FilterSelectItem) => {
-    setValue('jobType', item.id as JobType)
+  const selectJobType = (id: string) => {
+    setValue('jobType', id as JobType)
   }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
@@ -82,7 +82,6 @@ export default function CreateProposedJobForm({
       id: jobTypeKey,
       name: jobTypeToSelectName,
       searchable: jobTypeToSelectName,
-      item: <span> {jobTypeToSelectName} </span>,
     })
   )
 
@@ -91,7 +90,6 @@ export default function CreateProposedJobForm({
       id: area.id,
       searchable: `${area.name}`,
       name: area.name,
-      item: <span>{area.name}</span>,
     }
   }
   
@@ -131,7 +129,7 @@ export default function CreateProposedJobForm({
               label="Oblast jobu"
               placeholder="Vyberte oblast"
               items={areas.map(areaToSelectItem)}
-              onSelect={selectArea}
+              onSelected={selectArea}
               errors={errors}
               register={() => register('areaId')}
             />
@@ -217,7 +215,7 @@ export default function CreateProposedJobForm({
               label="Typ práce"
               placeholder="Vyberte typ práce"
               items={jobTypeSelectItems}
-              onSelect={selectJobType}
+              onSelected={selectJobType}
               defaultSelected={jobTypeSelectItems.find(
                 item => item.id === JobType.OTHER
               )}

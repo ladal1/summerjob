@@ -67,8 +67,8 @@ export default function EditActiveJobForm({
     router.back()
   }
 
-  const selectResponsibleWorker = (item: FilterSelectItem) => {
-    setValue('responsibleWorkerId', item.id)
+  const selectResponsibleWorker = (id: string) => {
+    setValue('responsibleWorkerId', id)
   }
 
   function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
@@ -76,11 +76,6 @@ export default function EditActiveJobForm({
       id: worker.id,
       searchable: `${worker.firstName} ${worker.lastName}`,
       name: `${worker.firstName} ${worker.lastName}`,
-      item: (
-        <span>
-          {worker.firstName} {worker.lastName}
-        </span>
-      ),
     }
   }
 
@@ -125,7 +120,7 @@ export default function EditActiveJobForm({
               label="Zodpovědný pracant"
               placeholder="Vyberte pracanta"
               items={workerSelectItems}
-              onSelect={selectResponsibleWorker}
+              onSelected={selectResponsibleWorker}
               {...(job.responsibleWorker && {
                 defaultSelected: workerToSelectItem(job.responsibleWorker),
               })}
