@@ -88,17 +88,18 @@ export default function EditProposedJobForm({
   }
 
   const selectJobType = (id: string) => {
-    setValue('jobType', id as JobType)
+    setValue('jobType', id as JobType, { shouldDirty: true, shouldValidate: true })
   }
 
   const selectArea = (id: string) => {
-    setValue('areaId', id)
+    setValue('areaId', id, { shouldDirty: true, shouldValidate: true })
   }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
     ([jobTypeKey, jobTypeToSelectName]) => ({
       id: jobTypeKey,
       name: jobTypeToSelectName,
+      searchable: jobTypeToSelectName
     })
   )
 
@@ -108,6 +109,7 @@ export default function EditProposedJobForm({
     return {
       id: area.id,
       name: area.name,
+      searchable: `${area.name}`
     }
   }
 
