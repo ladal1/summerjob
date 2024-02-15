@@ -9,8 +9,7 @@ import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getPhotoPath, parseFormWithSingleImage } from 'lib/api/parse-form'
-import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
-import formidable from 'formidable'
+import { createDirectory, deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -40,7 +39,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const { files, json } = await parseFormWithSingleImage(req, id, getUploadDirForImages())
+  const { files, json } = await parseFormWithSingleImage(req, id, getUploadDirForImages() + '/workers')
 
   /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)

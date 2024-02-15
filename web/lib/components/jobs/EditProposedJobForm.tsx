@@ -163,6 +163,7 @@ export default function EditProposedJobForm({
               register={() => register("address")}
               errors={errors}
             />
+            
             <TextInput
               id="contact"
               label="Kontakt"

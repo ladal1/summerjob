@@ -14,7 +14,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import AddCarModal from '../modal/AddCarModal'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
-import { ImageUploader } from '../forms/ImageUpload'
+import { ImageUploader } from '../forms/ImageUploader'
 import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 

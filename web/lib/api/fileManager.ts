@@ -45,3 +45,12 @@ export const updatePhotoPathByNewFilename = (
   // create new path
   return `${directory}${newFilename}${fileType}`
 } 
+
+export const createDirectory = async (dirName: string) => {
+  try {
+    await promises.access(dirName)
+  }
+  catch (error) {
+    await promises.mkdir(dirName)
+  }
+}

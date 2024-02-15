@@ -9,8 +9,8 @@ export const customErrorMessages = {
   emptyPhone: 'Zadejte telefonní číslo',
   invalidRegexPhone: 'Zadejte platné telefonní číslo',
 
-  maxCapacityImage: 'Nahraný soubor je příliš velký',
-  unsuportedTypeImage: 'Nepodporovaná koncovka souboru',
+  maxCapacityImage: 'Nahraný obrázek je příliš velký - max 10MB',
+  unsuportedTypeImage: 'Nepodporovaná koncovka souboru - pouze obrázky',
 
   emptyProposedJobName: 'Zadejte název jobu',
   emptyAreaId: 'Vyberte oblast',

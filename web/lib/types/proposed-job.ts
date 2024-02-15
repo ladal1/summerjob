@@ -51,6 +51,12 @@ export const ProposedJobCreateSchema = z
       .default(1),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
+    photoFiles: z
+      .custom<File[]>()
+      .refine((files) => !files || (!!files && files.map((file) => file.size <= 1024*1024*10)), err.maxCapacityImage) // 10 MB = 1024*1024*10
+      .refine((files) => !files || (!!files && files.map((file) => file.type?.startsWith("image"))), err.unsuportedTypeImage) // any image
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
+      .optional(),
     availability: z
       .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
       .openapi({

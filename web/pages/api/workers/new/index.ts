@@ -17,7 +17,7 @@ async function post(
   session: ExtendedSession
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDir = getUploadDirForImages()
+  const uploadDir = getUploadDirForImages() + '/workers'
   const { files, json } = await parseFormWithSingleImage(req, temporaryName, uploadDir)
 
   const singleWorker = validateOrSendError(WorkerCreateSchema, json, res)

@@ -1,6 +1,8 @@
-import type { NextApiRequest } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import mime from 'mime'
 import formidable from 'formidable'
+import { createDirectory } from './fileManager'
+import { ApiInternalServerError } from 'lib/types/api-error'
 export const FormidableError = formidable.errors.FormidableError
 
 /* Get simple data from string jsonData containing json data. */
@@ -40,6 +42,9 @@ export const parseFormWithSingleImage = async (
   nameOfImage: string,
   uploadDir: string
 ): Promise<{ fields: formidable.Fields; files: formidable.Files; json: any }> => {
+  
+    createDirectory(uploadDir)
+    
     return await new Promise(async (resolve, reject) => {
     const form = formidable({
       maxFiles: 1,

@@ -16,9 +16,10 @@ import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { ImageUploader } from '../forms/ImageUpload'
+import { ImageUploader } from '../forms/ImageUploader'
 import { Label } from '../forms/Label'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { Test } from '../forms/input/Test'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -105,7 +106,7 @@ export default function EditWorker({
 
   //#region File
 
-  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on.  */
+  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on. */
   const setPhotoFileState = (state: boolean) => {
     setValue('photoFileRemoved', state, { shouldDirty: state, shouldValidate: state })
   }
@@ -196,13 +197,14 @@ export default function EditWorker({
               />
             )}
             {!isProfilePage && (
-              <ImageUploader
+              <Test
                 id="photoFile"
-                photoInit={worker.photoPath ? `/api/workers/${worker.id}/photo` : null}
+                photoInit={null}
                 setPhotoFileState={setPhotoFileState}
                 errors={errors}
                 register={register}
                 removePhoto={removePhoto}
+                multiple={true}
               />
             )}
             {(carAccess || isProfilePage) && (

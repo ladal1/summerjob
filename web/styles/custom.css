@@ -502,9 +502,18 @@ img.smj-nav-logo {
   display: inline-block;
 }
 
+.smj-photo-icon-delete {
+  font-size: 24px;
+}
+
 .photo-default {
   width: 200px;
   height: 200px;
+}
+
+
+.smj-add-photo-icon:hover {
+  background-color: #e9ecef;
 }
 
 .smj-file-upload {
