@@ -21,7 +21,7 @@
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1495px) {
   .navbar-nav .navbar-div {
     padding-top: 6px;
     padding-bottom: 6px;
@@ -33,6 +33,10 @@
 .nav-link.active .navbar-div {
   background: #f9da68;
   border-style: none;
+}
+
+.navbar-div span {
+  margin-left: 9px;
 }
 
 .header-controlbar .btn {
@@ -98,10 +102,6 @@
 img.smj-nav-logo {
   width: 60px;
   height: auto;
-}
-
-.navbar-div span {
-  margin-left: 9px;
 }
 
 #btn-nav-logout {

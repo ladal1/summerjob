@@ -1,6 +1,6 @@
 interface ModalProps {
   children: React.ReactNode
-  title: string
+  title?: string
   size: ModalSize
   onClose?: () => void
 }
