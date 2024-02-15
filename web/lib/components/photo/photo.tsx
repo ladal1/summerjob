@@ -1,7 +1,7 @@
-export const calculateDimensions = (naturalWidth: number, naturalHeight: number, maxWidth: number, maxHeight: number) => {
+export const calculateDimensions = (naturalWidth: number, naturalHeight: number, maxSize: {maxWidth: number, maxHeight: number}) => {
   const aspectRatio = naturalWidth / naturalHeight
 
-  if (naturalWidth < maxWidth && naturalHeight < maxWidth) {
+  if (naturalWidth < maxSize.maxWidth && naturalHeight < maxSize.maxWidth) {
     return {
       width: naturalWidth, 
       height: naturalHeight
@@ -9,14 +9,14 @@ export const calculateDimensions = (naturalWidth: number, naturalHeight: number,
   }
   else if (naturalWidth >= naturalHeight) {
     return {
-      width: Math.min(maxWidth, naturalWidth), 
-      height: Math.min(maxWidth / aspectRatio, maxHeight)
+      width: Math.min(maxSize.maxWidth, naturalWidth), 
+      height: Math.min(maxSize.maxWidth / aspectRatio, maxSize.maxHeight)
     }
   } 
   else {
     return {
-      width: Math.min(maxHeight * aspectRatio, maxWidth), 
-      height: Math.min(maxHeight, naturalHeight)
+      width: Math.min(maxSize.maxHeight * aspectRatio, maxSize.maxWidth), 
+      height: Math.min(maxSize.maxHeight, naturalHeight)
     }
   }
 }

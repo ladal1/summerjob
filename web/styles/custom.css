@@ -507,20 +507,15 @@ img.smj-nav-logo {
   height: 200px;
 }
 
-.photo-uploaded {
-  width: 320px;
-  height: 320px;
-  object-fit: 'cover';
-  fill: 'fixed';
+.smj-file-upload {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
 }
 
 @media (max-width: 390px) {
   .photo-default {
-    width: 100px;
-    height: 100px;
-  }
-  .photo-uploaded {
-    width: 220px;
-    height: 220px;
+    width: 130px;
+    height: 130px;
   }
 }

@@ -43,16 +43,18 @@ export const parseFormWithSingleImage = async (
     return await new Promise(async (resolve, reject) => {
     const form = formidable({
       maxFiles: 1,
-      maxTotalFileSize: 1024 * 1024 * 10, // 10mb picture
+      maxTotalFileSize: 1024 * 1024 * 10, // 10 MB picture
       uploadDir,
       filename: (_name, _ext, part) => {
         const filename = `${nameOfImage}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
         return filename
       },
       filter: part => {
-        return (
-          part.mimetype?.includes('image') || false
-        )
+        if (!part.mimetype?.includes('image')) {
+          reject(new Error('Invalid file type - only images are allowed.'))
+          return false
+        }
+        return true
       },
     })
 
