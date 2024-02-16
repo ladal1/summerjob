@@ -15,7 +15,8 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm } from 'lib/api/parse-form'
+import { parseForm, parseFormWithSingleImage } from 'lib/api/parse-form'
+import { generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -43,7 +44,12 @@ async function post(
   res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const { json } = await parseForm(req)
+  const temporaryName = generateFileName(30) // temporary name for the file
+  const uploadDir = getUploadDirForImages() + '/proposed-job'
+  const { files, json } = await parseFormWithSingleImage(req, temporaryName, uploadDir)
+  //const { json } = await parseForm(req)
+  console.log(files)
+  console.log(json)
   const result = validateOrSendError(ProposedJobCreateSchema, json, res)
   console.log(result)
   if (!result) {

@@ -197,14 +197,13 @@ export default function EditWorker({
               />
             )}
             {!isProfilePage && (
-              <Test
+              <ImageUploader
                 id="photoFile"
-                photoInit={null}
+                photoInit={worker.photoPath ? `/api/workers/${worker.id}/photo` : null}
                 setPhotoFileState={setPhotoFileState}
                 errors={errors}
                 register={register}
                 removePhoto={removePhoto}
-                multiple={true}
               />
             )}
             {(carAccess || isProfilePage) && (

@@ -92,7 +92,7 @@ export default function CreateProposedJobForm({
       name: area.name,
     }
   }
-  
+
   return (
     <>
       <div className="row">

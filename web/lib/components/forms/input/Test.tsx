@@ -9,6 +9,7 @@ import { calculateDimensions } from 'lib/components/photo/photo'
 
 interface TestProps<FormData extends FieldValues> {
   id: Path<FormData>
+  label: string
   photoInit?: string[] | null
   setPhotoFileState?: (state: boolean) => void
   errors: FieldErrors<FormData>
@@ -20,13 +21,14 @@ interface TestProps<FormData extends FieldValues> {
 
 export const Test = <FormData extends FieldValues> ({
   id,
+  label,
   photoInit = null,
   setPhotoFileState,
   errors,
   register,
   removePhoto,
   multiple = false,
-  maxPhotos = 2
+  maxPhotos = 1
 }: TestProps<FormData>) => {
 
   const error = errors?.[id]?.message as string | undefined
@@ -80,8 +82,8 @@ export const Test = <FormData extends FieldValues> ({
 
   const updateDimensionsForIndex = (index: number, newSize: {width: number, height: number}) => {
     setDimensions((prevDimensions) => {
-      const updatedDimensions = [...prevDimensions];
-      updatedDimensions[index] = { width: newSize.width, height: newSize.height };
+      const updatedDimensions = [...prevDimensions]
+      updatedDimensions[index] = { width: newSize.width, height: newSize.height }
       return updatedDimensions;
     })
   }
@@ -90,7 +92,7 @@ export const Test = <FormData extends FieldValues> ({
     <>
       <Label
         id={id}
-        label="Fotografie"
+        label={label}
       />
       <div className="d-inline-flex gap-2 flex-wrap align-items-center">
         {previewUrls.map((url, index) => (
@@ -131,6 +133,7 @@ export const Test = <FormData extends FieldValues> ({
                             })
                           )
                         }}
+                        {...register(`${id}.${index}` as Path<FormData>)}
                       />
                     </div>
                   </div>
@@ -158,7 +161,7 @@ export const Test = <FormData extends FieldValues> ({
               type="file"
               multiple={multiple}
               id="upload-photo"
-              {...register(id, { onChange: (e) => onFileUploadChange(e) })}
+              {...register(`${id}` as Path<FormData>, { onChange: (e) => onFileUploadChange(e) })}
             />
           </div>
         )}

@@ -11,6 +11,7 @@ const sendData =
   (method: string) =>
   async (url: string, { arg }: { arg: any }) => {
     const formData = new FormData()
+    console.log("fetcher")
 
     let jsonData = "{"
     let first = true
