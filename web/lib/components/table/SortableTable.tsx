@@ -1,7 +1,11 @@
+import { CSSProperties } from "react"
+
 export interface SortableColumn {
   id: string
   name: string
   sortable: boolean
+  className?: string
+  style?: CSSProperties
 }
 
 export interface SortOrder {
@@ -47,15 +51,16 @@ export function SortableTable({
   }
 
   return (
-    <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
+    <div className="table-responsive mb-2 smj-shadow rounded-3">
       <table className="table mb-0">
-        <thead className="smj-table-header">
+        <thead className="smj-table-header text-nowrap">
           <tr>
             {columns.map(column => (
               <th
                 key={column.id}
                 onClick={() => onSortClicked(column.id)}
-                className={column.sortable ? 'cursor-pointer' : ''}
+                className={column.sortable ? 'cursor-pointer ' : ' ' + column.className}
+                style={column.style}
               >
                 {column.name}
                 {column.sortable && sortIcon(column.id)}

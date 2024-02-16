@@ -14,7 +14,7 @@ import { useMemo, useState } from 'react'
 import DeleteIcon from '../forms/DeleteIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { ExpandableRow } from '../table/ExpandableRow'
+import { ExpandableRow, RowCells } from '../table/ExpandableRow'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -155,20 +155,20 @@ function formatJobRow(
   setHidden: (hidden: boolean) => void,
   deleteJob: () => void,
   isBeingDeleted: boolean
-) {
+): RowCells[] {
   // Show job as available today before 6:00
   // After that, show job as not available anymore
   const now = new Date()
   now.setHours(now.getHours() - 6)
   return [
-    job.name,
-    job.area?.name,
-    job.contact,
-    job.address,
-    `${job.activeJobs.length} / ${job.requiredDays}`,
-    datesAfterDate(job.availability, now).length,
-    `${job.minWorkers} - ${job.maxWorkers}`,
-    <span key={job.id} className="d-flex align-items-center gap-3">
+    {content: job.name},
+    {content: job.area?.name},
+    {content: job.contact},
+    {content: job.address},
+    {content: `${job.activeJobs.length} / ${job.requiredDays}`},
+    {content: datesAfterDate(job.availability, now).length},
+    {content: `${job.minWorkers} - ${job.maxWorkers}`},
+    {content: <span key={job.id} className="d-inline-flex flex-wrap align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, setPinned)}
       {hideJobIcon(job, setHidden)}
@@ -180,7 +180,7 @@ function formatJobRow(
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
       <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
-    </span>,
+    </span>, stickyRight: true},
   ]
 }
 

@@ -86,7 +86,7 @@ export function PlanJoblessRow({
   return (
     <>
       <ExpandableRow
-        data={[`Bez práce (${joblessWorkers.length})`]}
+        data={[{content: `Bez práce (${joblessWorkers.length})`}]}
         colspan={numColumns}
         className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
         onDrop={onWorkerDropped()}

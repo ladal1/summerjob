@@ -10,14 +10,14 @@ import {
 import ProposedJobRow from './ProposedJobRow'
 
 const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Název', sortable: true },
-  { id: 'area', name: 'Lokalita', sortable: true },
-  { id: 'contact', name: 'Kontaktní osoba', sortable: false },
-  { id: 'address', name: 'Adresa', sortable: false },
+  { id: 'name', name: 'Název', sortable: true, style: {minWidth: "200px"}},
+  { id: 'area', name: 'Lokalita', sortable: true, style: {minWidth: "200px"} },
+  { id: 'contact', name: 'Kontaktní osoba', sortable: false, style: {minWidth: "150px"} },
+  { id: 'address', name: 'Adresa', sortable: false, style: {minWidth: "180px"} },
   { id: 'daysPlanned', name: 'Naplánované dny', sortable: true },
   { id: 'daysLeft', name: 'Dostupné dny', sortable: true },
   { id: 'workers', name: 'Pracantů', sortable: true },
-  { id: 'actions', name: 'Akce', sortable: false },
+  { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"} },
 ]
 
 interface JobsTableProps {

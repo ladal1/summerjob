@@ -1,8 +1,13 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 
+export interface RowCells {
+  content: any
+  stickyRight?: boolean
+}
+
 interface RowProps {
-  data: any[]
+  data: RowCells[]
   children: React.ReactNode
   colspan?: number
   className?: string
@@ -20,13 +25,15 @@ function Cell({
   contents,
   tooltip,
   colspan,
+  stickyRight = false,
 }: {
   contents: any
   tooltip?: string
   colspan?: number
+  stickyRight?: boolean
 }) {
   return (
-    <td className="text-truncate" title={tooltip} colSpan={colspan}>
+    <td className={"text-truncate text-wrap " + (stickyRight ? 'smj-sticky-col-right smj-expandable-row' : '')} title={tooltip} colSpan={colspan}>
       {contents}
     </td>
   )
@@ -71,7 +78,7 @@ export function ExpandableRow({
               <>
                 {expanded && <ExpandedArrow />}
                 {!expanded && <Arrow />}
-                {field}
+                {field.content}
               </>
             }
             colspan={colspan}
@@ -80,8 +87,9 @@ export function ExpandableRow({
         {data.slice(1).map((field, index) => (
           <Cell
             key={index + 1}
-            contents={field}
-            tooltip={typeof field === 'string' ? field : undefined}
+            contents={field.content}
+            tooltip={typeof field.content === 'string' ? field.content : undefined}
+            stickyRight={field.stickyRight}
           />
         ))}
       </tr>

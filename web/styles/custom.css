@@ -57,7 +57,7 @@
 }
 
 .smj-table-header {
-  background: rgb(247, 225, 34);
+  background: rgb(247, 225, 34) !important;
 }
 
 .smj-table {
@@ -130,7 +130,7 @@ img.smj-nav-logo {
 }
 
 .smj-expandable-row {
-  background-color: #f4f1b6;
+  background-color: #f4f1b6 !important;
 }
 
 .smj-expandable-row > td:first-child > i,
@@ -150,6 +150,13 @@ img.smj-nav-logo {
 .smj-row-collapsible {
   overflow: hidden;
   transition: all 0.2s ease-out;
+}
+
+.smj-sticky-col-right {
+  position: sticky;
+  right: 0;
+  background-color: #ddd;
+  box-shadow: -5px 0 5px rgba(0, 0, 0, 0.1) !important;
 }
 
 .smj-background-error {
@@ -396,11 +403,15 @@ img.smj-nav-logo {
 }
 
 .bg-category-done {
-  background-color: #d4edda;
+  background-color: #d4edda !important;
+}
+
+.bg-category-done:hover {
+  background-color: #b4ceba;
 }
 
 .smj-completed-job-row td:first-of-type::before {
-  background-color: #d4edda;
+  background-color: #d4edda !important;
   content: "";
   height: 2.5rem;
   width: 0.5rem;
@@ -416,6 +427,10 @@ img.smj-nav-logo {
 
 .bg-category-hidden {
   background-color: #dddddd;
+}
+
+.bg-category-hidden:hover {
+  background-color: #b9b9b9;
 }
 
 .smj-hidden-job-row td:first-of-type::before {

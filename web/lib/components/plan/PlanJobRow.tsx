@@ -2,7 +2,7 @@ import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RideComplete, RidesForJob } from 'lib/types/ride'
 import { WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
-import { ExpandableRow } from '../table/ExpandableRow'
+import { ExpandableRow, RowCells } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
 import type { Worker } from 'lib/prisma/client'
 import {
@@ -297,9 +297,9 @@ function formatRowData(
   ridesForOtherJobs: RidesForJob[],
   deleteJob: () => void,
   isBeingDeleted: boolean
-) {
+): RowCells[] {
   return [
-    <span
+    {content: <span
       className="d-inline-flex gap-1 align-items-center"
       key={`name-${job.id}`}
     >
@@ -309,13 +309,13 @@ function formatRowData(
         day={day}
         ridesForOtherJobs={ridesForOtherJobs}
       />
-    </span>,
-    `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`,
-    job.proposedJob.contact,
-    job.proposedJob.area?.name,
-    job.proposedJob.address,
-    formatAmenities(job),
-    <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
+    </span>},
+    {content: `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`},
+    {content: job.proposedJob.contact},
+    {content: job.proposedJob.area?.name},
+    {content: job.proposedJob.address},
+    {content: formatAmenities(job)},
+    {content: <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
       <Link
         href={`/plans/${job.planId}/${job.id}`}
         onClick={e => e.stopPropagation()}
@@ -326,7 +326,7 @@ function formatRowData(
 
       {deleteJobIcon(deleteJob, isBeingDeleted)}
       <span style={{ width: '0px' }}></span>
-    </span>,
+    </span>, stickyRight: true},
   ]
 }
 
