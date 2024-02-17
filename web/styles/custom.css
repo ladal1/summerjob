@@ -155,8 +155,17 @@ img.smj-nav-logo {
 .smj-sticky-col-right {
   position: sticky;
   right: 0;
-  background-color: #ddd;
   box-shadow: -5px 0 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.smj-sticky-col-left {
+  position: sticky;
+  left: 0;
+  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.smj-light-grey {
+  background-color: #ececec;
 }
 
 .smj-background-error {

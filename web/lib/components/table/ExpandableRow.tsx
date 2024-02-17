@@ -94,14 +94,14 @@ export function ExpandableRow({
         ))}
       </tr>
 
-      <tr className="smj-details-row" onDrop={onDrop} onDragOver={onDragOver}>
+      <tr className="smj-details-row no-hover" onDrop={onDrop} onDragOver={onDragOver}>
         <td colSpan={colspan ?? data.length}>
           <div
             className="smj-row-collapsible"
             ref={collapsibleContentRef}
             style={{ maxHeight: expanded ? `${expandedHeight}px` : '0px' }}
           >
-            <div className="p-2">{children}</div>
+            <div className="pt-2">{children}</div>
           </div>
         </td>
       </tr>

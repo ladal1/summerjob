@@ -91,8 +91,10 @@ export function PlanJoblessRow({
         className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
         onDrop={onWorkerDropped()}
       >
-        <div className="ms-2">
-          <b>Následující pracanti nemají přiřazenou práci:</b>
+        <div className="smj-light-grey">
+          <div className="ms-2">
+            <b>Následující pracanti nemají přiřazenou práci:</b>
+          </div>
         </div>
         <div className="table-responsive text-nowrap">
           <table className="table table-hover">

@@ -17,6 +17,7 @@ import RideSelect from './RideSelect'
 import MoveWorkerModal from './MoveWorkerModal'
 import JobRideList from './JobRideList'
 import { ActiveJobIssueBanner, ActiveJobIssueIcon } from './ActiveJobIssue'
+import { RowContent, RowContentsInterface } from '../table/RowContent'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -118,6 +119,52 @@ export function PlanJobRow({
     [rides, job]
   )
 
+  const expandedContent: RowContentsInterface[] = [
+    {
+      label: "Popis",
+      content: `${job.publicDescription}`, 
+    },
+    {
+      label: "Poznámka pro organizátory",
+      content: `${job.privateDescription}`, 
+    },
+    {
+      label: <div className="d-flex gap-1">
+                <strong>Doprava</strong>
+                <AddRideButton job={job} />
+            </div>,
+      content: <>
+                <JobRideList
+                  job={job}
+                  otherJobs={plannedJobs.filter(j => j.id !== job.id)}
+                  reloadPlan={reloadPlan}
+                />
+                <br />
+              </>, 
+    },
+    {
+      label: "Adorace v oblasti",
+      content: `${job.proposedJob.area?.supportsAdoration ? 'Ano' : 'Ne'}`, 
+    },
+    {
+      label: "Alergeny",
+      content: `${formatAllergens(job)}`, 
+    },
+    {
+      label: "Pracantů (min/max/silných)",
+      content: `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers}/
+      ${job.proposedJob.strongWorkers}`, 
+    },
+    {
+      label: "Zodpovědná osoba",
+      content: `${responsibleWorkerName(job)}`, 
+    },
+    {
+      label: "",
+      content: ``, 
+    },
+  ] 
+
   return (
     <>
       {isDisplayed && (
@@ -138,46 +185,9 @@ export function PlanJobRow({
               day={day}
               ridesForOtherJobs={ridesForOtherJobs}
             />
-            <div className="ms-2">
-              <strong>Popis</strong>
-              <p>{job.publicDescription}</p>
-              <strong>Poznámka pro organizátory</strong>
-              <p>{job.privateDescription}</p>
-
-              <div className="d-flex gap-1">
-                <strong>Doprava</strong>
-                <AddRideButton job={job} />
-              </div>
-
-              <JobRideList
-                job={job}
-                otherJobs={plannedJobs.filter(j => j.id !== job.id)}
-                reloadPlan={reloadPlan}
-              />
-              <br />
-              <p>
-                <strong>Adorace v oblasti: </strong>
-                <span>
-                  {job.proposedJob.area?.supportsAdoration ? 'Ano' : 'Ne'}
-                </span>
-              </p>
-              <p>
-                <strong>Alergeny: </strong>
-                <span>{formatAllergens(job)}</span>
-              </p>
-              <p>
-                <strong>Pracantů (min/max/silných): </strong>
-                <span>
-                  {' '}
-                  {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
-                  {job.proposedJob.strongWorkers}
-                </span>
-              </p>
-              <p>
-                <strong>Zodpovědná osoba: </strong>
-                {responsibleWorkerName(job)}
-              </p>
-            </div>
+            <RowContent
+              data={expandedContent}
+            />
             <div className="table-responsive text-nowrap">
               <table className="table table-hover">
                 <thead>

@@ -15,6 +15,7 @@ import DeleteIcon from '../forms/DeleteIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow, RowCells } from '../table/ExpandableRow'
+import { RowContent, RowContentsInterface } from '../table/RowContent'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -70,6 +71,37 @@ export default function ProposedJobRow({
     return days.map(formatDateShort).map(capitalizeFirstLetter).join(', ')
   }, [job.availability])
 
+  const expandedContent: RowContentsInterface[] = [
+    {
+      label: "Popis",
+      content: `${job.publicDescription}`, 
+    },
+    {
+      label: "Poznámka pro organizátory",
+      content: `${job.privateDescription}`, 
+    },
+    {
+      label: "Počet pracantů",
+      content: `${job.minWorkers} - ${job.maxWorkers} (${job.strongWorkers} siláků)`, 
+    },
+    {
+      label: "Doprava do oblasti požadována",
+      content: `${job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}`, 
+    },
+    {
+      label: "Alergeny",
+      content: `${job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}`, 
+    },
+    {
+      label: "Dostupné",
+      content: `${availableDays}`, 
+    },
+    {
+      label: "Naplánované dny",
+      content: `${job.activeJobs.length} / ${job.requiredDays}`, 
+    },
+  ] 
+
   return (
     <ExpandableRow
       data={formatJobRow(
@@ -82,32 +114,9 @@ export default function ProposedJobRow({
       )}
       className={rowColorClass(job)}
     >
-      <div className="ms-2">
-        <strong>Popis</strong>
-        <p>{job.publicDescription}</p>
-        <strong>Poznámka pro organizátory</strong>
-        <p>{job.privateDescription}</p>
-        <p>
-          <strong>Počet pracantů: </strong>
-          {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)
-        </p>
-        <p>
-          <strong>Doprava do oblasti požadována: </strong>
-          {job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}
-        </p>
-        <p>
-          <strong>Alergeny: </strong>
-          {job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}
-        </p>
-        <p>
-          <strong>Dostupné: </strong>
-          {availableDays}
-        </p>
-        <p>
-          <strong>Naplánované dny: </strong>
-          {job.activeJobs.length} / {job.requiredDays}
-        </p>
-      </div>
+      <RowContent
+        data={expandedContent}
+      />
       {showDeleteConfirmation && !deleteError && (
         <ConfirmationModal
           onConfirm={deleteJob}
