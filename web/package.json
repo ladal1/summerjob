@@ -58,7 +58,7 @@
     "@types/supertest": "^2.0.12",
     "@types/swagger-ui-react": "^4.18.0",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
-    "@typescript-eslint/parser": "^5.60.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "chai": "^4.3.7",
     "encoding": "^0.1.13",
     "lint-staged": "^13.2.2",
