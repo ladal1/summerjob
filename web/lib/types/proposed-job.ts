@@ -4,6 +4,7 @@ import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { Allergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
+import { photoPath } from './photo'
 
 useZodOpenApi
 
@@ -51,6 +52,29 @@ export const ProposedJobCreateSchema = z
       .default(1),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
+    photoFiles: z
+      .any()
+      .refine((fileList) => fileList instanceof FileList, err.invalidTypeFile)
+      .refine((fileList) => fileList.length <= 10, err.maxCountImage + ' 10')
+      .superRefine((fileList, ctx) => {
+        for (let i = 0; i < fileList.length; i++) {
+          const file = fileList[i]
+          if (!file || (file.size > 1024 * 1024 * 10)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: err.maxCapacityImage + ' - max 10 MB',
+            });
+          }
+          if (!file || (!file.type?.startsWith("image"))) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: err.unsuportedTypeImage,
+            });
+          }
+        }
+      })
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
+      .optional(),
     availability: z
       .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
       .openapi({

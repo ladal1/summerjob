@@ -24,6 +24,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { useRouter } from 'next/navigation'
+import { DateBool } from 'lib/data/dateSelectionType'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized

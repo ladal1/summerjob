@@ -11,7 +11,6 @@ const sendData =
   (method: string) =>
   async (url: string, { arg }: { arg: any }) => {
     const formData = new FormData()
-    console.log("fetcher")
 
     let jsonData = "{"
     let first = true
@@ -19,6 +18,12 @@ const sendData =
       if (value instanceof (File || Blob)) {
         formData.append(key, value)
       } 
+      else if (value instanceof FileList) {
+        for (let i = 0; i < value.length; i++) {
+          const file = value[i];
+          formData.append(`file${i}`, file);
+        }
+      }
       else {
         jsonData += (first ? '' : ',') + '"' + key + '"' + ':' + (JSON.stringify(value))
         first = false

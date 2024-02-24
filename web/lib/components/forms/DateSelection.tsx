@@ -1,3 +1,4 @@
+import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
 import React from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'

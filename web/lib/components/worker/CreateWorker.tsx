@@ -17,6 +17,8 @@ import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { ImageUploader } from '../forms/ImageUploader'
 import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { Test } from '../forms/Test'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -139,8 +141,10 @@ export default function CreateWorker({
                 }
               ]}
             />
-            <ImageUploader
+            <Test
               id="photoFile"
+              label="Fotografie"
+              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
               errors={errors}
               register={register}
               removePhoto={removePhoto}

@@ -1,8 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest } from 'next'
 import mime from 'mime'
 import formidable from 'formidable'
 import { createDirectory } from './fileManager'
-import { ApiInternalServerError } from 'lib/types/api-error'
 export const FormidableError = formidable.errors.FormidableError
 
 /* Get simple data from string jsonData containing json data. */
@@ -37,21 +36,25 @@ export const parseForm = async (
   })
 }
 
-export const parseFormWithSingleImage = async (
+export const parseFormWithImages = async (
   req: NextApiRequest,
   nameOfImage: string,
-  uploadDir: string
+  uploadDir: string,
+  maxFiles: number
 ): Promise<{ fields: formidable.Fields; files: formidable.Files; json: any }> => {
   
-    createDirectory(uploadDir)
+    await createDirectory(uploadDir)
+    let count = 0
     
     return await new Promise(async (resolve, reject) => {
     const form = formidable({
-      maxFiles: 1,
-      maxTotalFileSize: 1024 * 1024 * 10, // 10 MB picture
+      maxFiles: maxFiles,
+      maxFileSize: 1024 * 1024 * 10,
+      maxTotalFileSize: 1024 * 1024 * 10 * maxFiles, // 10 MB a picture
       uploadDir,
       filename: (_name, _ext, part) => {
-        const filename = `${nameOfImage}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
+        const filename = `${nameOfImage}-${count}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
+        count = count + 1
         return filename
       },
       filter: part => {
@@ -70,3 +73,4 @@ export const parseFormWithSingleImage = async (
     })
   })
 }
+

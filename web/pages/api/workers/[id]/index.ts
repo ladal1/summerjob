@@ -8,8 +8,8 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getPhotoPath, parseFormWithSingleImage } from 'lib/api/parse-form'
-import { createDirectory, deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
+import { getPhotoPath, parseFormWithImages } from 'lib/api/parse-form'
+import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -39,19 +39,18 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const { files, json } = await parseFormWithSingleImage(req, id, getUploadDirForImages() + '/workers')
+  const { files, json } = await parseFormWithImages(req, id, getUploadDirForImages() + '/workers', 1)
 
   /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
   }
-
   /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
   if (files.photoFile) {
     const photoPath = getPhotoPath(files.photoFile) // update photoPath
     const worker = await getWorkerPhotoById(id)
-    if(worker?.photoPath && worker?.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithSingleImage) delete it 
+    if(worker?.photoPath && worker?.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it 
       deleteFile(worker.photoPath) // delete original image if necessary
     }
     workerData.photoPath = photoPath

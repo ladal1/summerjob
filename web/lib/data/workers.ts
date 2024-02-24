@@ -295,6 +295,7 @@ export async function createWorker(
           permissions: [],
         },
       },
+      photoPath: data.photoPath,
     },
   })
 }

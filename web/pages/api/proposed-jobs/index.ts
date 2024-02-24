@@ -15,8 +15,8 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm, parseFormWithSingleImage } from 'lib/api/parse-form'
 import { generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
+import { parseFormWithImages } from 'lib/api/parse-form'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -46,7 +46,7 @@ async function post(
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDir = getUploadDirForImages() + '/proposed-job'
-  const { files, json } = await parseFormWithSingleImage(req, temporaryName, uploadDir)
+  const { files, json } = await parseFormWithImages(req, temporaryName, uploadDir, 10)
   //const { json } = await parseForm(req)
   console.log(files)
   console.log(json)

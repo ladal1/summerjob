@@ -1,3 +1,4 @@
+import { DateBool } from 'lib/data/dateSelectionType'
 import { datesBetween, isBetweenDates } from 'lib/helpers/helpers'
 
 export default function dateSelectionMaker(

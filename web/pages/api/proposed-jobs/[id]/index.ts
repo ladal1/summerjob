@@ -1,6 +1,7 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { parseForm } from 'lib/api/parse-form'
+import { getUploadDirForImages } from 'lib/api/fileManager'
+import { parseForm, parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import {
   deleteProposedJob,
@@ -37,7 +38,13 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  const { json } = await parseForm(req)
+  const { files, json } = await parseFormWithImages(req, id, getUploadDirForImages() + `/proposed-job/${id}`, 10)
+  // Go through every file in files
+  const fileFieldNames = Object.keys(files)
+  fileFieldNames.forEach(fieldName => { 
+    const file = files[fieldName]
+    // TODO: rename them
+  })
   const proposedJobData = validateOrSendError(
     ProposedJobUpdateSchema,
     json,

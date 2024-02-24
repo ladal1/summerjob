@@ -46,9 +46,10 @@ export const WorkerCreateSchema = z
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
     photoFile: z
-      .custom<File[]>()
-      .transform((file) => (file && file.length > 0) && file[0])
-      .refine((file) => !file || (!!file && file.size <= 1024*1024*10), err.maxCapacityImage) // 10 MB = 1024*1024*10
+      .any()
+      .refine((fileList) => fileList instanceof FileList, err.invalidTypeFile)
+      .transform((fileList) => (fileList && fileList.length > 0) && fileList[0] || undefined)
+      .refine((file) => !file || (!!file && file.size <= 1024*1024*10), err.maxCapacityImage + ' - 10 MB')
       .refine((file) => !file || (!!file && file.type?.startsWith("image")), err.unsuportedTypeImage) // any image
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
       .optional(),

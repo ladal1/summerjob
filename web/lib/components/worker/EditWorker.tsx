@@ -19,7 +19,8 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { ImageUploader } from '../forms/ImageUploader'
 import { Label } from '../forms/Label'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { Test } from '../forms/input/Test'
+import { Test } from '../forms/Test'
+import { DateBool } from 'lib/data/dateSelectionType'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -197,9 +198,11 @@ export default function EditWorker({
               />
             )}
             {!isProfilePage && (
-              <ImageUploader
+              <Test
                 id="photoFile"
-                photoInit={worker.photoPath ? `/api/workers/${worker.id}/photo` : null}
+                label="Fotografie"
+                secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+                photoInit={worker.photoPath ? [`/api/workers/${worker.id}/photo`] : null}
                 setPhotoFileState={setPhotoFileState}
                 errors={errors}
                 register={register}

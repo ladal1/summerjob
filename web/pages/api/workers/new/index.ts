@@ -1,7 +1,7 @@
 import { APIAccessController } from "lib/api/APIAccessControler"
 import { APIMethodHandler } from "lib/api/MethodHandler"
 import { generateFileName, getUploadDirForImages, renameFile } from "lib/api/fileManager"
-import { parseFormWithSingleImage, getPhotoPath } from "lib/api/parse-form"
+import { getPhotoPath, parseFormWithImages } from "lib/api/parse-form"
 import { validateOrSendError } from "lib/api/validator"
 import { createWorker, updateWorker } from "lib/data/workers"
 import logger from "lib/logger/logger"
@@ -18,7 +18,7 @@ async function post(
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDir = getUploadDirForImages() + '/workers'
-  const { files, json } = await parseFormWithSingleImage(req, temporaryName, uploadDir)
+  const { files, json } = await parseFormWithImages(req, temporaryName, uploadDir, 1)
 
   const singleWorker = validateOrSendError(WorkerCreateSchema, json, res)
   if(!singleWorker) {

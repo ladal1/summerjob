@@ -27,6 +27,8 @@ import FormWarning from '../forms/FormWarning'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { Test } from '../forms/Test'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -113,6 +115,21 @@ export default function EditProposedJobForm({
     }
   }
 
+  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on. */
+  const setPhotoFileState = (state: boolean) => {
+    console.log("state")
+  }
+ 
+  const removePhoto = () => {
+    console.log("remove")
+  }
+
+  const fetchImages = () => {
+    // TODO: photoIds
+    const photoIds = ['0', '1']
+    return photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)
+  }
+
   return (
     <>
       <div className="row">
@@ -163,7 +180,18 @@ export default function EditProposedJobForm({
               register={() => register("address")}
               errors={errors}
             />
-            
+            <Test
+              id="photoFiles"
+              label="Fotografie"
+              secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
+              photoInit={fetchImages()}
+              setPhotoFileState={setPhotoFileState}
+              errors={errors}
+              register={register}
+              removePhoto={removePhoto}
+              multiple
+              maxPhotos={10}
+            />
             <TextInput
               id="contact"
               label="Kontakt"

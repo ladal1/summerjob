@@ -1,15 +1,17 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { FieldErrors, FieldValues, Path, UseFormRegister } from 'react-hook-form'
-import { Label } from '../Label'
+import { Label } from './Label'
 import Image from 'next/image'
 import React from 'react'
-import FormWarning from '../FormWarning'
+import FormWarning from './FormWarning'
 import PhotoModal from 'lib/components/modal/PhotoModal'
 import { calculateDimensions } from 'lib/components/photo/photo'
+import { customErrorMessages as err } from 'lib/lang/error-messages'
 
 interface TestProps<FormData extends FieldValues> {
   id: Path<FormData>
   label: string
+  secondaryLabel?: string
   photoInit?: string[] | null
   setPhotoFileState?: (state: boolean) => void
   errors: FieldErrors<FormData>
@@ -17,21 +19,26 @@ interface TestProps<FormData extends FieldValues> {
   removePhoto: (index: number) => void
   multiple?: boolean
   maxPhotos?: number
+  maxFileSize?: number
 }
 
 export const Test = <FormData extends FieldValues> ({
   id,
   label,
+  secondaryLabel,
   photoInit = null,
   setPhotoFileState,
   errors,
   register,
   removePhoto,
   multiple = false,
-  maxPhotos = 1
+  maxPhotos = 1,
+  maxFileSize = 1024*1024*10 // 10 MB
 }: TestProps<FormData>) => {
 
   const error = errors?.[id]?.message as string | undefined
+  const [errorBeforeSave, setErrorBeforeSave] = useState<string | undefined>(undefined);
+
   const [previewUrls, setPreviewUrls] = useState<(string | null)[]>(photoInit || [])
   const [showPhotoModal, setShowPhotoModal] = useState(false)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(1)
@@ -47,14 +54,19 @@ export const Test = <FormData extends FieldValues> ({
   }, [])
 
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setErrorBeforeSave(undefined)
     const fileInput = e.target
 
-    if (!fileInput.files || fileInput.files.length === 0 || (previewUrls.length + fileInput.files.length > maxPhotos)) {
+    if (!fileInput.files || fileInput.files.length === 0) {
+      return
+    }
+    if (previewUrls.length + fileInput.files.length > maxPhotos) {
+      setErrorBeforeSave(err.maxCountImage + ` ${maxPhotos}`)
       return
     }
 
     const newPreviewUrls = Array.from(fileInput.files).map((file) => {
-      if (!file.type.startsWith('image') || file.size > 1024 * 1024 * 10) {
+      if (!file.type.startsWith('image') || file.size > maxFileSize) {
         return null
       }
 
@@ -94,6 +106,20 @@ export const Test = <FormData extends FieldValues> ({
         id={id}
         label={label}
       />
+      {secondaryLabel && (
+        <p className="text-muted">
+          {secondaryLabel}
+        </p>
+      )}
+      <div className="row mb-2">
+        <input
+          type="file"
+          disabled={previewUrls.length >= maxPhotos}
+          multiple={multiple}
+          id="upload-photo"
+          {...register(id as Path<FormData>, { onChange: (e) => onFileUploadChange(e) })}
+        />
+      </div>
       <div className="d-inline-flex gap-2 flex-wrap align-items-center">
         {previewUrls.map((url, index) => (
           <React.Fragment key={index}>
@@ -103,6 +129,7 @@ export const Test = <FormData extends FieldValues> ({
                   <div className="pb-2">
                     <div className="d-flex justify-content-end">
                       <button
+                        type="button"
                         className="btn btn-light p-2 pb-1"
                         onClick={() => onRemoveImage(index)}
                       >
@@ -133,7 +160,6 @@ export const Test = <FormData extends FieldValues> ({
                             })
                           )
                         }}
-                        {...register(`${id}.${index}` as Path<FormData>)}
                       />
                     </div>
                   </div>
@@ -156,13 +182,6 @@ export const Test = <FormData extends FieldValues> ({
                 <path d="M0,-64 V64 M-64, 0 H64" />
               </svg>
             </label>
-            <input
-              className="smj-file-upload"
-              type="file"
-              multiple={multiple}
-              id="upload-photo"
-              {...register(`${id}` as Path<FormData>, { onChange: (e) => onFileUploadChange(e) })}
-            />
           </div>
         )}
       </div>
@@ -174,7 +193,7 @@ export const Test = <FormData extends FieldValues> ({
           onClose={() => setShowPhotoModal(false)}
         />
       )}
-      <FormWarning message={error} />
+      <FormWarning message={error || errorBeforeSave} />
     </>
   )
 }

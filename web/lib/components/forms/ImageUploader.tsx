@@ -8,22 +8,30 @@ import { calculateDimensions } from '../photo/photo'
 
 interface ImageUploaderProps<FormData extends FieldValues> {
   id: Path<FormData>
+  label: string
+  secondaryLabel?: string
   photoInit?: string | null
   setPhotoFileState?: (state: boolean) => void
   errors: FieldErrors<FormData>
   register: UseFormRegister<FormData>
   removePhoto: () => void
   multiple?: boolean
+  maxPhotos?: number
+  maxFileSize?: number
 }
 
 export const ImageUploader = <FormData extends FieldValues> ({
   id,
+  label,
+  secondaryLabel,
   photoInit = null,
   setPhotoFileState,
   errors,
   register,
   removePhoto,
-  multiple = false
+  multiple = false,
+  maxPhotos = 1,
+  maxFileSize = 1024*1024*10 // 10MB
 }: ImageUploaderProps<FormData>) => {
 
   const error = errors?.[id]?.message as string | undefined
@@ -56,7 +64,7 @@ export const ImageUploader = <FormData extends FieldValues> ({
     const file = fileInput.files[0]
 
     /** File validation */
-    if (!file.type.startsWith('image') || file.size > 1024*1024*10) { // 10MB
+    if (!file.type.startsWith('image') || file.size > maxFileSize) { 
       setPreviewUrl(null)
       return
     }
@@ -76,22 +84,35 @@ export const ImageUploader = <FormData extends FieldValues> ({
     <>
       <Label
         id={id}
-        label="Fotografie"        
+        label={label}
       />
+      {secondaryLabel && (
+        <p className="text-muted">
+          {secondaryLabel}
+        </p>
+      )}
+      <div className="row mb-2">
+        <input
+          type="file"
+          multiple={multiple}
+          id="upload-photo"
+          {...register(id as Path<FormData>, { onChange: (e) => onFileUploadChange(e) })}
+        />
+      </div>
       <div className="d-inline-flex gap-2"> 
         {previewUrl && ( 
           <div className="d-inline-flex shadow bg-white rounded border p-3 pt-2 mb-2">
             <div className="container p-0 m-0">
-                <div className="pb-2 row">
-                  <div className="col d-flex justify-content-end">
-                    <button
-                      className="btn btn-light p-2 pt-1 pb-1"
-                      onClick={onRemoveImage}
-                    >
-                      <i className="fa-regular fa-circle-xmark smj-action-delete" />
-                    </button>
-                  </div>
+              <div className="pb-2 row">
+                <div className="col d-flex justify-content-end">
+                  <button
+                    className="btn btn-light p-2 pt-1 pb-1"
+                    onClick={onRemoveImage}
+                  >
+                    <i className="fa-regular fa-circle-xmark smj-action-delete" />
+                  </button>
                 </div>
+              </div>
               <div className="col">
                 <div className="d-flex justify-content-center">
                   <div 
@@ -130,13 +151,6 @@ export const ImageUploader = <FormData extends FieldValues> ({
               <path d="M0,-64 V64 M-64, 0 H64" />
             </svg>
           </label>
-          <input
-            className="smj-file-upload"
-            type="file"
-            multiple={multiple}
-            id="upload-photo"
-            {...register(id, {onChange: (e) => {onFileUploadChange(e)}})} // we will use the file state, to send it later to the server
-          />
         </div>
       )}  
       </div>

@@ -1,6 +1,7 @@
 import { UseFormRegisterReturn } from 'react-hook-form'
 import DateSelection from '../DateSelection'
 import { Label } from '../Label'
+import { DateBool } from 'lib/data/dateSelectionType'
 
 interface DateSelectionInputProps {
   id: string

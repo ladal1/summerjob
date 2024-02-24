@@ -48,8 +48,8 @@ export default function MoveWorkerModal({
     }
   }
 
-  const onItemSelected = (item: FilterSelectItem) => {
-    const job = jobs.find(j => j.id === item.id)
+  const onItemSelected = (id: string) => {
+    const job = jobs.find(j => j.id === id)
     setSelectedJob(job)
   }
 
@@ -67,6 +67,7 @@ export default function MoveWorkerModal({
       na job:
       <div className="m-3 ms-0">
         <FilterSelect
+          id="moveWorker"
           items={items}
           placeholder={'Vyberte job'}
           onSelected={onItemSelected}
