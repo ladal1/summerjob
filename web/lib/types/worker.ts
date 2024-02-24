@@ -27,6 +27,7 @@ export const WorkerCreateSchema = z
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
+    age: z.number().int().nullable(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

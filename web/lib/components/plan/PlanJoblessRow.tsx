@@ -151,7 +151,7 @@ function formatWorkerData(
   planDay: Date,
   requestMoveWorker: (worker: WorkerComplete) => void
 ) {
-  const name = `${worker.firstName} ${worker.lastName}`
+  const name = `${worker.firstName} ${worker.lastName} (${worker.age ?? '?'})`
   const abilities = []
 
   if (worker.cars.length > 0) abilities.push('Auto')
