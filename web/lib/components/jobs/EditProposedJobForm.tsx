@@ -126,8 +126,9 @@ export default function EditProposedJobForm({
 
   const fetchImages = () => {
     // TODO: photoIds
-    const photoIds = ['0', '1']
-    return photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)
+    /*const photoIds = ['0', '1']
+    return photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)*/
+    return null
   }
 
   return (
