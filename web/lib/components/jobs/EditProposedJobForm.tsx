@@ -122,14 +122,13 @@ export default function EditProposedJobForm({
     console.log("state")
   }
  
-  const removePhoto = () => {
+  const removePhoto = (id: number) => {
+    //job.photoIdsDeleted.push(job.photoIds[id])
     console.log("remove")
   }
 
   const fetchImages = () => {
-    /*const photoIds = ['0', '1']
-    return photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)*/
-    return null
+    return job.photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)
   }
 
   //#endregion

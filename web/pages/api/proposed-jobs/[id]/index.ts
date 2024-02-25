@@ -1,8 +1,10 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getUploadDirForImages } from 'lib/api/fileManager'
-import { parseForm, parseFormWithImages } from 'lib/api/parse-form'
+import { getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
+import { getPhotoPath, parseForm, parseFormWithImages } from 'lib/api/parse-form'
+import { registerPhotos } from 'lib/api/registerPhotos'
 import { validateOrSendError } from 'lib/api/validator'
+import { createPhoto, updatePhoto } from 'lib/data/photo'
 import {
   deleteProposedJob,
   getProposedJobById,
@@ -11,6 +13,7 @@ import {
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
+import { PhotoPathSchema, PhotoPathSchemaTest } from 'lib/types/photo'
 import {
   ProposedJobUpdateSchema,
   ProposedJobUpdateDataInput,
@@ -39,12 +42,6 @@ async function patch(
 ) {
   const id = req.query.id as string
   const { files, json } = await parseFormWithImages(req, id, getUploadDirForImages() + `/proposed-job/${id}`, 10)
-  // Go through every file in files
-  const fileFieldNames = Object.keys(files)
-  fileFieldNames.forEach(fieldName => { 
-    const file = files[fieldName]
-    // TODO: rename them
-  })
   const proposedJobData = validateOrSendError(
     ProposedJobUpdateSchema,
     json,
@@ -53,7 +50,36 @@ async function patch(
   if (!proposedJobData) {
     return
   }
-  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, json, session)
+
+  /*
+  // Go through every file in files
+  const fileFieldNames = Object.keys(files)
+  fileFieldNames.forEach(async fieldName => { 
+    const file = files[fieldName]
+    const photoPath = getPhotoPath(file)
+    const photo = validateOrSendError(PhotoPathSchemaTest, {photoPath: photoPath}, res)
+    if(!photo) {
+      return
+    }
+    // create new photo
+    const newPhoto = await createPhoto(photo)
+    // save its id to photoIds array for proposedJob
+    if(!proposedJobData.photoIds) {
+      proposedJobData.photoIds = [newPhoto.id]
+    }
+    else {
+      proposedJobData.photoIds.push(newPhoto.id)
+    }
+    // rename photo to its id instead of temporary name which was proposedJob.id-number given in parseFormWithImages
+    const newPhotoPath = updatePhotoPathByNewFilename(photoPath, newPhoto.id) ?? ''
+    renameFile(photoPath, newPhotoPath)
+    await updatePhoto(newPhoto.id, {photoPath: newPhotoPath})
+  })
+  */
+  const newPhotoIds = await registerPhotos(files)
+  proposedJobData.photoIds ? proposedJobData.photoIds.concat(newPhotoIds) : proposedJobData.photoIds = newPhotoIds
+
+  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   await updateProposedJob(id, proposedJobData)
   res.status(204).end()
 }

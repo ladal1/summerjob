@@ -25,6 +25,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { useRouter } from 'next/navigation'
 import { DateBool } from 'lib/data/dateSelectionType'
+import { ImageUploader } from '../forms/ImageUploader'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -94,6 +95,10 @@ export default function CreateProposedJobForm({
     }
   }
 
+  const removePhoto = (id: number) => {
+    console.log("remove")
+  }
+
   return (
     <>
       <div className="row">
@@ -148,6 +153,16 @@ export default function CreateProposedJobForm({
               register={() => register("contact")}
               errors={errors}
             />
+            <ImageUploader
+              id="photoFiles"
+              label="Fotografie"
+              secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
+              errors={errors}
+              register={register}
+              removePhoto={removePhoto}
+              multiple
+              maxPhotos={10}
+            />
             <TextInput
               id="requiredDays"
               label="Celkový počet dní na splnění"
@@ -159,7 +174,6 @@ export default function CreateProposedJobForm({
               register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
-
             <Label
               id="minWorkers"
               label="Počet pracantů minimálně / maximálně / z toho silných"

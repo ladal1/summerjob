@@ -53,8 +53,14 @@ export const parseFormWithImages = async (
       maxTotalFileSize: 1024 * 1024 * 10 * maxFiles, // 10 MB a picture
       uploadDir,
       filename: (_name, _ext, part) => {
-        const filename = `${nameOfImage}-${count}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
-        count = count + 1
+        let filename = ""
+        if(maxFiles > 1) {
+          filename = `${nameOfImage}-${count}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
+          count = count + 1
+        }
+        else {
+          filename = `${nameOfImage}.${mime.getExtension(part.mimetype || '') || 'unknown'}`
+        }
         return filename
       },
       filter: part => {

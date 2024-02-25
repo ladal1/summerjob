@@ -1,6 +1,6 @@
 import { APIAccessController } from "lib/api/APIAccessControler"
 import { APIMethodHandler } from "lib/api/MethodHandler"
-import { generateFileName, getUploadDirForImages, renameFile } from "lib/api/fileManager"
+import { generateFileName, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from "lib/api/fileManager"
 import { getPhotoPath, parseFormWithImages } from "lib/api/parse-form"
 import { validateOrSendError } from "lib/api/validator"
 import { createWorker, updateWorker } from "lib/data/workers"
@@ -28,7 +28,7 @@ async function post(
   /* Rename photo file and update worker with new photo path to it. */
   if (files.photoFile) {
     const temporaryPhotoPath = getPhotoPath(files.photoFile) // update photoPath
-    singleWorker.photoPath = uploadDir + '/' + worker.id
+    singleWorker.photoPath = updatePhotoPathByNewFilename(temporaryPhotoPath, worker.id) ?? ''
     renameFile(temporaryPhotoPath, singleWorker.photoPath)
     await updateWorker(worker.id, singleWorker)
   }

@@ -34,6 +34,11 @@ enum JobType {
   OTHER
 }
 
+model Photo {
+  id             String               @id @default(uuid())
+  photoPath      String
+}
+
 model Worker {
   id             String               @id @default(uuid())
   firstName      String
@@ -53,7 +58,7 @@ model Worker {
   permissions    WorkerPermissions    @relation(fields: [permissionsId], references: [id])
   permissionsId  String               @unique
   note           String               @default("")
-  photoPath      String
+  photoPath      String?
 }
 
 model WorkerPermissions {
@@ -113,6 +118,7 @@ model ProposedJob {
   allergens          Allergy[]
   availability       DateTime[]  @db.Date
   jobType            JobType     @default(OTHER)
+  photoIds           String[]
 }
 
 model ActiveJob {
