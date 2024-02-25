@@ -1,10 +1,9 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIProposedJobUpdate } from 'lib/fetcher/proposed-job'
-import { allowForNumber, datesBetween, formatNumber } from 'lib/helpers/helpers'
+import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
 import {
   deserializeProposedJob,
-  ProposedJobComplete,
   ProposedJobUpdateSchema,
 } from 'lib/types/proposed-job'
 import { Serialized } from 'lib/types/serialize'
@@ -28,7 +27,7 @@ import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { Test } from '../forms/Test'
+import { ImageUploader } from '../forms/ImageUploader'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -115,6 +114,9 @@ export default function EditProposedJobForm({
     }
   }
 
+  //#region Photo
+  // TODO: work on photo deletion and fetching
+
   /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on. */
   const setPhotoFileState = (state: boolean) => {
     console.log("state")
@@ -125,11 +127,12 @@ export default function EditProposedJobForm({
   }
 
   const fetchImages = () => {
-    // TODO: photoIds
     /*const photoIds = ['0', '1']
     return photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)*/
     return null
   }
+
+  //#endregion
 
   return (
     <>
@@ -181,7 +184,7 @@ export default function EditProposedJobForm({
               register={() => register("address")}
               errors={errors}
             />
-            <Test
+            <ImageUploader
               id="photoFiles"
               label="Fotografie"
               secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."

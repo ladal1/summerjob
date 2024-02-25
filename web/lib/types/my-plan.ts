@@ -60,7 +60,6 @@ export function deserializeMyPlan(serialized: Serialized): MyPlan {
 }
 
 export function serializeMyPlans(plans: MyPlan[]): Serialized {
-  console.log(plans)
   return {
     data: JSON.stringify(plans),
   }

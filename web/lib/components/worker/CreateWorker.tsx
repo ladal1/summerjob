@@ -5,20 +5,17 @@ import { z } from 'zod'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { formatName, formatPhoneNumber } from 'lib/helpers/helpers'
+import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import { TextInput } from '../forms/input/TextInput'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import AddCarModal from '../modal/AddCarModal'
-import { CarCreateData, CarCreateSchema } from 'lib/types/car'
-import { ImageUploader } from '../forms/ImageUploader'
 import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { Test } from '../forms/Test'
+import { ImageUploader } from '../forms/ImageUploader'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -86,7 +83,7 @@ export default function CreateWorker({
               id="firstName"
               label="Jméno"
               placeholder="Jméno"
-              register={() => register("firstName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
+              register={() => register("firstName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
               errors={errors}
             />
             <TextInput
@@ -94,7 +91,7 @@ export default function CreateWorker({
               label="Příjmení"
               placeholder="Příjmení"
               errors={errors}
-              register={() => register("lastName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
+              register={() => register("lastName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
             />
             <TextInput
               id="phone"
@@ -141,7 +138,7 @@ export default function CreateWorker({
                 }
               ]}
             />
-            <Test
+            <ImageUploader
               id="photoFile"
               label="Fotografie"
               secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
@@ -196,47 +193,3 @@ export default function CreateWorker({
     </>
   )
 }
-
-
-  /* TODO: Finish AddCarModal or remove 
-  const {
-    setValue: setValueCar,
-    register: registerCar,
-    handleSubmit: handleSubmitCar,
-    formState: { errors: errorsCar },
-  } = useForm<CarCreateData>({
-    resolver: zodResolver(CarCreateSchema),
-    defaultValues: {
-      seats: 4,
-    },
-  })
-
-
-  const firstName = watch('firstName')
-  const lastName = watch('lastName')
-
-  const [isAddCarModalOpen, setAddCarModalOpen] = useState(false)
-
-  const openAddCarModal = () => {
-    setAddCarModalOpen(true)
-  }
-
-  const closeAddCarModal = () => {
-    setAddCarModalOpen(false)
-  }
-
-  <button
-    className="btn btn-light pt-2 pb-2 align-self-start"
-    onClick={openAddCarModal}
-  >
-    <i className="fas fa-plus me-2"></i>
-    Přidat auto
-  </button>
-  {isAddCarModalOpen && (
-    <AddCarModal 
-      onClose={closeAddCarModal} 
-      errors={errorsCar}
-      register={registerCar}
-    />
-  )}
-  */

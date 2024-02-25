@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-// -------------------------------------------------------------------------
-
 export const photoPath = z
   .string()
   .nullable()

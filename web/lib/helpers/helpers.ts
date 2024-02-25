@@ -1,5 +1,3 @@
-import XRegExp from "xregexp"
-
 export const capitalizeFirstLetter = (text: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
@@ -144,9 +142,9 @@ export function formatPhoneNumber(value: string) {
   return startsWithPlus ? `+${formattedPhoneNumber}` : formattedPhoneNumber || ""
 }
 
-// Get rid of anything that isn't letter or spaces, and replace redundant spaces by one space and trim spaces from front.
-export function formatName(value: string) {
-  return XRegExp.replace(value, XRegExp('[^\\p{L}\\s]+', 'g'), '').replace(/\s+/g, ' ').trimStart()
+// Replace redundant spaces by one space and trim spaces from front.
+export function removeRedundantSpace(value: string) {
+  return value.replace(/\s+/g, ' ').trimStart()
 }
 
 // Get rid of anything that isn't positive number

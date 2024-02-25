@@ -34,7 +34,6 @@ async function post(
     { ...json, summerJobEventId },
     res
   )
-  console.log(result)
   if (!result) {
     return
   }

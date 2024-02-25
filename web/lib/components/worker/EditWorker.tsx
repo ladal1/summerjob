@@ -9,18 +9,17 @@ import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { Serialized } from 'lib/types/serialize'
-import { formatName, formatPhoneNumber, pick } from 'lib/helpers/helpers'
+import { formatPhoneNumber, pick, removeRedundantSpace } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { Allergy } from '../../prisma/client'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { ImageUploader } from '../forms/ImageUploader'
 import { Label } from '../forms/Label'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { Test } from '../forms/Test'
 import { DateBool } from 'lib/data/dateSelectionType'
+import { ImageUploader } from '../forms/ImageUploader'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -135,7 +134,7 @@ export default function EditWorker({
               id="firstName"
               label="Jméno"
               placeholder="Jméno"
-              register={() => register("firstName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
+              register={() => register("firstName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
               errors={errors}
             />
             <TextInput
@@ -143,7 +142,7 @@ export default function EditWorker({
               label="Příjmení"
               placeholder="Příjmení"
               errors={errors}
-              register={() => register("lastName", {onChange: (e) => e.target.value = formatName(e.target.value)})}
+              register={() => register("lastName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
             />
             <TextInput
               id="phone"
@@ -198,7 +197,7 @@ export default function EditWorker({
               />
             )}
             {!isProfilePage && (
-              <Test
+              <ImageUploader
                 id="photoFile"
                 label="Fotografie"
                 secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."

@@ -47,11 +47,13 @@ async function post(
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDir = getUploadDirForImages() + '/proposed-job'
   const { files, json } = await parseFormWithImages(req, temporaryName, uploadDir, 10)
-  //const { json } = await parseForm(req)
-  console.log(files)
-  console.log(json)
+  // Go through every file in files
+  const fileFieldNames = Object.keys(files)
+  fileFieldNames.forEach(fieldName => { 
+    const file = files[fieldName]
+    // TODO: rename them
+  })
   const result = validateOrSendError(ProposedJobCreateSchema, json, res)
-  console.log(result)
   if (!result) {
     return
   }
@@ -62,7 +64,6 @@ async function post(
     session
   )
   const job = await createProposedJob(result)
-  console.log(job)
   res.status(201).json(job)
 }
 

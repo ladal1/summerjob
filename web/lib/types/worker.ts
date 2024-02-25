@@ -10,7 +10,7 @@ import {
   WorkerSchema,
 } from 'lib/prisma/zod'
 import { Allergy } from '../../lib/prisma/client'
-import { nameRegex, phoneRegex } from 'lib/helpers/regex'
+import { phoneRegex } from 'lib/helpers/regex'
 import { photoPath } from './photo'
 
 useZodOpenApi
@@ -27,13 +27,11 @@ export const WorkerCreateSchema = z
     firstName: z
       .string()
       .min(1, { message: err.emptyFirstName })
-      .trim()
-      .refine((name) => nameRegex.test(name), { message: err.invalidRegexName }),
+      .trim(),
     lastName: z
       .string()
       .min(1, { message: err.emptyLastName })
-      .trim()
-      .refine((name) => nameRegex.test(name), { message: err.invalidRegexName }),
+      .trim(),
     email: z
       .string()
       .min(1, { message: err.emptyEmail })
