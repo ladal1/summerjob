@@ -106,14 +106,16 @@ export default function EditWorker({
 
   //#region File
 
-  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on. */
-  const setPhotoFileState = (state: boolean) => {
-    setValue('photoFileRemoved', state, { shouldDirty: state, shouldValidate: state })
+  const removeNewPhoto = () => {
+    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true })
   }
- 
-  const removePhoto = () => {
-    setValue('photoFile', undefined, { shouldDirty: false, shouldValidate: false })
-    setPhotoFileState(true)
+
+  const removeExistingPhoto = () => {
+    setValue('photoFileRemoved', true, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const registerPhoto = (fileList: FileList) => {
+    setValue('photoFile', fileList, { shouldDirty: true, shouldValidate: true })
   }
 
   //#endregion
@@ -201,11 +203,11 @@ export default function EditWorker({
                 id="photoFile"
                 label="Fotografie"
                 secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-                photoInit={worker.photoPath ? [`/api/workers/${worker.id}/photo`] : null}
-                setPhotoFileState={setPhotoFileState}
+                photoInit={worker.photoPath ? [{url: `/api/workers/${worker.id}/photo`, index: "0"}] : null}
                 errors={errors}
-                register={register}
-                removePhoto={removePhoto}
+                registerPhoto={registerPhoto}
+                removeNewPhoto={removeNewPhoto}
+                removeExistingPhoto={removeExistingPhoto}
               />
             )}
             {(carAccess || isProfilePage) && (

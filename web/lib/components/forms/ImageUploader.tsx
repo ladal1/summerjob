@@ -6,6 +6,7 @@ import React from 'react'
 import FormWarning from './FormWarning'
 import PhotoModal from 'lib/components/modal/PhotoModal'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
+import Link from 'next/link'
 
 interface PreviewUrl {
   url: string
@@ -127,11 +128,14 @@ export const ImageUploader = <FormData extends FieldValues> ({
                       </button>
                     </div>
                   </div>
-                  <div className="d-flex justify-content-center align-items-center">
+                  <div
+                    className="d-inline-flex gap-2 flex-wrap align-items-center">
                     <div
-                      className="cursor-pointer smj-photo-size"
+                      className="smj-photo-size"
                       style={{ 
-                        position: 'relative'}}
+                        position: 'relative',
+                        cursor: 'zoom-in'  
+                      }}
                     >
                       <Image
                         className="responsive"
@@ -143,6 +147,11 @@ export const ImageUploader = <FormData extends FieldValues> ({
                         loading="eager"
                         priority  
                         onClick={() => openPhotoModal(index)}
+                        onMouseDown={(e) => { // open image in new tab with middle mouse click
+                          if( e.button === 1 ) {
+                            window.open(url.url)
+                          }
+                        }}
                       />
                     </div>
                   </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Modal, ModalSize } from './Modal'
 import Image from 'next/image'
 import { calculateDimensions } from '../photo/photo'
+import Link from 'next/link'
 
 type PhotoModalProps = {
   onClose: () => void
@@ -42,6 +43,7 @@ export default function PhotoModal({
     <Modal size={ModalSize.LARGE} onClose={onClose}>
       <div className="d-flex justify-content-center justify-self-center justify-items-center">
         <div 
+          className="cursor-pointer"
           style={{position: "relative", height: dimensions.height, width:dimensions.width}}
         > 
           <Image
@@ -58,6 +60,11 @@ export default function PhotoModal({
                 maxWidth: determineSizeByWidthOfWindow(), 
                 maxHeight: determineSizeByWidthOfWindow()
               }))
+            }}
+            onMouseDown={(e) => { // open image in new tab with middle or left mouse click
+              if( e.button === 1 || e.button === 0) {
+                window.open(photo)
+              }
             }}
           /> 
         </div>

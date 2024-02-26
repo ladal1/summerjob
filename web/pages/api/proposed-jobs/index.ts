@@ -58,10 +58,10 @@ async function post(
   const job = await createProposedJob(result)
 
   // Create directory for photos
-  await createDirectory(uploadDirectory + "/" + job.id)
+  await createDirectory(uploadDirectory + `/${job.id}`)
 
   // Save those photos and save photo ids that belong to proposedJob
-  const newPhotoIds = await registerPhotos(files, "/" + job.id)
+  const newPhotoIds = await registerPhotos(files, `/${job.id}`)
 
   await updateProposedJob(job.id, {photoIds: newPhotoIds})
   await logger.apiRequest(

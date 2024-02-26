@@ -211,8 +211,8 @@ export default function EditProposedJobForm({
               photoInit={fetchImages()}
               errors={errors}
               registerPhoto={registerPhoto}
-              removeExistingPhoto={removeExistingPhoto}
               removeNewPhoto={removeNewPhoto}
+              removeExistingPhoto={removeExistingPhoto}
               multiple
               maxPhotos={10}
             />
