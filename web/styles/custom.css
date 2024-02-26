@@ -530,25 +530,27 @@ img.smj-nav-logo {
   font-size: 24px;
 }
 
-.photo-default {
-  width: 200px;
-  height: 200px;
-}
-
-
 .smj-add-photo-icon:hover {
   background-color: #e9ecef;
+}
+
+.smj-photo-size {
+  height: 200px;
+  width: 200px;
+}
+
+@media (max-width: 768px) {
+  .smj-photo-size {
+    height: 100px;
+    width: 100px;
+  }
+  .smj-photo-icon-delete {
+    font-size: 16px;
+  }
 }
 
 .smj-file-upload {
   opacity: 0;
   position: absolute;
   z-index: -1;
-}
-
-@media (max-width: 390px) {
-  .photo-default {
-    width: 130px;
-    height: 130px;
-  }
 }

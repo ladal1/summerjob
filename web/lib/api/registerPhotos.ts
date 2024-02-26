@@ -7,7 +7,7 @@ export const registerPhotos = async (files: formidable.Files): Promise<string[]>
   const newPhotoIds: string[] = []
   // Go through every file in files
   const fileFieldNames = Object.keys(files)
-  fileFieldNames.forEach(async fieldName => { 
+  for (const fieldName of fileFieldNames) {
     const file = files[fieldName]
     const photoPath = getPhotoPath(file)
     const photo = {photoPath: photoPath}
@@ -19,6 +19,6 @@ export const registerPhotos = async (files: formidable.Files): Promise<string[]>
     const newPhotoPath = updatePhotoPathByNewFilename(photoPath, newPhoto.id) ?? ''
     renameFile(photoPath, newPhotoPath)
     await updatePhoto(newPhoto.id, {photoPath: newPhotoPath})
-  })
+  }
   return newPhotoIds
 }

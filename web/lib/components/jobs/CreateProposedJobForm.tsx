@@ -44,6 +44,7 @@ export default function CreateProposedJobForm({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
   } = useForm<ProposedJobCreateData>({
     resolver: zodResolver(ProposedJobCreateSchema),
     defaultValues: {
@@ -95,9 +96,45 @@ export default function CreateProposedJobForm({
     }
   }
 
-  const removePhoto = (id: number) => {
-    console.log("remove")
+  
+  //#region Photo
+
+
+  // Remove newly added photo from FileList before sending
+  const removeNewPhoto = (index: number) => {
+    const prevPhotoFiles = getValues('photoFiles')
+    const dt = new DataTransfer()
+
+    // Add only those photos that are not on index
+    for (let i = 0; i < prevPhotoFiles.length; i++) {
+      const file = prevPhotoFiles[i]
+      if (index !== i)
+        dt.items.add(file)
+    }
+    setValue('photoFiles', dt.files)
   }
+
+  // Register newly added photo to FileList
+  const registerPhoto = (fileList: FileList) => {
+    const prevPhotoFiles = getValues('photoFiles')
+    const dt = new DataTransfer()
+
+    // Add existing files to data transfer
+    for (let i = 0; i < prevPhotoFiles?.length; i++) {
+      const file = prevPhotoFiles[i];
+      dt.items.add(file);
+    }
+
+    // Add newly added files to data transfer
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      dt.items.add(file);
+    }
+
+    setValue('photoFiles', dt.files)
+  }
+
+  //#endregion
 
   return (
     <>
@@ -158,8 +195,8 @@ export default function CreateProposedJobForm({
               label="Fotografie"
               secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
               errors={errors}
-              register={register}
-              removePhoto={removePhoto}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
               multiple
               maxPhotos={10}
             />

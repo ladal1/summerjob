@@ -52,6 +52,7 @@ export default function EditProposedJobForm({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues
   } = useForm<ProposedJobForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -115,20 +116,52 @@ export default function EditProposedJobForm({
   }
 
   //#region Photo
-  // TODO: work on photo deletion and fetching
-
-  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on. */
-  const setPhotoFileState = (state: boolean) => {
-    console.log("state")
+  
+  // Remove existing photo from backend.
+  const removeExistingPhoto = (id: string) => {
+    const prevPhotoIdsDeleted = getValues('photoIdsDeleted') || []
+    setValue('photoIdsDeleted', [...prevPhotoIdsDeleted, id])
   }
- 
-  const removePhoto = (id: number) => {
-    //job.photoIdsDeleted.push(job.photoIds[id])
-    console.log("remove")
+
+  // Remove newly added photo from FileList before sending
+  const removeNewPhoto = (index: number) => {
+    const prevPhotoFiles = getValues('photoFiles')
+    const dt = new DataTransfer()
+
+    // Add only those photos that are not on index
+    for (let i = 0; i < prevPhotoFiles.length; i++) {
+      const file = prevPhotoFiles[i]
+      if (index !== i)
+        dt.items.add(file)
+    }
+    setValue('photoFiles', dt.files)
+  }
+
+  // Register newly added photo to FileList
+  const registerPhoto = (fileList: FileList) => {
+    const prevPhotoFiles = getValues('photoFiles')
+    const dt = new DataTransfer()
+
+    // Add existing files to data transfer
+    for (let i = 0; i < prevPhotoFiles?.length; i++) {
+      const file = prevPhotoFiles[i];
+      dt.items.add(file);
+    }
+
+    // Add newly added files to data transfer
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      dt.items.add(file);
+    }
+
+    setValue('photoFiles', dt.files)
   }
 
   const fetchImages = () => {
-    return job.photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)
+    return job.photoIds.map((photoId) => ({
+      url: `/api/proposed-jobs/${job.id}/photos/${photoId}`,
+      index: photoId,
+    }))
   }
 
   //#endregion
@@ -188,10 +221,10 @@ export default function EditProposedJobForm({
               label="Fotografie"
               secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
               photoInit={fetchImages()}
-              setPhotoFileState={setPhotoFileState}
               errors={errors}
-              register={register}
-              removePhoto={removePhoto}
+              registerPhoto={registerPhoto}
+              removeExistingPhoto={removeExistingPhoto}
+              removeNewPhoto={removeNewPhoto}
               multiple
               maxPhotos={10}
             />

@@ -10,9 +10,14 @@ export const PhotoPathSchema = z.object({
 
 export type PhotoPathData = z.infer<typeof PhotoPathSchema>
 
-
 export const PhotoPathSchemaTest = z.object({
   photoPath: z.string()
 }).strict()
 
 export type PhotoPathDataTest = z.infer<typeof PhotoPathSchemaTest>
+
+export const PhotoIdsSchemaTest = z.object({
+  photoIds: z.array(z.string())
+}).strict()
+
+export type PhotoIdsDataTest = z.infer<typeof PhotoIdsSchemaTest>
