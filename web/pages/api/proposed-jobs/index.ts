@@ -6,6 +6,7 @@ import {
   createProposedJob,
   getProposedJobs,
   getProposedJobsAssignableTo,
+  updateProposedJob,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
@@ -15,8 +16,9 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
+import { createDirectory, generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
+import { registerPhotos } from 'lib/api/registerPhotos'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -45,25 +47,29 @@ async function post(
   session: ExtendedSession
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDir = getUploadDirForImages() + '/proposed-job'
-  const { files, json } = await parseFormWithImages(req, temporaryName, uploadDir, 10)
-  // Go through every file in files
-  const fileFieldNames = Object.keys(files)
-  fileFieldNames.forEach(fieldName => { 
-    const file = files[fieldName]
-    // TODO: rename them
-  })
+  const uploadDirectory = getUploadDirForImages() + '/proposed-job'
+  const { files, json } = await parseFormWithImages(req, temporaryName, uploadDirectory, 10)
+
   const result = validateOrSendError(ProposedJobCreateSchema, json, res)
   if (!result) {
     return
   }
+
+  const job = await createProposedJob(result)
+
+  // Create directory for photos
+  await createDirectory(uploadDirectory + "/" + job.id)
+
+  // Save those photos and save photo ids that belong to proposedJob
+  const newPhotoIds = await registerPhotos(files, "/" + job.id)
+
+  await updateProposedJob(job.id, {photoIds: newPhotoIds})
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
-    json,
+    {...json, photoIds: newPhotoIds},
     session
   )
-  const job = await createProposedJob(result)
   res.status(201).json(job)
 }
 

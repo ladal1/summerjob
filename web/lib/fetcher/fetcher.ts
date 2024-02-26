@@ -36,6 +36,7 @@ const sendData =
     
     // JSON.stringify(arg) could be used here, but among arg can be file or blob too, so we want to avoid those keys
     formData.append('jsonData', jsonData)
+    console.log(formData)
 
     const res = await fetch(url, {
       method: method,

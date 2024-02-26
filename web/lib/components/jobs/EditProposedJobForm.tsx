@@ -125,35 +125,23 @@ export default function EditProposedJobForm({
 
   // Remove newly added photo from FileList before sending
   const removeNewPhoto = (index: number) => {
-    const prevPhotoFiles = getValues('photoFiles')
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Filter out the file at the specified index
+    const filteredFiles: Array<File> = Array.from(prevPhotoFiles ?? []).filter((_, i) => i !== index)
+    // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
-
-    // Add only those photos that are not on index
-    for (let i = 0; i < prevPhotoFiles.length; i++) {
-      const file = prevPhotoFiles[i]
-      if (index !== i)
-        dt.items.add(file)
-    }
+    filteredFiles.forEach((file: File) => dt.items.add(file))
     setValue('photoFiles', dt.files)
   }
 
   // Register newly added photo to FileList
   const registerPhoto = (fileList: FileList) => {
-    const prevPhotoFiles = getValues('photoFiles')
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Combine existing files and newly added files
+    const combinedFiles: File[] = (Array.from(prevPhotoFiles ?? [])).concat(Array.from(fileList ?? []))
+    // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
-
-    // Add existing files to data transfer
-    for (let i = 0; i < prevPhotoFiles?.length; i++) {
-      const file = prevPhotoFiles[i];
-      dt.items.add(file);
-    }
-
-    // Add newly added files to data transfer
-    for (let i = 0; i < fileList.length; i++) {
-      const file = fileList[i];
-      dt.items.add(file);
-    }
-
+    combinedFiles.forEach((file: File) => dt.items.add(file))
     setValue('photoFiles', dt.files)
   }
 

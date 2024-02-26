@@ -75,8 +75,8 @@ export const ProposedJobCreateSchema = z
       })
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
       .optional(),
-    photoIds: z.array(z.string()),
-    photoIdsDeleted: z.array(z.string()),
+    photoIds: z.array(z.string()).optional(),
+    photoIdsDeleted: z.array(z.string()).optional(),
     availability: z
       .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
       .openapi({

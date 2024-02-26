@@ -101,7 +101,7 @@ export const ImageUploader = <FormData extends FieldValues> ({
           {secondaryLabel}
         </p>
       )}
-      <div className="row mb-2">
+      <div className="row mb-2 smj-file-upload">
         <input
           type="file"
           disabled={previewUrls.length >= maxPhotos}

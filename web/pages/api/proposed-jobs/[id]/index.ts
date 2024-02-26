@@ -1,6 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { deleteFile, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
+import { createDirectory, deleteDirectory, deleteFile, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
 import { getPhotoPath, parseForm, parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/registerPhotos'
 import { validateOrSendError } from 'lib/api/validator'
@@ -46,8 +46,9 @@ async function patch(
   // Get current photoIds
   const currentPhotoIds = await getProposedJobPhotoIdsById(id)
   const currentPhotoCnt = currentPhotoIds?.photoIds.length ?? 0
+  const uploadDirectory = getUploadDirForImages() + `/proposed-job`
 
-  const { files, json } = await parseFormWithImages(req, id, getUploadDirForImages() + `/proposed-job/${id}`, 10 - currentPhotoCnt)
+  const { files, json } = await parseFormWithImages(req, id, uploadDirectory, 10 - currentPhotoCnt)
   const proposedJobData = validateOrSendError(
     ProposedJobUpdateSchema,
     json,
@@ -60,7 +61,7 @@ async function patch(
   // Save existing ids
   proposedJobData.photoIds = currentPhotoIds?.photoIds ?? []
 
-  // Delete those photos by their ids, that are flaged to be deleted.
+  // Delete those photos (by their ids), that are flaged to be deleted.
   if(proposedJobData.photoIdsDeleted) {
     for (const photoId of proposedJobData.photoIdsDeleted) {
       const photo = await getPhotoById(photoId)
@@ -72,13 +73,16 @@ async function patch(
     }
   }
 
-  // Save photo ids that belong to proposedJob
-  const newPhotoIds = await registerPhotos(files)
-  if(proposedJobData.photoIds) {
-    proposedJobData.photoIds = proposedJobData.photoIds.concat(newPhotoIds)
-  }
-  else {
-    proposedJobData.photoIds = newPhotoIds
+  // Create directory for photos
+  await createDirectory(uploadDirectory + `/${id}`)
+
+  // Save those photos and save photo ids that belong to proposedJob
+  const newPhotoIds = await registerPhotos(files, `/${id}`)
+  proposedJobData.photoIds = (proposedJobData.photoIds ?? []).concat(newPhotoIds)
+
+  // If all photos were deleted, delete directory
+  if(!proposedJobData.photoIds || proposedJobData.photoIds.length == 0) {
+    await deleteDirectory(uploadDirectory)
   }
 
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)

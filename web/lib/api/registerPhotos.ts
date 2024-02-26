@@ -3,7 +3,7 @@ import { getPhotoPath } from "./parse-form"
 import { createPhoto, updatePhoto } from "lib/data/photo"
 import { updatePhotoPathByNewFilename, renameFile } from "./fileManager"
 
-export const registerPhotos = async (files: formidable.Files): Promise<string[]> => {
+export const registerPhotos = async (files: formidable.Files, lastDirectory: string): Promise<string[]> => {
   const newPhotoIds: string[] = []
   // Go through every file in files
   const fileFieldNames = Object.keys(files)
@@ -16,7 +16,7 @@ export const registerPhotos = async (files: formidable.Files): Promise<string[]>
     // save its id to photoIds array
     newPhotoIds.push(newPhoto.id)
     // rename photo to its id instead of temporary name which was proposedJob.id-number given in parseFormWithImages
-    const newPhotoPath = updatePhotoPathByNewFilename(photoPath, newPhoto.id) ?? ''
+    const newPhotoPath = updatePhotoPathByNewFilename(photoPath, lastDirectory, newPhoto.id) ?? ''
     renameFile(photoPath, newPhotoPath)
     await updatePhoto(newPhoto.id, {photoPath: newPhotoPath})
   }

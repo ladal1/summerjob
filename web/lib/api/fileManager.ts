@@ -28,6 +28,7 @@ export const renameFile = async (
 
 export const updatePhotoPathByNewFilename = (
   originalPath: string,
+  lastDirectory: string,
   newFilename: string
 ): string | undefined => {
   const lastSlashIndex = originalPath.lastIndexOf('/')
@@ -39,11 +40,11 @@ export const updatePhotoPathByNewFilename = (
   }
 
   // get part before and after replaced part
-  const directory = originalPath.slice(0, lastSlashIndex + 1) // directory part
+  const directory = originalPath.slice(0, lastSlashIndex) // directory part
   const fileType = originalPath.slice(lastDotIndex) // type part
 
   // create new path
-  return `${directory}${newFilename}${fileType}`
+  return `${directory}${lastDirectory}/${newFilename}${fileType}`
 } 
 
 export const createDirectory = async (dirName: string) => {
@@ -52,5 +53,14 @@ export const createDirectory = async (dirName: string) => {
   }
   catch (error) {
     await promises.mkdir(dirName)
+  }
+}
+
+export const deleteDirectory = async (dirName: string) => {
+  try {
+    await promises.access(dirName)
+    await promises.rmdir(dirName)
+  }
+  catch (error) {
   }
 }
