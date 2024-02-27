@@ -6,7 +6,7 @@ import SimpleDatePicker from '../date-picker/date-picker'
 import EditBox from '../forms/EditBox'
 import PageHeader from '../page-header/PageHeader'
 import { RowContent } from '../table/RowContent'
-import Map from '../forms/input/Map'
+import Map from '../map/Map'
 import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 
 interface MyPlanBrowserProps {
