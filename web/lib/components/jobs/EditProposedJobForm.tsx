@@ -28,6 +28,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
+import { MapInput } from '../forms/input/MapInput'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -154,6 +155,21 @@ export default function EditProposedJobForm({
 
   //#endregion
 
+  //#region Coordinations
+
+  const getCoordinations = (): [number, number] | null => {
+    if (job.coordinations && job.coordinations[0] && job.coordinations[1]) {
+      return [job.coordinations[0], job.coordinations[1]]
+    }
+    return null
+  }
+
+  const registerCoordinations = (coords: [number, number]) => {
+    setValue('coordinations', coords)
+  }
+
+  //#endregion
+
   return (
     <>
       <div className="row">
@@ -197,11 +213,13 @@ export default function EditProposedJobForm({
               errors={errors}
               register={() => register('areaId')}
             />
-            <TextInput
+            <MapInput
               id="address"
               label="Adresa"
               placeholder="Adresa"
-              register={() => register("address")}
+              markerPosition={getCoordinations()}
+              registerAdress={() => register("address")}
+              registerCoordinations={registerCoordinations}
               errors={errors}
             />
             <ImageUploader
@@ -234,7 +252,6 @@ export default function EditProposedJobForm({
               register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
-            
             <Label
               id="minWorkers"
               label="Počet pracantů minimálně / maximálně / z toho silných"

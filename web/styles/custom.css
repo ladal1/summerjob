@@ -554,3 +554,14 @@ img.smj-nav-logo {
   position: absolute;
   z-index: -1;
 }
+
+.smj-map-container {
+  height: 370px;
+  width: 100%; 
+}
+
+@media (max-width: 768px) {
+  .smj-map-container {
+    height: 210px;
+  }
+}

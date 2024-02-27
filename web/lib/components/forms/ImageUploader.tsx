@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from 'react'
-import { FieldErrors, FieldValues, Path, UseFormRegister } from 'react-hook-form'
+import { FieldErrors, FieldValues, Path } from 'react-hook-form'
 import { Label } from './Label'
 import Image from 'next/image'
 import React from 'react'
@@ -7,6 +7,11 @@ import FormWarning from './FormWarning'
 import PhotoModal from 'lib/components/modal/PhotoModal'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import Link from 'next/link'
+
+interface PreviewUrl {
+  url: string
+  index?: string
+}
 
 interface PreviewUrl {
   url: string

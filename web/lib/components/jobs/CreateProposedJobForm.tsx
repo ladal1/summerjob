@@ -26,6 +26,7 @@ import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { useRouter } from 'next/navigation'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
+import { MapInput } from '../forms/input/MapInput'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -123,6 +124,13 @@ export default function CreateProposedJobForm({
 
   //#endregion
 
+  //#region Coordinations
+
+  const registerCoordinations = (coords: [number, number]) => {
+    setValue('coordinations', coords)
+  }
+
+  //#endregion
   return (
     <>
       <div className="row">
@@ -163,11 +171,12 @@ export default function CreateProposedJobForm({
               errors={errors}
               register={() => register('areaId')}
             />
-            <TextInput
+            <MapInput
               id="address"
               label="Adresa"
               placeholder="Adresa"
-              register={() => register("address")}
+              registerAdress={() => register("address")}
+              registerCoordinations={registerCoordinations}
               errors={errors}
             />
             <TextInput
