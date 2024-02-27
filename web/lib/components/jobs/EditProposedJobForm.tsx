@@ -168,6 +168,10 @@ export default function EditProposedJobForm({
     setValue('coordinations', coords)
   }
 
+  const registerAdress = (address: string) => {
+    setValue('address', address)
+  }
+
   //#endregion
 
   return (
@@ -218,7 +222,7 @@ export default function EditProposedJobForm({
               label="Adresa"
               placeholder="Adresa"
               markerPosition={getCoordinations()}
-              registerAdress={() => register("address")}
+              registerAdress={registerAdress}
               registerCoordinations={registerCoordinations}
               errors={errors}
             />
