@@ -14,7 +14,6 @@ import {
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
-import { PhotoPathSchema, PhotoPathSchemaTest } from 'lib/types/photo'
 import {
   ProposedJobUpdateSchema,
   ProposedJobUpdateDataInput,

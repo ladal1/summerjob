@@ -35,11 +35,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
     setDate(newDate)
   }
   const selectedPlan = useMemo(() => {
-    const t =  sortedPlans.find(plan => plan.day.getTime() === date.getTime())
-    console.log(plans)
-    console.log(sortedPlans)
-    console.log(t?.job?.location)
-    return t
+    return sortedPlans.find(plan => plan.day.getTime() === date.getTime())
   }, [date, sortedPlans])
 
   return (

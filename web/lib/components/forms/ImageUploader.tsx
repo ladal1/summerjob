@@ -6,12 +6,6 @@ import React from 'react'
 import FormWarning from './FormWarning'
 import PhotoModal from 'lib/components/modal/PhotoModal'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
-import Link from 'next/link'
-
-interface PreviewUrl {
-  url: string
-  index?: string
-}
 
 interface PreviewUrl {
   url: string

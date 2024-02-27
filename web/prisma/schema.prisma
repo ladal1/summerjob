@@ -58,7 +58,7 @@ model Worker {
   permissions    WorkerPermissions    @relation(fields: [permissionsId], references: [id])
   permissionsId  String               @unique
   note           String               @default("")
-  photoPath      String?
+  photoPath      String
 }
 
 model WorkerPermissions {

@@ -55,7 +55,6 @@ import {
 } from 'lib/types/worker'
 import { z } from 'zod'
 import { Allergy } from '../prisma/client'
-import { PhotoPathSchema } from 'lib/types/photo'
 
 const registry = new OpenAPIRegistry()
 

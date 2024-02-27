@@ -58,6 +58,9 @@ export const Map = ({
   return (
       <MapContainer 
         className="smj-map-container" 
+        style={{
+          zIndex: 1 // Fix for too high z-index of zoom panel
+        }}
         center={center} 
         zoom={zoom}
         scrollWheelZoom={scrollWheelZoom}

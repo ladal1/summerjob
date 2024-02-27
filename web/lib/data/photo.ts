@@ -1,11 +1,11 @@
 import prisma from 'lib/prisma/connection'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
-import { PhotoPathDataTest } from 'lib/types/photo'
+import { PhotoPathData } from 'lib/types/photo'
 
 export async function getPhotoById(
   id: string
-): Promise<PhotoPathDataTest | null> {
+): Promise<PhotoPathData | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
@@ -23,7 +23,7 @@ export async function getPhotoById(
 }
 
 export async function createPhoto(
-  data: PhotoPathDataTest,
+  data: PhotoPathData,
 ) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
@@ -37,7 +37,7 @@ export async function createPhoto(
 
 export async function updatePhoto(
   id: string, 
-  photo: PhotoPathDataTest
+  photo: PhotoPathData
 ) {
   await prisma.photo.update({
     where: {

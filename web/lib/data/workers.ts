@@ -82,7 +82,6 @@ export async function getWorkerPhotoById(
       photoPath: true,
     },
   })
-  
   return worker
 }
 
@@ -295,7 +294,7 @@ export async function createWorker(
           permissions: [],
         },
       },
-      photoPath: data.photoPath,
+      photoPath: data.photoPath ?? '',
     },
   })
 }

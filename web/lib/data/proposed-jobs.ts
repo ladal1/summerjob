@@ -6,7 +6,7 @@ import {
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
-import { PhotoIdsDataTest } from 'lib/types/photo'
+import { PhotoIdsData } from 'lib/types/photo'
 
 export async function getProposedJobById(
   id: string
@@ -29,7 +29,7 @@ export async function getProposedJobById(
 
 export async function getProposedJobPhotoIdsById(
   id: string
-): Promise<PhotoIdsDataTest | null> {
+): Promise<PhotoIdsData | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
