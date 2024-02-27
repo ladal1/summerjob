@@ -39,7 +39,6 @@ export const Map = ({
       click(event) {
         if(canPickLocation) {
           const { lat, lng } = event.latlng
-          console.log(`Clicked at: ${lat}, ${lng}`)
           setClickedPosition([lat, lng])
           if(registerCoordinations)
             registerCoordinations([lat, lng])

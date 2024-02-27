@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import SimpleDatePicker from '../date-picker/date-picker'
 import EditBox from '../forms/EditBox'
 import PageHeader from '../page-header/PageHeader'
-import { RowContent, RowContentsInterface } from '../table/RowContent'
+import { RowContent } from '../table/RowContent'
 import Map from '../forms/input/Map'
 import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 
@@ -35,7 +35,11 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
     setDate(newDate)
   }
   const selectedPlan = useMemo(() => {
-    return sortedPlans.find(plan => plan.day.getTime() === date.getTime())
+    const t =  sortedPlans.find(plan => plan.day.getTime() === date.getTime())
+    console.log(plans)
+    console.log(sortedPlans)
+    console.log(t?.job?.location)
+    return t
   }, [date, sortedPlans])
 
   return (
@@ -55,7 +59,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
             {selectedPlan?.job && (
               <div className="container-fluid">
                 <div className="row">
-                  <div className="col-lg-6 mb-3">
+                  <div className={`${selectedPlan.job.location.coordinations ? "col-lg-6" : "col"} " mb-3"`}>
                     <RowContent
                       data={
                         [
@@ -125,21 +129,22 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                       }
                     />
                   </div>
-                  <div className="col-lg-6">
-                    <div className="mb-3">
-                      <Map
-                        center={[49.8203, 15.4784]} // Czech republic
-                        zoom={11}
-                        markerPosition={[49.8203, 15.4784]}
-                      />
+                  {selectedPlan.job.location.coordinations && (
+                    <div className="col-lg-6">
+                      <div className="mb-3">
+                        <Map
+                          center={selectedPlan.job.location.coordinations}
+                          zoom={11}
+                          markerPosition={selectedPlan.job.location.coordinations}
+                        />
+                      </div>
+                      <div className="d-flex justify-content-end">
+                        <OpenNavigationButton coordinates={selectedPlan.job.location.coordinations} />
+                      </div>
                     </div>
-                    <div className="d-flex justify-content-end">
-                      <OpenNavigationButton coordinates={[49.8203, 15.4784]} />
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
-              
             )}
           </EditBox>
         </div>
