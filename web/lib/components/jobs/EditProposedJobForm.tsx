@@ -28,6 +28,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
+import { MapInput } from '../forms/input/MapInput'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -52,6 +53,7 @@ export default function EditProposedJobForm({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues
   } = useForm<ProposedJobForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -115,20 +117,55 @@ export default function EditProposedJobForm({
   }
 
   //#region Photo
-  // TODO: work on photo deletion and fetching
-
-  /* If photo was deleted set it to yes and let it be dirty so it will be picked by pick later on. */
-  const setPhotoFileState = (state: boolean) => {
-    console.log("state")
+  
+  // Remove existing photo from backend.
+  const removeExistingPhoto = (id: string) => {
+    const prevPhotoIdsDeleted = getValues('photoIdsDeleted') || []
+    setValue('photoIdsDeleted', [...prevPhotoIdsDeleted, id])
   }
- 
-  const removePhoto = (id: number) => {
-    //job.photoIdsDeleted.push(job.photoIds[id])
-    console.log("remove")
+
+  // Remove newly added photo from FileList before sending
+  const removeNewPhoto = (index: number) => {
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Filter out the file at the specified index
+    const filteredFiles: Array<File> = Array.from(prevPhotoFiles ?? []).filter((_, i) => i !== index)
+    // Transfer those photos back to photoFiles
+    const dt = new DataTransfer()
+    filteredFiles.forEach((file: File) => dt.items.add(file))
+    setValue('photoFiles', dt.files)
+  }
+
+  // Register newly added photo to FileList
+  const registerPhoto = (fileList: FileList) => {
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Combine existing files and newly added files
+    const combinedFiles: File[] = (Array.from(prevPhotoFiles ?? [])).concat(Array.from(fileList ?? []))
+    // Transfer those photos back to photoFiles
+    const dt = new DataTransfer()
+    combinedFiles.forEach((file: File) => dt.items.add(file))
+    setValue('photoFiles', dt.files)
   }
 
   const fetchImages = () => {
-    return job.photoIds.map((photoId) => `/api/proposed-jobs/${job.id}/photos/${photoId}`)
+    return job.photoIds.map((photoId) => ({
+      url: `/api/proposed-jobs/${job.id}/photos/${photoId}`,
+      index: photoId,
+    }))
+  }
+
+  //#endregion
+
+  //#region Coordinations
+
+  const getCoordinations = (): [number, number] | null => {
+    if (job.coordinations && job.coordinations[0] && job.coordinations[1]) {
+      return [job.coordinations[0], job.coordinations[1]]
+    }
+    return null
+  }
+
+  const registerCoordinations = (coords: [number, number]) => {
+    setValue('coordinations', coords)
   }
 
   //#endregion
@@ -176,11 +213,13 @@ export default function EditProposedJobForm({
               errors={errors}
               register={() => register('areaId')}
             />
-            <TextInput
+            <MapInput
               id="address"
               label="Adresa"
               placeholder="Adresa"
-              register={() => register("address")}
+              markerPosition={getCoordinations()}
+              registerAdress={() => register("address")}
+              registerCoordinations={registerCoordinations}
               errors={errors}
             />
             <ImageUploader
@@ -188,10 +227,10 @@ export default function EditProposedJobForm({
               label="Fotografie"
               secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
               photoInit={fetchImages()}
-              setPhotoFileState={setPhotoFileState}
               errors={errors}
-              register={register}
-              removePhoto={removePhoto}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
+              removeExistingPhoto={removeExistingPhoto}
               multiple
               maxPhotos={10}
             />
@@ -213,7 +252,6 @@ export default function EditProposedJobForm({
               register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
-            
             <Label
               id="minWorkers"
               label="Počet pracantů minimálně / maximálně / z toho silných"

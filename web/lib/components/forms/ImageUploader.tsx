@@ -1,22 +1,26 @@
 import { ChangeEvent, useEffect, useState } from 'react'
-import { FieldErrors, FieldValues, Path, UseFormRegister } from 'react-hook-form'
+import { FieldErrors, FieldValues, Path } from 'react-hook-form'
 import { Label } from './Label'
 import Image from 'next/image'
 import React from 'react'
 import FormWarning from './FormWarning'
 import PhotoModal from 'lib/components/modal/PhotoModal'
-import { calculateDimensions } from 'lib/components/photo/photo'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
+
+interface PreviewUrl {
+  url: string
+  index?: string
+}
 
 interface ImageUploaderProps<FormData extends FieldValues> {
   id: Path<FormData>
   label: string
   secondaryLabel?: string
-  photoInit?: string[] | null
-  setPhotoFileState?: (state: boolean) => void
+  photoInit?: PreviewUrl[] | null
   errors: FieldErrors<FormData>
-  register: UseFormRegister<FormData>
-  removePhoto: (index: number) => void
+  registerPhoto: (fileList: FileList) => void
+  removeExistingPhoto?: (index: string) => void
+  removeNewPhoto: (index: number) => void
   multiple?: boolean
   maxPhotos?: number
   maxFileSize?: number
@@ -27,31 +31,22 @@ export const ImageUploader = <FormData extends FieldValues> ({
   label,
   secondaryLabel,
   photoInit = null,
-  setPhotoFileState,
   errors,
-  register,
-  removePhoto,
+  registerPhoto,
+  removeExistingPhoto,
+  removeNewPhoto,
   multiple = false,
   maxPhotos = 1,
   maxFileSize = 1024*1024*10 // 10 MB
 }: ImageUploaderProps<FormData>) => {
 
   const error = errors?.[id]?.message as string | undefined
-  const [errorBeforeSave, setErrorBeforeSave] = useState<string | undefined>(undefined);
+  const [errorBeforeSave, setErrorBeforeSave] = useState<string | undefined>(undefined)
 
-  const [previewUrls, setPreviewUrls] = useState<(string | null)[]>(photoInit || [])
+  const [photoInitCount, setphotoInitCount] = useState(photoInit?.length ?? 0)
+  const [previewUrls, setPreviewUrls] = useState<(PreviewUrl | null)[]>(photoInit || [])
   const [showPhotoModal, setShowPhotoModal] = useState(false)
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(1)
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }[]>([])
-  const [widthOfWindow, setWidthOfWindow] = useState(0)
-
-  const handleResize = () => setWidthOfWindow(window.innerWidth)
-
-  useEffect(() => {
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
     setErrorBeforeSave(undefined)
@@ -69,35 +64,30 @@ export const ImageUploader = <FormData extends FieldValues> ({
       if (!file.type.startsWith('image') || file.size > maxFileSize) {
         return null
       }
-
-      if (setPhotoFileState) {
-        setPhotoFileState(false)
-      }
-
-      return URL.createObjectURL(file)
+    
+      return { url: URL.createObjectURL(file) }
     })
 
+    registerPhoto(fileInput.files)
     setPreviewUrls((prevPreviewUrls) => [...prevPreviewUrls, ...newPreviewUrls])
   }
 
   const onRemoveImage = (index: number) => {
-    const newPreviewUrls = [...previewUrls]
-    newPreviewUrls.splice(index, 1)
-    setPreviewUrls(newPreviewUrls)
-    removePhoto(index)
+    const deletedPreviewUrl = previewUrls[index]
+    // 
+    if (deletedPreviewUrl?.index && removeExistingPhoto) {
+      removeExistingPhoto(deletedPreviewUrl.index)
+      setphotoInitCount((photoInitCount) => photoInitCount - 1)
+    }
+    else {
+      removeNewPhoto(index - photoInitCount)
+    }
+    setPreviewUrls((prevPreviewUrls) => prevPreviewUrls.filter((_, i) => i !== index))
   }
 
   const openPhotoModal = (index: number) => {
     setCurrentPhotoIndex(index)
     setShowPhotoModal(true)
-  }
-
-  const updateDimensionsForIndex = (index: number, newSize: {width: number, height: number}) => {
-    setDimensions((prevDimensions) => {
-      const updatedDimensions = [...prevDimensions]
-      updatedDimensions[index] = { width: newSize.width, height: newSize.height }
-      return updatedDimensions;
-    })
   }
 
   return (
@@ -111,13 +101,13 @@ export const ImageUploader = <FormData extends FieldValues> ({
           {secondaryLabel}
         </p>
       )}
-      <div className="row mb-2">
+      <div className="row mb-2 smj-file-upload">
         <input
           type="file"
           disabled={previewUrls.length >= maxPhotos}
           multiple={multiple}
           id="upload-photo"
-          {...register(id as Path<FormData>, { onChange: (e) => onFileUploadChange(e) })}
+          onChange={(e) => onFileUploadChange(e)}
         />
       </div>
       <div className="d-inline-flex gap-2 flex-wrap align-items-center">
@@ -130,35 +120,36 @@ export const ImageUploader = <FormData extends FieldValues> ({
                     <div className="d-flex justify-content-end">
                       <button
                         type="button"
-                        className="btn btn-light p-2 pb-1"
+                        className="btn btn-light p-2 pb-1 pt-1"
                         onClick={() => onRemoveImage(index)}
                       >
                         <i className="fa-solid fa-circle-xmark smj-action-delete smj-photo-icon-delete"/>
                       </button>
                     </div>
                   </div>
-                  <div className="d-flex justify-content-center align-items-center">
+                  <div
+                    className="d-inline-flex gap-2 flex-wrap align-items-center">
                     <div
-                      className="cursor-pointer"
+                      className="smj-photo-size"
                       style={{ 
-                        position: 'relative', 
-                        height: dimensions[index] && dimensions[index].height ? dimensions[index].height : 200, 
-                        width: dimensions[index] && dimensions[index].width ? dimensions[index].width : 200 }}
+                        position: 'relative',
+                        cursor: 'zoom-in'  
+                      }}
                     >
                       <Image
                         className="responsive"
+                        style={{objectFit: 'contain'}}
                         alt={`Fotografie ${index + 1}`}
-                        src={url}
+                        src={url.url}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         loading="eager"
-                        key={Date.now()}
+                        priority  
                         onClick={() => openPhotoModal(index)}
-                        onLoadingComplete={({ naturalWidth, naturalHeight }) => {
-                          updateDimensionsForIndex(index, calculateDimensions(naturalWidth, naturalHeight, {
-                              maxWidth: widthOfWindow > 750 ? 320 : 220,
-                              maxHeight: widthOfWindow > 750 ? 320 : 220,
-                            })
-                          )
+                        onMouseDown={(e) => { // open image in new tab with middle mouse click
+                          if( e.button === 1 ) {
+                            window.open(url.url)
+                          }
                         }}
                       />
                     </div>
@@ -170,9 +161,9 @@ export const ImageUploader = <FormData extends FieldValues> ({
         ))}
         {previewUrls.length < maxPhotos && (
           <div className="smj-add-photo-icon border rounded shadow">
-            <label className="cursor-pointer m-4" htmlFor="upload-photo">
+            <label className="cursor-pointer smj-photo-size" htmlFor="upload-photo">
               <svg
-                className="photo-default"
+                className="m-4"
                 viewBox="-64 -64 128 128"
                 xmlns="http://www.w3.org/2000/svg"
                 strokeWidth="6"
@@ -188,8 +179,7 @@ export const ImageUploader = <FormData extends FieldValues> ({
       
       {showPhotoModal && currentPhotoIndex !== null && previewUrls[currentPhotoIndex] && (
         <PhotoModal
-          widthOfWindow={widthOfWindow}
-          photo={previewUrls[currentPhotoIndex] as string}
+          photo={previewUrls[currentPhotoIndex]?.url as string}
           onClose={() => setShowPhotoModal(false)}
         />
       )}

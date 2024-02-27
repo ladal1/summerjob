@@ -15,8 +15,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
     <>
       <div className="modal-backdrop fade show"></div>
       <div
-        className={`modal fade show ${size}`}
-        style={{ display: 'block' }}
+        className={`modal fade show ${size} d-block`}
         tabIndex={-1}
       >
         <div className="modal-dialog">

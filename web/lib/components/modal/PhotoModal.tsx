@@ -1,24 +1,34 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal, ModalSize } from './Modal'
 import Image from 'next/image'
 import { calculateDimensions } from '../photo/photo'
+import Link from 'next/link'
 
 type PhotoModalProps = {
-  widthOfWindow: number
   onClose: () => void
   photo: string
 }
 
 export default function PhotoModal({
-  widthOfWindow,
   onClose,
   photo
 }: PhotoModalProps) {
 
   const [dimensions, setDimensions] = useState({
-    width: 200,
-    height: 200,
+    width: 800,
+    height: 800,
   });
+
+  const [widthOfWindow, setWidthOfWindow] = useState(0)
+
+  const handleResize = () => setWidthOfWindow(window.innerWidth)
+
+  useEffect(() => {
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
 
   const determineSizeByWidthOfWindow = () => {
     if(widthOfWindow > 1000)
@@ -31,13 +41,18 @@ export default function PhotoModal({
 
   return (
     <Modal size={ModalSize.LARGE} onClose={onClose}>
-      <div className="d-flex justify-content-center">
-        <div style={{position: "relative", height: dimensions.height, width:dimensions.width}}> 
+      <div className="d-flex justify-content-center justify-self-center justify-items-center">
+        <div 
+          className="cursor-pointer"
+          style={{position: "relative", height: dimensions.height, width:dimensions.width}}
+        > 
           <Image
             className="responsive"
+            style={{objectFit: 'contain'}}
             alt="Fotografie"
             src={photo}
             fill
+            sizes="100vw"
             loading="eager"
             key={Date.now()}
             onLoadingComplete={({ naturalWidth, naturalHeight }) => {
@@ -45,6 +60,11 @@ export default function PhotoModal({
                 maxWidth: determineSizeByWidthOfWindow(), 
                 maxHeight: determineSizeByWidthOfWindow()
               }))
+            }}
+            onMouseDown={(e) => { // open image in new tab with middle or left mouse click
+              if( e.button === 1 || e.button === 0) {
+                window.open(photo)
+              }
             }}
           /> 
         </div>

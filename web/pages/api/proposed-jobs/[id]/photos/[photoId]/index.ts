@@ -17,7 +17,7 @@ const get = async (
   if (!allowed) {
     return
   }
-
+  
   const photo = await getPhotoById(photoId)
   if (!photo || !photo.photoPath) {
     res.status(404).end()

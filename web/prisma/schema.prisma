@@ -109,6 +109,7 @@ model ProposedJob {
   maxWorkers         Int
   strongWorkers      Int
   address            String
+  coordinations      Float[]
   contact            String
   hasFood            Boolean     @default(false)
   hasShower          Boolean     @default(false)

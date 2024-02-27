@@ -65,8 +65,12 @@ export default function CreateWorker({
     router.back()
   }
 
-  const removePhoto = () => {
-    setValue('photoFile', undefined, { shouldDirty: false, shouldValidate: false})
+  const removeNewPhoto = () => {
+    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const registerPhoto = (fileList: FileList) => {
+    setValue('photoFile', fileList, { shouldDirty: true, shouldValidate: true })
   }
 
   return (
@@ -143,8 +147,8 @@ export default function CreateWorker({
               label="Fotografie"
               secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
               errors={errors}
-              register={register}
-              removePhoto={removePhoto}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
             />
 
             {carAccess && (

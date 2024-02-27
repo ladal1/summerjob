@@ -26,6 +26,7 @@ import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { useRouter } from 'next/navigation'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
+import { MapInput } from '../forms/input/MapInput'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -44,6 +45,7 @@ export default function CreateProposedJobForm({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
   } = useForm<ProposedJobCreateData>({
     resolver: zodResolver(ProposedJobCreateSchema),
     defaultValues: {
@@ -95,10 +97,40 @@ export default function CreateProposedJobForm({
     }
   }
 
-  const removePhoto = (id: number) => {
-    console.log("remove")
+  
+  //#region Photo
+
+  // Remove newly added photo from FileList before sending
+  const removeNewPhoto = (index: number) => {
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Filter out the file at the specified index
+    const filteredFiles: Array<File> = Array.from(prevPhotoFiles ?? []).filter((_, i) => i !== index)
+    // Transfer those photos back to photoFiles
+    const dt = new DataTransfer()
+    filteredFiles.forEach((file: File) => dt.items.add(file))
+    setValue('photoFiles', dt.files)
   }
 
+  // Register newly added photo to FileList
+  const registerPhoto = (fileList: FileList) => {
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Combine existing files and newly added files
+    const combinedFiles: File[] = (Array.from(prevPhotoFiles ?? [])).concat(Array.from(fileList ?? []))
+    // Transfer those photos back to photoFiles
+    const dt = new DataTransfer()
+    combinedFiles.forEach((file: File) => dt.items.add(file))
+    setValue('photoFiles', dt.files)
+  }
+
+  //#endregion
+
+  //#region Coordinations
+
+  const registerCoordinations = (coords: [number, number]) => {
+    setValue('coordinations', coords)
+  }
+
+  //#endregion
   return (
     <>
       <div className="row">
@@ -139,11 +171,12 @@ export default function CreateProposedJobForm({
               errors={errors}
               register={() => register('areaId')}
             />
-            <TextInput
+            <MapInput
               id="address"
               label="Adresa"
               placeholder="Adresa"
-              register={() => register("address")}
+              registerAdress={() => register("address")}
+              registerCoordinations={registerCoordinations}
               errors={errors}
             />
             <TextInput
@@ -158,8 +191,8 @@ export default function CreateProposedJobForm({
               label="Fotografie"
               secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
               errors={errors}
-              register={register}
-              removePhoto={removePhoto}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
               multiple
               maxPhotos={10}
             />

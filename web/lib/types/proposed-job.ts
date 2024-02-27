@@ -30,6 +30,7 @@ export const ProposedJobCreateSchema = z
     publicDescription: z.string(),
     name: z.string().min(1, { message: err.emptyProposedJobName }),
     address: z.string().min(1, { message: err.emptyAdress }),
+    coordinations: z.tuple([z.number(), z.number()]).optional(),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
       .number({ invalid_type_error: err.invalidTypeMaxWorkers })
@@ -75,8 +76,8 @@ export const ProposedJobCreateSchema = z
       })
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
       .optional(),
-    photoIds: z.array(z.string()),
-    photoIdsDeleted: z.array(z.string()),
+    photoIds: z.array(z.string()).optional(),
+    photoIdsDeleted: z.array(z.string()).optional(),
     availability: z
       .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
       .openapi({

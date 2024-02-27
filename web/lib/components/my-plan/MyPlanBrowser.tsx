@@ -6,6 +6,8 @@ import SimpleDatePicker from '../date-picker/date-picker'
 import EditBox from '../forms/EditBox'
 import PageHeader from '../page-header/PageHeader'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
+import Map from '../forms/input/Map'
+import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]
@@ -51,74 +53,93 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                 'Tento den nemáte naplánovanou práci.'}
             </h5>
             {selectedPlan?.job && (
-              <RowContent
-                data={
-                  [
-                    {
-                      label: "Popis",
-                      content: `${selectedPlan.job.description}`, 
-                    },
-                    {
-                      label: "Zodpovědný pracant",
-                      content: `${selectedPlan.job.responsibleWorkerName}`, 
-                    },
-                    {
-                      label: "Pracanti",
-                      content: `${selectedPlan.job.workerNames.join(', ')}`, 
-                    },
-                    {
-                      label: "Kontaktní osoba",
-                      content: `${selectedPlan.job.contact}`, 
-                    },
-                    {
-                      label: "Alergeny",
-                      content: `${selectedPlan.job.allergens.join(', ') || 'Žádné'}`, 
-                    },
-                    {
-                      label: "Adresa",
-                      content: `${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`, 
-                    },
-                    {
-                      label: "Občerstvení k dispozici",
-                      content: `${selectedPlan.job.hasFood ? 'Ano' : 'Ne'}`, 
-                    },
-                    {
-                      label: "Sprcha k dispozici",
-                      content: `${selectedPlan.job.hasShower ? 'Ano' : 'Ne'}`, 
-                    },
-                    {
-                      label: <strong>Doprava:</strong>,
-                      content: 
-                      <>
-                        {!selectedPlan.job.ride && <div className="ms-2">Pěšky</div>}
-                        {selectedPlan.job.ride && (
-                          <>
-                            <div className="ms-2 pt-2">
-                              <div>
-                                <strong>Auto: </strong>
-                                {selectedPlan.job.ride.car}
-                              </div>
-                              <div>
-                                <strong>Řidič: </strong>
-                                {selectedPlan.job.ride.driverName}
-                                {', '}
-                                {selectedPlan.job.ride.driverPhone}
-                              </div>
-                              {!selectedPlan.job.ride.endsAtMyJob && (
+              <div className="container-fluid">
+                <div className="row">
+                  <div className="col-lg-6 mb-3">
+                    <RowContent
+                      data={
+                        [
+                          {
+                            label: "Popis",
+                            content: `${selectedPlan.job.description}`, 
+                          },
+                          {
+                            label: "Zodpovědný pracant",
+                            content: `${selectedPlan.job.responsibleWorkerName}`, 
+                          },
+                          {
+                            label: "Pracanti",
+                            content: `${selectedPlan.job.workerNames.join(', ')}`, 
+                          },
+                          {
+                            label: "Kontaktní osoba",
+                            content: `${selectedPlan.job.contact}`, 
+                          },
+                          {
+                            label: "Alergeny",
+                            content: `${selectedPlan.job.allergens.join(', ') || 'Žádné'}`, 
+                          },
+                          {
+                            label: "Adresa",
+                            content: `${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`, 
+                          },
+                          {
+                            label: "Občerstvení k dispozici",
+                            content: `${selectedPlan.job.hasFood ? 'Ano' : 'Ne'}`, 
+                          },
+                          {
+                            label: "Sprcha k dispozici",
+                            content: `${selectedPlan.job.hasShower ? 'Ano' : 'Ne'}`, 
+                          },
+                          {
+                            label: <strong>Doprava:</strong>,
+                            content: 
+                            <>
+                              {!selectedPlan.job.ride && <div className="ms-2">Pěšky</div>}
+                              {selectedPlan.job.ride && (
                                 <>
-                                  Sdílená doprava. Auto jede na job{' '}
-                                  <i>{selectedPlan.job.ride.endJobName}</i>, tebe
-                                  vysadí cestou.
+                                  <div className="ms-2 pt-2">
+                                    <div>
+                                      <strong>Auto: </strong>
+                                      {selectedPlan.job.ride.car}
+                                    </div>
+                                    <div>
+                                      <strong>Řidič: </strong>
+                                      {selectedPlan.job.ride.driverName}
+                                      {', '}
+                                      {selectedPlan.job.ride.driverPhone}
+                                    </div>
+                                    {!selectedPlan.job.ride.endsAtMyJob && (
+                                      <>
+                                        Sdílená doprava. Auto jede na job{' '}
+                                        <i>{selectedPlan.job.ride.endJobName}</i>, tebe
+                                        vysadí cestou.
+                                      </>
+                                    )}
+                                  </div>
                                 </>
                               )}
-                            </div>
-                          </>
-                        )}
-                      </> 
-                    },
-                  ] 
-                }
-              />
+                            </> 
+                          },
+                        ] 
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <div className="mb-3">
+                      <Map
+                        center={[49.8203, 15.4784]} // Czech republic
+                        zoom={11}
+                        markerPosition={[49.8203, 15.4784]}
+                      />
+                    </div>
+                    <div className="d-flex justify-content-end">
+                      <OpenNavigationButton coordinates={[49.8203, 15.4784]} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
             )}
           </EditBox>
         </div>
