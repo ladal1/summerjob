@@ -7,7 +7,6 @@ import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { Serialized } from 'lib/types/serialize'
 import { formatPhoneNumber, pick, removeRedundantSpace } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
@@ -20,6 +19,7 @@ import { Label } from '../forms/Label'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -84,7 +84,7 @@ export default function EditWorker({
     if (isHandlingCar) {
       router.push(`/cars/${carRoute}`)
     }
-    if (!isProfilePage) {
+    else if (!isProfilePage) {
       router.back()
     }
   }
@@ -305,7 +305,7 @@ export default function EditWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => {setSaved(false)}} />}
+            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

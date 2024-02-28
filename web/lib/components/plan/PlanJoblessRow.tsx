@@ -6,6 +6,7 @@ import type { Worker } from 'lib/prisma/client'
 import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
 import { useEffect, useState } from 'react'
 import MoveWorkerModal from './MoveWorkerModal'
+import { allergyMapping } from 'lib/data/allergyMapping'
 
 const NO_JOB = 'NO_JOB'
 
@@ -154,23 +155,24 @@ function formatWorkerData(
   requestMoveWorker: (worker: WorkerComplete) => void
 ) {
   const name = `${worker.firstName} ${worker.lastName}`
-  const abilities = []
-
-  if (worker.cars.length > 0) abilities.push('Auto')
-  if (worker.isStrong) abilities.push('Silák')
-  if (
-    worker.availability.adorationDays.find(
-      x => x.getTime() === planDay.getTime()
-    )
-  )
-    abilities.push('Adoruje')
   const allergies = worker.allergies
+  const allergiesMapped = allergies.map((key) => allergyMapping[key])
 
   return [
     name,
     worker.phone,
-    abilities.join(', '),
-    allergies.join(', '),
+    <>
+      {worker.cars.length > 0 && (
+        <i className="fas fa-car me-2" title={'Auto'} />
+      )}
+      {worker.isStrong && (
+        <i className="fas fa-dumbbell me-2" title={'Silák'} />
+      )}
+      {worker.availability.adorationDays.find(x => x.getTime() === planDay.getTime()) && (
+        <i className="fa fa-church" title={'Adoruje'} />
+      )}
+    </>,
+    allergiesMapped.join(', '),
     <span
       key={`actions-${worker.id}`}
       className="d-flex align-items-center gap-3"

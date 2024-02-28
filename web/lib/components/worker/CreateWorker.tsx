@@ -12,10 +12,10 @@ import { TextInput } from '../forms/input/TextInput'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -189,7 +189,7 @@ export default function CreateWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => { setSaved(false) }} />}
+            {saved && <SuccessProceedModal onClose={onConfirmationClosed}/>}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>
