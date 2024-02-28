@@ -19,7 +19,7 @@ const _columns: SortableColumn[] = [
   { id: 'area', name: 'Oblast', sortable: true },
   { id: 'address', name: 'Adresa', sortable: true },
   { id: 'amenities', name: 'Zajištění', sortable: false },
-  { id: 'actions', name: 'Akce', sortable: false },
+  { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"}},
 ]
 
 interface PlanTableProps {

@@ -86,13 +86,15 @@ export function PlanJoblessRow({
   return (
     <>
       <ExpandableRow
-        data={[`Bez práce (${joblessWorkers.length})`]}
+        data={[{content: `Bez práce (${joblessWorkers.length})`}]}
         colspan={numColumns}
         className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
         onDrop={onWorkerDropped()}
       >
-        <div className="ms-2">
-          <b>Následující pracanti nemají přiřazenou práci:</b>
+        <div className="smj-light-grey">
+          <div className="ms-2">
+            <b>Následující pracanti nemají přiřazenou práci:</b>
+          </div>
         </div>
         <div className="table-responsive text-nowrap">
           <table className="table table-hover">
@@ -124,7 +126,7 @@ export function PlanJoblessRow({
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
                   onMouseEnter={() =>
                     worker.photoPath
-                      ? onWorkerHover(`/api/workers/${worker.id}/image`)
+                      ? onWorkerHover(`/api/workers/${worker.id}/photo`)
                       : onWorkerHover(null)
                   }
                   onMouseLeave={() => onWorkerHover(null)}

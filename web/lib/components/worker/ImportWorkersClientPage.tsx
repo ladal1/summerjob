@@ -236,6 +236,7 @@ function getWorkerInfo(
       workDays,
       adorationDays,
     },
+    photoFile: undefined,
   })
   if (!parsed.success) {
     const error = parsed.error.issues

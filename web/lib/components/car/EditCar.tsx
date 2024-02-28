@@ -5,6 +5,7 @@ import { useState } from 'react'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import CarEditForm from './CarEditForm'
+import { useRouter } from 'next/navigation'
 
 export default function EditCar({ car }: { car: CarComplete }) {
   const [saved, setSaved] = useState(false)
@@ -13,14 +14,21 @@ export default function EditCar({ car }: { car: CarComplete }) {
       setSaved(true)
     },
   })
+  const router = useRouter()
+  
   const onSubmit = (data: CarUpdateData) => {
     trigger(data)
+  }
+
+  const onConfirmationClosed = () => {
+    setSaved(false)
+    router.back()
   }
 
   return (
     <>
       <CarEditForm onSubmit={onSubmit} car={car} isSending={isMutating} />
-      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   )

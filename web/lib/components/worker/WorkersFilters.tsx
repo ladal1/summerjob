@@ -30,7 +30,7 @@ export function WorkersFilters({
         <div className="col-auto mb-3 d-flex">
           <div className="form-check align-self-center align-items-center d-flex gap-2">
             <input
-              className="form-check-input fs-5 checkbox-white"
+              className="form-check-input fs-5 smj-checkbox"
               type="checkbox"
               id="onlyStrongCheckbox"
               checked={onlyStrong}
@@ -47,7 +47,7 @@ export function WorkersFilters({
         <div className="col-auto mb-3 d-flex">
           <div className="form-check align-self-center align-items-center d-flex gap-2">
             <input
-              className="form-check-input fs-5 checkbox-white"
+              className="form-check-input fs-5 smj-checkbox"
               type="checkbox"
               id="onlyWithCarCheckbox"
               checked={onlyWithCar}

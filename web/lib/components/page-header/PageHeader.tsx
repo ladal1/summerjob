@@ -3,7 +3,7 @@ export default function PageHeader({
   title,
   isFluid = true,
 }: {
-  children: React.ReactNode
+  children?: React.ReactNode
   title: string
   isFluid?: boolean
 }) {

@@ -6,7 +6,7 @@ import NewEventModal from './NewEventModal'
 
 export default function EventsHeader() {
   const router = useRouter()
-  const onSuccess = (eventId: string) => {
+  const onSuccess = () => {
     setIsNewEventModalOpen(false)
     router.refresh()
   }

@@ -14,7 +14,8 @@ import { useMemo, useState } from 'react'
 import DeleteIcon from '../forms/DeleteIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { ExpandableRow } from '../table/ExpandableRow'
+import { ExpandableRow, RowCells } from '../table/ExpandableRow'
+import { RowContent, RowContentsInterface } from '../table/RowContent'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -70,6 +71,37 @@ export default function ProposedJobRow({
     return days.map(formatDateShort).map(capitalizeFirstLetter).join(', ')
   }, [job.availability])
 
+  const expandedContent: RowContentsInterface[] = [
+    {
+      label: "Popis",
+      content: `${job.publicDescription}`, 
+    },
+    {
+      label: "Poznámka pro organizátory",
+      content: `${job.privateDescription}`, 
+    },
+    {
+      label: "Počet pracantů",
+      content: `${job.minWorkers} - ${job.maxWorkers} (${job.strongWorkers} siláků)`, 
+    },
+    {
+      label: "Doprava do oblasti požadována",
+      content: `${job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}`, 
+    },
+    {
+      label: "Alergeny",
+      content: `${job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}`, 
+    },
+    {
+      label: "Dostupné",
+      content: `${availableDays}`, 
+    },
+    {
+      label: "Naplánované dny",
+      content: `${job.activeJobs.length} / ${job.requiredDays}`, 
+    },
+  ] 
+
   return (
     <ExpandableRow
       data={formatJobRow(
@@ -82,32 +114,9 @@ export default function ProposedJobRow({
       )}
       className={rowColorClass(job)}
     >
-      <div className="ms-2">
-        <strong>Popis</strong>
-        <p>{job.publicDescription}</p>
-        <strong>Poznámka pro organizátory</strong>
-        <p>{job.privateDescription}</p>
-        <p>
-          <strong>Počet pracantů: </strong>
-          {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)
-        </p>
-        <p>
-          <strong>Doprava do oblasti požadována: </strong>
-          {job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}
-        </p>
-        <p>
-          <strong>Alergeny: </strong>
-          {job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}
-        </p>
-        <p>
-          <strong>Dostupné: </strong>
-          {availableDays}
-        </p>
-        <p>
-          <strong>Naplánované dny: </strong>
-          {job.activeJobs.length} / {job.requiredDays}
-        </p>
-      </div>
+      <RowContent
+        data={expandedContent}
+      />
       {showDeleteConfirmation && !deleteError && (
         <ConfirmationModal
           onConfirm={deleteJob}
@@ -155,20 +164,20 @@ function formatJobRow(
   setHidden: (hidden: boolean) => void,
   deleteJob: () => void,
   isBeingDeleted: boolean
-) {
+): RowCells[] {
   // Show job as available today before 6:00
   // After that, show job as not available anymore
   const now = new Date()
   now.setHours(now.getHours() - 6)
   return [
-    job.name,
-    job.area?.name,
-    job.contact,
-    job.address,
-    `${job.activeJobs.length} / ${job.requiredDays}`,
-    datesAfterDate(job.availability, now).length,
-    `${job.minWorkers} - ${job.maxWorkers}`,
-    <span key={job.id} className="d-flex align-items-center gap-3">
+    {content: job.name},
+    {content: job.area?.name},
+    {content: job.contact},
+    {content: job.address},
+    {content: `${job.activeJobs.length} / ${job.requiredDays}`},
+    {content: datesAfterDate(job.availability, now).length},
+    {content: `${job.minWorkers} - ${job.maxWorkers}`},
+    {content: <span key={job.id} className="d-inline-flex flex-wrap align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, setPinned)}
       {hideJobIcon(job, setHidden)}
@@ -180,7 +189,7 @@ function formatJobRow(
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
       <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
-    </span>,
+    </span>, stickyRight: true},
   ]
 }
 

@@ -5,7 +5,8 @@ import {
   type ProposedJobUpdateData,
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
-import { InvalidDataError, NoActiveEventError } from './internal-error'
+import { NoActiveEventError } from './internal-error'
+import { PhotoIdsData } from 'lib/types/photo'
 
 export async function getProposedJobById(
   id: string
@@ -24,6 +25,25 @@ export async function getProposedJobById(
     },
   })
   return job
+}
+
+export async function getProposedJobPhotoIdsById(
+  id: string
+): Promise<PhotoIdsData | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const proposedJob = await prisma.proposedJob.findUnique({
+    where: {
+      id: id,
+    },
+    select: {
+      photoIds: true,
+    },
+  })
+  
+  return proposedJob
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {

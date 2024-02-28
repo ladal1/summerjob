@@ -1,5 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { parseForm } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import {
   deleteActiveJob,
@@ -18,11 +19,12 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.jobId as string
-  const data = validateOrSendError(ActiveJobUpdateSchema, req.body, res)
+  const { json } = await parseForm(req)
+  const data = validateOrSendError(ActiveJobUpdateSchema, json, res)
   if (!data) {
     return
   }
-  await logger.apiRequest(APILogEvent.PLAN_JOB_MODIFY, id, req.body, session)
+  await logger.apiRequest(APILogEvent.PLAN_JOB_MODIFY, id, json, session)
   await updateActiveJob(id, data)
   res.status(204).end()
 }
@@ -49,7 +51,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.jobId as string
-  await logger.apiRequest(APILogEvent.PLAN_JOB_DELETE, id, req.body, session)
+  await logger.apiRequest(APILogEvent.PLAN_JOB_DELETE, id, {}, session)
   await deleteActiveJob(id)
   res.status(204).end()
 }
@@ -58,3 +60,9 @@ export default APIAccessController(
   [Permission.PLANS],
   APIMethodHandler({ patch, get, del })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

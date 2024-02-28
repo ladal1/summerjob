@@ -1567,6 +1567,41 @@ registry.registerPath({
   },
 })
 
+registry.registerPath({
+  path: '/api/workers/{workerId}/photo',
+  method: 'get',
+  description:
+    'Gets a worker\'s photo by worker\'s ID. Permissions required (at least one): ADMIN, WORKERS.',
+  summary: 'Get a worker\'s photo by ID',
+  tags: ['Workers'],
+  parameters: [
+    {
+      name: 'workerId',
+      in: 'path',
+      required: true,
+      description: 'ID of the worker to get.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: 'Worker\'s photo retrieved successfully.',
+      content: {
+        'image/*': {
+          schema: {
+            type: 'string',
+            format: 'binary',
+          },
+        }
+      },
+    },
+  },
+})
+
+
 //#endregion
 
 const generator = new OpenAPIGenerator(registry.definitions, '3.0.0')

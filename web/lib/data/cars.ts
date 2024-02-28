@@ -64,6 +64,8 @@ export async function updateCar(carId: string, car: CarUpdateData) {
       name: car.name,
       description: car.description,
       seats: car.seats,
+      odometerStart: car.odometerStart,
+      odometerEnd: car.odometerEnd,
       reimbursed: car.reimbursed,
       reimbursementAmount: car.reimbursementAmount,
     },

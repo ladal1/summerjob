@@ -9,7 +9,7 @@ interface LogsTableProps {
 export default function LogsTable({ logs }: LogsTableProps) {
   return (
     <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
-      <table className="table table-hover mb-0">
+      <table className="table mb-0">
         <thead className="smj-table-header">
           <tr>
             {_columns.map(column => (

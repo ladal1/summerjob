@@ -2,15 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  experimental: {
-    appDir: true,
-  },
   distDir: 'build',
   async redirects() {
     return [
       {
         source: '/',
-        destination: '/my-plan',
+        destination: '/home',
         permanent: true,
       },
     ]

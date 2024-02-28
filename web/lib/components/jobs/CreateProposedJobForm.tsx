@@ -1,7 +1,6 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
-import { datesBetween } from 'lib/helpers/helpers'
 import { Area, JobType } from 'lib/prisma/client'
 import { deserializeAreas } from 'lib/types/area'
 import {
@@ -11,24 +10,32 @@ import {
 import { Serialized } from 'lib/types/serialize'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
-import AllergyPill from '../forms/AllergyPill'
-import DaysSelection from '../forms/DaysSelection'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { allergyMapping } from '../../data/allergyMapping'
 import { jobTypeMapping } from '../../data/jobTypeMapping'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { TextInput } from '../forms/input/TextInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { FilterSelectInput } from '../forms/input/FilterSelectInput'
+import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { Label } from '../forms/Label'
+import FormWarning from '../forms/FormWarning'
+import { AlergyPillInput } from '../forms/input/AlergyPillInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { FilterSelectItem } from '../filter-select/FilterSelect'
+import { useRouter } from 'next/navigation'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { ImageUploader } from '../forms/ImageUploader'
+import { MapInput } from '../forms/input/MapInput'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
-  eventStartDate: string
-  eventEndDate: string
+  allDates: DateBool[][]
 }
 
 export default function CreateProposedJobForm({
   serializedAreas,
-  eventStartDate,
-  eventEndDate,
+  allDates,
 }: CreateProposedJobProps) {
   const areas = deserializeAreas(serializedAreas)
   const { trigger, error, isMutating, reset } = useAPIProposedJobCreate()
@@ -38,6 +45,7 @@ export default function CreateProposedJobForm({
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
   } = useForm<ProposedJobCreateData>({
     resolver: zodResolver(ProposedJobCreateSchema),
     defaultValues: {
@@ -48,6 +56,8 @@ export default function CreateProposedJobForm({
     },
   })
 
+  const router = useRouter()
+  
   const onSubmit = (data: ProposedJobCreateData) => {
     trigger(data, {
       onError: e => {
@@ -59,27 +69,72 @@ export default function CreateProposedJobForm({
     })
   }
 
-  const selectArea = (item: FilterSelectItem) => {
-    setValue('areaId', item.id)
-  }
-  const selectJobType = (item: FilterSelectItem) => {
-    setValue('jobType', item.id as JobType)
+  const onConfirmationClosed = () => {
+    setSaved(false)
+    router.back()
   }
 
-  const allDates = datesBetween(
-    new Date(eventStartDate),
-    new Date(eventEndDate)
-  )
+  const selectArea = (id: string) => {
+    setValue('areaId', id)
+  }
+  const selectJobType = (id: string) => {
+    setValue('jobType', id as JobType)
+  }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
     ([jobTypeKey, jobTypeToSelectName]) => ({
       id: jobTypeKey,
       name: jobTypeToSelectName,
       searchable: jobTypeToSelectName,
-      item: <span> {jobTypeToSelectName} </span>,
     })
   )
 
+  function areaToSelectItem(area: Area): FilterSelectItem {
+    return {
+      id: area.id,
+      searchable: `${area.name}`,
+      name: area.name,
+    }
+  }
+
+  
+  //#region Photo
+
+  // Remove newly added photo from FileList before sending
+  const removeNewPhoto = (index: number) => {
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Filter out the file at the specified index
+    const filteredFiles: Array<File> = Array.from(prevPhotoFiles ?? []).filter((_, i) => i !== index)
+    // Transfer those photos back to photoFiles
+    const dt = new DataTransfer()
+    filteredFiles.forEach((file: File) => dt.items.add(file))
+    setValue('photoFiles', dt.files)
+  }
+
+  // Register newly added photo to FileList
+  const registerPhoto = (fileList: FileList) => {
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
+    // Combine existing files and newly added files
+    const combinedFiles: File[] = (Array.from(prevPhotoFiles ?? [])).concat(Array.from(fileList ?? []))
+    // Transfer those photos back to photoFiles
+    const dt = new DataTransfer()
+    combinedFiles.forEach((file: File) => dt.items.add(file))
+    setValue('photoFiles', dt.files)
+  }
+
+  //#endregion
+
+  //#region Coordinations and Address
+
+  const registerCoordinations = (coords: [number, number]) => {
+    setValue('coordinations', coords)
+  }
+
+  const registerAdress = (address: string) => {
+    setValue('address', address, { shouldDirty: true, shouldValidate: true })
+  }
+
+  //#endregion
   return (
     <>
       <div className="row">
@@ -90,96 +145,86 @@ export default function CreateProposedJobForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <label className="form-label fw-bold mt-4" htmlFor="name">
-              Název jobu
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="name"
-              {...register('name')}
+              label="Název jobu"
+              placeholder="Název"
+              register={() => register("name")}
+              errors={errors}
             />
-            {errors.name && (
-              <div className="text-danger">Zadejte název jobu</div>
-            )}
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="publicDescription"
-            >
-              Popis navrhované práce
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
+            <TextAreaInput
               id="publicDescription"
-              rows={3}
-              {...register('publicDescription')}
-            ></textarea>
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="privateDescription"
-            >
-              Poznámka pro organizátory
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
+              label="Popis navrhované práce"
+              placeholder="Popis"
+              rows={4}
+              register={() => register("publicDescription")}
+            />
+            <TextAreaInput
               id="privateDescription"
-              rows={3}
-              {...register('privateDescription')}
-            ></textarea>
-            <label className="form-label fw-bold mt-4" htmlFor="area">
-              Oblast jobu
-            </label>
-            <input type={'hidden'} {...register('areaId')} />
-            <FilterSelect
-              items={areas.map(areaToSelectItem)}
+              label="Poznámka pro organizátory"
+              placeholder="Poznámka"
+              rows={4}
+              register={() => register("privateDescription")}
+            />
+            <FilterSelectInput
+              id="areaId"
+              label="Oblast jobu"
               placeholder="Vyberte oblast"
+              items={areas.map(areaToSelectItem)}
               onSelected={selectArea}
+              errors={errors}
+              register={() => register('areaId')}
             />
-            {errors.areaId && <div className="text-danger">Vyberte oblast</div>}
-            <label className="form-label fw-bold mt-4" htmlFor="address">
-              Adresa
-            </label>
-            <input
-              className="form-control p-1 ps-2"
-              id="address"
-              {...register('address')}
+            <MapInput
+              idAddress="address"
+              idCoordinations="coordinations"
+              label="Adresa"
+              placeholder="Adresa"
+              registerAdress={registerAdress}
+              registerCoordinations={registerCoordinations}
+              errors={errors}
             />
-            {errors.address && (
-              <div className="text-danger">Zadejte adresu</div>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="contact">
-              Kontakt
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <TextInput
               id="contact"
-              {...register('contact')}
+              label="Kontakt"
+              placeholder="Kontakt"
+              register={() => register("contact")}
+              errors={errors}
             />
-            {errors.contact && (
-              <div className="text-danger">Zadejte kontaktní informace</div>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="requiredDays">
-              Celkový počet dnů na splnění
-            </label>
-            <input
-              className="form-control p-1 ps-2"
+            <ImageUploader
+              id="photoFiles"
+              label="Fotografie"
+              secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
+              errors={errors}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
+              multiple
+              maxPhotos={10}
+            />
+            <TextInput
               id="requiredDays"
+              label="Celkový počet dní na splnění"
+              placeholder="Počet dní"
               type="number"
-              {...register('requiredDays', { valueAsNumber: true })}
+              min={1}
+              defaultValue={1}
+              onKeyDown={(e) => allowForNumber(e)}
+              register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              errors={errors}
             />
-            {errors.requiredDays && (
-              <div className="text-danger">Zadejte odhadovaný počet dnů</div>
-            )}
-            <label className="form-label fw-bold mt-4" htmlFor="minWorkers">
-              Počet pracantů minimálně / maximálně / z toho silných
-            </label>
-
+            <Label
+              id="minWorkers"
+              label="Počet pracantů minimálně / maximálně / z toho silných"
+            />
             <div className="d-flex w-50">
               <input
                 className="form-control p-1 ps-2"
                 id="minWorkers"
                 type="number"
                 min={1}
-                {...register('minWorkers', { valueAsNumber: true })}
+                defaultValue={1}
+                onKeyDown={(e) => allowForNumber(e)}
+                {...register('minWorkers', { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
@@ -187,7 +232,9 @@ export default function CreateProposedJobForm({
                 id="maxWorkers"
                 type="number"
                 min={1}
-                {...register('maxWorkers', { valueAsNumber: true })}
+                defaultValue={1}
+                onKeyDown={(e) => allowForNumber(e)}
+                {...register('maxWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
@@ -195,88 +242,65 @@ export default function CreateProposedJobForm({
                 id="strongWorkers"
                 type="number"
                 min={0}
-                {...register('strongWorkers', { valueAsNumber: true })}
+                defaultValue={0}
+                onKeyDown={(e) => allowForNumber(e)}
+                {...register('strongWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
             </div>
             {(errors.minWorkers ||
               errors.maxWorkers ||
-              errors.strongWorkers) && (
-              <div className="text-danger">Zadejte počty pracantů</div>
-            )}
-            <label
-              className="form-label d-block fw-bold mt-4"
-              htmlFor="availability"
-            >
-              Dostupné v následující dny
-            </label>
-            <DaysSelection
-              name={'availability'}
-              days={allDates}
-              register={() => register('availability')}
-            />
-            <div>
-              <label className="form-label fw-bold mt-4" htmlFor="area">
-                Typ práce
-              </label>
-              <input type={'hidden'} {...register('jobType')} />
-              <FilterSelect
-                items={jobTypeSelectItems}
-                placeholder="Vyberte typ práce"
-                onSelected={selectJobType}
-                defaultSelected={jobTypeSelectItems.find(
-                  item => item.id === JobType.OTHER
-                )}
-              />
-              {errors.jobType && (
-                <div className="text-danger">Vyberte typ práce</div>
-              )}
-            </div>
-            <label className="form-label d-block fw-bold mt-4" htmlFor="email">
-              Alergie
-            </label>
-            <div className="form-check-inline">
-              {Object.entries(allergyMapping).map(
-                ([allergyKey, allergyName]) => (
-                  <AllergyPill
-                    key={allergyKey}
-                    allergyId={allergyKey}
-                    allergyName={allergyName}
-                    register={() => register('allergens')}
-                  />
-                )
-              )}
-            </div>
+              errors.strongWorkers) && (<FormWarning message={
+                errors?.minWorkers?.message as string | undefined ||
+                errors?.maxWorkers?.message as string | undefined ||
+                errors?.strongWorkers?.message as string | undefined
+              } />)}
 
-            <div className="form-check mt-4">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="hasFood"
-                {...register('hasFood')}
+            <div className="d-flex flex-row">
+              <DateSelectionInput
+                id="availability"
+                label="Časová dostupnost"
+                register={() => register("availability")}
+                days={allDates}
               />
-              <label className="form-check-label" htmlFor="hasFood">
-                <i className="fa fa-utensils ms-2 me-2"></i>
-                Strava na místě
-              </label>
             </div>
-            <div className="form-check mt-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="hasShower"
-                {...register('hasShower')}
-              />
-              <label className="form-check-label" htmlFor="hasShower">
-                <i className="fa fa-shower ms-2 me-2"></i>
-                Sprcha na místě
-              </label>
-            </div>
+            <FilterSelectInput
+              id="jobType"
+              label="Typ práce"
+              placeholder="Vyberte typ práce"
+              items={jobTypeSelectItems}
+              onSelected={selectJobType}
+              defaultSelected={jobTypeSelectItems.find(
+                item => item.id === JobType.OTHER
+              )}
+              errors={errors}
+              register={() => register('jobType')}
+            />
+            <AlergyPillInput
+              label="Alergeny"
+              register={() => register("allergens")}
+            />
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+              objects={[
+                {
+                  id: "hasFood",
+                  icon: "fa fa-utensils",
+                  label: "Strava na místě",
+                }, 
+                {
+                  id: "hasShower",
+                  icon: "fa fa-shower",
+                  label: "Sprcha na místě",
+                }
+              ]}
+            />
 
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               >
                 Zpět
               </button>
@@ -290,17 +314,8 @@ export default function CreateProposedJobForm({
           </form>
         </div>
       </div>
-      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   )
-}
-
-function areaToSelectItem(area: Area): FilterSelectItem {
-  return {
-    id: area.id,
-    searchable: `${area.name}`,
-    name: area.name,
-    item: <span>{area.name}</span>,
-  }
 }

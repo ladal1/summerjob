@@ -8,16 +8,21 @@ import {
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Modal, ModalSize } from '../modal/Modal'
+import { TextInput } from '../forms/input/TextInput'
+import { DateInput } from '../forms/input/DateInput'
+
+const schema = SummerJobEventCreateSchema
 
 interface NewEventModalProps {
   onConfirm: (newPlanId: string) => void
   onReject: () => void
 }
+
 export default function NewEventModal({
   onConfirm,
   onReject,
 }: NewEventModalProps) {
-  const { trigger, error, isMutating } = useAPISummerJobEventCreate({
+  const { trigger, isMutating } = useAPISummerJobEventCreate({
     onSuccess: (data: SummerJobEventsAPIPostResponse) => {
       onConfirm(data.id)
     },
@@ -42,65 +47,39 @@ export default function NewEventModal({
       onClose={onReject}
     >
       <form onSubmit={handleSubmit(onSubmit)} autoComplete={'off'}>
-        <label className="form-label fw-bold" htmlFor="name">
-          Název ročníku
-        </label>
-        <input
+        <TextInput
           id="name"
-          className="form-control p-0 fs-5"
-          type="text"
+          label="Název ročníku"
           placeholder="Název ročníku"
-          {...register('name')}
+          errors={errors}
+          register={() => register("name")}
+          margin={false}
         />
-        {errors.name?.message && (
-          <p className="text-danger">{errors.name.message as string}</p>
-        )}
         <label
           className="form-label fw-bold mt-4 d-none d-md-block"
-          htmlFor="dayStart"
+          htmlFor="startDate"
         >
           Začátek a konec
         </label>
         <div className="d-flex flex-column flex-md-row">
           <div className="d-flex flex-column flex-fill">
-            <label
-              className="form-label fw-bold mt-4 d-block d-md-none"
-              htmlFor="dayStart"
-            >
-              Začátek
-            </label>
-
-            <input
-              className="form-control p-1 fs-5"
-              id="dayStart"
+            <DateInput
+              id="startDate"
+              label="Začátek"
               type="date"
-              {...register('startDate', { valueAsDate: true })}
+              errors={errors}
+              register={() => register("startDate")}
             />
-            <p className="text-danger">
-              {errors.startDate?.message
-                ? (errors.startDate.message as string)
-                : ' '}
-            </p>
           </div>
-          <div className="fs-3 ms-3 me-3 d-none d-md-block">-</div>
+          <div className="fs-3 mx-3 me-3 d-none d-md-block">-</div>
           <div className="d-flex flex-column flex-fill">
-            <label
-              className="form-label fw-bold mt-4 d-block d-md-none"
-              htmlFor="dayEnd"
-            >
-              Konec
-            </label>
-            <input
-              className="form-control p-1 fs-5"
-              id="dayEnd"
+            <DateInput
+              id="endDate"
+              label="Konec"
               type="date"
-              {...register('endDate', { valueAsDate: true })}
+              errors={errors}
+              register={() => register("endDate")}
             />
-            <p className="text-danger">
-              {errors.endDate?.message
-                ? (errors.endDate.message as string)
-                : ' '}
-            </p>
           </div>
         </div>
         <div className="d-flex justify-content-end mt-4">
@@ -115,11 +94,3 @@ export default function NewEventModal({
     </Modal>
   )
 }
-
-const schema = SummerJobEventCreateSchema.refine(
-  data => data.startDate <= data.endDate,
-  data => ({
-    message: 'Final date must be after starting date',
-    path: ['endDate'],
-  })
-)

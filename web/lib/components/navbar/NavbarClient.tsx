@@ -20,7 +20,11 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
     <>
       <nav className="navbar navbar-light navbar-expand-md smj-gray pt-2 pb-2 mb-0">
         <div className="container-fluid">
-          <a className="navbar-brand d-flex align-items-center" href="#">
+          <Link 
+            className="navbar-brand d-flex align-items-center" 
+            href="/home"
+            onClick={() => setExpanded(false)}
+          >
             <Image
               src={logoImage}
               className="smj-nav-logo"
@@ -28,7 +32,7 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
               quality={98}
               priority={true}
             />
-          </a>
+          </Link>
           <button
             data-bs-toggle="collapse"
             className="navbar-toggler"
@@ -42,6 +46,7 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
             className={`collapse navbar-collapse ${expanded ? 'show' : ''}`}
             id="navcol-1"
           >
+            <hr/>
             <ul className="navbar-nav me-auto">
               {paths.map(navPath => {
                 return (
@@ -52,6 +57,7 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
                         (pathname?.startsWith(navPath.path) ? ' active' : '')
                       }
                       href={navPath.path}
+                      onClick={() => setExpanded(false)}
                     >
                       <div className="d-xl-flex justify-content-xl-start align-items-xl-center navbar-div text-truncate rounded-3">
                         <i
@@ -66,31 +72,35 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
                 )
               })}
             </ul>
-            {username && (
-              <>
-                <div>{username}</div>
-                <button
-                  className="btn"
-                  id="btn-nav-logout"
-                  type="button"
-                  onClick={() => signOut()}
-                >
-                  Odhlásit
-                </button>
-              </>
-            )}
-            {!username && (
-              <>
-                <button
-                  className="btn"
-                  id="btn-nav-logout"
-                  type="button"
-                  onClick={() => signIn()}
-                >
-                  Přihlásit se
-                </button>
-              </>
-            )}
+            <hr/>
+            <div className='d-flex justify-content-end'>
+              {username && (
+                <>
+                  <button
+                    className="btn"
+                    id="btn-nav-logout"
+                    type="button"
+                    onClick={() => signOut()}
+                  >
+                    <i className="fa-solid fa-right-from-bracket me-2"></i>
+                    <span className="hover-text">Odhlásit se</span>
+                  </button>
+                </>
+              )}
+              {!username && (
+                <>
+                  <button
+                    className="btn"
+                    id="btn-nav-login"
+                    type="button"
+                    onClick={() => signIn()}
+                  >
+                    <i className="fa-solid fa-right-to-bracket"></i>
+                    <span className="hover-text">Přihlásit</span>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>

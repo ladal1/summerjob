@@ -1,13 +1,12 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { parseForm } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { createWorker, createWorkers, getWorkers } from 'lib/data/workers'
+import { createWorkers, getWorkers } from 'lib/data/workers'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import {
-  WorkerCreateDataInput,
-  WorkerCreateSchema,
   WorkersCreateDataInput,
   WorkersCreateSchema,
 } from 'lib/types/worker'
@@ -25,27 +24,16 @@ async function get(
   res.status(200).json(users)
 }
 
-export type WorkersAPIPostData = WorkerCreateDataInput | WorkersCreateDataInput
+export type WorkersAPIPostData = WorkersCreateDataInput
 async function post(
   req: NextApiRequest,
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  const singleWorker = WorkerCreateSchema.safeParse(req.body)
-  if (singleWorker.success) {
-    const worker = await createWorker(singleWorker.data)
-    await logger.apiRequest(
-      APILogEvent.WORKER_CREATE,
-      'workers',
-      req.body,
-      session
-    )
-    res.status(201).json(worker)
-    return
-  }
+  const { json } = await parseForm(req)
   const multipleWorkers = validateOrSendError(
     WorkersCreateSchema,
-    req.body,
+    json,
     res
   )
   if (!multipleWorkers) {
@@ -54,7 +42,7 @@ async function post(
   await logger.apiRequest(
     APILogEvent.WORKER_CREATE,
     'workers',
-    req.body,
+    json,
     session
   )
   const workers = await createWorkers(multipleWorkers)
@@ -65,3 +53,9 @@ export default APIAccessController(
   [Permission.WORKERS, Permission.PLANS],
   APIMethodHandler({ get, post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

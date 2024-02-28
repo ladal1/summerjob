@@ -11,6 +11,7 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { parseForm } from 'lib/api/parse-form'
 
 export type CarsAPIGetResponse = Awaited<ReturnType<typeof getCars>>
 async function get(
@@ -36,11 +37,12 @@ async function post(
   if (!summerJobEvent) {
     return
   }
-  const data = validateOrSendError(CarCreateSchema, req.body, res)
+  const { json } = await parseForm(req)
+  const data = validateOrSendError(CarCreateSchema, json, res)
   if (!data) {
     return
   }
-  await logger.apiRequest(APILogEvent.CAR_CREATE, 'cars', req.body, session)
+  await logger.apiRequest(APILogEvent.CAR_CREATE, 'cars', json, session)
   const car = await createCar(data, summerJobEvent.id)
   res.status(201).json(car)
 }
@@ -49,3 +51,9 @@ export default APIAccessController(
   [Permission.CARS, Permission.PLANS],
   APIMethodHandler({ get, post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}

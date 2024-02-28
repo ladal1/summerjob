@@ -1,9 +1,14 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { createDirectory, deleteDirectory, deleteFile, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
+import { getPhotoPath, parseForm, parseFormWithImages } from 'lib/api/parse-form'
+import { registerPhotos } from 'lib/api/registerPhotos'
 import { validateOrSendError } from 'lib/api/validator'
+import { createPhoto, deletePhoto, getPhotoById, updatePhoto } from 'lib/data/photo'
 import {
   deleteProposedJob,
   getProposedJobById,
+  getProposedJobPhotoIdsById,
   updateProposedJob,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
@@ -36,16 +41,52 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
+  
+  // Get current photoIds
+  const currentPhotoIds = await getProposedJobPhotoIdsById(id)
+  const currentPhotoCnt = currentPhotoIds?.photoIds.length ?? 0
+  const uploadDirectory = getUploadDirForImages() + `/proposed-job`
+
+  const { files, json } = await parseFormWithImages(req, id, uploadDirectory, 10 - currentPhotoCnt)
   const proposedJobData = validateOrSendError(
     ProposedJobUpdateSchema,
-    req.body,
+    json,
     res
   )
   if (!proposedJobData) {
     return
   }
-  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, req.body, session)
-  await updateProposedJob(id, proposedJobData)
+
+  // Save existing ids
+  proposedJobData.photoIds = currentPhotoIds?.photoIds ?? []
+
+  // Delete those photos (by their ids), that are flaged to be deleted.
+  if(proposedJobData.photoIdsDeleted) {
+    for (const photoId of proposedJobData.photoIdsDeleted) {
+      const photo = await getPhotoById(photoId)
+      if(photo) {
+        deleteFile(photo.photoPath)
+        await deletePhoto(photoId)
+        proposedJobData.photoIds = proposedJobData.photoIds?.filter((id) => id !== photoId)
+      }
+    }
+  }
+
+  // Create directory for photos
+  await createDirectory(uploadDirectory + `/${id}`)
+
+  // Save those photos and save photo ids that belong to proposedJob
+  const newPhotoIds = await registerPhotos(files, `/${id}`)
+  proposedJobData.photoIds = (proposedJobData.photoIds ?? []).concat(newPhotoIds)
+
+  // If all photos were deleted, delete directory
+  if(!proposedJobData.photoIds || proposedJobData.photoIds.length == 0) {
+    await deleteDirectory(uploadDirectory)
+  }
+
+  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
+  const {photoIdsDeleted, ...rest} = proposedJobData
+  await updateProposedJob(id, rest)
   res.status(204).end()
 }
 
@@ -55,7 +96,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  await logger.apiRequest(APILogEvent.JOB_DELETE, id, req.body, session)
+  await logger.apiRequest(APILogEvent.JOB_DELETE, id, {}, session)
   await deleteProposedJob(id)
   res.status(204).end()
 }
@@ -64,3 +105,9 @@ export default APIAccessController(
   [Permission.JOBS],
   APIMethodHandler({ get, patch, del })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}
