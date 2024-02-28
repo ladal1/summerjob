@@ -1,47 +1,74 @@
-import { ChangeEvent, DetailedHTMLProps, InputHTMLAttributes, useState } from "react"
-import { FieldErrors, FieldValues, UseFormRegisterReturn } from "react-hook-form"
+import { DetailedHTMLProps, InputHTMLAttributes, useState } from "react"
+import { FieldErrors, FieldValues } from "react-hook-form"
 import Map from "../../map/Map"
 import { Label } from "../Label"
 import FormWarning from "../FormWarning"
-import { getGeocodingData } from "lib/components/map/GeocodingData"
+import { getGeocodingData, getReverseGeocodingData } from "lib/components/map/GeocodingData"
 
 interface MapInputProps<FormData extends FieldValues>
 extends DetailedHTMLProps<
   InputHTMLAttributes<HTMLInputElement>,
   HTMLInputElement
 > {
-  id: string
+  idAddress: string
+  idCoordinations: string
   label: string
   registerAdress: (address: string) => void
   registerCoordinations: (coords: [number, number]) => void 
   errors: FieldErrors<FormData>
   markerPosition?: [number, number] | null
+  addressInit?: string
 }
 
 export const MapInput = <FormData extends FieldValues> ({
-  id,
+  idAddress,
+  idCoordinations,
   label,
   registerAdress,
   registerCoordinations,
   errors,
-  markerPosition,
+  markerPosition = null,
+  addressInit = '',
   ...rest
 }: MapInputProps<FormData>) => {
-  const error = errors?.[id]?.message as string | undefined
+  const errorAddress = errors?.[idAddress]?.message as string | undefined
+  const errorCoordinations = errors?.[idCoordinations]?.message as string | undefined
+
+  const [address, setAddress] = useState(addressInit)
+  const [coordinates, setCoordinates] = useState(markerPosition)
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-  const [address, setAddress] = useState('')
-  
+  const [canPickLocation, setCanPickLocation] = useState(true)
 
-  const geocodingDataSearch = async () => {
+
+  const geocodingDataSearch = async ()   => {
     setIsButtonDisabled(true)
-    const coordinates = await getGeocodingData(address)
-    if(coordinates) {
-      console.log(coordinates)
+    const fetchedCoords = await getGeocodingData(address)
+    if(fetchedCoords) {
+      setCoordinates(fetchedCoords)
+      registerCoordinations(fetchedCoords)
     }
     setTimeout(() => {
       setIsButtonDisabled(false)
-    }, 2000);
+    }, 5000)
+  }
+
+  const reverseGeocodingDataSearch = async () => {
+    setCanPickLocation(false)
+    const fetchedAddress = await getReverseGeocodingData(coordinates?.at(0), coordinates?.at(1)) // has to be number, because coords are set in caller registerMarker
+    if(fetchedAddress) {
+      setAddress(fetchedAddress)
+      registerAdress(fetchedAddress)
+    }
+    setTimeout(() => {
+      setCanPickLocation(true)
+    }, 5000)
+  }
+
+  const registerMarker = (coords: [number, number]) => {
+    registerCoordinations(coords)
+    setCoordinates(coords)
+    reverseGeocodingDataSearch()
   }
 
   return (
@@ -50,11 +77,12 @@ export const MapInput = <FormData extends FieldValues> ({
         <div className="row align-items-end">
             <div className="col">
               <Label
-                id={id}
+                id={idAddress}
                 label={label}
               />
               <input
                 className="form-control smj-input p-0 fs-5"
+                value={address}
                 onChange={(e) => {
                   registerAdress(e.target.value)
                   setAddress(e.target.value)
@@ -69,21 +97,22 @@ export const MapInput = <FormData extends FieldValues> ({
                 onClick={geocodingDataSearch}
                 disabled={isButtonDisabled}
               >
-                Najít souřadnice na mapě
+                Najít adresu na mapě
               </button>
           </div>
         </div>
       </div>
+      <FormWarning message={errorAddress} />
       <div className="pt-3">
         <Map
           center={markerPosition ?? [49.8203, 15.4784]} // Czech republic
           zoom={6}
-          canPickLocation={true}
-          markerPosition={markerPosition}
-          registerCoordinations={registerCoordinations}
+          canPickLocation={canPickLocation}
+          markerPosition={coordinates}
+          setMarkerPosition={registerMarker}
         />
       </div>
-      <FormWarning message={error} />
+      <FormWarning message={errorCoordinations} />
     </>
   )
 }

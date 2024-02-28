@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { number, z } from 'zod'
 import { Serialized } from './serialize'
 import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
@@ -29,7 +29,7 @@ export const ProposedJobCreateSchema = z
     publicDescription: z.string(),
     name: z.string().min(1, { message: err.emptyProposedJobName }),
     address: z.string().min(1, { message: err.emptyAdress }),
-    coordinations: z.tuple([z.number(), z.number()]).optional(),
+    coordinations: z.array(z.number()).min(1, { message: err.emptyCoordinations }),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
       .number({ invalid_type_error: err.invalidTypeMaxWorkers })
