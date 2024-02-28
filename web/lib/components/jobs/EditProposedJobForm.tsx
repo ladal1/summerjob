@@ -29,6 +29,7 @@ import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
+import { getGeocodingData, getReverseGeocodingData } from '../map/GeocodingData'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -62,6 +63,7 @@ export default function EditProposedJobForm({
       privateDescription: job.privateDescription,
       allergens: job.allergens,
       address: job.address,
+      coordinations: job.coordinations,
       contact: job.contact,
       requiredDays: job.requiredDays,
       minWorkers: job.minWorkers,
@@ -78,6 +80,7 @@ export default function EditProposedJobForm({
   const router = useRouter()
 
   const onSubmit = (data: ProposedJobForm) => {
+    console.log(data)
     trigger(data, {
       onSuccess: () => {
         setSaved(true)
@@ -155,7 +158,7 @@ export default function EditProposedJobForm({
 
   //#endregion
 
-  //#region Coordinations
+  //#region Coordinations and Address
 
   const getCoordinations = (): [number, number] | null => {
     if (job.coordinations && job.coordinations[0] && job.coordinations[1]) {
@@ -165,11 +168,11 @@ export default function EditProposedJobForm({
   }
 
   const registerCoordinations = (coords: [number, number]) => {
-    setValue('coordinations', coords)
+    setValue('coordinations', coords, { shouldDirty: true, shouldValidate: true })
   }
 
   const registerAdress = (address: string) => {
-    setValue('address', address)
+    setValue('address', address, { shouldDirty: true, shouldValidate: true })
   }
 
   //#endregion
@@ -218,10 +221,12 @@ export default function EditProposedJobForm({
               register={() => register('areaId')}
             />
             <MapInput
-              id="address"
+              idAddress="address"
+              idCoordinations="coordinations"
               label="Adresa"
               placeholder="Adresa"
               markerPosition={getCoordinations()}
+              addressInit={job.address}
               registerAdress={registerAdress}
               registerCoordinations={registerCoordinations}
               errors={errors}

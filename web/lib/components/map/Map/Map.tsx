@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
@@ -8,8 +8,8 @@ export interface MapProps {
   zoom: number
   scrollWheelZoom?: boolean
   markerPosition?: [number, number] | null
+  setMarkerPosition?: (coords: [number, number]) => void
   canPickLocation?: boolean
-  registerCoordinations?: (coords: [number, number]) => void
 }
 
 export const Map = ({ 
@@ -17,8 +17,8 @@ export const Map = ({
   zoom,
   scrollWheelZoom = true,
   markerPosition,
+  setMarkerPosition,
   canPickLocation = false,
-  registerCoordinations
 }: MapProps) => {
 
 
@@ -31,25 +31,22 @@ export const Map = ({
   })
   L.Marker.prototype.options.icon = DefaultIcon
 
-  
-  const [clickedPosition, setClickedPosition] = useState<[number, number] | null>(markerPosition ?? null)
-
   function LocationMarker() {
     const map = useMapEvents({
+      
       click(event) {
         if(canPickLocation) {
           const { lat, lng } = event.latlng
-          setClickedPosition([lat, lng])
-          if(registerCoordinations)
-            registerCoordinations([lat, lng])
+          if(setMarkerPosition)
+            setMarkerPosition([lat, lng])
         }
       },
     })
   
-    return clickedPosition === null ? null : (
-      <Marker position={clickedPosition}>
+    return (markerPosition === null || markerPosition === undefined) ? null : (
+      <Marker position={markerPosition}>
         <Popup>
-          Souřadnice: <br /> {`[${clickedPosition[0]}, ${clickedPosition[1]}]`}
+          Souřadnice: <br /> {`[${markerPosition[0]}, ${markerPosition[1]}]`}
         </Popup>
       </Marker>
     )

@@ -29,7 +29,7 @@ export const OpenNavigationButton = ({
       type="button"
       onClick={openNavigation}
     >
-      <label className="form-check-label">
+      <label className="form-check-label cursor-pointer">
         <i className="fa-solid fa-arrow-up-right-from-square me-2"></i>
           <span>
             Otevřít navigaci
