@@ -164,20 +164,32 @@ export default function PlanClientPage({
     return map
   }, [planData?.jobs])
 
+  // get query parameters
+  const searchParams = useSearchParams()
+  const areaIdQ = searchParams?.get("area")
+  const contactQ = searchParams?.get("contact")
+  const searchQ = searchParams?.get("search")
+
+  // area
   const areas = useMemo(
     () => getAvailableAreas(planData ?? undefined),
     [planData]
   )
 
-  // get query parameters
-  const searchParams = useSearchParams()
-  const areaIdQ = searchParams?.get("area")
-  const searchQ = searchParams?.get("search")
-
-  // area
   const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === areaIdQ) || areas[0])
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find(a => a.id === id) || areas[0])
+  }
+
+  // contact
+  const contacts = useMemo(
+    () => getAvailableContacts(planData ?? undefined),
+    [planData]
+  )
+
+  const [selectedContact, setSelectedContact] = useState(contacts.find(a => a.id === contactQ) || contacts[0])
+  const onContactSelected = (id: string) => {
+    setSelectedContact(contacts.find(a => a.id === id) || contacts[0])
   }
 
   // search
@@ -188,11 +200,12 @@ export default function PlanClientPage({
   useEffect(() => {
     router.replace(`?${new URLSearchParams({
       area: selectedArea.id,
+      contact: selectedContact.id,
       search: filter
     })}`, {
       scroll: false
     })
-  }, [selectedArea, filter, router])
+  }, [selectedArea, selectedContact, filter, router])
 
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
 
@@ -201,10 +214,14 @@ export default function PlanClientPage({
       const isInArea =
         selectedArea.id === areas[0].id ||
         job.proposedJob.area?.id === selectedArea.id
+      const includesContact =
+        selectedContact.id === contacts[0].id ||
+        job.proposedJob.contact === selectedContact.id
       const searchableTokens = searchableJobs.get(job.id)?.split(';')
       if (searchableTokens) {
         return (
           isInArea &&
+          includesContact &&
           filter
             .split(';')
             .every(filterToken =>
@@ -216,7 +233,7 @@ export default function PlanClientPage({
       }
       return isInArea
     },
-    [selectedArea, areas, searchableJobs, filter]
+    [selectedArea.id, areas, selectedContact.id, contacts, searchableJobs, filter]
   )
 
   //#endregion
@@ -284,6 +301,13 @@ export default function PlanClientPage({
                     search={filter}
                     onSearchChanged={setFilter}
                     selects={[
+                      {
+                        id: 'contact',
+                        options: contacts,
+                        selected: selectedContact,
+                        onSelectChanged: onContactSelected,
+                        defaultOptionId: 'all'
+                      },
                       {
                         id: 'area',
                         options: areas,
@@ -461,6 +485,20 @@ function getAvailableAreas(plan?: PlanComplete) {
   areas.sort((a, b) => a.name.localeCompare(b.name))
   areas.unshift(ALL_AREAS)
   return areas
+}
+
+function getAvailableContacts(plan?: PlanComplete) {
+  const ALL_CONTACTS = { id: 'all', name: 'Vyberte kontakt' }
+  const UNKNOWN_CONTACTS = { id: 'unknown', name: 'Neznámý kontakt' }
+  const jobs = plan?.jobs.flatMap(j => j.proposedJob)
+  const contacts = filterUniqueById(
+    jobs?.map(job =>
+      job.contact ? { id: job.contact, name: job.contact } : UNKNOWN_CONTACTS
+    ) || []
+  )
+  contacts.sort((a, b) => a.name.localeCompare(b.name))
+  contacts.unshift(ALL_CONTACTS)
+  return contacts
 }
 
 function isWorkerAvailable(worker: WorkerComplete, day: Date) {
