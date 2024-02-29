@@ -7,11 +7,11 @@ import {
   ProposedJobComplete,
 } from 'lib/types/proposed-job'
 import { useMemo, useState } from 'react'
-import { JobsFilters } from 'lib/components/jobs/JobsFilters'
 import { useAPIProposedJobs } from 'lib/fetcher/proposed-job'
 import { datesBetween, filterUniqueById } from 'lib/helpers/helpers'
 import Link from 'next/link'
 import { Serialized } from 'lib/types/serialize'
+import { Filters } from '../filters/Filters'
 
 interface ProposedJobsClientPage {
   initialData: Serialized
@@ -84,15 +84,27 @@ export default function ProposedJobsClientPage({
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <JobsFilters
+              <Filters
                 search={filter}
                 onSearchChanged={setFilter}
-                areas={areas}
-                selectedArea={selectedArea}
-                onAreaSelected={onAreaSelected}
-                days={days}
-                selectedDay={selectedDay}
-                onDaySelected={onDaySelected}
+                selects={[
+                  {
+                    id: 'area',
+                    options: areas,
+                    selected: selectedArea,
+                    onSelectChanged: onAreaSelected,
+                    defaultOptionId: 'all'
+                  },
+                ]}
+                selectsDays={[
+                  {
+                    id: 'day',
+                    options: days,
+                    selected: selectedDay,
+                    onSelectChanged: onDaySelected,
+                    defaultOptionId: 'all'
+                  },
+                ]}
               />
             </div>
           </div>

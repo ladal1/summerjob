@@ -6,9 +6,9 @@ import { Serialized } from 'lib/types/serialize'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { WorkersFilters } from './WorkersFilters'
 import WorkersTable from './WorkersTable'
 import Image from 'next/image'
+import { Filters } from '../filters/Filters'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
@@ -64,13 +64,23 @@ export default function WorkersClientPage({
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <WorkersFilters
+              <Filters
                 search={filter}
                 onSearchChanged={setFilter}
-                onlyStrong={onlyStrong}
-                onOnlyStrongChanged={setOnlyStrong}
-                onlyWithCar={onlyWithCar}
-                onOnlyWithCarChanged={setOnlyWithCar}
+                checkboxes={[
+                  {
+                    id: 'onlyStrongCheckbox',
+                    label: 'Pouze silní',
+                    checked: onlyStrong,
+                    onCheckboxChanged: setOnlyStrong
+                  },
+                  {
+                    id: 'onlyWithCarCheckbox',
+                    label: 'Pouze s autem',
+                    checked: onlyWithCar,
+                    onCheckboxChanged: setOnlyWithCar
+                  },
+                ]}
               />
             </div>
           </div>

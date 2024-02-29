@@ -2,10 +2,10 @@
 import LogsTable from './LogsTable'
 import { APILogEvent, FilteredLogs, deserializeLogs } from 'lib/types/logger'
 import { Serialized } from 'lib/types/serialize'
-import { LogsFilters, LogsFiltersEventType } from './LogsFilters'
 import { useMemo, useState } from 'react'
 import useDebounce from 'lib/helpers/debounce'
 import { useAPILogs } from 'lib/fetcher/log'
+import { Filters } from '../filters/Filters'
 
 interface LogsClientPageProps {
   sLogs: Serialized
@@ -19,7 +19,7 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
   const debouncedSearch = useDebounce(filter, 500)
   const [page, setPage] = useState(1)
   const eventTypes = useMemo(() => getEventTypes(), [])
-  const [filterEventType, setFilterEventType] = useState<LogsFiltersEventType>(
+  const [filterEventType, setFilterEventType] = useState(
     eventTypes[0]
   )
   const { data } = useAPILogs(
@@ -91,12 +91,18 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
       <div className="container">
         <div className="row">
           <div className="col">
-            <LogsFilters
+            <Filters
               search={filter}
               onSearchChanged={onFilterChanged}
-              eventTypes={eventTypes}
-              onEventTypeSelected={eventTypeSelectChanged}
-              selectedEventType={filterEventType}
+              selects={[
+                {
+                  id: 'eventType',
+                  options: eventTypes,
+                  selected: filterEventType,
+                  onSelectChanged: eventTypeSelectChanged,
+                  defaultOptionId: 'all'
+                },
+              ]}
             />
           </div>
         </div>
@@ -148,7 +154,7 @@ function PaginationButton({
   )
 }
 
-function getEventTypes(): LogsFiltersEventType[] {
+function getEventTypes() {
   const types = [{ id: 'all', name: 'Vyberte typ události' }]
   const events = Object.values(APILogEvent)
   events.sort()

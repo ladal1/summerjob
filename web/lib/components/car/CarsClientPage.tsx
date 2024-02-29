@@ -5,8 +5,8 @@ import { Serialized } from 'lib/types/serialize'
 import Link from 'next/link'
 import { useState } from 'react'
 import PageHeader from '../page-header/PageHeader'
-import { CarsFilters } from './CarsFilters'
 import { CarsTable } from './CarsTable'
+import { Filters } from '../filters/Filters'
 
 interface CarsClientPageProps {
   initialData: Serialized
@@ -48,7 +48,10 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <CarsFilters search={filter} onSearchChanged={setFilter} />
+              <Filters 
+                search={filter} 
+                onSearchChanged={setFilter} 
+              />
             </div>
           </div>
           <div className="row gx-3">

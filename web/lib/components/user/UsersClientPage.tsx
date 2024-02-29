@@ -6,8 +6,8 @@ import { Serialized } from 'lib/types/serialize'
 import { deserializeUsers, UserComplete } from 'lib/types/user'
 import { useState, useMemo } from 'react'
 import ErrorPage from '../error-page/ErrorPage'
-import { UsersFilters, UsersFiltersPermission } from './UsersFilters'
 import UsersTable from './UsersTable'
+import { Filters } from '../filters/Filters'
 
 interface UsersClientPageProps {
   sUsers: Serialized
@@ -30,7 +30,7 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
 
   const [filter, setFilter] = useState('')
   const [filterPermission, setFilterPermission] =
-    useState<UsersFiltersPermission>(permissions[0])
+    useState(permissions[0])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(
@@ -57,12 +57,18 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
       <div className="container">
         <div className="row">
           <div className="col">
-            <UsersFilters
+            <Filters
               search={filter}
               onSearchChanged={setFilter}
-              permissions={permissions}
-              selectedPermission={filterPermission}
-              onPermissionSelected={permissionSelectChanged}
+              selects={[
+                {
+                  id: 'permission',
+                  options: permissions,
+                  selected: filterPermission,
+                  onSelectChanged: permissionSelectChanged,
+                  defaultOptionId: 'all'
+                },
+              ]}
             />
           </div>
         </div>
@@ -87,7 +93,7 @@ function getFulltextData(users?: UserComplete[]) {
   return map
 }
 
-function getPermissions(): UsersFiltersPermission[] {
+function getPermissions() {
   const perms = [{ id: 'all', name: 'Vyberte oprávnění' }]
   for (const perm of Object.values(Permission)) {
     perms.push({ id: perm, name: perm })

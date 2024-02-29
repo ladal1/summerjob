@@ -3,7 +3,6 @@ import ErrorPage from 'lib/components/error-page/ErrorPage'
 import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
 import { Modal, ModalSize } from 'lib/components/modal/Modal'
 import PageHeader from 'lib/components/page-header/PageHeader'
-import { PlanFilters } from 'lib/components/plan/PlanFilters'
 import { PlanTable } from 'lib/components/plan/PlanTable'
 import {
   useAPIPlan,
@@ -24,6 +23,7 @@ import { Serialized } from 'lib/types/serialize'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Filters } from '../filters/Filters'
 
 interface PlanClientPageProps {
   id: string
@@ -280,12 +280,18 @@ export default function PlanClientPage({
             <div className="container-fluid">
               <div className="row gx-3">
                 <div className="col">
-                  <PlanFilters
+                  <Filters
                     search={filter}
                     onSearchChanged={setFilter}
-                    areas={areas}
-                    selectedArea={selectedArea}
-                    onAreaSelected={onAreaSelected}
+                    selects={[
+                      {
+                        id: 'areas',
+                        options: areas,
+                        selected: selectedArea,
+                        onSelectChanged: onAreaSelected,
+                        defaultOptionId: 'all'
+                      },
+                    ]}
                   />
                 </div>
               </div>
