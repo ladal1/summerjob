@@ -16,13 +16,14 @@ import { filterUniqueById, formatDateLong } from 'lib/helpers/helpers'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { deserializePlan, PlanComplete } from 'lib/types/plan'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import ErrorPage404 from '../404/404'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface PlanClientPageProps {
   id: string
@@ -167,13 +168,31 @@ export default function PlanClientPage({
     () => getAvailableAreas(planData ?? undefined),
     [planData]
   )
-  const [selectedArea, setSelectedArea] = useState(areas[0])
 
+  // get query parameters
+  const searchParams = useSearchParams()
+  const selectedAreaQ = searchParams?.get("selectedArea")
+  const searchQ = searchParams?.get("search")
+
+  // area
+  const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === selectedAreaQ) || areas[0])
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find(a => a.id === id) || areas[0])
   }
 
-  const [filter, setFilter] = useState('')
+  // search
+  const [filter, setFilter] = useState(searchQ ?? '')
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(`?${new URLSearchParams({
+      selectedArea: selectedArea.id,
+      search: filter
+    })}`, {
+      scroll: false
+    })
+  }, [selectedArea, filter, router])
 
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
 
