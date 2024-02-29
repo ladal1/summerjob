@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
 import 'leaflet/dist/leaflet.css'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer } from 'react-leaflet'
 import L from 'leaflet'
+import { ChangeView } from '../ChangeView'
+import { LocationMarker } from '../LocationMarker'
 
 export interface MapProps {
   center: [number, number]
@@ -18,7 +19,7 @@ export const Map = ({
   scrollWheelZoom = true,
   markerPosition,
   setMarkerPosition,
-  canPickLocation = false,
+  canPickLocation = false
 }: MapProps) => {
 
 
@@ -30,27 +31,6 @@ export const Map = ({
     popupAnchor: [2, -46] // fix popup window position
   })
   L.Marker.prototype.options.icon = DefaultIcon
-
-  function LocationMarker() {
-    const map = useMapEvents({
-      
-      click(event) {
-        if(canPickLocation) {
-          const { lat, lng } = event.latlng
-          if(setMarkerPosition)
-            setMarkerPosition([lat, lng])
-        }
-      },
-    })
-  
-    return (markerPosition === null || markerPosition === undefined) ? null : (
-      <Marker position={markerPosition}>
-        <Popup>
-          Souřadnice: <br /> {`[${markerPosition[0]}, ${markerPosition[1]}]`}
-        </Popup>
-      </Marker>
-    )
-  }
 
   return (
       <MapContainer 
@@ -70,11 +50,16 @@ export const Map = ({
           </>
         }
       >
+        { markerPosition && <ChangeView center={markerPosition}/>}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <LocationMarker />
+        <LocationMarker
+          markerPosition={markerPosition}
+          setMarkerPosition={setMarkerPosition}
+          canPickLocation={canPickLocation}
+        />
       </MapContainer>
   )
 }

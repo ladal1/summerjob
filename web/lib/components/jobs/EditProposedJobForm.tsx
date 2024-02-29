@@ -29,7 +29,6 @@ import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
-import { getGeocodingData, getReverseGeocodingData } from '../map/GeocodingData'
 
 interface EditProposedJobProps {
   serializedJob: Serialized

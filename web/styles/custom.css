@@ -407,6 +407,10 @@ img.smj-nav-logo {
   box-shadow: inset 0 -2px 0 #fdc345 !important; 
 }
 
+.smj-progress-bar {
+  background-color:#fdc345 !important
+}
+
 .text-small {
   font-size: 0.8rem;
 }
