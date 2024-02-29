@@ -4,10 +4,12 @@ import { useAPIUsers } from 'lib/fetcher/user'
 import { Permission } from 'lib/types/auth'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeUsers, UserComplete } from 'lib/types/user'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import ErrorPage from '../error-page/ErrorPage'
 import UsersTable from './UsersTable'
 import { Filters } from '../filters/Filters'
+import { useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 interface UsersClientPageProps {
   sUsers: Serialized
@@ -28,9 +30,25 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   }, [data])
   const permissions = useMemo(() => getPermissions(), [])
 
-  const [filter, setFilter] = useState('')
-  const [filterPermission, setFilterPermission] =
-    useState(permissions[0])
+
+  // get query parameters
+  const searchParams = useSearchParams()
+  const permissionQ = searchParams?.get("permission")
+  const searchQ = searchParams?.get("search")
+
+  const [filter, setFilter] = useState(searchQ ?? '')
+  const [filterPermission, setFilterPermission] = useState(permissions.find(a => a.id === permissionQ) ||  permissions[0])
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(`?${new URLSearchParams({
+      permission: filterPermission.id,
+      search: filter
+    })}`, {
+      scroll: false
+    })
+  }, [filterPermission, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(

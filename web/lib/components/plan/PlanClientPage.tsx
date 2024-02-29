@@ -171,11 +171,11 @@ export default function PlanClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const selectedAreaQ = searchParams?.get("selectedArea")
+  const areaIdQ = searchParams?.get("area")
   const searchQ = searchParams?.get("search")
 
   // area
-  const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === selectedAreaQ) || areas[0])
+  const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === areaIdQ) || areas[0])
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find(a => a.id === id) || areas[0])
   }
@@ -187,7 +187,7 @@ export default function PlanClientPage({
   const router = useRouter()
   useEffect(() => {
     router.replace(`?${new URLSearchParams({
-      selectedArea: selectedArea.id,
+      area: selectedArea.id,
       search: filter
     })}`, {
       scroll: false
@@ -285,7 +285,7 @@ export default function PlanClientPage({
                     onSearchChanged={setFilter}
                     selects={[
                       {
-                        id: 'areas',
+                        id: 'area',
                         options: areas,
                         selected: selectedArea,
                         onSelectChanged: onAreaSelected,

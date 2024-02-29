@@ -3,10 +3,11 @@ import { useAPICars } from 'lib/fetcher/car'
 import { CarComplete, deserializeCars } from 'lib/types/car'
 import { Serialized } from 'lib/types/serialize'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PageHeader from '../page-header/PageHeader'
 import { CarsTable } from './CarsTable'
 import { Filters } from '../filters/Filters'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface CarsClientPageProps {
   initialData: Serialized
@@ -17,7 +18,22 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
   const { data, error, isLoading, mutate } = useAPICars({
     fallbackData: initialCars,
   })
-  const [filter, setFilter] = useState('')
+
+  // get query parameters
+  const searchParams = useSearchParams()
+  const searchQ = searchParams?.get("search")
+
+  const [filter, setFilter] = useState(searchQ ?? '')
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(`?${new URLSearchParams({
+      search: filter
+    })}`, {
+      scroll: false
+    })
+  }, [filter, router])
 
   const filterCars = (cars: CarComplete[]) => {
     const filterString = filter.toLocaleLowerCase()

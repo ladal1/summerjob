@@ -6,12 +6,13 @@ import {
   deserializeProposedJobs,
   ProposedJobComplete,
 } from 'lib/types/proposed-job'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAPIProposedJobs } from 'lib/fetcher/proposed-job'
 import { datesBetween, filterUniqueById } from 'lib/helpers/helpers'
 import Link from 'next/link'
 import { Serialized } from 'lib/types/serialize'
 import { Filters } from '../filters/Filters'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface ProposedJobsClientPage {
   initialData: Serialized
@@ -30,9 +31,15 @@ export default function ProposedJobsClientPage({
   })
   const reload = () => mutate()
 
+  // get query parameters
+  const searchParams = useSearchParams()
+  const areaIdQ = searchParams?.get("area")
+  const selectedDayQ = searchParams?.get("day")
+  const searchQ = searchParams?.get("search")
+
   //#region Filtering areas
   const areas = getAvailableAreas(data)
-  const [selectedArea, setSelectedArea] = useState(areas[0])
+  const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === areaIdQ) || areas[0])
 
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find(a => a.id === id) || areas[0])
@@ -43,14 +50,26 @@ export default function ProposedJobsClientPage({
   const firstDay = new Date(startDate)
   const lastDay = new Date(endDate)
   const days = getDays(firstDay, lastDay)
-  const [selectedDay, setSelectedDay] = useState(days[0])
+  const [selectedDay, setSelectedDay] = useState(days.find(a => a.id === selectedDayQ) || days[0])
 
   const onDaySelected = (day: Date) => {
     setSelectedDay(days.find(d => d.day.getTime() === day.getTime()) || days[0])
   }
   //#endregion
 
-  const [filter, setFilter] = useState('')
+  const [filter, setFilter] = useState(searchQ ?? '')
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(`?${new URLSearchParams({
+      area: selectedArea.id,
+      day: selectedDay.id,
+      search: filter
+    })}`, {
+      scroll: false
+    })
+  }, [selectedArea, selectedDay, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
 

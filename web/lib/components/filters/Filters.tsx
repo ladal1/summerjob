@@ -81,7 +81,7 @@ export function Filters({
         <div className="col-auto mb-3">
           <input
             type="text"
-            className="p-2 d-inline-block outline-none border-0 smj-filter-input"
+            className="p-2 d-inline-block outline-none border-0 smj-filter-input smj-input"
             placeholder="Vyhledat..."
             value={search}
             onChange={(e) => onSearchChanged(e.target.value)}
@@ -93,7 +93,7 @@ export function Filters({
               <select
                 name={select.id}
                 id={select.id}
-                className={`form-select p-2 bg-white smj-filter-input ${
+                className={`form-select p-2 bg-white smj-filter-input smj-input ${
                   (select.defaultOptionId && select.id === select.defaultOptionId 
                     ? 'smj-default-option' : '')
                 }`}
@@ -115,7 +115,7 @@ export function Filters({
               <select
                 name={select.id}
                 id={select.id}
-                className={`form-select p-2 bg-white smj-filter-input ${
+                className={`form-select p-2 bg-white smj-filter-input smj-input ${
                   (select.defaultOptionId && select.id === select.defaultOptionId 
                     ? 'smj-default-option' : '')
                 }`}

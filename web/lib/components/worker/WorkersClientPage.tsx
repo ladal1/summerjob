@@ -5,10 +5,11 @@ import { useAPIWorkers } from 'lib/fetcher/worker'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import WorkersTable from './WorkersTable'
 import Image from 'next/image'
 import { Filters } from '../filters/Filters'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
@@ -22,9 +23,40 @@ export default function WorkersClientPage({
     fallbackData: inititalWorkers,
   })
 
-  const [filter, setFilter] = useState('')
-  const [onlyStrong, setOnlyStrong] = useState(false)
-  const [onlyWithCar, setOnlyWithCar] = useState(false)
+  // get query parameters
+  const searchParams = useSearchParams()
+  const onlyStrongQ = searchParams?.get("area")
+  const onlyWithCarQ = searchParams?.get("day")
+  const searchQ = searchParams?.get("search")
+
+  const getBoolean = (value: string) => {
+    switch(value){
+      case "true":
+      case "1":
+      case "ano":
+      case "yes":
+          return true;
+      default: 
+          return false;
+    }
+  }
+
+  const [filter, setFilter] = useState(searchQ ?? '')
+  const [onlyStrong, setOnlyStrong] = useState(onlyStrongQ ? getBoolean(onlyStrongQ) : false)
+  const [onlyWithCar, setOnlyWithCar] = useState(onlyWithCarQ ? getBoolean(onlyWithCarQ) : false)
+
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(`?${new URLSearchParams({
+      onlyStrong: `${onlyStrong}`,
+      onlyWithCar: `${onlyWithCar}`,
+      search: filter
+    })}`, {
+      scroll: false
+    })
+  }, [onlyStrong, onlyWithCar, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(

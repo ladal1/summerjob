@@ -2,10 +2,11 @@
 import LogsTable from './LogsTable'
 import { APILogEvent, FilteredLogs, deserializeLogs } from 'lib/types/logger'
 import { Serialized } from 'lib/types/serialize'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import useDebounce from 'lib/helpers/debounce'
 import { useAPILogs } from 'lib/fetcher/log'
 import { Filters } from '../filters/Filters'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface LogsClientPageProps {
   sLogs: Serialized
@@ -15,13 +16,29 @@ const PAGE_SIZE = 10
 
 export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
   const logs = deserializeLogs(sLogs)
-  const [filter, setFilter] = useState('')
+
+  // get query parameters
+  const searchParams = useSearchParams()
+  const eventTypeQ = searchParams?.get("eventType")
+  const searchQ = searchParams?.get("search")
+  
+  const [filter, setFilter] = useState(searchQ ?? '')
   const debouncedSearch = useDebounce(filter, 500)
   const [page, setPage] = useState(1)
   const eventTypes = useMemo(() => getEventTypes(), [])
-  const [filterEventType, setFilterEventType] = useState(
-    eventTypes[0]
-  )
+  const [filterEventType, setFilterEventType] = useState(eventTypes.find(a => a.id === eventTypeQ) || eventTypes[0])
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(`?${new URLSearchParams({
+      eventType: filterEventType.id,
+      search: filter
+    })}`, {
+      scroll: false
+    })
+  }, [filterEventType, filter, router])
+
   const { data } = useAPILogs(
     debouncedSearch,
     filterEventType.id,
