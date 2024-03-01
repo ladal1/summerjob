@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { jobTypeMapping } from '../../data/jobTypeMapping'
+import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
@@ -20,13 +20,14 @@ import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
 import { Label } from '../forms/Label'
 import FormWarning from '../forms/FormWarning'
-import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { useRouter } from 'next/navigation'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -176,12 +177,18 @@ export default function CreateProposedJobForm({
               register={() => register('areaId')}
             />
             <MapInput
-              idAddress="address"
-              idCoordinates="coordinates"
-              label="Adresa"
-              placeholder="Adresa"
-              registerAdress={registerAdress}
-              registerCoordinates={registerCoordinates}
+              address={{
+                id: 'address',
+                label: 'Adresa',
+                placeholder: 'Adresa',
+                register: registerAdress,
+              }}
+              coordinates={{
+                id: 'coordinates',
+                label: 'Souřadnice',
+                placeholder: '0, 0',
+                register: registerCoordinates,
+              }}
               errors={errors}
             />
             <TextInput
@@ -275,8 +282,9 @@ export default function CreateProposedJobForm({
               errors={errors}
               register={() => register('jobType')}
             />
-            <AlergyPillInput
+            <GroupButtonsInput
               label="Alergeny"
+              mapping={allergyMapping}
               register={() => register("allergens")}
             />
             <OtherAttributesInput

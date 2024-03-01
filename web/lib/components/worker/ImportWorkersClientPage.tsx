@@ -3,6 +3,7 @@ import {
   capitalizeFirstLetter,
   formatDateNumeric,
   formatDateShort,
+  formatPhoneNumber,
 } from 'lib/helpers/helpers'
 import { useMemo, useState } from 'react'
 import EditBox from '../forms/EditBox'
@@ -12,7 +13,7 @@ import { useAPIWorkersCreate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { Allergy } from '../../prisma/client'
+import { Allergy, Skill } from '../../prisma/client'
 
 interface ImportWorkersClientPageProps {
   eventName: string
@@ -80,7 +81,7 @@ export default function ImportWorkersClientPage({
             <div>
               Import akceptuje data oddělená středníkem v následujícím formátu:
               <pre>
-                Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dny práce;Dny
+                Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny práce;Dny
                 adorace
               </pre>
               Příklad:
@@ -90,6 +91,8 @@ export default function ImportWorkersClientPage({
             </div>
             <p>
               Seznam evidovaných alergií: {Object.values(Allergy).join(', ')}
+              <br />
+              Seznam evidovaných dovedností: {Object.values(Skill).join(', ')}
               <br />
               Datum je možné zadat i v jiném formátu. Před importem zkontrolujte
               níže, že se data naimportují správně.
@@ -101,7 +104,7 @@ export default function ImportWorkersClientPage({
               name="data"
               className="form-control border p-1"
               rows={10}
-              placeholder="Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dny práce;Dny adorace"
+              placeholder="Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny práce;Dny adorace"
               value={importData}
               onChange={e => setImportData(e.target.value)}
             />
@@ -164,6 +167,10 @@ function ResultBox({
           </small>
           <br />
           <small className="text-muted">
+            Dovednosti: {result.data.skills.join(', ')}
+          </small>
+          <br />
+          <small className="text-muted">
             Pracuje:{' '}
             {result.data.availability.workDays
               .map(d => capitalizeFirstLetter(formatDateShort(d)))
@@ -209,13 +216,16 @@ function getWorkerInfo(
     email,
     phone,
     allergiesStr,
+    skillsStr,
     workDaysStr,
     adorationDaysStr,
   ] = line.split(';')
   if (adorationDaysStr === undefined) {
     return { success: false, error: 'Missing data' }
   }
+  const formatedPhone = formatPhoneNumber(phone)
   const allergies = allergiesStr.split(',').filter(a => a.trim() !== '')
+  const skills = skillsStr.split(',').filter(a => a.trim() !== '')
   const workDays = workDaysStr
     .split(',')
     .filter(a => a.trim() !== '')
@@ -229,9 +239,10 @@ function getWorkerInfo(
     firstName,
     lastName,
     email,
-    phone,
+    phone: formatedPhone,
     strong: false,
     allergyIds: allergies,
+    skills,
     availability: {
       workDays,
       adorationDays,

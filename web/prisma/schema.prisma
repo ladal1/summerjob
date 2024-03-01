@@ -34,6 +34,44 @@ enum JobType {
   OTHER
 }
 
+enum ToolName {
+  AXE
+  BOW_SAW
+  LADDER
+  PAINT
+  PAINT_ROLLER
+  COVER_SHEET
+  MASKING_TAPE
+  PAINT_BRUSH
+  SCRAPER_GRID
+  PAINTER_SPATULA
+  JAPANESE_SPATULA
+  GYPSUM
+  BUCKET
+  RAG
+  BROOM
+}
+
+enum Skill {
+  LUMBERJACK
+  ARTIST
+  GARDENER
+  DANGER
+  ELECTRICIAN
+  HEIGHTS
+  STRONG
+}
+
+model Tool {
+  id                     String        @id @default(uuid())
+  tool                   ToolName      @unique
+  skill                  Skill[]       
+  jobType                JobType       @default(OTHER)
+  amount                 Int           @default(1)
+  jobsWithToolOnSite     ProposedJob[] @relation("ToolOnSite")  
+  jobsWithToolToTakeWith ProposedJob[] @relation("ToolToTakeWith")  
+}
+
 model Photo {
   id             String               @id @default(uuid())
   photoPath      String
@@ -48,6 +86,7 @@ model Worker {
   cars           Car[]
   isStrong       Boolean              @default(false)
   allergies      Allergy[]
+  skills         Skill[]
   jobs           ActiveJob[]
   driving        Ride[]               @relation("Driver")
   passengerIn    Ride[]
@@ -119,6 +158,8 @@ model ProposedJob {
   allergens          Allergy[]
   availability       DateTime[]  @db.Date
   jobType            JobType     @default(OTHER)
+  toolsOnSite        Tool[]      @relation("ToolOnSite")  
+  toolsToTakeWith    Tool[]      @relation("ToolToTakeWith")  
   photoIds           String[]
 }
 

@@ -9,7 +9,7 @@ import {
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
-import { Allergy } from '../../lib/prisma/client'
+import { Allergy, Skill } from '../../lib/prisma/client'
 import { phoneRegex } from 'lib/helpers/regex'
 
 useZodOpenApi
@@ -40,6 +40,7 @@ export const WorkerCreateSchema = z
       .min(1, { message: err.emptyPhone })
       .refine((phone) => phoneRegex.test(phone), { message: err.invalidRegexPhone }),
     strong: z.boolean(),
+    skills: z.array(z.nativeEnum(Skill)),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
     photoFile: z

@@ -168,6 +168,9 @@ export async function deleteWorker(id: string) {
         allergies: {
           set: [],
         },
+        skills: {
+          set: [],
+        },
         availability: {
           updateMany: {
             where: {},
@@ -255,6 +258,9 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      skills: {
+        set: data.skills,
+      },
       blocked: false,
       availability: {
         create: {
@@ -277,6 +283,9 @@ export async function createWorker(
       note: data.note,
       allergies: {
         set: data.allergyIds,
+      },
+      skills: {
+        set: data.skills,
       },
       availability: {
         create: {
@@ -328,6 +337,10 @@ export async function internal_updateWorker(
     ? { allergies: { set: data.allergyIds } }
     : {}
 
+  const skillsUpdate = data.skills
+    ? { skills: { set: data.skills } }
+    : {}
+
   return await prismaClient.worker.update({
     where: {
       id,
@@ -341,6 +354,7 @@ export async function internal_updateWorker(
       photoPath: data.photoPath,
       note: data.note,
       ...allergyUpdate,
+      ...skillsUpdate,
       availability: {
         update: {
           where: {

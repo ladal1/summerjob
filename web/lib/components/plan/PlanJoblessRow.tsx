@@ -6,7 +6,7 @@ import type { Worker } from 'lib/prisma/client'
 import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
 import { useEffect, useState } from 'react'
 import MoveWorkerModal from './MoveWorkerModal'
-import { allergyMapping } from 'lib/data/allergyMapping'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 
 const NO_JOB = 'NO_JOB'
 

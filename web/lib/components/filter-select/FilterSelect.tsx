@@ -69,7 +69,7 @@ export function FilterSelect({
   }
 
   const shouldShowItem = (item: FilterSelectItem) => {
-    const isSearchEmpty = search.length === 0 || search === selected;
+    const isSearchEmpty = search.length === 0 || search === selected
     return (
       isSearchEmpty ||
       item.searchable.toLowerCase().includes(search.toLowerCase())

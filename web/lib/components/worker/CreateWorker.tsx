@@ -10,12 +10,14 @@ import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import { TextInput } from '../forms/input/TextInput'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -127,9 +129,15 @@ export default function CreateWorker({
                 days={allDates}
               />
             </div>
-            <AlergyPillInput
+            <GroupButtonsInput
               label="Alergie"
+              mapping={allergyMapping}
               register={() => register("allergyIds")}
+            />
+            <GroupButtonsInput
+              label="Dovednosti"
+              mapping={skillMapping}
+              register={() => register("skills")}
             />
             <OtherAttributesInput
               label="Další vlastnosti"

@@ -1,28 +1,28 @@
 import { UseFormRegisterReturn } from 'react-hook-form'
 
-export default function AllergyPill({
-  allergyId,
-  allergyName,
+export default function ButtonGroup({
+  id,
+  name,
   register,
 }: {
-  allergyId: string
-  allergyName: string
+  id: string
+  name: string
   register: () => UseFormRegisterReturn
 }) {
   return (
     <div className="d-inline-block me-3">
       <input
-        id={allergyId}
+        id={id}
         className="btn-check"
         type="checkbox"
-        value={allergyId}
+        value={id}
         {...register()}
       />
       <label
         className="form-label btn btn-allergy-select btn-light p-2"
-        htmlFor={allergyId}
+        htmlFor={id}
       >
-        {allergyName}
+        {name}
       </label>
     </div>
   )

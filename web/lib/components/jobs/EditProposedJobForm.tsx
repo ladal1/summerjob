@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { jobTypeMapping } from '../../data/jobTypeMapping'
+import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
 import { JobType } from '../../prisma/client'
 import { Area } from '../../prisma/zod'
 import { deserializeAreas } from '../../types/area'
@@ -23,12 +23,13 @@ import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { Label } from '../forms/Label'
 import FormWarning from '../forms/FormWarning'
-import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -317,7 +318,6 @@ export default function EditProposedJobForm({
                 days={allDates}
               />
             </div>
-
             <FilterSelectInput
               id="jobType"
               label="Typ práce"
@@ -330,8 +330,9 @@ export default function EditProposedJobForm({
               errors={errors}
               register={() => register('jobType')}
             />
-            <AlergyPillInput
+            <GroupButtonsInput
               label="Alergeny"
+              mapping={allergyMapping}
               register={() => register("allergens")}
             />
             <OtherAttributesInput

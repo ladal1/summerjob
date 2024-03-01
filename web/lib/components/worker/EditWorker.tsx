@@ -10,16 +10,18 @@ import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
 import { formatPhoneNumber, pick, removeRedundantSpace } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
-import { Allergy } from '../../prisma/client'
+import { Allergy, Skill } from '../../prisma/client'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
-import { AlergyPillInput } from '../forms/input/AlergyPillInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { Label } from '../forms/Label'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { ImageUploader } from '../forms/ImageUploader'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -55,6 +57,7 @@ export default function EditWorker({
       strong: worker.isStrong,
       note: worker.note,
       allergyIds: worker.allergies as Allergy[],
+      skills: worker.skills as Skill[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
         adorationDays: worker.availability.adorationDays.map(day =>
@@ -181,10 +184,18 @@ export default function EditWorker({
                 days={allDates}
               />
             </div>
-            <AlergyPillInput
+            <GroupButtonsInput
               label="Alergie"
+              mapping={allergyMapping}
               register={() => register("allergyIds")}
             />
+            {!isProfilePage && (
+              <GroupButtonsInput
+                label="Dovednosti"
+                mapping={skillMapping}
+                register={() => register("skills")}
+              />
+            )}
             {!isProfilePage && (
               <OtherAttributesInput
                 label="Další vlastnosti"

@@ -28,8 +28,8 @@ export const renameFile = async (
 
 export const updatePhotoPathByNewFilename = (
   originalPath: string,
-  lastDirectory: string,
-  newFilename: string
+  newFilename: string,
+  lastDirectory?: string,
 ): string | undefined => {
   const lastSlashIndex = originalPath.lastIndexOf('/')
   const lastDotIndex = originalPath.lastIndexOf('.')
@@ -44,7 +44,7 @@ export const updatePhotoPathByNewFilename = (
   const fileType = originalPath.slice(lastDotIndex) // type part
 
   // create new path
-  return `${directory}${lastDirectory}/${newFilename}${fileType}`
+  return `${directory}${lastDirectory ?? ''}/${newFilename}${fileType}`
 } 
 
 export const createDirectory = async (dirName: string) => {
