@@ -10,11 +10,13 @@ import {
   ActiveJobCreateSchema,
 } from 'lib/types/active-job'
 import { ProposedJobComplete } from 'lib/types/proposed-job'
-import { ReactNode, useMemo } from 'react'
+import React, { ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Select, { FormatOptionLabelMeta } from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
+import { formatDateLong, formatDateShort } from 'lib/helpers/helpers'
+import { Issue } from './Issue'
 
 interface AddJobToPlanFormProps {
   planId: string
@@ -144,16 +146,38 @@ export default function AddJobToPlanForm({
 }
 
 function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
+  console.log(job)
   return (
     <>
       <div className="text-wrap">
         {job.name} ({job.area?.name})
         {job.pinned && (
-          <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
+          <i className="ms-2 fas fa-thumbtack smj-action-pinned"/>
+        )}
+        {(job.requiredDays - job.activeJobs.length) >= job.availability.length && (
+          <>
+            <i className="ms-2 fas fa-triangle-exclamation smj-action-pinned"/>
+            <Issue>
+              <span>
+                Job musí být naplánován
+                <i className="text-muted">
+                  {' - poslední dostupné dny'}
+                </i>
+              </span>
+            </Issue>
+          </>
         )}
       </div>
       <div className="text-muted text-wrap text-small">
         Naplánováno: {job.activeJobs.length}/{job.requiredDays}
+        <br/>
+        Dostupné dny:
+        {job.availability.map((day, index) => (
+          <span key={index}>
+            {index === 0 ? ' ' : ', '}
+            {formatDateShort(new Date(day))}
+          </span>
+        ))}  
       </div>
     </>
   )
