@@ -1,3 +1,12 @@
+/* TODO: unify this file */ 
+:root {
+--text: #291a00;
+--background: #fff0d6;
+--primary: #fac505;
+--secondary: #ffd97a;
+--accent: #ff9500;
+}
+
 .nav-item .nav-link {
   padding-top: 0.2rem !important;
   padding-bottom: 0.2rem !important;

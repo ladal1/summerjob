@@ -37,7 +37,7 @@ export const MyPlanSchema = z.object({
       location: z.object({
         name: z.string().min(1),
         address: z.string().min(1),
-        coordinations: z.tuple([z.number(), z.number()]).nullable(),
+        coordinates: z.tuple([z.number(), z.number()]).nullable(),
       }),
       hasFood: z.boolean(),
       hasShower: z.boolean(),

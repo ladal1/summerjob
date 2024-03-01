@@ -29,7 +29,7 @@ export const ProposedJobCreateSchema = z
     publicDescription: z.string(),
     name: z.string().min(1, { message: err.emptyProposedJobName }),
     address: z.string().min(1, { message: err.emptyAdress }),
-    coordinations: z.array(z.number()).optional(),
+    coordinates: z.array(z.number()).optional(),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
       .number({ invalid_type_error: err.invalidTypeMaxWorkers })

@@ -55,7 +55,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
             {selectedPlan?.job && (
               <div className="container-fluid">
                 <div className="row">
-                  <div className={`${selectedPlan.job.location.coordinations ? "col-lg-6" : "col"} " mb-3"`}>
+                  <div className={`${selectedPlan.job.location.coordinates ? "col-lg-6" : "col"} " mb-3"`}>
                     <RowContent
                       data={
                         [
@@ -125,17 +125,17 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                       }
                     />
                   </div>
-                  {selectedPlan.job.location.coordinations && (
+                  {selectedPlan.job.location.coordinates && (
                     <div className="col-lg-6">
                       <div className="mb-3">
                         <Map
-                          center={selectedPlan.job.location.coordinations}
+                          center={selectedPlan.job.location.coordinates}
                           zoom={11}
-                          markerPosition={selectedPlan.job.location.coordinations}
+                          markerPosition={selectedPlan.job.location.coordinates}
                         />
                       </div>
                       <div className="d-flex justify-content-end">
-                        <OpenNavigationButton coordinates={selectedPlan.job.location.coordinations} />
+                        <OpenNavigationButton coordinates={selectedPlan.job.location.coordinates} />
                       </div>
                     </div>
                   )}

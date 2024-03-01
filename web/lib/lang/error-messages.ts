@@ -17,7 +17,7 @@ export const customErrorMessages = {
   emptyProposedJobName: 'Zadejte název jobu',
   emptyAreaId: 'Vyberte oblast',
   emptyAdress: 'Zadejte adresu',
-  emptyCoordinations: 'Zadejte souřadnice',
+  emptyCoordinates: 'Zadejte souřadnice',
   emptyContactInformation: 'Zadejte kontaktní informace',
   emptyRequiredDays: 'Zadejte odhadovaný počet dní',
   emptyMaxWorkers: 'Zadejte max. počet pracantů',

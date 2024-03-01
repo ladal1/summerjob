@@ -62,7 +62,7 @@ export default function EditProposedJobForm({
       privateDescription: job.privateDescription,
       allergens: job.allergens,
       address: job.address,
-      coordinations: job.coordinations,
+      coordinates: job.coordinates,
       contact: job.contact,
       requiredDays: job.requiredDays,
       minWorkers: job.minWorkers,
@@ -157,17 +157,17 @@ export default function EditProposedJobForm({
 
   //#endregion
 
-  //#region Coordinations and Address
+  //#region Coordinates and Address
 
-  const getCoordinations = (): [number, number] | null => {
-    if (job.coordinations && job.coordinations[0] && job.coordinations[1]) {
-      return [job.coordinations[0], job.coordinations[1]]
+  const getCoordinates = (): [number, number] | null => {
+    if (job.coordinates && job.coordinates[0] && job.coordinates[1]) {
+      return [job.coordinates[0], job.coordinates[1]]
     }
     return null
   }
 
-  const registerCoordinations = (coords: [number, number]) => {
-    setValue('coordinations', coords, { shouldDirty: true, shouldValidate: true })
+  const registerCoordinates = (coords: [number, number]) => {
+    setValue('coordinates', coords, { shouldDirty: true, shouldValidate: true })
   }
 
   const registerAdress = (address: string) => {
@@ -220,14 +220,20 @@ export default function EditProposedJobForm({
               register={() => register('areaId')}
             />
             <MapInput
-              idAddress="address"
-              idCoordinations="coordinations"
-              label="Adresa"
-              placeholder="Adresa"
-              markerPosition={getCoordinations()}
-              addressInit={job.address}
-              registerAdress={registerAdress}
-              registerCoordinations={registerCoordinations}
+              address={{
+                id: 'address',
+                label: 'Adresa',
+                placeholder: 'Adresa',
+                init: job.address,
+                register: registerAdress,
+              }}
+              coordinates={{
+                id: 'coordinates',
+                label: 'Souřadnice',
+                placeholder: '0, 0',
+                init: getCoordinates(),
+                register: registerCoordinates,
+              }}
               errors={errors}
             />
             <ImageUploader

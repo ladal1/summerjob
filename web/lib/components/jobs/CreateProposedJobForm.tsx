@@ -124,10 +124,10 @@ export default function CreateProposedJobForm({
 
   //#endregion
 
-  //#region Coordinations and Address
+  //#region Coordinates and Address
 
-  const registerCoordinations = (coords: [number, number]) => {
-    setValue('coordinations', coords)
+  const registerCoordinates = (coords: [number, number]) => {
+    setValue('coordinates', coords)
   }
 
   const registerAdress = (address: string) => {
@@ -177,11 +177,11 @@ export default function CreateProposedJobForm({
             />
             <MapInput
               idAddress="address"
-              idCoordinations="coordinations"
+              idCoordinates="coordinates"
               label="Adresa"
               placeholder="Adresa"
               registerAdress={registerAdress}
-              registerCoordinations={registerCoordinations}
+              registerCoordinates={registerCoordinates}
               errors={errors}
             />
             <TextInput

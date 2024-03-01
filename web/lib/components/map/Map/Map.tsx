@@ -3,10 +3,12 @@ import { MapContainer, TileLayer } from 'react-leaflet'
 import L from 'leaflet'
 import { ChangeView } from '../ChangeView'
 import { LocationMarker } from '../LocationMarker'
+import React, { useEffect, useState } from 'react'
 
 export interface MapProps {
   center: [number, number]
   zoom: number
+  address?: string
   scrollWheelZoom?: boolean
   markerPosition?: [number, number] | null
   setMarkerPosition?: (coords: [number, number]) => void
@@ -16,6 +18,7 @@ export interface MapProps {
 export const Map = ({ 
   center, 
   zoom,
+  address,
   scrollWheelZoom = true,
   markerPosition,
   setMarkerPosition,
@@ -56,6 +59,7 @@ export const Map = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <LocationMarker
+          address={address ?? ''}
           markerPosition={markerPosition}
           setMarkerPosition={setMarkerPosition}
           canPickLocation={canPickLocation}

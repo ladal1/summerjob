@@ -1,42 +1,44 @@
-import { DetailedHTMLProps, InputHTMLAttributes, useState } from "react"
-import { FieldErrors, FieldValues } from "react-hook-form"
+import { useState } from "react"
+import { FieldErrors, Path } from "react-hook-form"
 import Map from "../../map/Map"
 import { Label } from "../Label"
 import FormWarning from "../FormWarning"
 import { getGeocodingData, getReverseGeocodingData } from "lib/components/map/GeocodingData"
 import { ProgressBar } from "../ProgressBar"
 
-interface MapInputProps<FormData extends FieldValues>
-extends DetailedHTMLProps<
-  InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
-> {
-  idAddress: string
-  idCoordinations: string
-  label: string
-  registerAdress: (address: string) => void
-  registerCoordinations: (coords: [number, number]) => void 
-  errors: FieldErrors<FormData>
-  markerPosition?: [number, number] | null
-  addressInit?: string
+interface AddressInput {
+  id: string,
+  label: string,
+  placeholder: string,
+  init?: string,
+  register: (address: string) => void
 }
 
-export const MapInput = <FormData extends FieldValues> ({
-  idAddress,
-  idCoordinations,
-  label,
-  registerAdress,
-  registerCoordinations,
-  errors,
-  markerPosition = null,
-  addressInit = '',
-  ...rest
-}: MapInputProps<FormData>) => {
-  const errorAddress = errors?.[idAddress]?.message as string | undefined
-  const errorCoordinations = errors?.[idCoordinations]?.message as string | undefined
+interface CoordinatesInput {
+  id: string,
+  label: string,
+  placeholder: string,
+  init?: [number, number] | null,
+  register: (coords: [number, number]) => void
+}
 
-  const [address, setAddress] = useState(addressInit)
-  const [coordinates, setCoordinates] = useState(markerPosition)
+interface MapInputProps {
+  address: AddressInput,
+  coordinates: CoordinatesInput
+  errors: FieldErrors<FormData>
+}
+
+export const MapInput = ({
+  address,
+  coordinates,
+  errors
+}: MapInputProps) => {
+  const errorAddress = errors?.[address.id as Path<FormData>]?.message as string | undefined
+  const errorCoordinates = errors?.[coordinates.id as Path<FormData>]?.message as string | undefined
+
+  const [addressValue, setAddressValue] = useState(address.init ?? '')
+  const [addressForMap, setAddressForMap] = useState(address.init ?? '')
+  const [coordinatesValue, setCoordinatesValue] = useState(coordinates.init ?? null)
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const [canPickLocation, setCanPickLocation] = useState(true)
@@ -45,32 +47,34 @@ export const MapInput = <FormData extends FieldValues> ({
 
   const geocodingDataSearch = async ()   => {
     setIsButtonDisabled(true)
-    const fetchedCoords = await getGeocodingData(address)
+    setAddressForMap(addressValue)
+    const fetchedCoords = await getGeocodingData(addressValue)
     if(fetchedCoords) {
-      setCoordinates(fetchedCoords)
-      registerCoordinations(fetchedCoords)
+      setCoordinatesValue(fetchedCoords)
+      coordinates.register(fetchedCoords)
     }
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, timeOut)
   }
 
-  const reverseGeocodingDataSearch = async () => {
+  const reverseGeocodingDataSearch = async (coords: [number, number]) => {
     setCanPickLocation(false)
-    const fetchedAddress = await getReverseGeocodingData(coordinates?.at(0), coordinates?.at(1)) // has to be number, because coords are set in caller registerMarker
+    const fetchedAddress = await getReverseGeocodingData(coords[0], coords[1])
     if(fetchedAddress) {
-      setAddress(fetchedAddress)
-      registerAdress(fetchedAddress)
+      setAddressValue(fetchedAddress)
+      setAddressForMap(fetchedAddress)
+      address.register(fetchedAddress)
     }
     setTimeout(() => {
       setCanPickLocation(true)
     }, timeOut)
   }
 
-  const registerMarker = (coords: [number, number]) => {
-    registerCoordinations(coords)
-    setCoordinates(coords)
-    reverseGeocodingDataSearch()
+  const registerMarker = async (coords: [number, number]) => {
+    coordinates.register(coords)
+    setCoordinatesValue(coords)
+    await reverseGeocodingDataSearch(coords)
   }
 
   return (
@@ -79,17 +83,17 @@ export const MapInput = <FormData extends FieldValues> ({
         <div className="row align-items-end">
             <div className="col">
               <Label
-                id={idAddress}
-                label={label}
+                id={address.id}
+                label={address.label}
               />
               <input
                 className="form-control smj-input p-0 fs-5"
-                value={address}
+                value={addressValue}
+                placeholder={address.placeholder}
                 onChange={(e) => {
-                  registerAdress(e.target.value)
-                  setAddress(e.target.value)
+                  address.register(e.target.value)
+                  setAddressValue(e.target.value)
                 }}
-                {...rest}
               />
             </div>
             <div className="col-auto">
@@ -113,10 +117,11 @@ export const MapInput = <FormData extends FieldValues> ({
       <div className="pt-3">
         <div className="container p-0 m-0">
           <Map
-            center={markerPosition ?? [49.8203, 15.4784]} // Czech republic
+            center={coordinates.init ?? [49.8203, 15.4784]} // Czech republic
             zoom={6}
+            address={addressForMap}
             canPickLocation={canPickLocation}
-            markerPosition={coordinates}
+            markerPosition={coordinatesValue}
             setMarkerPosition={registerMarker}
           />
           {!canPickLocation && 
@@ -126,7 +131,7 @@ export const MapInput = <FormData extends FieldValues> ({
           }
         </div>
       </div>
-      <FormWarning message={errorCoordinations} />
+      <FormWarning message={errorCoordinates} />
     </>
   )
 }
