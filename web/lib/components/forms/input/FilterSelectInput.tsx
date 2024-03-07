@@ -15,10 +15,9 @@ interface FilterSelectInputProps<FormData extends FieldValues> {
   label: string
   placeholder: string
   items: FilterSelectItem[]
-  register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   onSelected: (id: string) => void
-  defaultSelected?: FilterSelectItem
+  defaultSelected?: FilterSelectItem | undefined
 }
 
 export const FilterSelectInput = <FormData extends FieldValues>({
@@ -26,12 +25,17 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   label,
   placeholder,
   items,
-  register,
   errors,
   onSelected,
   defaultSelected,
 }: FilterSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
+
+  const innerOnSelected = (items: FilterSelectItem[]) => {
+    console.log(items)
+    if(items && items.length !== 0)
+      onSelected(items[0].id)
+  }
 
   return (
     <div className="d-flex flex-column m-0">
@@ -43,10 +47,9 @@ export const FilterSelectInput = <FormData extends FieldValues>({
         id={id}
         placeholder={placeholder}
         items={[items]}
-        onSelected={onSelected}
+        onSelected={innerOnSelected}
         defaultSelected={defaultSelected}
       />
-      <input type={'hidden'} {...register()} />
       <FormWarning message={error} />
     </div>
   )

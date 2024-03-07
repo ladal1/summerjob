@@ -1,4 +1,3 @@
-'use client'
 import React, { createRef, useEffect, useState } from 'react'
 
 export interface FilterSelectItem {
@@ -11,8 +10,9 @@ interface FilterSelectProps {
   id: string,
   items: FilterSelectItem[][]
   placeholder: string
-  onSelected: (id: string) => void
+  onSelected: (selectedItems: FilterSelectItem[]) => void
   defaultSelected?: FilterSelectItem
+  multiple?: boolean
 }
 
 export function FilterSelect({
@@ -21,9 +21,10 @@ export function FilterSelect({
   placeholder,
   onSelected,
   defaultSelected,
+  multiple = false
 }: FilterSelectProps) {
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
-  const [selected, setSelected] = useState(defaultSelected?.name ?? '');
+  const [selectedItems, setSelectedItems] = useState<FilterSelectItem[]>(defaultSelected ? [defaultSelected] : [])
   const [isOpen, setIsOpen] = useState(false)
 
   const dropdown = createRef<HTMLInputElement>()
@@ -40,7 +41,7 @@ export function FilterSelect({
       but also it will set selected item, that's the reason why we are exluding it from here
       */
       if (dropdown.current && !dropdown.current.contains(event.target as Node)) {
-        hideDropdown();
+        hideDropdown()
       }
     }
 
@@ -51,7 +52,7 @@ export function FilterSelect({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [dropdown, isOpen]) // dependencies
+  }, [dropdown, isOpen]) 
   
   const toggleDropdown = () => {
     setIsOpen(!isOpen)
@@ -63,13 +64,33 @@ export function FilterSelect({
 
   const selectItem = (item: FilterSelectItem) => {
     hideDropdown()
-    setSelected(item.name)
-    onSelected(item.id) // save to form
-    setSearch(item.name)
+    if(multiple) {
+      setSearch('')
+    }
+    else {
+      setSearch(item.name)
+    }
+    onSelected([item])
+    if(!multiple) {
+      setSelectedItems([item])
+    }
+    // Check if the item is already selected
+    else if (!selectedItems.find((selectedItem) => selectedItem.id === item.id)) {
+      // Add the selected item to the array
+      setSelectedItems([...selectedItems, item])
+    }
+  }
+
+  const removeSelectedItem = (item: FilterSelectItem) => {
+    // Filter out the removed item
+    const updatedSelectedItems = selectedItems.filter((selectedItem) => selectedItem.id !== item.id)
+    // Update the state and notify the parent component
+    setSelectedItems(updatedSelectedItems)
+    onSelected(updatedSelectedItems)
   }
 
   const shouldShowItem = (item: FilterSelectItem) => {
-    const isSearchEmpty = search.length === 0 || search === selected
+    const isSearchEmpty = search.length === 0 || (!multiple && search === selectedItems[0].name)
     return (
       isSearchEmpty ||
       item.searchable.toLowerCase().includes(search.toLowerCase())
@@ -78,6 +99,18 @@ export function FilterSelect({
 
   return (
     <>
+      {multiple && (
+        <div className="pill-container">
+          {selectedItems.map((selectedItem) => (
+            <div key={selectedItem.id} className="pill">
+              {selectedItem.name}
+              <span className="pill-close" onClick={() => removeSelectedItem(selectedItem)}>
+                <i className="fa-solid fa-xmark"/>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="p-0" aria-expanded={isOpen}>
         <input
           id={id}
@@ -87,7 +120,7 @@ export function FilterSelect({
           value={search}
           onClick={toggleDropdown}
           onChange={e => setSearch(e.target.value)}
-        ></input>
+        />
       </div>
       <div className="btn-group" ref={dropdown}>
         <ul className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}>
@@ -97,7 +130,7 @@ export function FilterSelect({
                 shouldShowItem(item) && (
                   <li key={item.id}>
                     <button
-                      className="dropdown-item smj-dropdown-item fs-5"
+                      className={`dropdown-item smj-dropdown-item fs-5 ${multiple && selectedItems.find(selectedItem => selectedItem.id === item.id) ? 'smj-selected' : ''}`}
                       type="button"
                       onClick={() => selectItem(item)}
                     >

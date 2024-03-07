@@ -65,8 +65,6 @@ enum Skill {
 model Tool {
   id                     String        @id @default(uuid())
   tool                   ToolName      @unique
-  skill                  Skill[]       
-  jobType                JobType       @default(OTHER)
   amount                 Int           @default(1)
   jobsWithToolOnSite     ProposedJob[] @relation("ToolOnSite")  
   jobsWithToolToTakeWith ProposedJob[] @relation("ToolToTakeWith")  

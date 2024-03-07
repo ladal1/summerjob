@@ -85,8 +85,8 @@ export default function EditProposedJobForm({
   const router = useRouter()
 
   const onSubmit = (data: ProposedJobForm) => {
-    console.log(data)
     const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
+    console.log(modified)
     trigger(modified, {
       onSuccess: () => {
         setSaved(true)
@@ -113,7 +113,21 @@ export default function EditProposedJobForm({
     })
   )
 
-  const registerTools = (id: string, amount = 1) => {
+  const defaultJobType = () : FilterSelectItem | undefined => {
+    const typed = jobTypeSelectItems.find(
+      item => item.id === job.jobType
+    )
+    if(typed !== undefined) {
+      return typed
+    }
+    else {
+      return jobTypeSelectItems.find(
+        item => item.id === JobType.OTHER
+      )
+    }
+  }
+
+  const selectToolsOnSite = (id: string, amount = 1) => {
     const tool = id as ToolName
     const currentTools = getValues('toolsOnSite') ?? [];
     setValue('toolsOnSite', [...currentTools, {tool, amount}], { shouldDirty: true, shouldValidate: true })
@@ -258,7 +272,6 @@ export default function EditProposedJobForm({
                 item => item.id === job.areaId
               )}
               errors={errors}
-              register={() => register('areaId')}
             />
             <MapInput
               address={{
@@ -364,18 +377,16 @@ export default function EditProposedJobForm({
               placeholder={jobTypeMapping[job.jobType] ?? "Vyberte typ práce"}
               items={jobTypeSelectItems}
               onSelected={selectJobType}
-              defaultSelected={jobTypeSelectItems.find(
-                item => item.id === JobType.OTHER
-              )}
+              defaultSelected={defaultJobType()}
               errors={errors}
-              register={() => register('jobType')}
             />
             <PillInput
               id="toolsOnSite"
               label="Nářadí na místě"
               placeholder={"Vyberte nástroje"}
               items={manageToolSelectItems()}
-              register={registerTools}
+              register={selectToolsOnSite}
+              errors={errors}
             />
             <GroupButtonsInput
               label="Alergeny"

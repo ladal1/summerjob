@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { FieldErrors, FieldValues, Path } from 'react-hook-form'
 import { Label } from './Label'
 import Image from 'next/image'

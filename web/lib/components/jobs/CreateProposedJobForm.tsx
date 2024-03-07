@@ -174,7 +174,6 @@ export default function CreateProposedJobForm({
               items={areas.map(areaToSelectItem)}
               onSelected={selectArea}
               errors={errors}
-              register={() => register('areaId')}
             />
             <MapInput
               address={{
@@ -280,7 +279,6 @@ export default function CreateProposedJobForm({
                 item => item.id === JobType.OTHER
               )}
               errors={errors}
-              register={() => register('jobType')}
             />
             <GroupButtonsInput
               label="Alergeny"

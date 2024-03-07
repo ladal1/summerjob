@@ -128,7 +128,6 @@ export default function EditActiveJobForm({
                 item => item.id === job.responsibleWorkerId
               )}
               errors={errors}
-              register={() => register('responsibleWorkerId')}
             />
             
             <label className="form-label fw-bold mt-4" htmlFor="rides">

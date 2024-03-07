@@ -268,6 +268,10 @@ img.smj-nav-logo {
   background-color: #fdc345;
 }
 
+.smj-selected {
+  background-color: #facf81;
+}
+
 .smj-default-option {
   color: #888;
 }
@@ -577,4 +581,28 @@ img.smj-nav-logo {
   .smj-map-container {
     height: 210px;
   }
+}
+
+.pill-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pill {
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  padding: 8px 16px;
+  margin: 4px 8px 4px 0px;
+  display: flex;
+  align-items: center;
+}
+
+.pill:hover {
+  background-color: #b6b6b6;
+}
+
+.pill-close {
+  margin-left: 8px;
+  cursor: pointer;
+  color: #555;
 }
