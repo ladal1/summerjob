@@ -1,9 +1,11 @@
+import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
 import React, { createRef, useEffect, useState } from 'react'
 
 export interface FilterSelectItem {
   id: string
   name: string
   searchable: string
+  amount?: number
 }
 
 interface FilterSelectProps {
@@ -26,22 +28,26 @@ export function FilterSelect({
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
   const [selectedItems, setSelectedItems] = useState<FilterSelectItem[]>(defaultSelected ? [defaultSelected] : [])
   const [isOpen, setIsOpen] = useState(false)
+  const [editAmountItem, setEditAmountItem] = useState<FilterSelectItem | null>(null);
 
   const dropdown = createRef<HTMLInputElement>()
+  const input = createRef<HTMLInputElement>()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // if dropdown-menu isn't even open do nothing
-      if(!isOpen) 
-        return
-      
       /* 
       if we click anywhere outside of dropdown-menu it will close it
       even though when you click inside of dropdown-menu it will close it, 
       but also it will set selected item, that's the reason why we are exluding it from here
       */
-      if (dropdown.current && !dropdown.current.contains(event.target as Node)) {
+      if (isOpen && dropdown.current && !dropdown.current.contains(event.target as Node)) {
         hideDropdown()
+      }
+
+      // Check if the click target is outside the input and its parent container
+      if (editAmountItem && input.current && !input.current.contains(event.target as Node)) {
+        // Close the editAmountItem if it is open
+        setEditAmountItem(null);
       }
     }
 
@@ -52,7 +58,8 @@ export function FilterSelect({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [dropdown, isOpen]) 
+  }, [dropdown, isOpen, input, editAmountItem, setEditAmountItem]) 
+  
   
   const toggleDropdown = () => {
     setIsOpen(!isOpen)
@@ -103,7 +110,38 @@ export function FilterSelect({
         <div className="pill-container">
           {selectedItems.map((selectedItem) => (
             <div key={selectedItem.id} className="pill">
-              {selectedItem.name}
+              <span onClick={() => setEditAmountItem(selectedItem)}>
+                {selectedItem.name}
+                {!(editAmountItem && editAmountItem.id === selectedItem.id) && (selectedItem.amount !== undefined) && (
+                  <span>
+                    (
+                      {selectedItem.amount}
+                    )
+                  </span>
+                )}
+              </span>
+              {(editAmountItem && editAmountItem.id === selectedItem.id) && (
+                <span>
+                  (
+                  <input
+                    className="form-control smj-input"
+                    type="number"
+                    ref={input}
+                    min={1}
+                    defaultValue={selectedItem.amount ?? 1}
+                    onKeyDown={(e) => allowForNumber(e)}
+                    onChange={(e) => {
+                      const num = formatNumber(e.target.value)
+                      setSelectedItems((prevItems) =>
+                        prevItems.map((prevItem) =>
+                          prevItem.id === selectedItem.id ? { ...prevItem, amount: +num } : prevItem
+                        )
+                      )
+                    }}
+                  />
+                  )
+                </span>
+              )}
               <span className="pill-close" onClick={() => removeSelectedItem(selectedItem)}>
                 <i className="fa-solid fa-xmark"/>
               </span>

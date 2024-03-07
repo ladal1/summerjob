@@ -147,10 +147,11 @@ export function removeRedundantSpace(value: string) {
   return value.replace(/\s+/g, ' ').trimStart()
 }
 
-// Get rid of anything that isn't positive number
+// Get rid of anything that isn't non negative number
 export function formatNumber(value: string) {
   return value.replace(/\D/g, '')
 }
+
 
 export function allowForNumber(e: React.KeyboardEvent<HTMLInputElement>) {
   const allowedChars = "0123456789"

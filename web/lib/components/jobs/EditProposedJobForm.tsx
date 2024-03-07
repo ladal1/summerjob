@@ -326,7 +326,7 @@ export default function EditProposedJobForm({
             />
             <div className="d-flex w-50">
               <input
-                className="form-control p-1 ps-2"
+                className="form-control smj-input p-1 ps-2 fs-5"
                 id="minWorkers"
                 type="number"
                 min={1}
@@ -336,7 +336,7 @@ export default function EditProposedJobForm({
               />
               /
               <input
-                className="form-control p-1 ps-2"
+                className="form-control smj-input p-1 ps-2 fs-5"
                 id="maxWorkers"
                 type="number"
                 min={1}
@@ -346,7 +346,7 @@ export default function EditProposedJobForm({
               />
               /
               <input
-                className="form-control p-1 ps-2"
+                className="form-control smj-input p-1 ps-2 fs-5"
                 id="strongWorkers"
                 type="number"
                 min={0}
