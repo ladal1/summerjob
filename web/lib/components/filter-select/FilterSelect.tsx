@@ -1,5 +1,5 @@
 'use client'
-import { createRef, useEffect, useState } from 'react'
+import React, { createRef, useEffect, useState } from 'react'
 
 export interface FilterSelectItem {
   id: string
@@ -9,7 +9,7 @@ export interface FilterSelectItem {
 
 interface FilterSelectProps {
   id: string,
-  items: FilterSelectItem[]
+  items: FilterSelectItem[][]
   placeholder: string
   onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem
@@ -90,22 +90,27 @@ export function FilterSelect({
         ></input>
       </div>
       <div className="btn-group" ref={dropdown}>
-        <ul
-          className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}
-        >
-          {items.map(item => {
-            return ( shouldShowItem(item) && ( 
-                <li key={item.id}>
-                  <button
-                    className="dropdown-item smj-dropdown-item fs-5"
-                    type="button"
-                    onClick={() => selectItem(item)}
-                  >
-                    {item.name}
-                  </button>
-                </li>
-              ))
-          })}
+        <ul className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}>
+          {items.map((part, index) => (
+            <React.Fragment key={index}>
+              {part.map((item) => (
+                shouldShowItem(item) && (
+                  <li key={item.id}>
+                    <button
+                      className="dropdown-item smj-dropdown-item fs-5"
+                      type="button"
+                      onClick={() => selectItem(item)}
+                    >
+                      {item.name}
+                    </button>
+                  </li>
+                )
+              ))}
+              {(index < items.length - 1 && part.length !== 0) && (
+                <div className="dropdown-divider" key={`divider-${index}`}></div>
+              )}
+            </React.Fragment>
+          ))}
         </ul>
       </div>
     </>

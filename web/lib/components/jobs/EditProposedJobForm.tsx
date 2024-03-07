@@ -1,7 +1,7 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIProposedJobUpdate } from 'lib/fetcher/proposed-job'
-import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { allowForNumber, formatNumber, pick } from 'lib/helpers/helpers'
 import {
   deserializeProposedJob,
   ProposedJobUpdateSchema,
@@ -13,7 +13,7 @@ import { z } from 'zod'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
-import { JobType } from '../../prisma/client'
+import { JobType, ToolName } from '../../prisma/client'
 import { Area } from '../../prisma/zod'
 import { deserializeAreas } from '../../types/area'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
@@ -30,6 +30,9 @@ import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
 import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { PillInput } from '../forms/input/PillInput'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
+import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -52,7 +55,7 @@ export default function EditProposedJobForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     setValue,
     getValues
   } = useForm<ProposedJobForm>({
@@ -73,6 +76,8 @@ export default function EditProposedJobForm({
       hasShower: job.hasShower,
       availability: job.availability.map(day => day.toJSON()),
       jobType: job.jobType,
+      toolsOnSite: job.toolsOnSite,
+      toolsToTakeWith: job.toolsToTakeWith,
       areaId: job.areaId,
     },
   })
@@ -81,7 +86,8 @@ export default function EditProposedJobForm({
 
   const onSubmit = (data: ProposedJobForm) => {
     console.log(data)
-    trigger(data, {
+    const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
+    trigger(modified, {
       onSuccess: () => {
         setSaved(true)
       },
@@ -93,12 +99,10 @@ export default function EditProposedJobForm({
     router.back()
   }
 
+  //#region JobType and Tools
+
   const selectJobType = (id: string) => {
     setValue('jobType', id as JobType, { shouldDirty: true, shouldValidate: true })
-  }
-
-  const selectArea = (id: string) => {
-    setValue('areaId', id, { shouldDirty: true, shouldValidate: true })
   }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
@@ -109,6 +113,40 @@ export default function EditProposedJobForm({
     })
   )
 
+  const registerTools = (id: string, amount = 1) => {
+    const tool = id as ToolName
+    const currentTools = getValues('toolsOnSite') ?? [];
+    setValue('toolsOnSite', [...currentTools, {tool, amount}], { shouldDirty: true, shouldValidate: true })
+  }
+
+  const toolSelectItems = Object.entries(toolNameMapping).map(
+    ([key, name]) => ({
+      id: key,
+      name: name,
+      searchable: name
+    })
+  )
+
+  const manageToolSelectItems = () : FilterSelectItem[][] => {
+    const allTools = toolSelectItems
+    const currentJobType = getValues('jobType') || JobType.OTHER
+    const sortedToolsByCurrentJobType = allTools
+      .filter((tool) => mapToolNameToJobType(tool.id).includes(currentJobType))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    const sortedToolsOthers = allTools
+      .filter((tool) => !sortedToolsByCurrentJobType.some((t) => t.id === tool.id))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    return [sortedToolsByCurrentJobType, sortedToolsOthers]
+  }
+
+  //#endregion
+
+  //#region Area
+
+  const selectArea = (id: string) => {
+    setValue('areaId', id, { shouldDirty: true, shouldValidate: true })
+  }
+
   const areaSelectItems = areas.map(areaToSelectItem)
 
   function areaToSelectItem(area: Area): FilterSelectItem {
@@ -118,6 +156,8 @@ export default function EditProposedJobForm({
       searchable: `${area.name}`
     }
   }
+
+  //#endregion
 
   //#region Photo
   
@@ -329,6 +369,13 @@ export default function EditProposedJobForm({
               )}
               errors={errors}
               register={() => register('jobType')}
+            />
+            <PillInput
+              id="toolsOnSite"
+              label="Nářadí na místě"
+              placeholder={"Vyberte nástroje"}
+              items={manageToolSelectItems()}
+              register={registerTools}
             />
             <GroupButtonsInput
               label="Alergeny"

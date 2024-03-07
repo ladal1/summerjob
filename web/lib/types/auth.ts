@@ -9,7 +9,6 @@ export enum Permission {
   ADMIN = 'ADMIN',
   PLANS = 'PLANS',
   JOBS = 'JOBS',
-  TOOLS = 'TOOLS',
   CARS = 'CARS',
   WORKERS = 'WORKERS',
 }

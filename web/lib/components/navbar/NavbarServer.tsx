@@ -27,12 +27,6 @@ export function NavbarServer({ session }: NavbarServerProps) {
       permissions: [Permission.JOBS],
     },
     {
-      path: '/tools',
-      name: 'Nářadí',
-      icon: 'fa-solid fa-screwdriver-wrench',
-      permissions: [Permission.TOOLS],
-    },
-    {
       path: '/cars',
       name: 'Auta',
       icon: 'fas fa-car',

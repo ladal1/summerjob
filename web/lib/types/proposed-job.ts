@@ -1,9 +1,10 @@
-import { number, z } from 'zod'
+import { z } from 'zod'
 import { Serialized } from './serialize'
 import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { Allergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
+import { ToolCompleteSchema, ToolCreateSchema } from 'lib/types/tool'
 
 useZodOpenApi
 
@@ -17,6 +18,8 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   area: AreaSchema.nullable(),
   activeJobs: z.array(ActiveJobSchema),
   availability: z.array(z.date()),
+  toolsOnSite: z.array(ToolCompleteSchema),
+  toolsToTakeWith: z.array(ToolCompleteSchema),
 })
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
@@ -87,6 +90,8 @@ export const ProposedJobCreateSchema = z
         },
       }),
     jobType: z.nativeEnum(JobType, { required_error: err.emptyJobType }),
+    toolsOnSite: z.array(ToolCreateSchema),
+    toolsToTakeWith: z.array(ToolCreateSchema),
   })
   .strict()
 

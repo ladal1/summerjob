@@ -42,7 +42,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
       <FilterSelect
         id={id}
         placeholder={placeholder}
-        items={items}
+        items={[items]}
         onSelected={onSelected}
         defaultSelected={defaultSelected}
       />
