@@ -4,7 +4,7 @@ import { CarComplete, CarUpdateData, CarUpdateSchema } from 'lib/types/car'
 import { useForm } from 'react-hook-form'
 import { TextInput } from '../forms/input/TextInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { formatNumber } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 
@@ -67,40 +67,32 @@ export default function CarEditForm({
             <TextInput
               id="seats"
               label="Počet sedadel"
-              type="number"
               placeholder="Počet sedadel"
               min={1}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("seats", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
             <TextInput
               id="odometerStart"
               label="Počáteční stav kilometrů"
-              type="number"
               placeholder="Počáteční stav kilometrů"
               min={0}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("odometerStart", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
             <TextInput
               id="odometerEnd"
               label="Konečný stav kilometrů"
-              type="number"
               placeholder="Konečný stav kilometrů"
               min={0}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("odometerEnd", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
             <TextInput
               id="reimbursementAmount"
               label="Částka k proplacení"
-              type="number"
               placeholder="Částka k proplacení"
               min={0}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("reimbursementAmount", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />

@@ -32,7 +32,6 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   const error = errors?.[id]?.message as string | undefined
 
   const innerOnSelected = (items: FilterSelectItem[]) => {
-    console.log(items)
     if(items && items.length !== 0)
       onSelected(items[0].id)
   }

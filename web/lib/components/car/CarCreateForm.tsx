@@ -8,7 +8,7 @@ import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { useRouter } from 'next/navigation'
-import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { formatNumber } from 'lib/helpers/helpers'
 
 type CarEditFormProps = {
   onSubmit: (data: CarCreateData) => void
@@ -74,11 +74,9 @@ export default function CarCreateForm({
             <TextInput
               id="seats"
               label="Počet sedadel"
-              type="number"
               placeholder="Počet sedadel"
               min={1}
               defaultValue={4}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("seats", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
@@ -88,16 +86,13 @@ export default function CarCreateForm({
               placeholder="Vyberte majitele"
               items={owners.map(workerToSelectItem)}
               onSelected={onOwnerSelected}
-              register={() => register('ownerId')}
               errors={errors}
             />
             <TextInput
               id="odometerStart"
               label="Počáteční stav kilometrů"
-              type="number"
               placeholder="Počáteční stav kilometrů"
               min={0}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("odometerStart", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />

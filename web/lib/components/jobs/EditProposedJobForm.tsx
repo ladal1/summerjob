@@ -1,7 +1,7 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIProposedJobUpdate } from 'lib/fetcher/proposed-job'
-import { allowForNumber, formatNumber, pick } from 'lib/helpers/helpers'
+import { formatNumber, pick } from 'lib/helpers/helpers'
 import {
   deserializeProposedJob,
   ProposedJobUpdateSchema,
@@ -87,7 +87,7 @@ export default function EditProposedJobForm({
   const onSubmit = (data: ProposedJobForm) => {
     const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
     console.log(modified)
-    trigger(modified, {
+    trigger(data, {
       onSuccess: () => {
         setSaved(true)
       },
@@ -127,10 +127,9 @@ export default function EditProposedJobForm({
     }
   }
 
-  const selectToolsOnSite = (id: string, amount = 1) => {
-    const tool = id as ToolName
-    const currentTools = getValues('toolsOnSite') ?? [];
-    setValue('toolsOnSite', [...currentTools, {tool, amount}], { shouldDirty: true, shouldValidate: true })
+  const selectToolsOnSite = (items: FilterSelectItem[]) => {
+    const tools = items.map(item => ({ tool: item.id as ToolName, amount: item.amount ?? 1 }))
+    setValue('toolsOnSite', tools, { shouldDirty: true, shouldValidate: true })
   }
 
   const toolSelectItems = Object.entries(toolNameMapping).map(
@@ -313,13 +312,18 @@ export default function EditProposedJobForm({
               id="requiredDays"
               label="Celkový počet dní na splnění"
               placeholder="Počet dní"
-              type="number"
               min={1}
               defaultValue={1}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
+            <label 
+              onClick={() => {
+                const val = getValues("requiredDays")
+                console.log(val)
+              }}>
+              aaaaaa
+            </label>
             <Label
               id="minWorkers"
               label="Počet pracantů minimálně / maximálně / z toho silných"
@@ -328,30 +332,24 @@ export default function EditProposedJobForm({
               <input
                 className="form-control smj-input p-1 ps-2 fs-5"
                 id="minWorkers"
-                type="number"
                 min={1}
                 defaultValue={1}
-                onKeyDown={(e) => allowForNumber(e)}
                 {...register('minWorkers', { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
                 className="form-control smj-input p-1 ps-2 fs-5"
                 id="maxWorkers"
-                type="number"
                 min={1}
                 defaultValue={1}
-                onKeyDown={(e) => allowForNumber(e)}
                 {...register('maxWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
                 className="form-control smj-input p-1 ps-2 fs-5"
                 id="strongWorkers"
-                type="number"
                 min={0}
                 defaultValue={0}
-                onKeyDown={(e) => allowForNumber(e)}
                 {...register('strongWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
             </div>

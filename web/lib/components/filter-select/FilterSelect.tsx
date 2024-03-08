@@ -1,5 +1,5 @@
-import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
-import React, { createRef, useEffect, useState } from 'react'
+import { formatNumber } from 'lib/helpers/helpers'
+import React, { createRef, useEffect, useRef, useState } from 'react'
 
 export interface FilterSelectItem {
   id: string
@@ -30,8 +30,8 @@ export function FilterSelect({
   const [isOpen, setIsOpen] = useState(false)
   const [editAmountItem, setEditAmountItem] = useState<FilterSelectItem | null>(null);
 
-  const dropdown = createRef<HTMLInputElement>()
-  const input = createRef<HTMLInputElement>()
+  const dropdownRef = useRef<HTMLInputElement>(null);
+  const inputRef = createRef<HTMLInputElement>()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,12 +40,12 @@ export function FilterSelect({
       even though when you click inside of dropdown-menu it will close it, 
       but also it will set selected item, that's the reason why we are exluding it from here
       */
-      if (isOpen && dropdown.current && !dropdown.current.contains(event.target as Node)) {
+      if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         hideDropdown()
       }
 
       // Check if the click target is outside the input and its parent container
-      if (editAmountItem && input.current && !input.current.contains(event.target as Node)) {
+      if (editAmountItem && inputRef.current && !inputRef.current.contains(event.target as Node)) {
         // Close the editAmountItem if it is open
         setEditAmountItem(null);
       }
@@ -58,9 +58,8 @@ export function FilterSelect({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [dropdown, isOpen, input, editAmountItem, setEditAmountItem]) 
-  
-  
+  }, [dropdownRef, isOpen, inputRef, editAmountItem, setEditAmountItem]) 
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen)
   }
@@ -77,7 +76,6 @@ export function FilterSelect({
     else {
       setSearch(item.name)
     }
-    onSelected([item])
     if(!multiple) {
       setSelectedItems([item])
     }
@@ -86,6 +84,7 @@ export function FilterSelect({
       // Add the selected item to the array
       setSelectedItems([...selectedItems, item])
     }
+    onSelected(selectedItems)
   }
 
   const removeSelectedItem = (item: FilterSelectItem) => {
@@ -107,40 +106,49 @@ export function FilterSelect({
   return (
     <>
       {multiple && (
-        <div className="pill-container">
+        <div className="d-flex flex-wrap" onClick={(e) => {
+          if (e.target === e.currentTarget) { // click on this container will togle dropdown (but not click on pills)
+            toggleDropdown()
+          }
+        }}>
           {selectedItems.map((selectedItem) => (
             <div key={selectedItem.id} className="pill">
-              <span onClick={() => setEditAmountItem(selectedItem)}>
+              <div className="cursor-pointer" onClick={() => setEditAmountItem(selectedItem)}>
                 {selectedItem.name}
-                {!(editAmountItem && editAmountItem.id === selectedItem.id) && (selectedItem.amount !== undefined) && (
-                  <span>
+                {!(editAmountItem && editAmountItem.id === selectedItem.id) && (selectedItem.amount !== undefined && selectedItem.amount > 1) && (
+                  <span className="ms-1">
                     (
                       {selectedItem.amount}
                     )
                   </span>
                 )}
-              </span>
+              </div>
               {(editAmountItem && editAmountItem.id === selectedItem.id) && (
-                <span>
+                <div className="d-inline-flex align-items-baseline ms-1">
                   (
                   <input
-                    className="form-control smj-input"
-                    type="number"
-                    ref={input}
+                    className="form-control smj-input p-0"
+                    style={{
+                      maxWidth: "50px",
+                      boxShadow: "inset 0 -1px 0 #7e7e7e" 
+                    }}
+                    ref={inputRef}
                     min={1}
-                    defaultValue={selectedItem.amount ?? 1}
-                    onKeyDown={(e) => allowForNumber(e)}
+                    defaultValue={selectedItem.amount ?? ''}
                     onChange={(e) => {
-                      const num = formatNumber(e.target.value)
-                      setSelectedItems((prevItems) =>
-                        prevItems.map((prevItem) =>
-                          prevItem.id === selectedItem.id ? { ...prevItem, amount: +num } : prevItem
-                        )
-                      )
+                      e.target.value = formatNumber(e.target.value)
+                      const num = e.target.value
+                      if(+num > 1) {
+                        selectedItem.amount = +num
+                      }
+                      else {
+                        selectedItem.amount = undefined
+                      }
+                      onSelected(selectedItems)
                     }}
                   />
                   )
-                </span>
+                </div>
               )}
               <span className="pill-close" onClick={() => removeSelectedItem(selectedItem)}>
                 <i className="fa-solid fa-xmark"/>
@@ -154,13 +162,13 @@ export function FilterSelect({
           id={id}
           className="smj-dropdown fs-5"
           type="text"
-          placeholder={placeholder}
+          placeholder={multiple && selectedItems.length !== 0 ? '' : placeholder}
           value={search}
           onClick={toggleDropdown}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
-      <div className="btn-group" ref={dropdown}>
+      <div className="btn-group" ref={dropdownRef}>
         <ul className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}>
           {items.map((part, index) => (
             <React.Fragment key={index}>

@@ -17,7 +17,7 @@ import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { TextInput } from '../forms/input/TextInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
-import { allowForNumber, formatNumber } from 'lib/helpers/helpers'
+import { formatNumber } from 'lib/helpers/helpers'
 import { Label } from '../forms/Label'
 import FormWarning from '../forms/FormWarning'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
@@ -211,10 +211,8 @@ export default function CreateProposedJobForm({
               id="requiredDays"
               label="Celkový počet dní na splnění"
               placeholder="Počet dní"
-              type="number"
               min={1}
               defaultValue={1}
-              onKeyDown={(e) => allowForNumber(e)}
               register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
@@ -226,30 +224,24 @@ export default function CreateProposedJobForm({
               <input
                 className="form-control p-1 ps-2"
                 id="minWorkers"
-                type="number"
                 min={1}
                 defaultValue={1}
-                onKeyDown={(e) => allowForNumber(e)}
                 {...register('minWorkers', { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
                 className="form-control p-1 ps-2"
                 id="maxWorkers"
-                type="number"
                 min={1}
                 defaultValue={1}
-                onKeyDown={(e) => allowForNumber(e)}
                 {...register('maxWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
                 className="form-control p-1 ps-2"
                 id="strongWorkers"
-                type="number"
                 min={0}
                 defaultValue={0}
-                onKeyDown={(e) => allowForNumber(e)}
                 {...register('strongWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
             </div>

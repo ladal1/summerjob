@@ -131,7 +131,7 @@ export function pick<
 
 export function formatPhoneNumber(value: string) {
   // Remove any existing spaces and non-numeric characters
-  const phoneNumber = value.replace(/\D/g, '')
+  const phoneNumber = formatNumber(value)
   // Start with +
   const startsWithPlus = value.startsWith('+')
   // Limitation
@@ -150,13 +150,4 @@ export function removeRedundantSpace(value: string) {
 // Get rid of anything that isn't non negative number
 export function formatNumber(value: string) {
   return value.replace(/\D/g, '')
-}
-
-
-export function allowForNumber(e: React.KeyboardEvent<HTMLInputElement>) {
-  const allowedChars = "0123456789"
-  const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"]
-  if (!allowedChars.includes(e.key) && !allowedKeys.includes(e.key)) {
-    e.preventDefault();
-  }
 }
