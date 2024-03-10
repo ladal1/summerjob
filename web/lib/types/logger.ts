@@ -29,6 +29,7 @@ export enum APILogEvent {
   AREA_MODIFY = 'AREA_MODIFY',
   AREA_DELETE = 'AREA_DELETE',
   USER_MODIFY = 'USER_MODIFY',
+  TOOL_CREATE = 'TOOL_CREATE'
 }
 
 export type FilteredLogs = {

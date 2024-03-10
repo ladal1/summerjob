@@ -4,7 +4,7 @@ import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { Allergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
-import { ToolCompleteSchema, ToolCreateSchema } from 'lib/types/tool'
+import { ToolCompleteSchema, ToolCreateSchema, ToolsCreateSchema } from 'lib/types/tool'
 
 useZodOpenApi
 
@@ -90,8 +90,8 @@ export const ProposedJobCreateSchema = z
         },
       }),
     jobType: z.nativeEnum(JobType, { required_error: err.emptyJobType }),
-    toolsOnSite: z.array(ToolCreateSchema),
-    toolsToTakeWith: z.array(ToolCreateSchema),
+    toolsOnSiteCreate: ToolsCreateSchema.optional(),
+    toolsToTakeWithCreate: ToolsCreateSchema.optional(),
   })
   .strict()
 

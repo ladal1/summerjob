@@ -78,13 +78,14 @@ export function FilterSelect({
     }
     if(!multiple) {
       setSelectedItems([item])
+      onSelected([item])
     }
     // Check if the item is already selected
     else if (!selectedItems.find((selectedItem) => selectedItem.id === item.id)) {
       // Add the selected item to the array
       setSelectedItems([...selectedItems, item])
+      onSelected([...selectedItems, item])
     }
-    onSelected(selectedItems)
   }
 
   const removeSelectedItem = (item: FilterSelectItem) => {

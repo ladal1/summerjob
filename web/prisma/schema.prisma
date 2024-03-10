@@ -63,12 +63,18 @@ enum Skill {
 }
 
 model Tool {
-  id                     String        @id @default(uuid())
-  tool                   ToolName      @unique
-  amount                 Int           @default(1)
-  jobsWithToolOnSite     ProposedJob[] @relation("ToolOnSite")  
-  jobsWithToolToTakeWith ProposedJob[] @relation("ToolToTakeWith")  
+  id                      String       @id @default(uuid())
+  tool                    ToolName     @unique
+  amount                  Int          @default(1)
+  proposedJobOnSite       ProposedJob? @relation("ToolOnSite", fields: [proposedJobOnSiteId], references: [id])
+  proposedJobOnSiteId     String?
+  proposedJobToTakeWith   ProposedJob? @relation("ToolToTakeWith", fields: [proposedJobToTakeWithId], references: [id])
+  proposedJobToTakeWithId String?
+
+  @@unique([proposedJobOnSiteId, tool])
+  @@unique([proposedJobToTakeWithId, tool])
 }
+
 
 model Photo {
   id             String               @id @default(uuid())
@@ -157,7 +163,7 @@ model ProposedJob {
   availability       DateTime[]  @db.Date
   jobType            JobType     @default(OTHER)
   toolsOnSite        Tool[]      @relation("ToolOnSite")  
-  toolsToTakeWith    Tool[]      @relation("ToolToTakeWith")  
+  toolsToTakeWith    Tool[]      @relation("ToolToTakeWith")
   photoIds           String[]
 }
 

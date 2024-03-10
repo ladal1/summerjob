@@ -22,6 +22,8 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
     },
   })
   return job
@@ -58,6 +60,8 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
     },
     orderBy: [
       {
@@ -102,6 +106,8 @@ export async function getProposedJobsAssignableTo(
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
     },
     orderBy: [
       {
@@ -109,6 +115,7 @@ export async function getProposedJobsAssignableTo(
       },
     ],
   })
+  jobs.at(0)?.toolsOnSite
   return jobs
 }
 

@@ -76,8 +76,8 @@ export default function EditProposedJobForm({
       hasShower: job.hasShower,
       availability: job.availability.map(day => day.toJSON()),
       jobType: job.jobType,
-      toolsOnSite: job.toolsOnSite,
-      toolsToTakeWith: job.toolsToTakeWith,
+      toolsOnSiteCreate: {tools: job.toolsOnSite},
+      toolsToTakeWithCreate: {tools: job.toolsToTakeWith},
       areaId: job.areaId,
     },
   })
@@ -85,9 +85,10 @@ export default function EditProposedJobForm({
   const router = useRouter()
 
   const onSubmit = (data: ProposedJobForm) => {
+    console.log(data)
     const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
     console.log(modified)
-    trigger(data, {
+    trigger(modified, {
       onSuccess: () => {
         setSaved(true)
       },
@@ -129,7 +130,7 @@ export default function EditProposedJobForm({
 
   const selectToolsOnSite = (items: FilterSelectItem[]) => {
     const tools = items.map(item => ({ tool: item.id as ToolName, amount: item.amount ?? 1 }))
-    setValue('toolsOnSite', tools, { shouldDirty: true, shouldValidate: true })
+    setValue('toolsOnSiteCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
   }
 
   const toolSelectItems = Object.entries(toolNameMapping).map(
@@ -177,7 +178,7 @@ export default function EditProposedJobForm({
   // Remove existing photo from backend.
   const removeExistingPhoto = (id: string) => {
     const prevPhotoIdsDeleted = getValues('photoIdsDeleted') || []
-    setValue('photoIdsDeleted', [...prevPhotoIdsDeleted, id])
+    setValue('photoIdsDeleted', [...prevPhotoIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
   }
 
   // Remove newly added photo from FileList before sending
@@ -188,7 +189,7 @@ export default function EditProposedJobForm({
     // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
     filteredFiles.forEach((file: File) => dt.items.add(file))
-    setValue('photoFiles', dt.files)
+    setValue('photoFiles', dt.files, { shouldDirty: true, shouldValidate: true })
   }
 
   // Register newly added photo to FileList
@@ -199,7 +200,7 @@ export default function EditProposedJobForm({
     // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
     combinedFiles.forEach((file: File) => dt.items.add(file))
-    setValue('photoFiles', dt.files)
+    setValue('photoFiles', dt.files, { shouldDirty: true, shouldValidate: true })
   }
 
   const fetchImages = () => {
@@ -236,6 +237,9 @@ export default function EditProposedJobForm({
         <div className="col">
           <h3>Upravit job</h3>
         </div>
+        <label onClick={() => console.log({tools: job.toolsOnSite})} >
+        ahoj
+        </label>
       </div>
       <div className="row">
         <div className="col">
@@ -379,7 +383,7 @@ export default function EditProposedJobForm({
               errors={errors}
             />
             <PillInput
-              id="toolsOnSite"
+              id="toolsOnSiteCreate"
               label="Nářadí na místě"
               placeholder={"Vyberte nástroje"}
               items={manageToolSelectItems()}
