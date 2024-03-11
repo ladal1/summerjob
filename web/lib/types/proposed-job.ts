@@ -91,7 +91,9 @@ export const ProposedJobCreateSchema = z
       }),
     jobType: z.nativeEnum(JobType, { required_error: err.emptyJobType }),
     toolsOnSiteCreate: ToolsCreateSchema.optional(),
+    toolsOnSiteIdsDeleted: z.array(z.string()).optional(),
     toolsToTakeWithCreate: ToolsCreateSchema.optional(),
+    toolsToTakeWithIdsDeleted: z.array(z.string()).optional(),
   })
   .strict()
 

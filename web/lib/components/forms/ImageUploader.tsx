@@ -74,7 +74,6 @@ export const ImageUploader = <FormData extends FieldValues> ({
 
   const onRemoveImage = (index: number) => {
     const deletedPreviewUrl = previewUrls[index]
-    // 
     if (deletedPreviewUrl?.index && removeExistingPhoto) {
       removeExistingPhoto(deletedPreviewUrl.index)
       setphotoInitCount((photoInitCount) => photoInitCount - 1)

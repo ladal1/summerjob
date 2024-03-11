@@ -1,20 +1,18 @@
-import { formatNumber } from 'lib/helpers/helpers'
-import React, { createRef, useEffect, useRef, useState } from 'react'
+'use client'
+import { createRef, useEffect, useState } from 'react'
 
 export interface FilterSelectItem {
   id: string
   name: string
   searchable: string
-  amount?: number
 }
 
 interface FilterSelectProps {
   id: string,
-  items: FilterSelectItem[][]
+  items: FilterSelectItem[]
   placeholder: string
-  onSelected: (selectedItems: FilterSelectItem[]) => void
+  onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem
-  multiple?: boolean
 }
 
 export function FilterSelect({
@@ -23,31 +21,26 @@ export function FilterSelect({
   placeholder,
   onSelected,
   defaultSelected,
-  multiple = false
 }: FilterSelectProps) {
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
-  const [selectedItems, setSelectedItems] = useState<FilterSelectItem[]>(defaultSelected ? [defaultSelected] : [])
+  const [selected, setSelected] = useState(defaultSelected?.name ?? '');
   const [isOpen, setIsOpen] = useState(false)
-  const [editAmountItem, setEditAmountItem] = useState<FilterSelectItem | null>(null);
 
-  const dropdownRef = useRef<HTMLInputElement>(null);
-  const inputRef = createRef<HTMLInputElement>()
+  const dropdown = createRef<HTMLInputElement>()
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // if dropdown-menu isn't even open do nothing
+      if(!isOpen) 
+        return
+      
       /* 
       if we click anywhere outside of dropdown-menu it will close it
       even though when you click inside of dropdown-menu it will close it, 
       but also it will set selected item, that's the reason why we are exluding it from here
       */
-      if (isOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        hideDropdown()
-      }
-
-      // Check if the click target is outside the input and its parent container
-      if (editAmountItem && inputRef.current && !inputRef.current.contains(event.target as Node)) {
-        // Close the editAmountItem if it is open
-        setEditAmountItem(null);
+      if (dropdown.current && !dropdown.current.contains(event.target as Node)) {
+        hideDropdown();
       }
     }
 
@@ -58,8 +51,8 @@ export function FilterSelect({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [dropdownRef, isOpen, inputRef, editAmountItem, setEditAmountItem]) 
-
+  }, [dropdown, isOpen]) // dependencies
+  
   const toggleDropdown = () => {
     setIsOpen(!isOpen)
   }
@@ -70,34 +63,13 @@ export function FilterSelect({
 
   const selectItem = (item: FilterSelectItem) => {
     hideDropdown()
-    if(multiple) {
-      setSearch('')
-    }
-    else {
-      setSearch(item.name)
-    }
-    if(!multiple) {
-      setSelectedItems([item])
-      onSelected([item])
-    }
-    // Check if the item is already selected
-    else if (!selectedItems.find((selectedItem) => selectedItem.id === item.id)) {
-      // Add the selected item to the array
-      setSelectedItems([...selectedItems, item])
-      onSelected([...selectedItems, item])
-    }
-  }
-
-  const removeSelectedItem = (item: FilterSelectItem) => {
-    // Filter out the removed item
-    const updatedSelectedItems = selectedItems.filter((selectedItem) => selectedItem.id !== item.id)
-    // Update the state and notify the parent component
-    setSelectedItems(updatedSelectedItems)
-    onSelected(updatedSelectedItems)
+    setSelected(item.name)
+    onSelected(item.id) // save to form
+    setSearch(item.name)
   }
 
   const shouldShowItem = (item: FilterSelectItem) => {
-    const isSearchEmpty = search.length === 0 || (!multiple && search === selectedItems[0].name)
+    const isSearchEmpty = search.length === 0 || search === selected;
     return (
       isSearchEmpty ||
       item.searchable.toLowerCase().includes(search.toLowerCase())
@@ -106,91 +78,34 @@ export function FilterSelect({
 
   return (
     <>
-      {multiple && (
-        <div className="d-flex flex-wrap" onClick={(e) => {
-          if (e.target === e.currentTarget) { // click on this container will togle dropdown (but not click on pills)
-            toggleDropdown()
-          }
-        }}>
-          {selectedItems.map((selectedItem) => (
-            <div key={selectedItem.id} className="pill">
-              <div className="cursor-pointer" onClick={() => setEditAmountItem(selectedItem)}>
-                {selectedItem.name}
-                {!(editAmountItem && editAmountItem.id === selectedItem.id) && (selectedItem.amount !== undefined && selectedItem.amount > 1) && (
-                  <span className="ms-1">
-                    (
-                      {selectedItem.amount}
-                    )
-                  </span>
-                )}
-              </div>
-              {(editAmountItem && editAmountItem.id === selectedItem.id) && (
-                <div className="d-inline-flex align-items-baseline ms-1">
-                  (
-                  <input
-                    className="form-control smj-input p-0"
-                    style={{
-                      maxWidth: "50px",
-                      boxShadow: "inset 0 -1px 0 #7e7e7e" 
-                    }}
-                    ref={inputRef}
-                    min={1}
-                    defaultValue={selectedItem.amount ?? ''}
-                    onChange={(e) => {
-                      e.target.value = formatNumber(e.target.value)
-                      const num = e.target.value
-                      if(+num > 1) {
-                        selectedItem.amount = +num
-                      }
-                      else {
-                        selectedItem.amount = undefined
-                      }
-                      onSelected(selectedItems)
-                    }}
-                  />
-                  )
-                </div>
-              )}
-              <span className="pill-close" onClick={() => removeSelectedItem(selectedItem)}>
-                <i className="fa-solid fa-xmark"/>
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
       <div className="p-0" aria-expanded={isOpen}>
         <input
           id={id}
           className="smj-dropdown fs-5"
           type="text"
-          placeholder={multiple && selectedItems.length !== 0 ? '' : placeholder}
+          placeholder={placeholder}
           value={search}
           onClick={toggleDropdown}
           onChange={e => setSearch(e.target.value)}
-        />
+        ></input>
       </div>
-      <div className="btn-group" ref={dropdownRef}>
-        <ul className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}>
-          {items.map((part, index) => (
-            <React.Fragment key={index}>
-              {part.map((item) => (
-                shouldShowItem(item) && (
-                  <li key={item.id}>
-                    <button
-                      className={`dropdown-item smj-dropdown-item fs-5 ${multiple && selectedItems.find(selectedItem => selectedItem.id === item.id) ? 'smj-selected' : ''}`}
-                      type="button"
-                      onClick={() => selectItem(item)}
-                    >
-                      {item.name}
-                    </button>
-                  </li>
-                )
-              ))}
-              {(index < items.length - 1 && part.length !== 0) && (
-                <div className="dropdown-divider" key={`divider-${index}`}></div>
-              )}
-            </React.Fragment>
-          ))}
+      <div className="btn-group" ref={dropdown}>
+        <ul
+          className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}
+        >
+          {items.map(item => {
+            return ( shouldShowItem(item) && ( 
+                <li key={item.id}>
+                  <button
+                    className="dropdown-item smj-dropdown-item fs-5"
+                    type="button"
+                    onClick={() => selectItem(item)}
+                  >
+                    {item.name}
+                  </button>
+                </li>
+              ))
+          })}
         </ul>
       </div>
     </>

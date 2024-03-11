@@ -18,7 +18,7 @@ import {
 import { NextApiRequest, NextApiResponse } from 'next'
 import { createDirectory, generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
-import { registerPhotos } from 'lib/api/registerPhotos'
+import { registerPhotos } from 'lib/api/register/registerPhotos'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>

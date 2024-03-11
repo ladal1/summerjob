@@ -31,11 +31,6 @@ export const FilterSelectInput = <FormData extends FieldValues>({
 }: FilterSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
 
-  const innerOnSelected = (items: FilterSelectItem[]) => {
-    if(items && items.length !== 0)
-      onSelected(items[0].id)
-  }
-
   return (
     <div className="d-flex flex-column m-0">
       <Label
@@ -45,8 +40,8 @@ export const FilterSelectInput = <FormData extends FieldValues>({
       <FilterSelect
         id={id}
         placeholder={placeholder}
-        items={[items]}
-        onSelected={innerOnSelected}
+        items={items}
+        onSelected={onSelected}
         defaultSelected={defaultSelected}
       />
       <FormWarning message={error} />

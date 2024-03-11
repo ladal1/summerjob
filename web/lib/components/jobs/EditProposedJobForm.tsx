@@ -30,9 +30,11 @@ import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
 import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { PillInput } from '../forms/input/PillInput'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
+import { PillSelectItem } from '../filter-select/PillSelect'
+import { PillSelectInput } from '../forms/input/PillSelectInput'
+import { ToolComplete } from 'lib/types/tool'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -85,9 +87,7 @@ export default function EditProposedJobForm({
   const router = useRouter()
 
   const onSubmit = (data: ProposedJobForm) => {
-    console.log(data)
     const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
-    console.log(modified)
     trigger(modified, {
       onSuccess: () => {
         setSaved(true)
@@ -100,7 +100,7 @@ export default function EditProposedJobForm({
     router.back()
   }
 
-  //#region JobType and Tools
+  //#region JobType
 
   const selectJobType = (id: string) => {
     setValue('jobType', id as JobType, { shouldDirty: true, shouldValidate: true })
@@ -128,9 +128,17 @@ export default function EditProposedJobForm({
     }
   }
 
-  const selectToolsOnSite = (items: FilterSelectItem[]) => {
-    const tools = items.map(item => ({ tool: item.id as ToolName, amount: item.amount ?? 1 }))
+  //#endregion
+  //#region Tools
+  
+  const selectToolsOnSite = (items: PillSelectItem[]) => {
+    const tools = items.map(item => ({ id: item.databaseId, tool: item.id as ToolName, amount: item.amount ?? 1 }))
     setValue('toolsOnSiteCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const selectToolsToTakeWith = (items: PillSelectItem[]) => {
+    const tools = items.map(item => ({ id: item.databaseId, tool: item.id as ToolName, amount: item.amount ?? 1 }))
+    setValue('toolsToTakeWithCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
   }
 
   const toolSelectItems = Object.entries(toolNameMapping).map(
@@ -141,7 +149,7 @@ export default function EditProposedJobForm({
     })
   )
 
-  const manageToolSelectItems = () : FilterSelectItem[][] => {
+  const manageToolSelectItems = () : PillSelectItem[][] => {
     const allTools = toolSelectItems
     const currentJobType = getValues('jobType') || JobType.OTHER
     const sortedToolsByCurrentJobType = allTools
@@ -153,6 +161,31 @@ export default function EditProposedJobForm({
     return [sortedToolsByCurrentJobType, sortedToolsOthers]
   }
 
+  const fetchToolSelectItems = (tools: ToolComplete[]) : PillSelectItem[] => {
+    const selectItems: PillSelectItem[] = tools.map((toolItem) => {
+      const { id, tool, amount, proposedJobOnSiteId, proposedJobToTakeWithId } = toolItem
+      return {
+        databaseId: id,
+        id: tool,
+        name: toolNameMapping[tool],
+        searchable: toolNameMapping[tool],
+        amount,
+      }
+    })
+    return selectItems
+  }
+
+  // Remove existing tools from backend.
+  const removeExistingToolOnSite = (id: string) => {
+    const prevToolIdsDeleted = getValues('toolsOnSiteIdsDeleted') || []
+    setValue('toolsOnSiteIdsDeleted', [...prevToolIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
+  }
+
+  const removeExistingToolToTakeWith = (id: string) => {
+    const prevToolIdsDeleted = getValues('toolsToTakeWithIdsDeleted') || []
+    setValue('toolsToTakeWithIdsDeleted', [...prevToolIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
+  }
+  
   //#endregion
 
   //#region Area
@@ -237,9 +270,6 @@ export default function EditProposedJobForm({
         <div className="col">
           <h3>Upravit job</h3>
         </div>
-        <label onClick={() => console.log({tools: job.toolsOnSite})} >
-        ahoj
-        </label>
       </div>
       <div className="row">
         <div className="col">
@@ -321,13 +351,6 @@ export default function EditProposedJobForm({
               register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
-            <label 
-              onClick={() => {
-                const val = getValues("requiredDays")
-                console.log(val)
-              }}>
-              aaaaaa
-            </label>
             <Label
               id="minWorkers"
               label="Počet pracantů minimálně / maximálně / z toho silných"
@@ -382,12 +405,24 @@ export default function EditProposedJobForm({
               defaultSelected={defaultJobType()}
               errors={errors}
             />
-            <PillInput
+            <PillSelectInput
               id="toolsOnSiteCreate"
               label="Nářadí na místě"
               placeholder={"Vyberte nástroje"}
               items={manageToolSelectItems()}
+              init={fetchToolSelectItems(job.toolsOnSite)}
+              removeExisting={removeExistingToolOnSite}
               register={selectToolsOnSite}
+              errors={errors}
+            />  
+            <PillSelectInput
+              id="toolsToTakeWithCreate"
+              label="Nářadí s sebou"
+              placeholder={"Vyberte nástroje"}
+              items={manageToolSelectItems()}
+              init={fetchToolSelectItems(job.toolsToTakeWith)}
+              removeExisting={removeExistingToolToTakeWith}
+              register={selectToolsToTakeWith}
               errors={errors}
             />
             <GroupButtonsInput

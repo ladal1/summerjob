@@ -64,17 +64,13 @@ enum Skill {
 
 model Tool {
   id                      String       @id @default(uuid())
-  tool                    ToolName     @unique
+  tool                    ToolName     
   amount                  Int          @default(1)
   proposedJobOnSite       ProposedJob? @relation("ToolOnSite", fields: [proposedJobOnSiteId], references: [id])
-  proposedJobOnSiteId     String?
+  proposedJobOnSiteId     String?      
   proposedJobToTakeWith   ProposedJob? @relation("ToolToTakeWith", fields: [proposedJobToTakeWithId], references: [id])
-  proposedJobToTakeWithId String?
-
-  @@unique([proposedJobOnSiteId, tool])
-  @@unique([proposedJobToTakeWithId, tool])
+  proposedJobToTakeWithId String?      
 }
-
 
 model Photo {
   id             String               @id @default(uuid())

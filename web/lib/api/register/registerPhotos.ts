@@ -1,7 +1,7 @@
 import formidable from "formidable"
-import { getPhotoPath } from "./parse-form"
+import { getPhotoPath } from "../parse-form"
 import { createPhoto, updatePhoto } from "lib/data/photo"
-import { updatePhotoPathByNewFilename, renameFile } from "./fileManager"
+import { updatePhotoPathByNewFilename, renameFile } from "../fileManager"
 
 export const registerPhotos = async (files: formidable.Files, lastDirectory: string): Promise<string[]> => {
   const newPhotoIds: string[] = []

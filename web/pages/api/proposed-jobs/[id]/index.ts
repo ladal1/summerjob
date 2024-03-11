@@ -2,7 +2,8 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { createDirectory, deleteDirectory, deleteFile, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
 import { getPhotoPath, parseForm, parseFormWithImages } from 'lib/api/parse-form'
-import { registerPhotos } from 'lib/api/registerPhotos'
+import { registerPhotos } from 'lib/api/register/registerPhotos'
+import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
 import { createPhoto, deletePhoto, getPhotoById, updatePhoto } from 'lib/data/photo'
 import {
@@ -11,7 +12,7 @@ import {
   getProposedJobPhotoIdsById,
   updateProposedJob,
 } from 'lib/data/proposed-jobs'
-import { createTools } from 'lib/data/tools'
+import { createTools, deleteTools, updateTools } from 'lib/data/tools'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
@@ -19,7 +20,7 @@ import {
   ProposedJobUpdateSchema,
   ProposedJobUpdateDataInput,
 } from 'lib/types/proposed-job'
-import { ToolsCreateSchema } from 'lib/types/tool'
+import { ToolCreateData, ToolUpdateData, ToolsCreateData, ToolsCreateSchema, ToolsUpdateData } from 'lib/types/tool'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function get(
@@ -50,17 +51,17 @@ async function patch(
   const uploadDirectory = getUploadDirForImages() + `/proposed-job`
 
   const { files, json } = await parseFormWithImages(req, id, uploadDirectory, 10 - currentPhotoCnt)
-  const {toolsOnSiteCreate, toolsToTakeWithCreate, ...jsonRest} = json
-  console.log(jsonRest)
 
   const proposedJobData = validateOrSendError(
     ProposedJobUpdateSchema,
-    jsonRest,
+    json,
     res
   )
   if (!proposedJobData) {
     return
   }
+
+
 
   // Delete those photos (by their ids), that are flaged to be deleted.
   if(proposedJobData.photoIdsDeleted) {
@@ -90,48 +91,15 @@ async function patch(
     await deleteDirectory(uploadDirectory)
   }
 
+
+
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
-  const {photoIdsDeleted, ...rest} = proposedJobData
+  const {photoIdsDeleted, toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = proposedJobData
   await updateProposedJob(id, rest)
-
-  if(toolsOnSiteCreate !== undefined) {
-    const toolsOnSite = validateOrSendError(
-      ToolsCreateSchema,
-      toolsOnSiteCreate,
-      res
-    )
-    if (!toolsOnSite) {
-      return
-    }
-    const toolsOnSiteWithJobId = {
-      tools: toolsOnSite.tools.map((toolItem) => ({
-        ...toolItem,
-        proposedJobOnSiteId: id,
-      })),
-    }
-    await logger.apiRequest(APILogEvent.TOOL_CREATE, 'tools', toolsOnSiteWithJobId, session)
-    await createTools(toolsOnSiteWithJobId)
-  }
-
-  if(toolsToTakeWithCreate !== undefined) {
-    const toolsToTakeWith = validateOrSendError(
-      ToolsCreateSchema,
-      toolsToTakeWithCreate ?? {},
-      res
-    )
-    if (!toolsToTakeWith) {
-      return
-    }
-    const toolsToTakeWithWithJobId = {
-      tools: toolsToTakeWith.tools.map((toolItem) => ({
-        ...toolItem,
-        proposedJobToTakeWithId: id,
-      })),
-    }
-    await logger.apiRequest(APILogEvent.TOOL_CREATE, 'tools', toolsToTakeWithWithJobId, session)
-    await createTools(toolsToTakeWithWithJobId)
-  }
   
+  await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, id, ToolType.ON_SITE, session)
+  await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, id, ToolType.TO_TAKE_WITH, session)
+
   res.status(204).end()
 }
 

@@ -1,29 +1,33 @@
 import { FieldErrors, FieldValues } from 'react-hook-form'
 import { Label } from '../Label'
 import React from 'react'
-import { FilterSelect, FilterSelectItem } from 'lib/components/filter-select/FilterSelect'
 import FormWarning from '../FormWarning'
+import { PillSelect, PillSelectItem } from 'lib/components/filter-select/PillSelect'
 
-interface PillInputProps<FormData extends FieldValues> {
+interface PillSelectInputProps<FormData extends FieldValues> {
   id: string
   label?: string
   placeholder: string,
-  items: FilterSelectItem[][],
-  register: (items: FilterSelectItem[]) => void
+  items: PillSelectItem[][],
+  init: PillSelectItem[],
+  removeExisting: (id: string) => void,
+  register: (items: PillSelectItem[]) => void
   errors: FieldErrors<FormData>
 }
 
-export const PillInput = <FormData extends FieldValues>({
+export const PillSelectInput = <FormData extends FieldValues>({
   id,
   label,
   placeholder,
   items,
+  init,
+  removeExisting,
   register,
   errors
-}: PillInputProps<FormData>) => {
+}: PillSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
 
-  const onSelected = (items: FilterSelectItem[]) => {
+  const onSelected = (items: PillSelectItem[]) => {
     register(items)
   }
 
@@ -33,11 +37,13 @@ export const PillInput = <FormData extends FieldValues>({
         id={id}
         label={label}
       />
-      <FilterSelect
+      <PillSelect
         id={id}
         placeholder={placeholder}
         items={items}
         onSelected={onSelected}
+        defaultSelected={init}
+        removeExisting={removeExisting}
         multiple={true}
       />
       <FormWarning message={error} />
