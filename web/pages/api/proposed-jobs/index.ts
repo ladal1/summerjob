@@ -19,6 +19,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { createDirectory, generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
+import { ToolType, registerTools } from 'lib/api/register/registerTools'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -54,8 +55,9 @@ async function post(
   if (!result) {
     return
   }
+  const {toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = result
 
-  const job = await createProposedJob(result)
+  const job = await createProposedJob(rest)
 
   // Create directory for photos
   await createDirectory(uploadDirectory + `/${job.id}`)
@@ -70,6 +72,8 @@ async function post(
     {...json, photoIds: newPhotoIds},
     session
   )
+  await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, job.id, ToolType.ON_SITE, session)
+  await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, job.id, ToolType.TO_TAKE_WITH, session)
   res.status(201).json(job)
 }
 

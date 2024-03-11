@@ -1,7 +1,7 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
-import { Area, JobType } from 'lib/prisma/client'
+import { Area, JobType, ToolName } from 'lib/prisma/client'
 import { deserializeAreas } from 'lib/types/area'
 import {
   ProposedJobCreateData,
@@ -28,6 +28,10 @@ import { ImageUploader } from '../forms/ImageUploader'
 import { MapInput } from '../forms/input/MapInput'
 import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
+import { PillSelectInput } from '../forms/input/PillSelectInput'
+import { PillSelectItem } from '../filter-select/PillSelect'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
+import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -74,12 +78,11 @@ export default function CreateProposedJobForm({
     setSaved(false)
     router.back()
   }
+  
+  //#region JobType
 
-  const selectArea = (id: string) => {
-    setValue('areaId', id)
-  }
   const selectJobType = (id: string) => {
-    setValue('jobType', id as JobType)
+    setValue('jobType', id as JobType, { shouldDirty: true, shouldValidate: true })
   }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
@@ -90,6 +93,59 @@ export default function CreateProposedJobForm({
     })
   )
 
+  //#endregion
+
+  //#region Tools
+  
+  const selectToolsOnSite = (items: PillSelectItem[]) => {
+    const tools = items.map(item => ({ id: item.databaseId, tool: item.id as ToolName, amount: item.amount ?? 1 }))
+    setValue('toolsOnSiteCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const selectToolsToTakeWith = (items: PillSelectItem[]) => {
+    const tools = items.map(item => ({ id: item.databaseId, tool: item.id as ToolName, amount: item.amount ?? 1 }))
+    setValue('toolsToTakeWithCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const toolSelectItems = Object.entries(toolNameMapping).map(
+    ([key, name]) => ({
+      id: key,
+      name: name,
+      searchable: name
+    })
+  )
+
+  const manageToolSelectItems = () : PillSelectItem[][] => {
+    const allTools = toolSelectItems
+    const currentJobType = getValues('jobType') || JobType.OTHER
+    const sortedToolsByCurrentJobType = allTools
+      .filter((tool) => mapToolNameToJobType(tool.id).includes(currentJobType))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    const sortedToolsOthers = allTools
+      .filter((tool) => !sortedToolsByCurrentJobType.some((t) => t.id === tool.id))
+      .sort((a, b) => a.name.localeCompare(b.name))
+    return [sortedToolsByCurrentJobType, sortedToolsOthers]
+  }
+
+  // Remove existing tools from backend.
+  const removeExistingToolOnSite = (id: string) => {
+    const prevToolIdsDeleted = getValues('toolsOnSiteIdsDeleted') || []
+    setValue('toolsOnSiteIdsDeleted', [...prevToolIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
+  }
+
+  const removeExistingToolToTakeWith = (id: string) => {
+    const prevToolIdsDeleted = getValues('toolsToTakeWithIdsDeleted') || []
+    setValue('toolsToTakeWithIdsDeleted', [...prevToolIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
+  }
+  
+  //#endregion
+
+  //#region Area
+
+  const selectArea = (id: string) => {
+    setValue('areaId', id, { shouldDirty: true, shouldValidate: true })
+  }
+
   function areaToSelectItem(area: Area): FilterSelectItem {
     return {
       id: area.id,
@@ -97,7 +153,7 @@ export default function CreateProposedJobForm({
       name: area.name,
     }
   }
-
+  //#endregion
   
   //#region Photo
 
@@ -109,7 +165,7 @@ export default function CreateProposedJobForm({
     // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
     filteredFiles.forEach((file: File) => dt.items.add(file))
-    setValue('photoFiles', dt.files)
+    setValue('photoFiles', dt.files, { shouldDirty: true, shouldValidate: true })
   }
 
   // Register newly added photo to FileList
@@ -120,7 +176,7 @@ export default function CreateProposedJobForm({
     // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
     combinedFiles.forEach((file: File) => dt.items.add(file))
-    setValue('photoFiles', dt.files)
+    setValue('photoFiles', dt.files, { shouldDirty: true, shouldValidate: true })
   }
 
   //#endregion
@@ -128,7 +184,7 @@ export default function CreateProposedJobForm({
   //#region Coordinates and Address
 
   const registerCoordinates = (coords: [number, number]) => {
-    setValue('coordinates', coords)
+    setValue('coordinates', coords, { shouldDirty: true, shouldValidate: true })
   }
 
   const registerAdress = (address: string) => {
@@ -270,6 +326,24 @@ export default function CreateProposedJobForm({
               defaultSelected={jobTypeSelectItems.find(
                 item => item.id === JobType.OTHER
               )}
+              errors={errors}
+            />
+            <PillSelectInput
+              id="toolsOnSiteCreate"
+              label="Nářadí na místě"
+              placeholder={"Vyberte nástroje"}
+              items={manageToolSelectItems()}
+              removeExisting={removeExistingToolOnSite}
+              register={selectToolsOnSite}
+              errors={errors}
+            />  
+            <PillSelectInput
+              id="toolsToTakeWithCreate"
+              label="Nářadí s sebou"
+              placeholder={"Vyberte nástroje"}
+              items={manageToolSelectItems()}
+              removeExisting={removeExistingToolToTakeWith}
+              register={selectToolsToTakeWith}
               errors={errors}
             />
             <GroupButtonsInput

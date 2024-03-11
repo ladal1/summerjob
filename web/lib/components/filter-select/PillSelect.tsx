@@ -154,15 +154,12 @@ export function PillSelect({
                     onChange={(e) => {
                       e.target.value = formatNumber(e.target.value)
                       const num = e.target.value
-                      if(+num > 1) {
+                      if(+num >= 1) {
                         selectedItem.amount = +num
                         setItemToRemove(null)
                       }
-                      else if(+num === 0) {
+                      else if(+num == 0) {
                         setItemToRemove(selectedItem)
-                      }
-                      else {
-                        selectedItem.amount = undefined
                       }
                       onSelected(selectedItems)
                     }}

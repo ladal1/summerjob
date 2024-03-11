@@ -9,7 +9,7 @@ interface PillSelectInputProps<FormData extends FieldValues> {
   label?: string
   placeholder: string,
   items: PillSelectItem[][],
-  init: PillSelectItem[],
+  init?: PillSelectItem[],
   removeExisting: (id: string) => void,
   register: (items: PillSelectItem[]) => void
   errors: FieldErrors<FormData>

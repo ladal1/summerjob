@@ -1,18 +1,17 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { createDirectory, deleteDirectory, deleteFile, getUploadDirForImages, renameFile, updatePhotoPathByNewFilename } from 'lib/api/fileManager'
-import { getPhotoPath, parseForm, parseFormWithImages } from 'lib/api/parse-form'
+import { createDirectory, deleteDirectory, deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
+import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
-import { createPhoto, deletePhoto, getPhotoById, updatePhoto } from 'lib/data/photo'
+import { deletePhoto, getPhotoById } from 'lib/data/photo'
 import {
   deleteProposedJob,
   getProposedJobById,
   getProposedJobPhotoIdsById,
   updateProposedJob,
 } from 'lib/data/proposed-jobs'
-import { createTools, deleteTools, updateTools } from 'lib/data/tools'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
@@ -20,7 +19,6 @@ import {
   ProposedJobUpdateSchema,
   ProposedJobUpdateDataInput,
 } from 'lib/types/proposed-job'
-import { ToolCreateData, ToolUpdateData, ToolsCreateData, ToolsCreateSchema, ToolsUpdateData } from 'lib/types/tool'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function get(
@@ -61,8 +59,6 @@ async function patch(
     return
   }
 
-
-
   // Delete those photos (by their ids), that are flaged to be deleted.
   if(proposedJobData.photoIdsDeleted) {
     // Save existing ids
@@ -90,8 +86,6 @@ async function patch(
   if(!proposedJobData.photoIds || proposedJobData.photoIds.length == 0) {
     await deleteDirectory(uploadDirectory)
   }
-
-
 
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   const {photoIdsDeleted, toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = proposedJobData

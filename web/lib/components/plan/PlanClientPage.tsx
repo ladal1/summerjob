@@ -253,19 +253,15 @@ export default function PlanClientPage({
     [key: string]: Tool;
   }
 
-  const toolsToTakeWithList: ToolsList = {}
-
-  planData && planData.jobs.forEach(job => {
-    job.proposedJob.toolsToTakeWith.forEach(tool => {
-      const { tool: name, amount } = tool
-      if(toolsToTakeWithList[name]) {
-        toolsToTakeWithList[name].amount = (toolsToTakeWithList[name].amount || 0) + amount
-      }
-      else {
-        toolsToTakeWithList[name] = {name, amount}
-      }
-    })
-  })
+  const toolsToTakeWithList: ToolsList = planData?.jobs.reduce((accumulator: ToolsList, job) => {
+    job.proposedJob.toolsToTakeWith.forEach(({ tool: name, amount }) => {
+      accumulator[name] = {
+        name,
+        amount: (accumulator[name]?.amount || 0) + amount,
+      };
+    });
+    return accumulator;
+  }, {}) || {}
 
   return (
     <>
