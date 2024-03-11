@@ -56,24 +56,18 @@ async function post(
     return
   }
   const {toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = result
-
-  const job = await createProposedJob(rest)
-
-  // Create directory for photos
-  await createDirectory(uploadDirectory + `/${job.id}`)
-
-  // Save those photos and save photo ids that belong to proposedJob
-  const newPhotoIds = await registerPhotos(files, `/${job.id}`)
-
-  await updateProposedJob(job.id, {photoIds: newPhotoIds})
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
-    {...json, photoIds: newPhotoIds},
+    result,
     session
   )
+  const job = await createProposedJob(rest)
+
+  await registerPhotos(files, undefined, uploadDirectory, `/${job.id}`, session)
   await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, job.id, ToolType.ON_SITE, session)
   await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, job.id, ToolType.TO_TAKE_WITH, session)
+  
   res.status(201).json(job)
 }
 

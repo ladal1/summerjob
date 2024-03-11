@@ -4,7 +4,8 @@ import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { Allergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
-import { ToolCompleteSchema, ToolCreateSchema, ToolsCreateSchema } from 'lib/types/tool'
+import { ToolCompleteSchema, ToolsCreateSchema } from 'lib/types/tool'
+import { PhotoCompleteSchema } from './photo'
 
 useZodOpenApi
 
@@ -22,6 +23,7 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   availability: z.array(z.date()),
   toolsOnSite: z.array(ToolCompleteSchema),
   toolsToTakeWith: z.array(ToolCompleteSchema),
+  photos: z.array(PhotoCompleteSchema)
 })
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>

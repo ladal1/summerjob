@@ -24,6 +24,7 @@ export async function getProposedJobById(
       activeJobs: true,
       toolsOnSite: true,
       toolsToTakeWith: true,
+      photos: true,
     },
   })
   return job
@@ -36,16 +37,26 @@ export async function getProposedJobPhotoIdsById(
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const proposedJob = await prisma.proposedJob.findUnique({
+  const jobs = await prisma.proposedJob.findUnique({
     where: {
       id: id,
     },
     select: {
-      photoIds: true,
+      photos: {
+        select: {
+          id: true
+        }
+      },
     },
   })
-  
-  return proposedJob
+  return jobs
+}
+
+export async function hasProposedJobPhotos(
+  id: string
+): Promise<boolean> {
+  const jobs = await getProposedJobPhotoIdsById(id)
+  return !!jobs?.photos?.length
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
@@ -62,6 +73,7 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
       activeJobs: true,
       toolsOnSite: true,
       toolsToTakeWith: true,
+      photos: true,
     },
     orderBy: [
       {
@@ -108,6 +120,7 @@ export async function getProposedJobsAssignableTo(
       activeJobs: true,
       toolsOnSite: true,
       toolsToTakeWith: true,
+      photos: true,
     },
     orderBy: [
       {

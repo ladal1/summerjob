@@ -2,6 +2,8 @@ import prisma from 'lib/prisma/connection'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import { PhotoPathData } from 'lib/types/photo'
+import { PrismaClient } from '@prisma/client'
+import { PrismaTransactionClient } from 'lib/types/prisma'
 
 export async function getPhotoById(
   id: string
@@ -37,22 +39,33 @@ export async function createPhoto(
 
 export async function updatePhoto(
   id: string, 
-  photo: PhotoPathData
+  data: PhotoPathData
 ) {
   await prisma.photo.update({
     where: {
       id: id,
     },
     data: {
-      photoPath: photo.photoPath,
+      photoPath: data.photoPath,
     },
   })
 }
 
-export async function deletePhoto(
-  id: string
+export async function deletePhotos(
+  ids: string[]
 ) {
-  await prisma.photo.delete({
+  await prisma.$transaction(async tx => {
+    for (const id of ids) {
+      await deletePhoto(id, tx)
+    }
+  })
+}
+
+export async function deletePhoto(
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  await prismaClient.photo.delete({
     where: {
       id,
     },

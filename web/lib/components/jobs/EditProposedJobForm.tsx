@@ -238,9 +238,9 @@ export default function EditProposedJobForm({
   }
 
   const fetchImages = () => {
-    return job.photoIds.map((photoId) => ({
-      url: `/api/proposed-jobs/${job.id}/photos/${photoId}`,
-      index: photoId,
+    return job.photos.map((photo) => ({
+      url: `/api/proposed-jobs/${job.id}/photos/${photo.id}`,
+      index: photo.id,
     }))
   }
 

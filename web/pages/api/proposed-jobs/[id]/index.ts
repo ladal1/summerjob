@@ -10,6 +10,7 @@ import {
   deleteProposedJob,
   getProposedJobById,
   getProposedJobPhotoIdsById,
+  hasProposedJobPhotos,
   updateProposedJob,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
@@ -45,7 +46,7 @@ async function patch(
   
   // Get current photoIds
   const currentPhotoIds = await getProposedJobPhotoIdsById(id)
-  const currentPhotoCnt = currentPhotoIds?.photoIds.length ?? 0
+  const currentPhotoCnt = currentPhotoIds?.photos.length ?? 0
   const uploadDirectory = getUploadDirForImages() + `/proposed-job`
 
   const { files, json } = await parseFormWithImages(req, id, uploadDirectory, 10 - currentPhotoCnt)
@@ -59,38 +60,14 @@ async function patch(
     return
   }
 
-  // Delete those photos (by their ids), that are flaged to be deleted.
-  if(proposedJobData.photoIdsDeleted) {
-    // Save existing ids
-    proposedJobData.photoIds = currentPhotoIds?.photoIds ?? []
-    // go through photos ids and see which are being deleted
-    for (const photoId of proposedJobData.photoIdsDeleted) {
-      const photo = await getPhotoById(photoId)
-      if(photo) {
-        deleteFile(photo.photoPath)
-        await deletePhoto(photoId)
-        proposedJobData.photoIds = proposedJobData.photoIds?.filter((id) => id !== photoId)
-      }
-    }
-  }
-
-  // Create directory for photos
-  await createDirectory(uploadDirectory + `/${id}`)
-
-  // Save those photos and save photo ids that belong to proposedJob
-  const newPhotoIds = await registerPhotos(files, `/${id}`)
-  if(newPhotoIds.length > 0)
-    proposedJobData.photoIds = (proposedJobData.photoIds ?? []).concat(newPhotoIds)
-
-  // If all photos were deleted, delete directory
-  if(!proposedJobData.photoIds || proposedJobData.photoIds.length == 0) {
-    await deleteDirectory(uploadDirectory)
-  }
-
-  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   const {photoIdsDeleted, toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = proposedJobData
+  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   await updateProposedJob(id, rest)
   
+  await registerPhotos(files, photoIdsDeleted, uploadDirectory, `/${id}`, session)
+  if(!hasProposedJobPhotos(id)) {
+    await deleteDirectory(uploadDirectory)
+  }
   await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, id, ToolType.ON_SITE, session)
   await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, id, ToolType.TO_TAKE_WITH, session)
 

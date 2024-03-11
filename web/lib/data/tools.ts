@@ -18,10 +18,10 @@ export async function createTool(
   data: ToolCreateData,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) {
-  const proposedJob = await prismaClient.tool.create({
+  const tool = await prismaClient.tool.create({
     data: data,
   })
-  return proposedJob
+  return tool
 }
 
 export async function updateTools(data: ToolsUpdateData) {

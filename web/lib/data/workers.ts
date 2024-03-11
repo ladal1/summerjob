@@ -10,7 +10,7 @@ import {
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
 import { deleteUserSessions } from './users'
-import { PhotoPathData } from 'lib/types/photo'
+import { PhotoCreateData } from 'lib/types/photo'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -69,7 +69,7 @@ export async function getWorkers(
 
 export async function getWorkerPhotoById(
   id: string
-): Promise<PhotoPathData | null> {
+): Promise<PhotoCreateData | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()

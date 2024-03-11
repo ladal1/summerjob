@@ -73,8 +73,10 @@ model Tool {
 }
 
 model Photo {
-  id             String               @id @default(uuid())
-  photoPath      String
+  id            String       @id @default(uuid())
+  photoPath     String 
+  proposedJob   ProposedJob? @relation("PhotoProposedJob", fields: [proposedJobId], references: [id])
+  proposedJobId String?
 }
 
 model Worker {
@@ -160,7 +162,7 @@ model ProposedJob {
   jobType            JobType     @default(OTHER)
   toolsOnSite        Tool[]      @relation("ToolOnSite")  
   toolsToTakeWith    Tool[]      @relation("ToolToTakeWith")
-  photoIds           String[]
+  photos             Photo[]     @relation("PhotoProposedJob")
 }
 
 model ActiveJob {
