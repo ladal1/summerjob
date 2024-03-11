@@ -10,6 +10,8 @@ useZodOpenApi
 
 export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
   area: AreaSchema.nullable(),
+  toolsOnSite: z.array(ToolCompleteSchema),
+  toolsToTakeWith: z.array(ToolCompleteSchema),
 })
 
 export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>

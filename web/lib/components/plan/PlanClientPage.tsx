@@ -24,6 +24,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Filters } from '../filters/Filters'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
+import { ToolName } from 'lib/prisma/client'
 
 interface PlanClientPageProps {
   id: string
@@ -241,6 +243,29 @@ export default function PlanClientPage({
   if (error && !planData) {
     return <ErrorPage error={error} />
   }
+  
+  interface Tool {
+    name: ToolName;
+    amount: number;
+  }
+  
+  interface ToolsList {
+    [key: string]: Tool;
+  }
+
+  const toolsToTakeWithList: ToolsList = {}
+
+  planData && planData.jobs.forEach(job => {
+    job.proposedJob.toolsToTakeWith.forEach(tool => {
+      const { tool: name, amount } = tool
+      if(toolsToTakeWithList[name]) {
+        toolsToTakeWithList[name].amount = (toolsToTakeWithList[name].amount || 0) + amount
+      }
+      else {
+        toolsToTakeWithList[name] = {name, amount}
+      }
+    })
+  })
 
   return (
     <>
@@ -334,7 +359,7 @@ export default function PlanClientPage({
                   <div className="vstack smj-search-stack smj-shadow rounded-3">
                     <h5>Statistiky</h5>
                     <hr />
-                    <ul className="list-group list-group-flush ">
+                    <ul className="list-group list-group-flush">
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
                         Nasazených pracantů
                         <span>
@@ -364,6 +389,19 @@ export default function PlanClientPage({
                               .map(j => j.proposedJob.maxWorkers)
                               .reduce((a, b) => a + b, 0)}
                         </span>
+                      </li>
+                      <li className="list-group-item ps-0 pe-0 smj-gray">
+                        Potřebné nástroje
+                        <table className="table">
+                          <tbody>
+                            {Object.entries(toolsToTakeWithList).map(([key, tool]) => (
+                              <tr key={key} className="text-end">
+                                <td>{toolNameMapping[tool.name]}</td>
+                                <td>{tool.amount}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </li>
                     </ul>
                   </div>

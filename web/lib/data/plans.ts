@@ -48,6 +48,8 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
           proposedJob: {
             include: {
               area: true,
+              toolsOnSite: true,
+              toolsToTakeWith: true,
             },
           },
           rides: {
@@ -110,6 +112,8 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
           proposedJob: {
             include: {
               area: true,
+              toolsOnSite: true,
+              toolsToTakeWith: true,
             },
           },
           rides: {

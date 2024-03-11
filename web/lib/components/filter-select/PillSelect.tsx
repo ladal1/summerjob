@@ -156,6 +156,7 @@ export function PillSelect({
                       const num = e.target.value
                       if(+num > 1) {
                         selectedItem.amount = +num
+                        setItemToRemove(null)
                       }
                       else if(+num === 0) {
                         setItemToRemove(selectedItem)

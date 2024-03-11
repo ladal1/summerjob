@@ -9,6 +9,7 @@ useZodOpenApi
 export const ToolCompleteSchema = ToolSchema
 
 export type ToolComplete = z.infer<typeof ToolCompleteSchema>
+export type ToolCompleteData = z.infer<typeof ToolCreateSchema>
 
 export const ToolCreateSchema = z
   .object({
