@@ -25,7 +25,6 @@ export const renameFile = async (
   await promises.rename(oldPhotoPath, newPhotoPath)
 } 
 
-
 export const updatePhotoPathByNewFilename = (
   originalPath: string,
   newFilename: string,

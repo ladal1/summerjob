@@ -35,9 +35,9 @@ export default function WorkersClientPage({
       case "1":
       case "ano":
       case "yes":
-          return true;
+          return true
       default: 
-          return false;
+          return false
     }
   }
 

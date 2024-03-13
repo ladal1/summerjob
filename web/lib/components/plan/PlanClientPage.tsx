@@ -245,12 +245,12 @@ export default function PlanClientPage({
   }
   
   interface Tool {
-    name: ToolName;
-    amount: number;
+    name: ToolName
+    amount: number
   }
   
   interface ToolsList {
-    [key: string]: Tool;
+    [key: string]: Tool
   }
 
   const toolsToTakeWithList: ToolsList = planData?.jobs.reduce((accumulator: ToolsList, job) => {
@@ -258,9 +258,9 @@ export default function PlanClientPage({
       accumulator[name] = {
         name,
         amount: (accumulator[name]?.amount || 0) + amount,
-      };
-    });
-    return accumulator;
+      }
+    })
+    return accumulator
   }, {}) || {}
 
   return (

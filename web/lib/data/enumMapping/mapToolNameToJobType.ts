@@ -1,4 +1,4 @@
-import { JobType } from "lib/prisma/client";
+import { JobType } from "lib/prisma/client"
 
 const toolToJobTypeMapping: Record<string, (keyof typeof JobType)[]> = {
   AXE: ['WOOD'],
@@ -16,8 +16,8 @@ const toolToJobTypeMapping: Record<string, (keyof typeof JobType)[]> = {
   BUCKET: ['HOUSEWORK'],
   RAG: ['HOUSEWORK'],
   BROOM: ['HOUSEWORK']
-};
+}
 
 export const mapToolNameToJobType = (id: string) => {
   return toolToJobTypeMapping[id] || ['OTHER']
-};
+}

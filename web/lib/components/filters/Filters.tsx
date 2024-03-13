@@ -1,5 +1,5 @@
-import { formatDateLong } from 'lib/helpers/helpers';
-import { ChangeEvent } from 'react';
+import { formatDateLong } from 'lib/helpers/helpers'
+import { ChangeEvent } from 'react'
 
 interface SelectOption {
   id: string
@@ -152,5 +152,5 @@ export function Filters({
         ))}
       </div>
     </>
-  );
+  )
 }

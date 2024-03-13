@@ -1,4 +1,4 @@
-import { Skill } from "lib/prisma/client";
+import { Skill } from "lib/prisma/client"
 
 const toolToSkillMapping: Record<string, (keyof typeof Skill)[]> = {
   AXE: ['LUMBERJACK'],
@@ -13,8 +13,8 @@ const toolToSkillMapping: Record<string, (keyof typeof Skill)[]> = {
   PAINTER_SPATULA: ['ARTIST'],
   JAPANESE_SPATULA: ['ARTIST'],
   GYPSUM: ['ARTIST'],
-};
+}
 
 export const mapToolNameToSkill = (id: string) => {
   return toolToSkillMapping[id] || []
-};
+}

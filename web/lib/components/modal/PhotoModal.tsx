@@ -17,7 +17,7 @@ export default function PhotoModal({
   const [dimensions, setDimensions] = useState({
     width: 800,
     height: 800,
-  });
+  })
 
   const [widthOfWindow, setWidthOfWindow] = useState(0)
 

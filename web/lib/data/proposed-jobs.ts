@@ -56,7 +56,7 @@ export async function hasProposedJobPhotos(
   id: string
 ): Promise<boolean> {
   const jobs = await getProposedJobPhotoIdsById(id)
-  return !!jobs?.photos?.length
+  return jobs?.photos?.length !== 0
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {

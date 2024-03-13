@@ -24,12 +24,12 @@ export const registerTools = async (
     const { withId, withoutId } = toolsCreate.tools.reduce(
       (result, toolItem) => {
         if (toolItem.id) {
-          result.withId.push(toolItem);
+          result.withId.push(toolItem)
         } 
         else {
-          result.withoutId.push(toolItem);
+          result.withoutId.push(toolItem)
         }
-        return result;
+        return result
       },
       { withId: [] as ToolCreateData[], withoutId: [] as ToolCreateData[] }
     )

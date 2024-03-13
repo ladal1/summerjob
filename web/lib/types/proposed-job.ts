@@ -6,6 +6,7 @@ import { Allergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import { ToolCompleteSchema, ToolsCreateSchema } from 'lib/types/tool'
 import { PhotoCompleteSchema } from './photo'
+import { coordinatesZod } from './coordinates'
 
 useZodOpenApi
 
@@ -36,7 +37,7 @@ export const ProposedJobCreateSchema = z
     publicDescription: z.string(),
     name: z.string().min(1, { message: err.emptyProposedJobName }),
     address: z.string().min(1, { message: err.emptyAdress }),
-    coordinates: z.array(z.number()).optional(),
+    coordinates: coordinatesZod.optional(),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
       .number({ invalid_type_error: err.invalidTypeMaxWorkers })
@@ -70,13 +71,13 @@ export const ProposedJobCreateSchema = z
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: err.maxCapacityImage + ' - max 10 MB',
-            });
+            })
           }
           if (!file || (!file.type?.startsWith("image"))) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: err.unsuportedTypeImage,
-            });
+            })
           }
         }
       })

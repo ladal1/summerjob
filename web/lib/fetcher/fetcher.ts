@@ -20,8 +20,8 @@ const sendData =
       } 
       else if (value instanceof FileList) {
         for (let i = 0; i < value.length; i++) {
-          const file = value[i];
-          formData.append(`file${i}`, file);
+          const file = value[i]
+          formData.append(`file${i}`, file)
         }
       }
       else {

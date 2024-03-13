@@ -41,14 +41,13 @@ export async function updatePhoto(
   id: string, 
   data: PhotoPathData
 ) {
-  await prisma.photo.update({
+  const photo = await prisma.photo.update({
     where: {
       id: id,
     },
-    data: {
-      photoPath: data.photoPath,
-    },
+    data: data
   })
+  return photo
 }
 
 export async function deletePhotos(

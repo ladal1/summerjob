@@ -114,6 +114,21 @@ export const MapInput = ({
         </div>
       </div>
       <FormWarning message={errorAddress} />
+      {(coordinatesValue?.[0] && coordinatesValue?.[1]) && (
+        <>
+          <Label
+          id={coordinates.id}
+          label={coordinates.label}
+          />
+          <input
+            className="form-control smj-input p-0 fs-5"
+            value={`[${coordinatesValue?.[0]}, ${coordinatesValue?.[1]}]`}
+            placeholder={coordinates.placeholder}
+            disabled={true}
+          />
+        </>
+      )}
+      <FormWarning message={errorCoordinates} />
       <div className="pt-3">
         <div className="container p-0 m-0">
           <Map
@@ -131,7 +146,6 @@ export const MapInput = ({
           }
         </div>
       </div>
-      <FormWarning message={errorCoordinates} />
     </>
   )
 }

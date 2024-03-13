@@ -36,7 +36,7 @@ export const CarCreateSchema = z
     odometerStart: z
       .number({ invalid_type_error: err.invalidTypeNumber })
       .min(1, { message: err.emptyOdometerStart })
-      .positive({ message: err.nonPositiveNumber }),
+      .nonnegative({ message: err.nonPositiveNumber }),
     odometerEnd: z
       .number({ invalid_type_error: err.invalidTypeNumber })
       .positive({ message: err.nonPositiveNumber })

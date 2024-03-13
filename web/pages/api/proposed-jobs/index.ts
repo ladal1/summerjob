@@ -64,7 +64,7 @@ async function post(
   )
   const job = await createProposedJob(rest)
 
-  await registerPhotos(files, undefined, uploadDirectory, `/${job.id}`, session)
+  await registerPhotos(files, undefined, uploadDirectory, job.id, session)
   await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, job.id, ToolType.ON_SITE, session)
   await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, job.id, ToolType.TO_TAKE_WITH, session)
   

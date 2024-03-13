@@ -94,7 +94,7 @@ export default function EditWorker({
   //#endregion
 
   //#region Car
-  const [isHandlingCar, setIsHandlingCar] = useState(false);
+  const [isHandlingCar, setIsHandlingCar] = useState(false)
   const [carRoute, setCarRoute] = useState('new')
 
   const handleAddCar = () => {

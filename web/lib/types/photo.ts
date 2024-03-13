@@ -8,7 +8,8 @@ export type PhotoCompleteData = z.infer<typeof PhotoCompleteSchema>
 
 export const PhotoPathSchema = z.object({
   id: z.string().optional(),
-  photoPath: z.string()
+  photoPath: z.string(),
+  proposedJobId: z.string().nullable().optional(),
 }).strict()
 
 export type PhotoPathData = z.infer<typeof PhotoPathSchema>

@@ -1,4 +1,4 @@
-import { useMap } from "react-leaflet";
+import { useMap } from "react-leaflet"
 
 interface ChangeViewProps {
   center: [number, number]

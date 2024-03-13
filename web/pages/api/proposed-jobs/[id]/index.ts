@@ -5,6 +5,7 @@ import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
+import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { deletePhoto, getPhotoById } from 'lib/data/photo'
 import {
   deleteProposedJob,
@@ -15,6 +16,7 @@ import {
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
+import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import {
   ProposedJobUpdateSchema,
@@ -60,14 +62,20 @@ async function patch(
     return
   }
 
+  // Set coordinates if they are missing
+  if(proposedJobData.coordinates === undefined) {
+    const fetchedCoords = await getGeocodingData(proposedJobData.address)
+    const parsed = CoordinatesSchema.safeParse({coordinates: fetchedCoords})
+    if (fetchedCoords && parsed.success) {
+      proposedJobData.coordinates = parsed.data.coordinates
+    }
+  }
+
   const {photoIdsDeleted, toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = proposedJobData
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   await updateProposedJob(id, rest)
   
-  await registerPhotos(files, photoIdsDeleted, uploadDirectory, `/${id}`, session)
-  if(!hasProposedJobPhotos(id)) {
-    await deleteDirectory(uploadDirectory)
-  }
+  await registerPhotos(files, photoIdsDeleted, uploadDirectory, id, session)
   await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, id, ToolType.ON_SITE, session)
   await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, id, ToolType.TO_TAKE_WITH, session)
 

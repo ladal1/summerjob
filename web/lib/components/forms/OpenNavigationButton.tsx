@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 interface OpenNavigationButtonProps {
   coordinates: [number, number]
@@ -20,7 +20,7 @@ export const OpenNavigationButton = ({
       // Open Google maps website (on android phone it will open google map app)
       window.open(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`)
     }
-  };
+  }
 
   return (
     
