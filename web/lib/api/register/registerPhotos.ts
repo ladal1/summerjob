@@ -37,7 +37,8 @@ const savePhotos = async (
       newPhotos.push(renamedPhoto)
     }
   }
-  await logger.apiRequest(APILogEvent.PHOTO_CREATE, 'photos', newPhotos, session)
+  if(newPhotos.length !== 0)
+    await logger.apiRequest(APILogEvent.PHOTO_CREATE, 'photos', newPhotos, session)
 }
 
 const deleteFlaggedPhotos = async (
@@ -55,8 +56,10 @@ const deleteFlaggedPhotos = async (
         }
       })
     ).then((result) => result.filter((photoId) => photoId !== undefined)) as string[]
-    await logger.apiRequest(APILogEvent.PHOTO_DELETE, 'photos', photoIdsDeletedFinal, session)
-    await deletePhotos(photoIdsDeletedFinal)
+    if(photoIdsDeletedFinal.length !== 0) {
+      await logger.apiRequest(APILogEvent.PHOTO_DELETE, 'photos', photoIdsDeletedFinal, session)
+      await deletePhotos(photoIdsDeletedFinal)
+    }
   }
 }
 

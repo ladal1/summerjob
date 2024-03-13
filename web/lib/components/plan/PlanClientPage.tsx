@@ -31,12 +31,14 @@ interface PlanClientPageProps {
   id: string
   initialDataPlan: Serialized
   initialDataJoblessWorkers: Serialized
+  workerId: string
 }
 
 export default function PlanClientPage({
   id,
   initialDataPlan,
   initialDataJoblessWorkers,
+  workerId,
 }: PlanClientPageProps) {
   const initialDataPlanParsed = deserializePlan(initialDataPlan)
 
@@ -449,7 +451,7 @@ export default function PlanClientPage({
                 size={ModalSize.LARGE}
                 onClose={closeModal}
               >
-                <AddJobToPlanForm planId={id} onComplete={closeModal} />
+                <AddJobToPlanForm planId={id} workerId={workerId} onComplete={closeModal} />
               </Modal>
             )}
             {showDeleteConfirmation && !deleteError && (

@@ -18,12 +18,14 @@ interface ProposedJobsClientPage {
   initialData: Serialized
   startDate: string
   endDate: string
+  workerId: string
 }
 
 export default function ProposedJobsClientPage({
   initialData,
   startDate,
   endDate,
+  workerId
 }: ProposedJobsClientPage) {
   const deserializedData = deserializeProposedJobs(initialData)
   const { data, error, mutate } = useAPIProposedJobs({
@@ -133,6 +135,7 @@ export default function ProposedJobsClientPage({
                 data={data || []}
                 shouldShowJob={shouldShowJob}
                 reload={reload}
+                workerId={workerId}
               />
             </div>
           </div>

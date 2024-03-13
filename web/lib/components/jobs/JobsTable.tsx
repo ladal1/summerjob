@@ -24,9 +24,10 @@ interface JobsTableProps {
   data: ProposedJobComplete[]
   shouldShowJob: (job: ProposedJobComplete) => boolean
   reload: () => void
+  workerId: string
 }
 
-export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
+export function JobsTable({ data, shouldShowJob, reload, workerId }: JobsTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: undefined,
     direction: 'desc',
@@ -37,13 +38,20 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
   const [hiddenJobs, waitingJobs, completedJobs, pinnedJobs] = useMemo(() => {
     const { hidden, completed, pinned, regular } = data.reduce(
       (acc, job) => {
+        if(job.pinnedBy.length !== 0) {
+          console.log(job.pinnedBy)
+          console.log({id: workerId})
+        }
         if (job.hidden) {
           acc.hidden.push(job)
-        } else if (job.completed) {
+        } 
+        else if (job.completed) {
           acc.completed.push(job)
-        } else if (job.pinned) {
+        } 
+        else if (job.pinnedBy && job.pinnedBy.some(worker => worker.workerId === workerId)) {
           acc.pinned.push(job)
-        } else {
+        } 
+        else {
           acc.regular.push(job)
         }
         return acc
@@ -57,7 +65,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
     )
 
     return [hidden, regular, completed, pinned]
-  }, [data])
+  }, [data, workerId])
 
   const sortedData = useMemo(
     () => [
@@ -94,7 +102,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
         sortedData.map(
           job =>
             shouldShowJob(job) && (
-              <ProposedJobRow key={job.id} job={job} reloadJobs={reloadJobs} />
+              <ProposedJobRow key={job.id} job={job} workerId={workerId} reloadJobs={reloadJobs} />
             )
         )}
       <RowCategory
@@ -112,6 +120,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
                 <ProposedJobRow
                   key={job.id}
                   job={job}
+                  workerId={workerId}
                   reloadJobs={reloadJobs}
                 />
               )
@@ -132,6 +141,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
                 <ProposedJobRow
                   key={job.id}
                   job={job}
+                  workerId={workerId}
                   reloadJobs={reloadJobs}
                 />
               )

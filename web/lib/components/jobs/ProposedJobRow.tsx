@@ -20,18 +20,20 @@ import { RowContent, RowContentsInterface } from '../table/RowContent'
 interface ProposedJobRowData {
   job: ProposedJobComplete
   reloadJobs: () => void
+  workerId: string
 }
 
 export default function ProposedJobRow({
   job,
   reloadJobs,
+  workerId
 }: ProposedJobRowData) {
   const { trigger: triggerUpdate } = useAPIProposedJobUpdate(job.id, {
     onSuccess: reloadJobs,
   })
 
   const setJobPinned = (pinned: boolean) => {
-    triggerUpdate({ pinned })
+    triggerUpdate({ pinnedByChange: { workerId: workerId, pinned } })
   }
 
   const setJobCompleted = (completed: boolean) => {
@@ -106,13 +108,14 @@ export default function ProposedJobRow({
     <ExpandableRow
       data={formatJobRow(
         job,
+        workerId,
         setJobPinned,
         setJobCompleted,
         setJobHidden,
         confirmDelete,
         isBeingDeleted
       )}
-      className={rowColorClass(job)}
+      className={rowColorClass(job, workerId)}
     >
       <RowContent
         data={expandedContent}
@@ -144,14 +147,14 @@ export default function ProposedJobRow({
   )
 }
 
-function rowColorClass(job: ProposedJobComplete) {
+function rowColorClass(job: ProposedJobComplete, workerId: string) {
   if (job.hidden) {
     return 'smj-hidden-job-row'
   }
   if (job.completed) {
     return 'smj-completed-job-row'
   }
-  if (job.pinned) {
+  if (job.pinnedBy.some(worker => worker.workerId === workerId)) {
     return 'smj-pinned-job-row'
   }
   return ''
@@ -159,6 +162,7 @@ function rowColorClass(job: ProposedJobComplete) {
 
 function formatJobRow(
   job: ProposedJobComplete,
+  workerId: string,
   setPinned: (pinned: boolean) => void,
   setCompleted: (completed: boolean) => void,
   setHidden: (hidden: boolean) => void,
@@ -179,7 +183,7 @@ function formatJobRow(
     {content: `${job.minWorkers} - ${job.maxWorkers}`},
     {content: <span key={job.id} className="d-inline-flex flex-wrap align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}
-      {pinJobIcon(job, setPinned)}
+      {pinJobIcon(job, workerId, setPinned)}
       {hideJobIcon(job, setHidden)}
       <Link
         href={`/jobs/${job.id}`}
@@ -216,18 +220,20 @@ function markJobAsCompletedIcon(
 
 function pinJobIcon(
   job: ProposedJobComplete,
+  workerId: string,
   setPinned: (pinned: boolean) => void
 ) {
-  const color = job.pinned ? 'smj-action-pinned' : 'smj-action-pin'
-  const title = job.pinned ? 'Odepnout' : 'Připnout'
-  const icon = job.pinned ? 'fa-thumbtack' : 'fa-thumbtack'
+  const isPinned = job.pinnedBy.some(worker => worker.workerId === workerId)
+  const color = isPinned ? 'smj-action-pinned' : 'smj-action-pin'
+  const title = isPinned ? 'Odepnout' : 'Připnout'
+  const icon = isPinned ? 'fa-thumbtack' : 'fa-thumbtack'
   return (
     <i
       className={`fas ${icon} ${color}`}
       title={title}
       onClick={e => {
         e.stopPropagation()
-        setPinned(!job.pinned)
+        setPinned(!isPinned)
       }}
     ></i>
   )

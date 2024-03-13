@@ -24,7 +24,8 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   availability: z.array(z.date()),
   toolsOnSite: z.array(ToolCompleteSchema),
   toolsToTakeWith: z.array(ToolCompleteSchema),
-  photos: z.array(PhotoCompleteSchema)
+  photos: z.array(PhotoCompleteSchema),
+  pinnedBy: z.array(z.object({workerId: z.string()})),
 })
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
@@ -109,8 +110,11 @@ export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>
 export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
   z.object({
     completed: z.boolean(),
-    pinned: z.boolean(),
     hidden: z.boolean(),
+    pinnedByChange: z.object({
+      workerId: z.string(),
+      pinned: z.boolean()
+    }),
   })
 )
   .strict()

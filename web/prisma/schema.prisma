@@ -79,27 +79,28 @@ model Photo {
   proposedJobId String?
 }
 
-model Worker {
-  id             String               @id @default(uuid())
-  firstName      String
-  lastName       String
-  phone          String
-  email          String               @unique
-  cars           Car[]
-  isStrong       Boolean              @default(false)
-  allergies      Allergy[]
-  skills         Skill[]
-  jobs           ActiveJob[]
-  driving        Ride[]               @relation("Driver")
-  passengerIn    Ride[]
-  responsibleFor ActiveJob[]          @relation("ResponsibleWorker")
-  deleted        Boolean              @default(false)
-  availability   WorkerAvailability[]
-  blocked        Boolean              @default(false)
-  permissions    WorkerPermissions    @relation(fields: [permissionsId], references: [id])
-  permissionsId  String               @unique
-  note           String               @default("")
-  photoPath      String?
+model Worker {       
+  id                 String                      @id @default(uuid())
+  firstName          String      
+  lastName           String      
+  phone              String      
+  email              String                      @unique
+  cars               Car[]       
+  isStrong           Boolean                     @default(false)
+  allergies          Allergy[]       
+  skills             Skill[]       
+  jobs               ActiveJob[]       
+  driving            Ride[]                      @relation("Driver")
+  passengerIn        Ride[]      
+  responsibleFor     ActiveJob[]                 @relation("ResponsibleWorker")
+  deleted            Boolean                     @default(false)
+  availability       WorkerAvailability[]      
+  blocked            Boolean                     @default(false)
+  permissions        WorkerPermissions           @relation(fields: [permissionsId], references: [id])
+  permissionsId      String                      @unique
+  note               String                      @default("")
+  photoPath          String?
+  pinnedProposedJobs PinnedProposedJobByWorker[]
 }
 
 model WorkerPermissions {
@@ -138,31 +139,41 @@ model Car {
 }
 
 model ProposedJob {
-  id                 String      @id @default(uuid())
-  name               String
-  publicDescription  String      @default("")
-  privateDescription String      @default("")
-  requiredDays       Int
-  completed          Boolean     @default(false)
-  pinned             Boolean     @default(false)
-  hidden             Boolean     @default(false)
-  minWorkers         Int
-  maxWorkers         Int
-  strongWorkers      Int
-  address            String
-  coordinates        Float[]
-  contact            String
-  hasFood            Boolean     @default(false)
-  hasShower          Boolean     @default(false)
-  area               Area?       @relation(fields: [areaId], references: [id], onDelete: Cascade)
-  areaId             String?
-  activeJobs         ActiveJob[]
-  allergens          Allergy[]
-  availability       DateTime[]  @db.Date
-  jobType            JobType     @default(OTHER)
-  toolsOnSite        Tool[]      @relation("ToolOnSite")  
-  toolsToTakeWith    Tool[]      @relation("ToolToTakeWith")
-  photos             Photo[]     @relation("PhotoProposedJob")
+  id                 String                      @id @default(uuid())
+  name               String                
+  publicDescription  String                      @default("")
+  privateDescription String                      @default("")
+  requiredDays       Int                 
+  completed          Boolean                     @default(false)
+  pinned             Boolean                     @default(false)
+  pinnedBy           PinnedProposedJobByWorker[]
+  hidden             Boolean                     @default(false)
+  minWorkers         Int                 
+  maxWorkers         Int                 
+  strongWorkers      Int                 
+  address            String                
+  coordinates        Float[]                 
+  contact            String                
+  hasFood            Boolean                     @default(false)
+  hasShower          Boolean                     @default(false)
+  area               Area?                       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId             String?                 
+  activeJobs         ActiveJob[]                 
+  allergens          Allergy[]                 
+  availability       DateTime[]                  @db.Date
+  jobType            JobType                     @default(OTHER)
+  toolsOnSite        Tool[]                      @relation("ToolOnSite")  
+  toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
+  photos             Photo[]                     @relation("PhotoProposedJob")
+}
+
+model PinnedProposedJobByWorker {
+  worker      Worker      @relation(fields: [workerId], references: [id])
+  workerId    String
+  proposedJob ProposedJob @relation(fields: [jobId], references: [id])
+  jobId       String
+
+  @@id([workerId, jobId])
 }
 
 model ActiveJob {
@@ -263,13 +274,13 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String?
+  accounts           Account[]
+  sessions           Session[]
 }
 
 model VerificationToken {
