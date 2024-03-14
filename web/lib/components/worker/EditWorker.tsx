@@ -176,7 +176,7 @@ export default function EditWorker({
                   label="Pracovní dostupnost"
                   register={() => register("availability.workDays")}
                   days={allDates}
-                  disableAfter={18}
+                  disableAfter={isProfilePage ? 18 : undefined}
                 />
               </div>
               <DateSelectionInput
@@ -184,7 +184,7 @@ export default function EditWorker({
                 label="Dny adorace"
                 register={() => register("availability.adorationDays")}
                 days={allDates}
-                disableAfter={18}
+                disableAfter={isProfilePage ? 18 : undefined}
               />
             </div>
             <GroupButtonsInput

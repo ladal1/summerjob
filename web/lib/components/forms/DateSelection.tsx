@@ -2,6 +2,7 @@ import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
 import React, { useEffect, useState } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
+import CallSMJTeamModal from '../modal/CallSMJTeamModal'
 
 interface DateSelectionProps {
   name: string
@@ -63,6 +64,13 @@ export default function DateSelection({
     return date.getDate() === tomorrowDate.getDate()
   }
 
+  const isDateDisabledDueToAfterHours = (date: Date) => {
+    return true
+    return isAfterHours && isDateRightAfterNow(date)
+  }
+
+  const [showCallModal, setShowCallModal] = useState(false)
+
   //#endregion
 
   return (
@@ -80,7 +88,14 @@ export default function DateSelection({
           <div className="row gx-2">
             {week.map(day => (
               <React.Fragment key={day.date.toJSON()}>
-                <div className="col gy-2">
+                <div 
+                  className="col gy-2"
+                  onClick={() => {
+                    if(isDateDisabledDueToAfterHours(day.date)) {
+                      setShowCallModal(true)
+                    }
+                  }}
+                >
                   <input
                     type="checkbox"
                     className="btn-check"
@@ -88,7 +103,7 @@ export default function DateSelection({
                     autoComplete="off"
                     {...register()}
                     value={day.date.toJSON()}
-                    disabled={day.isDisabled || (isAfterHours && isDateRightAfterNow(day.date))}
+                    disabled={day.isDisabled || isDateDisabledDueToAfterHours(day.date)}
                   />
                   <label
                     className={`btn btn-day-select btn-light ${
@@ -104,6 +119,12 @@ export default function DateSelection({
           </div>
         </React.Fragment>
       ))}
+      {showCallModal && (
+        <CallSMJTeamModal 
+          onClose={() => setShowCallModal(false)} 
+          additionalText={`Je po ${disableAfter}. hodině, zvolení časové dostupnosti je tudíž znepřístupněno.`}
+        />
+      )}
     </div>
   )
 }
