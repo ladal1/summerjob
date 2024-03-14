@@ -17,6 +17,7 @@ useZodOpenApi
 export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
+  skills: z.array(z.nativeEnum(Skill)),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>

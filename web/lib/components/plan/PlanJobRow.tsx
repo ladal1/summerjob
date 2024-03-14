@@ -4,7 +4,7 @@ import { WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
 import { ExpandableRow, RowCells } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
-import type { Worker } from 'lib/prisma/client'
+import type { Skill, Worker } from 'lib/prisma/client'
 import {
   useAPIActiveJobDelete,
   useAPIActiveJobUpdate,
@@ -18,6 +18,10 @@ import MoveWorkerModal from './MoveWorkerModal'
 import JobRideList from './JobRideList'
 import { ActiveJobIssueBanner, ActiveJobIssueIcon } from './ActiveJobIssue'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
+import { ToolCompleteData, ToolsCreateData } from 'lib/types/tool'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -149,6 +153,14 @@ export function PlanJobRow({
     {
       label: "Alergeny",
       content: `${formatAllergens(job)}`, 
+    },
+    {
+      label: "Nářadí na místě",
+      content: `${formatTools(job.proposedJob.toolsOnSite)}`, 
+    },
+    {
+      label: "Nářadí s sebou",
+      content: `${formatTools(job.proposedJob.toolsToTakeWith)}`, 
     },
     {
       label: "Pracantů (min/max/silných)",
@@ -298,7 +310,12 @@ function formatAmenities(job: ActiveJobNoPlan) {
 
 function formatAllergens(job: ActiveJobNoPlan) {
   if (job.proposedJob.allergens.length == 0) return 'Žádné'
-  return job.proposedJob.allergens.join(', ')
+  return job.proposedJob.allergens.map(allergen => allergyMapping[allergen]).join(', ')
+}
+
+function formatTools(tools: ToolCompleteData[]) {
+  if (tools.length == 0) return 'Žádné'
+  return tools.map(tool => toolNameMapping[tool.tool] + (tool.amount > 1 ? (' - ' + tool.amount) : '')).join(', ')
 }
 
 function formatRowData(
@@ -384,6 +401,12 @@ function formatWorkerData(
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')
+  if (worker.skills) {
+    worker.skills.map(skill => {
+      abilities.push(skillMapping[skill])
+    })
+    
+  }
   const allergies = worker.allergies
 
   return [
@@ -395,7 +418,7 @@ function formatWorkerData(
     </>,
     worker.phone,
     abilities.join(', '),
-    allergies.join(', '),
+    allergies.map((key) => allergyMapping[key]),
     <RideSelect
       key={`rideselect-${worker.id}`}
       worker={worker}
