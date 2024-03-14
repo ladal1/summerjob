@@ -1,6 +1,6 @@
 'use client'
 import { useAPIMyPlans } from 'lib/fetcher/my-plan'
-import { deserializeMyPlans, MyPlan } from 'lib/types/my-plan'
+import { deserializeMyPlans } from 'lib/types/my-plan'
 import { Serialized } from 'lib/types/serialize'
 import MyPlanBrowser from './MyPlanBrowser'
 import MyPlanEmpty from './MyPlanEmpty'

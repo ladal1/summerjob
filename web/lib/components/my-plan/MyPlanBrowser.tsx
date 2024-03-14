@@ -49,7 +49,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
         <div className="container">
           <EditBox>
             <h5>
-              {selectedPlan?.job?.name ||
+              {(selectedPlan?.job?.seqNum + ' - ' + selectedPlan?.job?.name) ||
                 'Tento den nemáte naplánovanou práci.'}
             </h5>
             {selectedPlan?.job && (

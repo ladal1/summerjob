@@ -28,6 +28,7 @@ export const MyPlanSchema = z.object({
     }),
   job: z
     .object({
+      seqNum: z.string(),
       name: z.string().min(1),
       description: z.string().min(1),
       responsibleWorkerName: z.string().min(1),

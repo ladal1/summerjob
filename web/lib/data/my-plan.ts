@@ -18,6 +18,16 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
       day: plan.day,
     }
   }
+  // Find sequence number of job
+  const sortedJobs = plan.jobs.sort((a, b) =>
+    a.proposedJob.name.localeCompare(b.proposedJob.name)
+  )
+  let seqNum = '';
+  const index = sortedJobs.findIndex(job => job.id === myJob.id)
+  if (index !== -1) {
+    seqNum = (index + 1).toString();
+  }
+
   // Find if worker has a ride
   const isInRide = (ride: RideComplete) =>
     ride.driver.id === workerId ||
@@ -55,6 +65,7 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
   return {
     day: plan.day,
     job: {
+      seqNum: seqNum,
       name: myJob.proposedJob.name,
       description: myJob.publicDescription,
       responsibleWorkerName: responsibleWorkerName,
