@@ -94,6 +94,7 @@ model Worker {
   email              String                      @unique
   cars               Car[]       
   isStrong           Boolean                     @default(false)
+  isTeam             Boolean                     @default(false)
   allergies          Allergy[]       
   skills             Skill[]       
   jobs               ActiveJob[]       

@@ -41,6 +41,7 @@ export const WorkerCreateSchema = z
       .min(1, { message: err.emptyPhone })
       .refine((phone) => phoneRegex.test(phone), { message: err.invalidRegexPhone }),
     strong: z.boolean(),
+    team: z.boolean(),
     skills: z.array(z.nativeEnum(Skill)),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),

@@ -55,6 +55,7 @@ export default function EditWorker({
       email: worker.email,
       phone: formatPhoneNumber(worker.phone),
       strong: worker.isStrong,
+      team: worker.isTeam,
       note: worker.note,
       allergyIds: worker.allergies as Allergy[],
       skills: worker.skills as Skill[],
@@ -205,6 +206,12 @@ export default function EditWorker({
                     id: "strong",
                     icon: "fas fa-dumbbell",
                     label: "Silák",
+                  },
+
+                  {
+                    id: "team",
+                    icon: "fa-solid fa-people-group",
+                    label: "Tým",
                   }
                 ]}
               />

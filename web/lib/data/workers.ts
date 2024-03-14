@@ -280,6 +280,7 @@ export async function createWorker(
       email: data.email.toLowerCase(),
       phone: data.phone,
       isStrong: data.strong,
+      isTeam: data.team,
       note: data.note,
       allergies: {
         set: data.allergyIds,
@@ -351,6 +352,7 @@ export async function internal_updateWorker(
       email: data.email,
       phone: data.phone,
       isStrong: data.strong,
+      isTeam: data.team,
       photoPath: data.photoPath,
       note: data.note,
       ...allergyUpdate,
