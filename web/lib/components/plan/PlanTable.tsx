@@ -13,6 +13,7 @@ import { PlanJoblessRow } from './PlanJoblessRow'
 import { RidesForJob } from 'lib/types/ride'
 
 const _columns: SortableColumn[] = [
+  { id: 'completed', name: 'Hotovo', sortable: true, style: {maxWidth: "60px"} },
   { id: 'name', name: 'Práce', sortable: true },
   { id: 'workers', name: 'Pracanti', sortable: true },
   { id: 'contact', name: 'Kontaktní osoba', sortable: true },
@@ -119,6 +120,7 @@ function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
   const getSortable: {
     [b: string]: (job: ActiveJobNoPlan) => string | number
   } = {
+    completed: job => +job.completed,
     name: job => job.proposedJob.name,
     area: job => job.proposedJob.area?.name ?? -1,
     address: job => job.proposedJob.address,

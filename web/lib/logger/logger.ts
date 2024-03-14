@@ -17,7 +17,7 @@ async function apiRequest(
     type,
     payload === '""' ? '' : payload
   )
-  pinoLogger.debug({ type, data })
+  pinoLogger.debug({ type, resourceId, data })
 }
 
 const logger = {

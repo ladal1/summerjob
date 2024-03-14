@@ -22,6 +22,7 @@ import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { ToolCompleteData, ToolsCreateData } from 'lib/types/tool'
 import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import ToggleCompletedCheck from './ToggleCompletedCheck'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -326,34 +327,46 @@ function formatRowData(
   isBeingDeleted: boolean
 ): RowCells[] {
   return [
-    {content: <span
-      className="d-inline-flex gap-1 align-items-center"
-      key={`name-${job.id}`}
-    >
-      {job.proposedJob.name}
-      <ActiveJobIssueIcon
-        job={job}
-        day={day}
-        ridesForOtherJobs={ridesForOtherJobs}
-      />
-    </span>},
+    {content:
+      <span 
+        key={`completed-${job.id}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ToggleCompletedCheck job={job} />
+      </span>
+    },
+    {content: 
+      <span
+        className="d-inline-flex gap-1 align-items-center"
+        key={`name-${job.id}`}
+      >
+        {job.proposedJob.name}
+        <ActiveJobIssueIcon
+          job={job}
+          day={day}
+          ridesForOtherJobs={ridesForOtherJobs}
+        />
+      </span>
+    },
     {content: `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`},
     {content: job.proposedJob.contact},
     {content: job.proposedJob.area?.name},
     {content: job.proposedJob.address},
     {content: formatAmenities(job)},
-    {content: <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
-      <Link
-        href={`/plans/${job.planId}/${job.id}`}
-        onClick={e => e.stopPropagation()}
-        className="smj-action-edit"
-      >
-        <i className="fas fa-edit" title="Upravit"></i>
-      </Link>
+    {content: 
+      <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
+        <Link
+          href={`/plans/${job.planId}/${job.id}`}
+          onClick={e => e.stopPropagation()}
+          className="smj-action-edit"
+        >
+          <i className="fas fa-edit" title="Upravit"></i>
+        </Link>
 
-      {deleteJobIcon(deleteJob, isBeingDeleted)}
-      <span style={{ width: '0px' }}></span>
-    </span>, stickyRight: true},
+        {deleteJobIcon(deleteJob, isBeingDeleted)}
+      </span>,
+      stickyRight: true
+    },
   ]
 }
 

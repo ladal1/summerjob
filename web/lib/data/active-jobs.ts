@@ -40,6 +40,8 @@ export async function getActiveJobById(
       proposedJob: {
         include: {
           area: true,
+          toolsOnSite: true,
+          toolsToTakeWith: true,
         },
       },
       responsibleWorker: true,
@@ -204,6 +206,7 @@ function getActiveJobDetailsById(
 
 export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   const {
+    completed,
     privateDescription,
     publicDescription,
     responsibleWorkerId,
@@ -261,6 +264,7 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
         id,
       },
       data: {
+        completed,
         privateDescription,
         publicDescription,
         responsibleWorkerId,
