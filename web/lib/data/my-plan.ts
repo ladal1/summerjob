@@ -22,10 +22,10 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
   const sortedJobs = plan.jobs.sort((a, b) =>
     a.proposedJob.name.localeCompare(b.proposedJob.name)
   )
-  let seqNum = '';
+  let seqNum: string | undefined = undefined
   const index = sortedJobs.findIndex(job => job.id === myJob.id)
   if (index !== -1) {
-    seqNum = (index + 1).toString();
+    seqNum = (index + 1).toString()
   }
 
   // Find if worker has a ride
