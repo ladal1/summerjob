@@ -49,7 +49,14 @@ enum ToolName {
   GYPSUM
   BUCKET
   RAG
-  BROOM
+  BROOM   
+  SAW         
+  BRUSHCUTTER 
+  GLOVES      
+  RESPIRATOR  
+  HEADPHONES  
+  CHAINSAW    
+  CIRCULAR_SAW
 }
 
 enum Skill {
