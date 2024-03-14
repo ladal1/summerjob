@@ -114,6 +114,7 @@ export function datesAfterDate(dates: Date[], date: Date) {
   return dates.filter(d => d >= date)
 }
 
+
 /**
  * Picks only the specified keys from an object and returns a new object with only those keys and their values
  * @param obj Original object

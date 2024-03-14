@@ -1,17 +1,19 @@
 import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
 
 interface DateSelectionProps {
   name: string
   days: DateBool[][]
+  disableAfter?: number
   register: () => UseFormRegisterReturn
 }
 
 export default function DateSelection({
   name,
   days,
+  disableAfter = undefined,
   register,
 }: DateSelectionProps) {
   const firstDay = days[0][0].date
@@ -34,6 +36,34 @@ export default function DateSelection({
     const end = week[week.length - 1].date
     return start.toJSON() + '-' + end.toJSON()
   }
+
+  //#region Disable date button
+
+  const [currentDate] = useState<Date>(() => new Date())
+  const [tomorrowDate] = useState<Date>(() => {
+    const tomorrow = new Date(currentDate.getTime())
+    tomorrow.setDate(currentDate.getDate() + 1)
+    return tomorrow
+  })
+
+  const isAfterHoursCalc = () => {
+    if(!disableAfter) 
+      return false
+    const currentHour = currentDate.getHours()
+    return currentHour >= disableAfter
+  }
+
+  const [isAfterHours, setIsAfterHours] = useState<boolean>(isAfterHoursCalc())
+
+  useEffect(() => {
+    setIsAfterHours(isAfterHoursCalc())
+  }, [disableAfter])
+
+  const isDateRightAfterNow = (date: Date): boolean => {
+    return date.getDate() === tomorrowDate.getDate()
+  }
+
+  //#endregion
 
   return (
     <div className="container p-0 m-0">
@@ -58,7 +88,7 @@ export default function DateSelection({
                     autoComplete="off"
                     {...register()}
                     value={day.date.toJSON()}
-                    disabled={day.isDisabled}
+                    disabled={day.isDisabled || (isAfterHours && isDateRightAfterNow(day.date))}
                   />
                   <label
                     className={`btn btn-day-select btn-light ${

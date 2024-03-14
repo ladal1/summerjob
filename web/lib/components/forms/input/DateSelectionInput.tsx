@@ -8,6 +8,7 @@ interface DateSelectionInputProps {
   label: string
   register: () => UseFormRegisterReturn
   days: DateBool[][]
+  disableAfter?: number
 }
 
 export const DateSelectionInput = ({
@@ -15,6 +16,7 @@ export const DateSelectionInput = ({
   label,
   register,
   days,
+  disableAfter = undefined
 }: DateSelectionInputProps) => {
   return (
     <div className="d-flex flex-column m-0">
@@ -22,7 +24,12 @@ export const DateSelectionInput = ({
         id={id}
         label={label}
       />
-      <DateSelection name={id} days={days} register={register} />
+      <DateSelection 
+        name={id} 
+        days={days} 
+        disableAfter={disableAfter}
+        register={register} 
+      />
     </div>
   )
 }
