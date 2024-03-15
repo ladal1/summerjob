@@ -1,9 +1,5 @@
 import { type DetailedHTMLProps, type InputHTMLAttributes } from 'react'
-import {
-  FieldErrors,
-  Path,
-  UseFormRegisterReturn,
-} from 'react-hook-form'
+import { FieldErrors, Path, UseFormRegisterReturn } from 'react-hook-form'
 import { Label } from '../Label'
 import FormWarning from '../FormWarning'
 
@@ -24,26 +20,23 @@ export const ScaleInput = ({
   min,
   max,
   register,
-  errors
+  errors,
 }: ScaleInputProps) => {
   const error = errors?.[id as Path<FormData>]?.message as string | undefined
 
   return (
     <>
-      <Label
-        id={id}
-        label={label}
-      />
+      <Label id={id} label={label} />
       <div className="d-inline-flex justify-content-between allign-items-baseline gap-2">
-        {min} 
-        <input 
+        {min}
+        <input
           id={id}
-          type="range" 
-          className="form-range smj-range" 
-          min={min} 
+          type="range"
+          className="form-range smj-range"
+          min={min}
           max={max}
           {...register()}
-        /> 
+        />
         {max}
       </div>
       <div className="text-muted">{secondaryLabel}</div>

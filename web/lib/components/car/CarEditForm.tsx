@@ -55,21 +55,27 @@ export default function CarEditForm({
               label="Název"
               placeholder="Model auta, značka"
               errors={errors}
-              register={() => register("name")}
+              register={() => register('name')}
             />
             <TextAreaInput
               id="description"
               label="Poznámka pro organizátory"
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
               rows={4}
-              register={() => register("description")}
+              register={() => register('description')}
             />
             <TextInput
               id="seats"
               label="Počet sedadel"
               placeholder="Počet sedadel"
               min={1}
-              register={() => register("seats", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              register={() =>
+                register('seats', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
               errors={errors}
             />
             <TextInput
@@ -77,7 +83,13 @@ export default function CarEditForm({
               label="Počáteční stav kilometrů"
               placeholder="Počáteční stav kilometrů"
               min={0}
-              register={() => register("odometerStart", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              register={() =>
+                register('odometerStart', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
               errors={errors}
             />
             <TextInput
@@ -85,7 +97,13 @@ export default function CarEditForm({
               label="Konečný stav kilometrů"
               placeholder="Konečný stav kilometrů"
               min={0}
-              register={() => register("odometerEnd", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              register={() =>
+                register('odometerEnd', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
               errors={errors}
             />
             <TextInput
@@ -93,16 +111,22 @@ export default function CarEditForm({
               label="Částka k proplacení"
               placeholder="Částka k proplacení"
               min={0}
-              register={() => register("reimbursementAmount", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
+              register={() =>
+                register('reimbursementAmount', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
               errors={errors}
             />
             <OtherAttributesInput
               register={register}
               objects={[
                 {
-                  id: "reimbursed",
-                  icon: "fa-solid fa-hand-holding-dollar",
-                  label: "Proplaceno",
+                  id: 'reimbursed',
+                  icon: 'fa-solid fa-hand-holding-dollar',
+                  label: 'Proplaceno',
                 },
               ]}
             />

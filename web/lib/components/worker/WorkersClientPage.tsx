@@ -25,37 +25,43 @@ export default function WorkersClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const onlyStrongQ = searchParams?.get("area")
-  const onlyWithCarQ = searchParams?.get("day")
-  const searchQ = searchParams?.get("search")
+  const onlyStrongQ = searchParams?.get('area')
+  const onlyWithCarQ = searchParams?.get('day')
+  const searchQ = searchParams?.get('search')
 
   const getBoolean = (value: string) => {
-    switch(value){
-      case "true":
-      case "1":
-      case "ano":
-      case "yes":
-          return true
-      default: 
-          return false
+    switch (value) {
+      case 'true':
+      case '1':
+      case 'ano':
+      case 'yes':
+        return true
+      default:
+        return false
     }
   }
 
   const [filter, setFilter] = useState(searchQ ?? '')
-  const [onlyStrong, setOnlyStrong] = useState(onlyStrongQ ? getBoolean(onlyStrongQ) : false)
-  const [onlyWithCar, setOnlyWithCar] = useState(onlyWithCarQ ? getBoolean(onlyWithCarQ) : false)
-
+  const [onlyStrong, setOnlyStrong] = useState(
+    onlyStrongQ ? getBoolean(onlyStrongQ) : false
+  )
+  const [onlyWithCar, setOnlyWithCar] = useState(
+    onlyWithCarQ ? getBoolean(onlyWithCarQ) : false
+  )
 
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(`?${new URLSearchParams({
-      onlyStrong: `${onlyStrong}`,
-      onlyWithCar: `${onlyWithCar}`,
-      search: filter
-    })}`, {
-      scroll: false
-    })
+    router.replace(
+      `?${new URLSearchParams({
+        onlyStrong: `${onlyStrong}`,
+        onlyWithCar: `${onlyWithCar}`,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
   }, [onlyStrong, onlyWithCar, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
@@ -104,13 +110,13 @@ export default function WorkersClientPage({
                     id: 'onlyStrongCheckbox',
                     label: 'Pouze silní',
                     checked: onlyStrong,
-                    onCheckboxChanged: setOnlyStrong
+                    onCheckboxChanged: setOnlyStrong,
                   },
                   {
                     id: 'onlyWithCarCheckbox',
                     label: 'Pouze s autem',
                     checked: onlyWithCar,
-                    onCheckboxChanged: setOnlyWithCar
+                    onCheckboxChanged: setOnlyWithCar,
                   },
                 ]}
               />

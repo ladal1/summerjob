@@ -30,24 +30,28 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   }, [data])
   const permissions = useMemo(() => getPermissions(), [])
 
-
   // get query parameters
   const searchParams = useSearchParams()
-  const permissionQ = searchParams?.get("permission")
-  const searchQ = searchParams?.get("search")
+  const permissionQ = searchParams?.get('permission')
+  const searchQ = searchParams?.get('search')
 
   const [filter, setFilter] = useState(searchQ ?? '')
-  const [filterPermission, setFilterPermission] = useState(permissions.find(a => a.id === permissionQ) ||  permissions[0])
+  const [filterPermission, setFilterPermission] = useState(
+    permissions.find(a => a.id === permissionQ) || permissions[0]
+  )
 
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(`?${new URLSearchParams({
-      permission: filterPermission.id,
-      search: filter
-    })}`, {
-      scroll: false
-    })
+    router.replace(
+      `?${new URLSearchParams({
+        permission: filterPermission.id,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
   }, [filterPermission, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
@@ -84,7 +88,7 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
                   options: permissions,
                   selected: filterPermission,
                   onSelectChanged: permissionSelectChanged,
-                  defaultOptionId: 'all'
+                  defaultOptionId: 'all',
                 },
               ]}
             />

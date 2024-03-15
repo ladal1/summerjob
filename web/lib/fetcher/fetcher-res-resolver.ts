@@ -1,4 +1,4 @@
-import { ApiError, ApiErrorSchema } from "lib/types/api-error"
+import { ApiError, ApiErrorSchema } from 'lib/types/api-error'
 
 export const resultResolver = async (res: Response, errorMsg: string) => {
   if (!res.ok) {

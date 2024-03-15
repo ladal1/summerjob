@@ -1,24 +1,35 @@
-import formidable from "formidable"
-import { getPhotoPath } from "../parse-form"
-import { createPhoto, deletePhotos, getPhotoById, updatePhoto } from "lib/data/photo"
-import { updatePhotoPathByNewFilename, renameFile, deleteFile, createDirectory, deleteDirectory } from "../fileManager"
-import logger from "lib/logger/logger"
-import { APILogEvent } from "lib/types/logger"
-import { ExtendedSession } from "lib/types/auth"
-import { PhotoCompleteData } from "lib/types/photo"
-import { hasProposedJobPhotos } from "lib/data/proposed-jobs"
-import { boolean } from "zod"
+import formidable from 'formidable'
+import { getPhotoPath } from '../parse-form'
+import {
+  createPhoto,
+  deletePhotos,
+  getPhotoById,
+  updatePhoto,
+} from 'lib/data/photo'
+import {
+  updatePhotoPathByNewFilename,
+  renameFile,
+  deleteFile,
+  createDirectory,
+  deleteDirectory,
+} from '../fileManager'
+import logger from 'lib/logger/logger'
+import { APILogEvent } from 'lib/types/logger'
+import { ExtendedSession } from 'lib/types/auth'
+import { PhotoCompleteData } from 'lib/types/photo'
+import { hasProposedJobPhotos } from 'lib/data/proposed-jobs'
+import { boolean } from 'zod'
 
 const savePhotos = async (
-  files: formidable.Files, 
+  files: formidable.Files,
   uploadDirectory: string,
   jobId: string,
-  session: ExtendedSession,
+  session: ExtendedSession
 ) => {
   const newPhotos: PhotoCompleteData[] = []
   // Go through every file in files
   const fileFieldNames = Object.keys(files)
-  if(fileFieldNames.length !== 0) {
+  if (fileFieldNames.length !== 0) {
     // Create directory for photos
     await createDirectory(uploadDirectory + `/${jobId}`)
     for (const fieldName of fileFieldNames) {
@@ -30,34 +41,49 @@ const savePhotos = async (
         proposedJobId: jobId,
       })
       // rename photo to its id instead of temporary name which was proposedJob.id-number given in parseFormWithImages
-      const newPhotoPath = updatePhotoPathByNewFilename(photoPath, newPhoto.id, `/${jobId}`) ?? ''
+      const newPhotoPath =
+        updatePhotoPathByNewFilename(photoPath, newPhoto.id, `/${jobId}`) ?? ''
       renameFile(photoPath, newPhotoPath)
-      const renamedPhoto = await updatePhoto(newPhoto.id, {photoPath: newPhotoPath})
+      const renamedPhoto = await updatePhoto(newPhoto.id, {
+        photoPath: newPhotoPath,
+      })
       // save its id to photoIds array
       newPhotos.push(renamedPhoto)
     }
   }
-  if(newPhotos.length !== 0)
-    await logger.apiRequest(APILogEvent.PHOTO_CREATE, 'photos', newPhotos, session)
+  if (newPhotos.length !== 0)
+    await logger.apiRequest(
+      APILogEvent.PHOTO_CREATE,
+      'photos',
+      newPhotos,
+      session
+    )
 }
 
 const deleteFlaggedPhotos = async (
   photoIdsDeleted: string[] | undefined,
-  session: ExtendedSession,
+  session: ExtendedSession
 ) => {
-  if(photoIdsDeleted) {
+  if (photoIdsDeleted) {
     // go through photos ids and see which are being deleted
-    const photoIdsDeletedFinal: string[] = await Promise.all(
-      photoIdsDeleted.map(async (photoId) => {
+    const photoIdsDeletedFinal: string[] = (await Promise.all(
+      photoIdsDeleted.map(async photoId => {
         const photo = await getPhotoById(photoId)
-        if(photo) {
+        if (photo) {
           deleteFile(photo.photoPath)
           return photoId
         }
       })
-    ).then((result) => result.filter((photoId) => photoId !== undefined)) as string[]
-    if(photoIdsDeletedFinal.length !== 0) {
-      await logger.apiRequest(APILogEvent.PHOTO_DELETE, 'photos', photoIdsDeletedFinal, session)
+    ).then(result =>
+      result.filter(photoId => photoId !== undefined)
+    )) as string[]
+    if (photoIdsDeletedFinal.length !== 0) {
+      await logger.apiRequest(
+        APILogEvent.PHOTO_DELETE,
+        'photos',
+        photoIdsDeletedFinal,
+        session
+      )
       await deletePhotos(photoIdsDeletedFinal)
     }
   }
@@ -66,14 +92,14 @@ const deleteFlaggedPhotos = async (
 export const registerPhotos = async (
   files: formidable.Files,
   photoIdsDeleted: string[] | undefined,
-  uploadDirectory: string, 
+  uploadDirectory: string,
   jobId: string,
-  session: ExtendedSession,
+  session: ExtendedSession
 ) => {
   await deleteFlaggedPhotos(photoIdsDeleted, session)
   await savePhotos(files, uploadDirectory, jobId, session)
   const hasAnyPhotos = await hasProposedJobPhotos(jobId)
-  if(!hasAnyPhotos) {
+  if (!hasAnyPhotos) {
     await deleteDirectory(uploadDirectory + '/' + jobId)
   }
 }

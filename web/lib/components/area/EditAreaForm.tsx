@@ -65,22 +65,22 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
               id="name"
               label="Název oblasti"
               placeholder="Název oblasti"
-              register={() => register("name")}
+              register={() => register('name')}
               errors={errors}
             />
             <OtherAttributesInput
               register={register}
               objects={[
                 {
-                  id: "requiresCar",
-                  icon: "fa fa-car",
-                  label: "Do oblasti je nutné dojet autem",
-                }, 
+                  id: 'requiresCar',
+                  icon: 'fa fa-car',
+                  label: 'Do oblasti je nutné dojet autem',
+                },
                 {
-                  id: "supportsAdoration",
-                  icon: "fa fa-church",
-                  label: "V oblasti je možné adorovat",
-                }
+                  id: 'supportsAdoration',
+                  icon: 'fa fa-church',
+                  label: 'V oblasti je možné adorovat',
+                },
               ]}
             />
 

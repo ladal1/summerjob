@@ -15,18 +15,15 @@ interface OtherAttributesInputProps<FormData extends FieldValues> {
 export const OtherAttributesInput = <FormData extends FieldValues>({
   label,
   register,
-  objects
+  objects,
 }: OtherAttributesInputProps<FormData>) => {
   return (
     <>
       <div className="mb-2">
-        <Label
-          id={objects[0]?.id}
-          label={label}
-        />
+        <Label id={objects[0]?.id} label={label} />
       </div>
-      
-      {objects.map((item) => (
+
+      {objects.map(item => (
         <React.Fragment key={item.id}>
           <div className="form-check align-self-center align-items-center d-flex gap-2 mt-2">
             <input
@@ -41,7 +38,7 @@ export const OtherAttributesInput = <FormData extends FieldValues>({
             </label>
           </div>
         </React.Fragment>
-    ))}
+      ))}
     </>
   )
 }

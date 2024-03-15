@@ -28,7 +28,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
   } = useForm<AreaCreateData>({
     resolver: zodResolver(schema),
   })
-  
+
   const onSubmit = (data: FormData) => {
     trigger(data, {
       onSuccess: () => {
@@ -58,22 +58,22 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
               id="name"
               label="Název oblasti"
               placeholder="Název oblasti"
-              register={() => register("name")}
+              register={() => register('name')}
               errors={errors}
             />
             <OtherAttributesInput
               register={register}
               objects={[
                 {
-                  id: "requiresCar",
-                  icon: "fa fa-car",
-                  label: "Do oblasti je nutné dojet autem",
-                }, 
+                  id: 'requiresCar',
+                  icon: 'fa fa-car',
+                  label: 'Do oblasti je nutné dojet autem',
+                },
                 {
-                  id: "supportsAdoration",
-                  icon: "fa fa-church",
-                  label: "V oblasti je možné adorovat",
-                }
+                  id: 'supportsAdoration',
+                  icon: 'fa fa-church',
+                  label: 'V oblasti je možné adorovat',
+                },
               ]}
             />
             <div className="d-flex justify-content-between gap-3">

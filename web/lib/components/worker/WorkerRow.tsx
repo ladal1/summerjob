@@ -59,8 +59,12 @@ function formatWorkerRow(
       {worker.cars.length > 0 && (
         <i className="fas fa-car me-2" title={'Má auto'} />
       )}
-      {worker.isStrong && <i className="fas fa-dumbbell me-2" title={'Silák'} />}
-      {worker.isTeam && <i className="fa-solid fa-people-group" title={'Tým'} />}
+      {worker.isStrong && (
+        <i className="fas fa-dumbbell me-2" title={'Silák'} />
+      )}
+      {worker.isTeam && (
+        <i className="fa-solid fa-people-group" title={'Tým'} />
+      )}
     </>,
     <span
       key={`actions-${worker.id}`}

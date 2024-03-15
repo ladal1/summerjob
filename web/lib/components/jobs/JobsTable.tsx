@@ -10,15 +10,36 @@ import {
 import ProposedJobRow from './ProposedJobRow'
 
 const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Název', sortable: true, style: {minWidth: "180px"}},
-  { id: 'area', name: 'Lokalita', sortable: true, style: {minWidth: "180px"} },
-  { id: 'contact', name: 'Kontaktní osoba', sortable: false, style: {minWidth: "150px"} },
-  { id: 'address', name: 'Adresa', sortable: false, style: {minWidth: "170px"} },
+  { id: 'name', name: 'Název', sortable: true, style: { minWidth: '180px' } },
+  {
+    id: 'area',
+    name: 'Lokalita',
+    sortable: true,
+    style: { minWidth: '180px' },
+  },
+  {
+    id: 'contact',
+    name: 'Kontaktní osoba',
+    sortable: false,
+    style: { minWidth: '150px' },
+  },
+  {
+    id: 'address',
+    name: 'Adresa',
+    sortable: false,
+    style: { minWidth: '170px' },
+  },
   { id: 'daysPlanned', name: 'Naplánované dny', sortable: true },
   { id: 'daysLeft', name: 'Dostupné dny', sortable: true },
   { id: 'workers', name: 'Pracantů', sortable: true },
   { id: 'priority', name: 'Priorita', sortable: true },
-  { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"} },
+  {
+    id: 'actions',
+    name: 'Akce',
+    sortable: false,
+    className: 'smj-sticky-col-right smj-table-header',
+    style: { minWidth: '100px' },
+  },
 ]
 
 interface JobsTableProps {
@@ -28,7 +49,12 @@ interface JobsTableProps {
   workerId: string
 }
 
-export function JobsTable({ data, shouldShowJob, reload, workerId }: JobsTableProps) {
+export function JobsTable({
+  data,
+  shouldShowJob,
+  reload,
+  workerId,
+}: JobsTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: undefined,
     direction: 'desc',
@@ -39,20 +65,16 @@ export function JobsTable({ data, shouldShowJob, reload, workerId }: JobsTablePr
   const [hiddenJobs, waitingJobs, completedJobs, pinnedJobs] = useMemo(() => {
     const { hidden, completed, pinned, regular } = data.reduce(
       (acc, job) => {
-        if(job.pinnedBy.length !== 0) {
-          console.log(job.pinnedBy)
-          console.log({id: workerId})
-        }
         if (job.hidden) {
           acc.hidden.push(job)
-        } 
-        else if (job.completed) {
+        } else if (job.completed) {
           acc.completed.push(job)
-        } 
-        else if (job.pinnedBy && job.pinnedBy.some(worker => worker.workerId === workerId)) {
+        } else if (
+          job.pinnedBy &&
+          job.pinnedBy.some(worker => worker.workerId === workerId)
+        ) {
           acc.pinned.push(job)
-        } 
-        else {
+        } else {
           acc.regular.push(job)
         }
         return acc
@@ -103,7 +125,12 @@ export function JobsTable({ data, shouldShowJob, reload, workerId }: JobsTablePr
         sortedData.map(
           job =>
             shouldShowJob(job) && (
-              <ProposedJobRow key={job.id} job={job} workerId={workerId} reloadJobs={reloadJobs} />
+              <ProposedJobRow
+                key={job.id}
+                job={job}
+                workerId={workerId}
+                reloadJobs={reloadJobs}
+              />
             )
         )}
       <RowCategory
@@ -167,7 +194,7 @@ function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
     daysPlanned: job => job.activeJobs.length,
     daysLeft: job => job.availability.length,
     workers: job => job.minWorkers,
-    priority: job => job.priority
+    priority: job => job.priority,
   }
 
   if (sortOrder.columnId in getSortable) {

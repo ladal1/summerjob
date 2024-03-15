@@ -170,9 +170,9 @@ export default function PlanClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const areaIdQ = searchParams?.get("area")
-  const contactQ = searchParams?.get("contact")
-  const searchQ = searchParams?.get("search")
+  const areaIdQ = searchParams?.get('area')
+  const contactQ = searchParams?.get('contact')
+  const searchQ = searchParams?.get('search')
 
   // area
   const areas = useMemo(
@@ -180,7 +180,9 @@ export default function PlanClientPage({
     [planData]
   )
 
-  const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === areaIdQ) || areas[0])
+  const [selectedArea, setSelectedArea] = useState(
+    areas.find(a => a.id === areaIdQ) || areas[0]
+  )
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find(a => a.id === id) || areas[0])
   }
@@ -191,7 +193,9 @@ export default function PlanClientPage({
     [planData]
   )
 
-  const [selectedContact, setSelectedContact] = useState(contacts.find(a => a.id === contactQ) || contacts[0])
+  const [selectedContact, setSelectedContact] = useState(
+    contacts.find(a => a.id === contactQ) || contacts[0]
+  )
   const onContactSelected = (id: string) => {
     setSelectedContact(contacts.find(a => a.id === id) || contacts[0])
   }
@@ -202,13 +206,16 @@ export default function PlanClientPage({
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(`?${new URLSearchParams({
-      area: selectedArea.id,
-      contact: selectedContact.id,
-      search: filter
-    })}`, {
-      scroll: false
-    })
+    router.replace(
+      `?${new URLSearchParams({
+        area: selectedArea.id,
+        contact: selectedContact.id,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
   }, [selectedArea, selectedContact, filter, router])
 
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
@@ -237,7 +244,14 @@ export default function PlanClientPage({
       }
       return isInArea
     },
-    [selectedArea.id, areas, selectedContact.id, contacts, searchableJobs, filter]
+    [
+      selectedArea.id,
+      areas,
+      selectedContact.id,
+      contacts,
+      searchableJobs,
+      filter,
+    ]
   )
 
   //#endregion
@@ -245,26 +259,29 @@ export default function PlanClientPage({
   if (error && !planData) {
     return <ErrorPage error={error} />
   }
-  
+
   interface Tool {
     name: ToolName
     amount: number
   }
-  
+
   interface ToolsList {
     [key: string]: Tool
   }
 
-  const toolsToTakeWithList: ToolsList = planData?.jobs.reduce((accumulator: ToolsList, job) => {
-    const sortedTools = job.proposedJob.toolsToTakeWith.sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
-    sortedTools.forEach(({ tool: name, amount }) => {
-      accumulator[name] = {
-        name,
-        amount: (accumulator[name]?.amount || 0) + amount,
-      }
-    })
-    return accumulator
-  }, {}) || {}
+  const toolsToTakeWithList: ToolsList =
+    planData?.jobs.reduce((accumulator: ToolsList, job) => {
+      const sortedTools = job.proposedJob.toolsToTakeWith.sort((a, b) =>
+        toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool])
+      )
+      sortedTools.forEach(({ tool: name, amount }) => {
+        accumulator[name] = {
+          name,
+          amount: (accumulator[name]?.amount || 0) + amount,
+        }
+      })
+      return accumulator
+    }, {}) || {}
 
   return (
     <>
@@ -330,14 +347,14 @@ export default function PlanClientPage({
                         options: contacts,
                         selected: selectedContact,
                         onSelectChanged: onContactSelected,
-                        defaultOptionId: 'all'
+                        defaultOptionId: 'all',
                       },
                       {
                         id: 'area',
                         options: areas,
                         selected: selectedArea,
                         onSelectChanged: onAreaSelected,
-                        defaultOptionId: 'all'
+                        defaultOptionId: 'all',
                       },
                     ]}
                   />
@@ -393,12 +410,14 @@ export default function PlanClientPage({
                         Potřebné nástroje
                         <table className="table">
                           <tbody>
-                            {Object.entries(toolsToTakeWithList).map(([key, tool]) => (
-                              <tr key={key} className="text-end">
-                                <td>{toolNameMapping[tool.name]}</td>
-                                <td>{tool.amount}</td>
-                              </tr>
-                            ))}
+                            {Object.entries(toolsToTakeWithList).map(
+                              ([key, tool]) => (
+                                <tr key={key} className="text-end">
+                                  <td>{toolNameMapping[tool.name]}</td>
+                                  <td>{tool.amount}</td>
+                                </tr>
+                              )
+                            )}
                           </tbody>
                         </table>
                       </li>
@@ -452,7 +471,11 @@ export default function PlanClientPage({
                 size={ModalSize.LARGE}
                 onClose={closeModal}
               >
-                <AddJobToPlanForm planId={id} workerId={workerId} onComplete={closeModal} />
+                <AddJobToPlanForm
+                  planId={id}
+                  workerId={workerId}
+                  onComplete={closeModal}
+                />
               </Modal>
             )}
             {showDeleteConfirmation && !deleteError && (

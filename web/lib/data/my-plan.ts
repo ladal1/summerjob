@@ -67,7 +67,7 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
     job: {
       seqNum: seqNum,
       name: myJob.proposedJob.name,
-      description: myJob.publicDescription,
+      description: myJob.proposedJob.publicDescription,
       responsibleWorkerName: responsibleWorkerName,
       workerNames: myJob.workers.map(
         worker => `${worker.firstName} ${worker.lastName}`
@@ -77,12 +77,15 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
       location: {
         name: myJob.proposedJob.area?.name ?? 'Zatím neznáma',
         address: myJob.proposedJob.address,
-        coordinates: (
-          myJob.proposedJob.coordinates 
-            && myJob.proposedJob.coordinates.at(0) 
-            && myJob.proposedJob.coordinates.at(1)) 
-          ? [myJob.proposedJob.coordinates.at(0) as number, myJob.proposedJob.coordinates.at(1) as number]
-          : null
+        coordinates:
+          myJob.proposedJob.coordinates &&
+          myJob.proposedJob.coordinates.at(0) &&
+          myJob.proposedJob.coordinates.at(1)
+            ? [
+                myJob.proposedJob.coordinates.at(0) as number,
+                myJob.proposedJob.coordinates.at(1) as number,
+              ]
+            : null,
       },
       hasFood: myJob.proposedJob.hasFood,
       hasShower: myJob.proposedJob.hasShower,

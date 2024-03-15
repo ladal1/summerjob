@@ -19,24 +19,29 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
 
   // get query parameters
   const searchParams = useSearchParams()
-  const eventTypeQ = searchParams?.get("eventType")
-  const searchQ = searchParams?.get("search")
-  
+  const eventTypeQ = searchParams?.get('eventType')
+  const searchQ = searchParams?.get('search')
+
   const [filter, setFilter] = useState(searchQ ?? '')
   const debouncedSearch = useDebounce(filter, 500)
   const [page, setPage] = useState(1)
   const eventTypes = useMemo(() => getEventTypes(), [])
-  const [filterEventType, setFilterEventType] = useState(eventTypes.find(a => a.id === eventTypeQ) || eventTypes[0])
+  const [filterEventType, setFilterEventType] = useState(
+    eventTypes.find(a => a.id === eventTypeQ) || eventTypes[0]
+  )
 
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(`?${new URLSearchParams({
-      eventType: filterEventType.id,
-      search: filter
-    })}`, {
-      scroll: false
-    })
+    router.replace(
+      `?${new URLSearchParams({
+        eventType: filterEventType.id,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
   }, [filterEventType, filter, router])
 
   const { data } = useAPILogs(
@@ -117,7 +122,7 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
                   options: eventTypes,
                   selected: filterEventType,
                   onSelectChanged: eventTypeSelectChanged,
-                  defaultOptionId: 'all'
+                  defaultOptionId: 'all',
                 },
               ]}
             />

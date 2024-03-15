@@ -87,7 +87,7 @@ export function PlanJoblessRow({
   return (
     <>
       <ExpandableRow
-        data={[{content: `Bez práce (${joblessWorkers.length})`}]}
+        data={[{ content: `Bez práce (${joblessWorkers.length})` }]}
         colspan={numColumns}
         className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
         onDrop={onWorkerDropped()}
@@ -156,7 +156,7 @@ function formatWorkerData(
 ) {
   const name = `${worker.firstName} ${worker.lastName}`
   const allergies = worker.allergies
-  const allergiesMapped = allergies.map((key) => allergyMapping[key])
+  const allergiesMapped = allergies.map(key => allergyMapping[key])
 
   return [
     name,
@@ -168,9 +168,9 @@ function formatWorkerData(
       {worker.isStrong && (
         <i className="fas fa-dumbbell me-2" title={'Silák'} />
       )}
-      {worker.availability.adorationDays.find(x => x.getTime() === planDay.getTime()) && (
-        <i className="fa fa-church" title={'Adoruje'} />
-      )}
+      {worker.availability.adorationDays.find(
+        x => x.getTime() === planDay.getTime()
+      ) && <i className="fa fa-church" title={'Adoruje'} />}
     </>,
     allergiesMapped.join(', '),
     <span

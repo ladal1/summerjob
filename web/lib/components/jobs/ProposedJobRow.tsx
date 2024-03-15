@@ -26,7 +26,7 @@ interface ProposedJobRowData {
 export default function ProposedJobRow({
   job,
   reloadJobs,
-  workerId
+  workerId,
 }: ProposedJobRowData) {
   const { trigger: triggerUpdate } = useAPIProposedJobUpdate(job.id, {
     onSuccess: reloadJobs,
@@ -75,34 +75,38 @@ export default function ProposedJobRow({
 
   const expandedContent: RowContentsInterface[] = [
     {
-      label: "Popis",
-      content: `${job.publicDescription}`, 
+      label: 'Popis',
+      content: `${job.publicDescription}`,
     },
     {
-      label: "Poznámka pro organizátory",
-      content: `${job.privateDescription}`, 
+      label: 'Poznámka pro organizátory',
+      content: `${job.privateDescription}`,
     },
     {
-      label: "Počet pracantů",
-      content: `${job.minWorkers} - ${job.maxWorkers} (${job.strongWorkers} siláků)`, 
+      label: 'Počet pracantů',
+      content: `${job.minWorkers} - ${job.maxWorkers} (${job.strongWorkers} siláků)`,
     },
     {
-      label: "Doprava do oblasti požadována",
-      content: `${job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}`, 
+      label: 'Doprava do oblasti požadována',
+      content: `${
+        job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'
+      }`,
     },
     {
-      label: "Alergeny",
-      content: `${job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}`, 
+      label: 'Alergeny',
+      content: `${
+        job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'
+      }`,
     },
     {
-      label: "Dostupné",
-      content: `${availableDays}`, 
+      label: 'Dostupné',
+      content: `${availableDays}`,
     },
     {
-      label: "Naplánované dny",
-      content: `${job.activeJobs.length} / ${job.requiredDays}`, 
+      label: 'Naplánované dny',
+      content: `${job.activeJobs.length} / ${job.requiredDays}`,
     },
-  ] 
+  ]
 
   return (
     <ExpandableRow
@@ -117,9 +121,7 @@ export default function ProposedJobRow({
       )}
       className={rowColorClass(job, workerId)}
     >
-      <RowContent
-        data={expandedContent}
-      />
+      <RowContent data={expandedContent} />
       {showDeleteConfirmation && !deleteError && (
         <ConfirmationModal
           onConfirm={deleteJob}
@@ -174,27 +176,35 @@ function formatJobRow(
   const now = new Date()
   now.setHours(now.getHours() - 6)
   return [
-    {content: job.name},
-    {content: job.area?.name},
-    {content: job.contact},
-    {content: job.address},
-    {content: `${job.activeJobs.length} / ${job.requiredDays}`},
-    {content: datesAfterDate(job.availability, now).length},
-    {content: `${job.minWorkers} - ${job.maxWorkers}`},
-    {content: job.priority},
-    {content: <span key={job.id} className="d-inline-flex flex-wrap align-items-center gap-3">
-      {markJobAsCompletedIcon(job, setCompleted)}
-      {pinJobIcon(job, workerId, setPinned)}
-      {hideJobIcon(job, setHidden)}
-      <Link
-        href={`/jobs/${job.id}`}
-        onClick={e => e.stopPropagation()}
-        className="smj-action-edit"
-      >
-        <i className="fas fa-edit" title="Upravit"></i>
-      </Link>
-      <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
-    </span>, stickyRight: true},
+    { content: job.name },
+    { content: job.area?.name },
+    { content: job.contact },
+    { content: job.address },
+    { content: `${job.activeJobs.length} / ${job.requiredDays}` },
+    { content: datesAfterDate(job.availability, now).length },
+    { content: `${job.minWorkers} - ${job.maxWorkers}` },
+    { content: job.priority },
+    {
+      content: (
+        <span
+          key={job.id}
+          className="d-inline-flex flex-wrap align-items-center gap-3"
+        >
+          {markJobAsCompletedIcon(job, setCompleted)}
+          {pinJobIcon(job, workerId, setPinned)}
+          {hideJobIcon(job, setHidden)}
+          <Link
+            href={`/jobs/${job.id}`}
+            onClick={e => e.stopPropagation()}
+            className="smj-action-edit"
+          >
+            <i className="fas fa-edit" title="Upravit"></i>
+          </Link>
+          <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
+        </span>
+      ),
+      stickyRight: true,
+    },
   ]
 }
 

@@ -80,7 +80,9 @@ export function ActiveJobIssueBanner({
               )}
               {issues.lowSkilledWorkers && (
                 <div className="row">
-                  <div className="col">Na jobu nejsou dostatečně zruční pracanti.</div>
+                  <div className="col">
+                    Na jobu nejsou dostatečně zruční pracanti.
+                  </div>
                 </div>
               )}
             </div>
@@ -118,7 +120,7 @@ function getIssues(
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
     adorations: adorations(job, day),
-    lowSkilledWorkers: lowSkilledWorkers(job)
+    lowSkilledWorkers: lowSkilledWorkers(job),
   }
 }
 
@@ -197,14 +199,13 @@ function lowSkilledWorkers(job: ActiveJobNoPlan) {
   // Sum all workers skills
   job.workers.forEach(worker => {
     worker.skills.forEach(skill => workersSkills.add(skill))
-  }) 
+  })
 
   // Check if needs for skills are met
   let allRequiredSkillsPresent = true
   requiredSkills.forEach(skill => {
-    if(!workersSkills.has(skill)) 
-      allRequiredSkillsPresent = false
-      return
+    if (!workersSkills.has(skill)) allRequiredSkillsPresent = false
+    return
   })
 
   return !allRequiredSkillsPresent

@@ -1571,8 +1571,8 @@ registry.registerPath({
   path: '/api/workers/{workerId}/photo',
   method: 'get',
   description:
-    'Gets a worker\'s photo by worker\'s ID. Permissions required (at least one): ADMIN, WORKERS.',
-  summary: 'Get a worker\'s photo by ID',
+    "Gets a worker's photo by worker's ID. Permissions required (at least one): ADMIN, WORKERS.",
+  summary: "Get a worker's photo by ID",
   tags: ['Workers'],
   parameters: [
     {
@@ -1588,19 +1588,18 @@ registry.registerPath({
   ],
   responses: {
     200: {
-      description: 'Worker\'s photo retrieved successfully.',
+      description: "Worker's photo retrieved successfully.",
       content: {
         'image/*': {
           schema: {
             type: 'string',
             format: 'binary',
           },
-        }
+        },
       },
     },
   },
 })
-
 
 //#endregion
 

@@ -2,7 +2,8 @@ import { type DetailedHTMLProps, type TextareaHTMLAttributes } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
 import { Label } from '../Label'
 
-interface TextAreaProps extends DetailedHTMLProps<
+interface TextAreaProps
+  extends DetailedHTMLProps<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
     HTMLTextAreaElement
   > {
@@ -21,11 +22,7 @@ export const TextAreaInput = ({
 }: TextAreaProps) => {
   return (
     <>
-      <Label
-        id={id}
-        label={label}
-        margin={margin}
-      />
+      <Label id={id} label={label} margin={margin} />
       <textarea
         id={id}
         className="form-control border smj-textarea p-2 fs-5"

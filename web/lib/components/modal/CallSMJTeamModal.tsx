@@ -9,9 +9,15 @@ export default function CallSMJTeamModal({
   additionalText,
 }: CallSMJTeamModalProps) {
   return (
-    <Modal title="Momentálně nedostupné" size={ModalSize.MEDIUM} onClose={onClose}>
+    <Modal
+      title="Momentálně nedostupné"
+      size={ModalSize.MEDIUM}
+      onClose={onClose}
+    >
       <p>{additionalText}</p>
-      <span className="text-muted">Pro více informací volejte prosím Job teamu.</span>
+      <span className="text-muted">
+        Pro více informací volejte prosím Job teamu.
+      </span>
     </Modal>
   )
 }

@@ -2,7 +2,12 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ApiError, WrappedError } from 'lib/types/api-error'
-import { deleteWorker, getWorkerById, getWorkerPhotoById, updateWorker } from 'lib/data/workers'
+import {
+  deleteWorker,
+  getWorkerById,
+  getWorkerPhotoById,
+  updateWorker,
+} from 'lib/data/workers'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
@@ -39,7 +44,12 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const { files, json } = await parseFormWithImages(req, id, getUploadDirForImages() + '/workers', 1)
+  const { files, json } = await parseFormWithImages(
+    req,
+    id,
+    getUploadDirForImages() + '/workers',
+    1
+  )
 
   /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
@@ -50,20 +60,20 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (files.photoFile) {
     const photoPath = getPhotoPath(files.photoFile) // update photoPath
     const worker = await getWorkerPhotoById(id)
-    if(worker?.photoPath && worker?.photoPath !== photoPath) { // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it 
+    if (worker?.photoPath && worker?.photoPath !== photoPath) {
+      // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
       deleteFile(worker.photoPath) // delete original image if necessary
     }
     workerData.photoPath = photoPath
-  }
+  } else if (workerData.photoFileRemoved) {
   /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
-  else if (workerData.photoFileRemoved) {
     const worker = await getWorkerPhotoById(id)
-    if(worker?.photoPath) { 
+    if (worker?.photoPath) {
       deleteFile(worker.photoPath) // delete original image if necessary
     }
     workerData.photoPath = ''
   }
-  
+
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
   await updateWorker(id, workerData)
 
@@ -130,6 +140,6 @@ export default APIMethodHandler({ get, patch, del })
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }

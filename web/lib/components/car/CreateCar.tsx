@@ -21,7 +21,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
   const onSubmit = (data: CarCreateData) => {
     trigger(data)
   }
-  
+
   const onConfirmationClosed = () => {
     setSaved(false)
     router.back()

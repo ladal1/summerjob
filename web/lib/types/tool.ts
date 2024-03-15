@@ -24,7 +24,6 @@ export const ToolCreateSchema = z
   })
   .strict()
 
-
 export type ToolCreateDataInput = z.input<typeof ToolCreateSchema>
 export type ToolCreateData = z.infer<typeof ToolCreateSchema>
 
