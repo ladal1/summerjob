@@ -1,4 +1,4 @@
-import { Marker, Popup, useMapEvents } from 'react-leaflet'
+import { Marker, Popup, useMapEvents } from "react-leaflet"
 
 interface LocationMarkerProps {
   address?: string
@@ -11,17 +11,18 @@ export const LocationMarker = ({
   address,
   markerPosition,
   setMarkerPosition,
-  canPickLocation = false,
+  canPickLocation = false
 }: LocationMarkerProps) => {
   useMapEvents({
     click(event) {
-      if (canPickLocation) {
+      if(canPickLocation) {
         const { lat, lng } = event.latlng
-        if (setMarkerPosition) setMarkerPosition([lat, lng])
+        if(setMarkerPosition)
+          setMarkerPosition([lat, lng])
       }
     },
   })
-  return markerPosition === null || markerPosition === undefined ? null : (
+  return (markerPosition === null || markerPosition === undefined) ? null : (
     <Marker position={markerPosition}>
       <Popup>
         <div>
@@ -38,14 +39,16 @@ export const LocationMarker = ({
         </div>
         {address && (
           <div>
-            <br />
+            <br/>
             <div className="row">
               <div className="col">
-                <strong>Adresa:</strong>
+              <strong>Adresa:</strong> 
               </div>
             </div>
             <div className="row">
-              <div className="col">{`${address}`}</div>
+              <div className="col">
+                {`${address}`}
+              </div>
             </div>
           </div>
         )}

@@ -32,7 +32,7 @@ const ActiveJobCreateFormSchema = z.object({
 export default function AddJobToPlanForm({
   planId,
   onComplete,
-  workerId,
+  workerId
 }: AddJobToPlanFormProps) {
   const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId)
   const { trigger, isMutating } = useAPIActiveJobCreateMultiple(planId, {
@@ -58,7 +58,7 @@ export default function AddJobToPlanForm({
     sorted.sort((a, b) => {
       const isPinnedA = isPinned(a, workerId)
       const isPinnedB = isPinned(b, workerId)
-
+      
       if (isPinnedA && !isPinnedB) {
         return -1
       }
@@ -68,7 +68,7 @@ export default function AddJobToPlanForm({
       return a.name.localeCompare(b.name)
     })
 
-    return sorted.map<SelectItem>(job => jobToSelectItem(job, workerId))
+    return sorted.map<SelectItem>((job) => jobToSelectItem(job, workerId))
   }, [data, workerId])
 
   const itemToFormData = (item: SelectItem) => ({
@@ -150,28 +150,23 @@ export default function AddJobToPlanForm({
   )
 }
 
-function AddJobSelectItem({
-  job,
-  workerId,
-}: {
-  job: ProposedJobComplete
-  workerId: string
-}) {
+function AddJobSelectItem({ job, workerId }: { job: ProposedJobComplete, workerId: string }) {
   return (
     <>
       <div className="text-wrap">
         {job.name} ({job.area?.name})
         {isPinned(job, workerId) && (
-          <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
+          <i className="ms-2 fas fa-thumbtack smj-action-pinned"/>
         )}
-        {job.requiredDays - job.activeJobs.length >=
-          job.availability.length && (
+        {(job.requiredDays - job.activeJobs.length) >= job.availability.length && (
           <>
-            <i className="ms-2 fas fa-triangle-exclamation smj-action-pinned" />
+            <i className="ms-2 fas fa-triangle-exclamation smj-action-pinned"/>
             <Issue>
               <span>
                 Job musí být naplánován
-                <i className="text-muted">{' - poslední dostupné dny'}</i>
+                <i className="text-muted">
+                  {' - poslední dostupné dny'}
+                </i>
               </span>
             </Issue>
           </>
@@ -179,23 +174,20 @@ function AddJobSelectItem({
       </div>
       <div className="text-muted text-wrap text-small">
         Naplánováno: {job.activeJobs.length}/{job.requiredDays}
-        <br />
+        <br/>
         Dostupné dny:
         {job.availability.map((day, index) => (
           <span key={index}>
             {index === 0 ? ' ' : ', '}
             {formatDateShort(new Date(day))}
           </span>
-        ))}
+        ))}  
       </div>
     </>
   )
 }
 
-function jobToSelectItem(
-  job: ProposedJobComplete,
-  workerId: string
-): SelectItem {
+function jobToSelectItem(job: ProposedJobComplete, workerId: string): SelectItem {
   return {
     id: job.id,
     name: job.name,
@@ -220,6 +212,6 @@ type SelectItem = {
   privateDescription: string
 }
 
-function isPinned(job: ProposedJobComplete, workerId: string) {
+function isPinned (job: ProposedJobComplete, workerId: string) {
   return job.pinnedBy.some(worker => worker.workerId === workerId)
-}
+} 

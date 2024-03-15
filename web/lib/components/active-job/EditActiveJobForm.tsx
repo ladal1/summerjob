@@ -61,10 +61,7 @@ export default function EditActiveJobForm({
     if (data.responsibleWorkerId === '') {
       delete data.responsibleWorkerId
     }
-    const modified = pick(
-      data,
-      ...Object.keys(dirtyFields)
-    ) as ActiveJobUpdateData
+    const modified = pick(data, ...Object.keys(dirtyFields)) as ActiveJobUpdateData
     trigger(modified, {
       onSuccess: () => {
         setSaved(true)
@@ -78,10 +75,7 @@ export default function EditActiveJobForm({
   }
 
   const selectResponsibleWorker = (id: string) => {
-    setValue('responsibleWorkerId', id, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('responsibleWorkerId', id, { shouldDirty: true, shouldValidate: true })
   }
 
   function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
@@ -93,7 +87,7 @@ export default function EditActiveJobForm({
   }
 
   const workerSelectItems = job.workers.map(workerToSelectItem)
-
+  
   const [name, setName] = useState(getValues('proposedJob.name'))
 
   return (
@@ -111,13 +105,9 @@ export default function EditActiveJobForm({
               id="proposedJob.name"
               label="Název jobu"
               placeholder="Název jobu"
-              register={() =>
-                register('proposedJob.name', {
-                  onChange: e => {
-                    setName(e.target.value)
-                  },
-                })
-              }
+              register={() => register("proposedJob.name", {onChange: (e) => {
+                setName(e.target.value)
+              }})}
               errors={errors}
             />
             <TextAreaInput
@@ -125,14 +115,14 @@ export default function EditActiveJobForm({
               label="Veřejný popis"
               placeholder="Popis"
               rows={4}
-              register={() => register('proposedJob.publicDescription')}
+              register={() => register("proposedJob.publicDescription")}
             />
             <TextAreaInput
               id="proposedJob.privateDescription"
               label="Poznámka pro organizátory"
               placeholder="Poznámka"
               rows={4}
-              register={() => register('proposedJob.privateDescription')}
+              register={() => register("proposedJob.privateDescription")}
             />
             <FilterSelectInput
               id="responsibleWorkerId"
@@ -148,7 +138,7 @@ export default function EditActiveJobForm({
               )}
               errors={errors}
             />
-
+            
             <label className="form-label fw-bold mt-4" htmlFor="rides">
               Přiřazené jízdy
             </label>
@@ -162,10 +152,10 @@ export default function EditActiveJobForm({
               register={register}
               objects={[
                 {
-                  id: 'completed',
-                  icon: 'fa-solid fa-user-check',
-                  label: 'Hotovo',
-                },
+                  id: "completed",
+                  icon: "fa-solid fa-user-check",
+                  label: "Hotovo",
+                }
               ]}
             />
             <div className="list-group mt-4 w-50">

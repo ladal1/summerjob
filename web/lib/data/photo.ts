@@ -5,7 +5,9 @@ import { PhotoPathData } from 'lib/types/photo'
 import { PrismaClient } from '@prisma/client'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 
-export async function getPhotoById(id: string): Promise<PhotoPathData | null> {
+export async function getPhotoById(
+  id: string
+): Promise<PhotoPathData | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
@@ -18,11 +20,13 @@ export async function getPhotoById(id: string): Promise<PhotoPathData | null> {
       photoPath: true,
     },
   })
-
+  
   return photo
 }
 
-export async function createPhoto(data: PhotoPathData) {
+export async function createPhoto(
+  data: PhotoPathData,
+) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
@@ -33,17 +37,22 @@ export async function createPhoto(data: PhotoPathData) {
   return photo
 }
 
-export async function updatePhoto(id: string, data: PhotoPathData) {
+export async function updatePhoto(
+  id: string, 
+  data: PhotoPathData
+) {
   const photo = await prisma.photo.update({
     where: {
       id: id,
     },
-    data: data,
+    data: data
   })
   return photo
 }
 
-export async function deletePhotos(ids: string[]) {
+export async function deletePhotos(
+  ids: string[]
+) {
   await prisma.$transaction(async tx => {
     for (const id of ids) {
       await deletePhoto(id, tx)

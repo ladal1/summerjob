@@ -17,13 +17,13 @@ const get = async (
   if (!allowed) {
     return
   }
-
+  
   const photo = await getPhotoById(photoId)
   if (!photo || !photo.photoPath) {
     res.status(404).end()
     return
   }
-
+  
   const fileStat = statSync(photo.photoPath)
   res.writeHead(200, {
     'Content-Type': `image/${photo?.photoPath?.split('.').pop()}`,
@@ -46,7 +46,7 @@ async function isAllowedToAccessProposedJobsPhoto(
   if (regularAccess) {
     return true
   }
-
+  
   res.status(403).end()
   return false
 }
@@ -58,3 +58,4 @@ export const config = {
     bodyParser: false,
   },
 }
+

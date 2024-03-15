@@ -1,7 +1,7 @@
 import { ActiveJob, Plan } from 'lib/prisma/client'
 import { z } from 'zod'
 import { Serialized } from './serialize'
-import { deserializeWorkerAvailability } from './worker'
+import {deserializeWorkerAvailability } from './worker'
 import { ActiveJobSchema, PlanSchema } from 'lib/prisma/zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
@@ -30,8 +30,9 @@ export const PlanWithJobsSchema = PlanSchema.extend({
 
 export type PlanUpdateDataInput = z.input<typeof PlanUpdateSchema>
 export const PlanUpdateSchema = z.object({
-  published: z.boolean(),
+  published: z.boolean()
 })
+
 
 export type PlanWithJobs = Plan & {
   jobs: ActiveJob[]

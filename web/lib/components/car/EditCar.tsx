@@ -15,7 +15,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
     },
   })
   const router = useRouter()
-
+  
   const onSubmit = (data: CarUpdateData) => {
     trigger(data)
   }

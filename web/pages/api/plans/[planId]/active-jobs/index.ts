@@ -62,6 +62,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false,
-  },
+    bodyParser: false
+  }
 }

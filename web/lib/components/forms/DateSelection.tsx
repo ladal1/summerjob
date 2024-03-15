@@ -48,7 +48,8 @@ export default function DateSelection({
   })
 
   const isAfterHoursCalc = () => {
-    if (!disableAfter) return false
+    if(!disableAfter) 
+      return false
     const currentHour = currentDate.getHours()
     return currentHour >= disableAfter
   }
@@ -86,10 +87,10 @@ export default function DateSelection({
           <div className="row gx-2">
             {week.map(day => (
               <React.Fragment key={day.date.toJSON()}>
-                <div
+                <div 
                   className="col gy-2"
                   onClick={() => {
-                    if (isDateDisabledDueToAfterHours(day.date)) {
+                    if(isDateDisabledDueToAfterHours(day.date)) {
                       setShowCallModal(true)
                     }
                   }}
@@ -101,9 +102,7 @@ export default function DateSelection({
                     autoComplete="off"
                     {...register()}
                     value={day.date.toJSON()}
-                    disabled={
-                      day.isDisabled || isDateDisabledDueToAfterHours(day.date)
-                    }
+                    disabled={day.isDisabled || isDateDisabledDueToAfterHours(day.date)}
                   />
                   <label
                     className={`btn btn-day-select btn-light ${
@@ -120,8 +119,8 @@ export default function DateSelection({
         </React.Fragment>
       ))}
       {showCallModal && (
-        <CallSMJTeamModal
-          onClose={() => setShowCallModal(false)}
+        <CallSMJTeamModal 
+          onClose={() => setShowCallModal(false)} 
           additionalText={`Je po ${disableAfter}. hodině, zvolení časové dostupnosti je tudíž znepřístupněno.`}
         />
       )}

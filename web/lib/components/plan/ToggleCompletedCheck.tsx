@@ -1,9 +1,5 @@
 'use client'
-import {
-  ActiveJobNoPlan,
-  ActiveJobUpdateData,
-  ActiveJobUpdateSchema,
-} from 'lib/types/active-job'
+import { ActiveJobNoPlan, ActiveJobUpdateData, ActiveJobUpdateSchema } from 'lib/types/active-job'
 import { useState } from 'react'
 import { Modal, ModalSize } from '../modal/Modal'
 import { useAPIActiveJobUpdate } from 'lib/fetcher/active-job'
@@ -16,18 +12,18 @@ interface ToggleCompletedCheckProps {
   job: ActiveJobNoPlan
 }
 
-export default function ToggleCompletedCheck({
-  job,
+export default function ToggleCompletedCheck({ 
+  job, 
 }: ToggleCompletedCheckProps) {
   const {
     register,
     handleSubmit,
-    formState: { dirtyFields },
+    formState: { dirtyFields }
   } = useForm<ActiveJobUpdateData>({
     resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
       completed: job.completed,
-      privateDescription: job.proposedJob.privateDescription,
+      privateDescription: job.privateDescription
     },
   })
 
@@ -37,10 +33,7 @@ export default function ToggleCompletedCheck({
   const [showNoteModal, setShowNoteModal] = useState(false)
 
   const onSubmit = (data: ActiveJobUpdateData) => {
-    const modified = pick(
-      data,
-      ...Object.keys(dirtyFields)
-    ) as ActiveJobUpdateData
+    const modified = pick(data, ...Object.keys(dirtyFields)) as ActiveJobUpdateData
     trigger(modified, {
       onSuccess: () => {
         setShowNoteModal(false)
@@ -55,11 +48,9 @@ export default function ToggleCompletedCheck({
         className="form-check-input smj-checkbox"
         type="checkbox"
         checked={checked}
-        {...register('completed', {
-          onChange: () => {
-            setChecked(!checked)
-            setShowNoteModal(true)
-          },
+        {...register('completed', { onChange: () => {
+          setChecked(!checked)
+          setShowNoteModal(true)}
         })}
       />
       {showNoteModal && (
@@ -69,10 +60,10 @@ export default function ToggleCompletedCheck({
           onClose={() => setShowNoteModal(false)}
         >
           <form onSubmit={handleSubmit(onSubmit)}>
-            <TextAreaInput
-              id={'privateDescription'}
-              label={'Poznámka pro organizátory'}
-              register={() => register('privateDescription')}
+            <TextAreaInput 
+              id={'privateDescription'} 
+              label={'Poznámka pro organizátory'} 
+              register={() => register("privateDescription")}
               rows={4}
               margin={false}
             />

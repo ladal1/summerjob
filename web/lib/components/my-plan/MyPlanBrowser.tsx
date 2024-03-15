@@ -49,64 +49,53 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
         <div className="container">
           <EditBox>
             <h5>
-              {(selectedPlan?.job?.seqNum
-                ? selectedPlan?.job?.seqNum + ' - '
-                : '') + selectedPlan?.job?.name ||
+              {((selectedPlan?.job?.seqNum ? (selectedPlan?.job?.seqNum + ' - ') : '') + selectedPlan?.job?.name) ||
                 'Tento den nemáte naplánovanou práci.'}
             </h5>
             {selectedPlan?.job && (
               <div className="container-fluid">
                 <div className="row">
-                  <div
-                    className={`${
-                      selectedPlan.job.location.coordinates ? 'col-lg-6' : 'col'
-                    } " mb-3"`}
-                  >
+                  <div className={`${selectedPlan.job.location.coordinates ? "col-lg-6" : "col"} " mb-3"`}>
                     <RowContent
-                      data={[
-                        {
-                          label: 'Popis',
-                          content: `${selectedPlan.job.description}`,
-                        },
-                        {
-                          label: 'Zodpovědný pracant',
-                          content: `${selectedPlan.job.responsibleWorkerName}`,
-                        },
-                        {
-                          label: 'Pracanti',
-                          content: `${selectedPlan.job.workerNames.join(', ')}`,
-                        },
-                        {
-                          label: 'Kontaktní osoba',
-                          content: `${selectedPlan.job.contact}`,
-                        },
-                        {
-                          label: 'Alergeny',
-                          content: `${
-                            selectedPlan.job.allergens.join(', ') || 'Žádné'
-                          }`,
-                        },
-                        {
-                          label: 'Adresa',
-                          content: `${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`,
-                        },
-                        {
-                          label: 'Občerstvení k dispozici',
-                          content: `${selectedPlan.job.hasFood ? 'Ano' : 'Ne'}`,
-                        },
-                        {
-                          label: 'Sprcha k dispozici',
-                          content: `${
-                            selectedPlan.job.hasShower ? 'Ano' : 'Ne'
-                          }`,
-                        },
-                        {
-                          label: <strong>Doprava:</strong>,
-                          content: (
+                      data={
+                        [
+                          {
+                            label: "Popis",
+                            content: `${selectedPlan.job.description}`, 
+                          },
+                          {
+                            label: "Zodpovědný pracant",
+                            content: `${selectedPlan.job.responsibleWorkerName}`, 
+                          },
+                          {
+                            label: "Pracanti",
+                            content: `${selectedPlan.job.workerNames.join(', ')}`, 
+                          },
+                          {
+                            label: "Kontaktní osoba",
+                            content: `${selectedPlan.job.contact}`, 
+                          },
+                          {
+                            label: "Alergeny",
+                            content: `${selectedPlan.job.allergens.join(', ') || 'Žádné'}`, 
+                          },
+                          {
+                            label: "Adresa",
+                            content: `${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`, 
+                          },
+                          {
+                            label: "Občerstvení k dispozici",
+                            content: `${selectedPlan.job.hasFood ? 'Ano' : 'Ne'}`, 
+                          },
+                          {
+                            label: "Sprcha k dispozici",
+                            content: `${selectedPlan.job.hasShower ? 'Ano' : 'Ne'}`, 
+                          },
+                          {
+                            label: <strong>Doprava:</strong>,
+                            content: 
                             <>
-                              {!selectedPlan.job.ride && (
-                                <div className="ms-2">Pěšky</div>
-                              )}
+                              {!selectedPlan.job.ride && <div className="ms-2">Pěšky</div>}
                               {selectedPlan.job.ride && (
                                 <>
                                   <div className="ms-2 pt-2">
@@ -123,19 +112,17 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                                     {!selectedPlan.job.ride.endsAtMyJob && (
                                       <>
                                         Sdílená doprava. Auto jede na job{' '}
-                                        <i>
-                                          {selectedPlan.job.ride.endJobName}
-                                        </i>
-                                        , tebe vysadí cestou.
+                                        <i>{selectedPlan.job.ride.endJobName}</i>, tebe
+                                        vysadí cestou.
                                       </>
                                     )}
                                   </div>
                                 </>
                               )}
-                            </>
-                          ),
-                        },
-                      ]}
+                            </> 
+                          },
+                        ] 
+                      }
                     />
                   </div>
                   {selectedPlan.job.location.coordinates && (
@@ -148,9 +135,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                         />
                       </div>
                       <div className="d-flex justify-content-end">
-                        <OpenNavigationButton
-                          coordinates={selectedPlan.job.location.coordinates}
-                        />
+                        <OpenNavigationButton coordinates={selectedPlan.job.location.coordinates} />
                       </div>
                     </div>
                   )}

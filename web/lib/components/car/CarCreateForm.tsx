@@ -62,14 +62,14 @@ export default function CarCreateForm({
               label="Název"
               placeholder="Model auta, značka"
               errors={errors}
-              register={() => register('name')}
+              register={() => register("name")}
             />
             <TextAreaInput
               id="description"
               label="Poznámka pro organizátory"
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
               rows={4}
-              register={() => register('description')}
+              register={() => register("description")}
             />
             <TextInput
               id="seats"
@@ -77,13 +77,7 @@ export default function CarCreateForm({
               placeholder="Počet sedadel"
               min={1}
               defaultValue={4}
-              register={() =>
-                register('seats', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
-              }
+              register={() => register("seats", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
             <FilterSelectInput
@@ -99,13 +93,7 @@ export default function CarCreateForm({
               label="Počáteční stav kilometrů"
               placeholder="Počáteční stav kilometrů"
               min={0}
-              register={() =>
-                register('odometerStart', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
-              }
+              register={() => register("odometerStart", { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
 

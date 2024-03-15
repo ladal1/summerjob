@@ -1,11 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import {
-  createDirectory,
-  deleteDirectory,
-  deleteFile,
-  getUploadDirForImages,
-} from 'lib/api/fileManager'
+import { createDirectory, deleteDirectory, deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { ToolType, registerTools } from 'lib/api/register/registerTools'
@@ -50,18 +45,13 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-
+  
   // Get current photoIds
   const currentPhotoIds = await getProposedJobPhotoIdsById(id)
   const currentPhotoCnt = currentPhotoIds?.photos.length ?? 0
   const uploadDirectory = getUploadDirForImages() + `/proposed-job`
 
-  const { files, json } = await parseFormWithImages(
-    req,
-    id,
-    uploadDirectory,
-    10 - currentPhotoCnt
-  )
+  const { files, json } = await parseFormWithImages(req, id, uploadDirectory, 10 - currentPhotoCnt)
 
   const proposedJobData = validateOrSendError(
     ProposedJobUpdateSchema,
@@ -73,40 +63,21 @@ async function patch(
   }
 
   // Set coordinates if they are missing
-  if (proposedJobData.coordinates === undefined) {
+  if(proposedJobData.coordinates === undefined) {
     const fetchedCoords = await getGeocodingData(proposedJobData.address)
-    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
+    const parsed = CoordinatesSchema.safeParse({coordinates: fetchedCoords})
     if (fetchedCoords && parsed.success) {
       proposedJobData.coordinates = parsed.data.coordinates
     }
   }
 
-  const {
-    photoIdsDeleted,
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    ...rest
-  } = proposedJobData
+  const {photoIdsDeleted, toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = proposedJobData
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   await updateProposedJob(id, rest)
-
+  
   await registerPhotos(files, photoIdsDeleted, uploadDirectory, id, session)
-  await registerTools(
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    id,
-    ToolType.ON_SITE,
-    session
-  )
-  await registerTools(
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    id,
-    ToolType.TO_TAKE_WITH,
-    session
-  )
+  await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, id, ToolType.ON_SITE, session)
+  await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, id, ToolType.TO_TAKE_WITH, session)
 
   res.status(204).end()
 }
@@ -129,6 +100,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false,
-  },
+    bodyParser: false
+  }
 }

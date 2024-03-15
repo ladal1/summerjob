@@ -24,8 +24,14 @@ export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 
 export const WorkerCreateSchema = z
   .object({
-    firstName: z.string().min(1, { message: err.emptyFirstName }).trim(),
-    lastName: z.string().min(1, { message: err.emptyLastName }).trim(),
+    firstName: z
+      .string()
+      .min(1, { message: err.emptyFirstName })
+      .trim(),
+    lastName: z
+      .string()
+      .min(1, { message: err.emptyLastName })
+      .trim(),
     email: z
       .string()
       .min(1, { message: err.emptyEmail })
@@ -33,9 +39,7 @@ export const WorkerCreateSchema = z
     phone: z
       .string()
       .min(1, { message: err.emptyPhone })
-      .refine(phone => phoneRegex.test(phone), {
-        message: err.invalidRegexPhone,
-      }),
+      .refine((phone) => phoneRegex.test(phone), { message: err.invalidRegexPhone }),
     strong: z.boolean(),
     team: z.boolean(),
     skills: z.array(z.nativeEnum(Skill)),
@@ -43,20 +47,11 @@ export const WorkerCreateSchema = z
     note: z.string().optional(),
     photoFile: z
       .any()
-      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
-      .transform(
-        fileList =>
-          (fileList && fileList.length > 0 && fileList[0]) || undefined
-      )
-      .refine(
-        file => !file || (!!file && file.size <= 1024 * 1024 * 10),
-        err.maxCapacityImage + ' - 10 MB'
-      )
-      .refine(
-        file => !file || (!!file && file.type?.startsWith('image')),
-        err.unsuportedTypeImage
-      ) // any image
-      .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
+      .refine((fileList) => fileList instanceof FileList, err.invalidTypeFile)
+      .transform((fileList) => (fileList && fileList.length > 0) && fileList[0] || undefined)
+      .refine((file) => !file || (!!file && file.size <= 1024*1024*10), err.maxCapacityImage + ' - 10 MB')
+      .refine((file) => !file || (!!file && file.type?.startsWith("image")), err.unsuportedTypeImage) // any image
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
       .optional(),
     photoFileRemoved: z.boolean().optional(),
     photoPath: z.string().optional(),

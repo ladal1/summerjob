@@ -62,7 +62,7 @@ export default function CreateProposedJobForm({
   })
 
   const router = useRouter()
-
+  
   const onSubmit = (data: ProposedJobCreateData) => {
     trigger(data, {
       onError: e => {
@@ -78,14 +78,11 @@ export default function CreateProposedJobForm({
     setSaved(false)
     router.back()
   }
-
+  
   //#region JobType
 
   const selectJobType = (id: string) => {
-    setValue('jobType', id as JobType, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('jobType', id as JobType, { shouldDirty: true, shouldValidate: true })
   }
 
   const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
@@ -99,49 +96,33 @@ export default function CreateProposedJobForm({
   //#endregion
 
   //#region Tools
-
+  
   const selectToolsOnSite = (items: PillSelectItem[]) => {
-    const tools = items.map(item => ({
-      id: item.databaseId,
-      tool: item.id as ToolName,
-      amount: item.amount ?? 1,
-    }))
-    setValue(
-      'toolsOnSiteCreate',
-      { tools: tools },
-      { shouldDirty: true, shouldValidate: true }
-    )
+    const tools = items.map(item => ({ id: item.databaseId, tool: item.id as ToolName, amount: item.amount ?? 1 }))
+    setValue('toolsOnSiteCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
   }
 
   const selectToolsToTakeWith = (items: PillSelectItem[]) => {
-    const tools = items.map(item => ({
-      id: item.databaseId,
-      tool: item.id as ToolName,
-      amount: item.amount ?? 1,
-    }))
-    setValue(
-      'toolsToTakeWithCreate',
-      { tools: tools },
-      { shouldDirty: true, shouldValidate: true }
-    )
+    const tools = items.map(item => ({ id: item.databaseId, tool: item.id as ToolName, amount: item.amount ?? 1 }))
+    setValue('toolsToTakeWithCreate', {tools: tools}, { shouldDirty: true, shouldValidate: true })
   }
 
   const toolSelectItems = Object.entries(toolNameMapping).map(
     ([key, name]) => ({
       id: key,
       name: name,
-      searchable: name,
+      searchable: name
     })
   )
 
-  const manageToolSelectItems = (): PillSelectItem[][] => {
+  const manageToolSelectItems = () : PillSelectItem[][] => {
     const allTools = toolSelectItems
     const currentJobType = getValues('jobType') || JobType.OTHER
     const sortedToolsByCurrentJobType = allTools
-      .filter(tool => mapToolNameToJobType(tool.id).includes(currentJobType))
+      .filter((tool) => mapToolNameToJobType(tool.id).includes(currentJobType))
       .sort((a, b) => a.name.localeCompare(b.name))
     const sortedToolsOthers = allTools
-      .filter(tool => !sortedToolsByCurrentJobType.some(t => t.id === tool.id))
+      .filter((tool) => !sortedToolsByCurrentJobType.some((t) => t.id === tool.id))
       .sort((a, b) => a.name.localeCompare(b.name))
     return [sortedToolsByCurrentJobType, sortedToolsOthers]
   }
@@ -149,20 +130,14 @@ export default function CreateProposedJobForm({
   // Remove existing tools from backend.
   const removeExistingToolOnSite = (id: string) => {
     const prevToolIdsDeleted = getValues('toolsOnSiteIdsDeleted') || []
-    setValue('toolsOnSiteIdsDeleted', [...prevToolIdsDeleted, id], {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('toolsOnSiteIdsDeleted', [...prevToolIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
   }
 
   const removeExistingToolToTakeWith = (id: string) => {
     const prevToolIdsDeleted = getValues('toolsToTakeWithIdsDeleted') || []
-    setValue('toolsToTakeWithIdsDeleted', [...prevToolIdsDeleted, id], {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('toolsToTakeWithIdsDeleted', [...prevToolIdsDeleted, id], { shouldDirty: true, shouldValidate: true })
   }
-
+  
   //#endregion
 
   //#region Area
@@ -179,39 +154,29 @@ export default function CreateProposedJobForm({
     }
   }
   //#endregion
-
+  
   //#region Photo
 
   // Remove newly added photo from FileList before sending
   const removeNewPhoto = (index: number) => {
-    const prevPhotoFiles: FileList | undefined = getValues('photoFiles')
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
     // Filter out the file at the specified index
-    const filteredFiles: Array<File> = Array.from(prevPhotoFiles ?? []).filter(
-      (_, i) => i !== index
-    )
+    const filteredFiles: Array<File> = Array.from(prevPhotoFiles ?? []).filter((_, i) => i !== index)
     // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
     filteredFiles.forEach((file: File) => dt.items.add(file))
-    setValue('photoFiles', dt.files, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('photoFiles', dt.files, { shouldDirty: true, shouldValidate: true })
   }
 
   // Register newly added photo to FileList
   const registerPhoto = (fileList: FileList) => {
-    const prevPhotoFiles: FileList | undefined = getValues('photoFiles')
+    const prevPhotoFiles: (FileList | undefined) = getValues('photoFiles')
     // Combine existing files and newly added files
-    const combinedFiles: File[] = Array.from(prevPhotoFiles ?? []).concat(
-      Array.from(fileList ?? [])
-    )
+    const combinedFiles: File[] = (Array.from(prevPhotoFiles ?? [])).concat(Array.from(fileList ?? []))
     // Transfer those photos back to photoFiles
     const dt = new DataTransfer()
     combinedFiles.forEach((file: File) => dt.items.add(file))
-    setValue('photoFiles', dt.files, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('photoFiles', dt.files, { shouldDirty: true, shouldValidate: true })
   }
 
   //#endregion
@@ -241,7 +206,7 @@ export default function CreateProposedJobForm({
               id="name"
               label="Název jobu"
               placeholder="Název"
-              register={() => register('name')}
+              register={() => register("name")}
               errors={errors}
             />
             <TextAreaInput
@@ -249,14 +214,14 @@ export default function CreateProposedJobForm({
               label="Popis navrhované práce"
               placeholder="Popis"
               rows={4}
-              register={() => register('publicDescription')}
+              register={() => register("publicDescription")}
             />
             <TextAreaInput
               id="privateDescription"
               label="Poznámka pro organizátory"
               placeholder="Poznámka"
               rows={4}
-              register={() => register('privateDescription')}
+              register={() => register("privateDescription")}
             />
             <FilterSelectInput
               id="areaId"
@@ -285,7 +250,7 @@ export default function CreateProposedJobForm({
               id="contact"
               label="Kontakt"
               placeholder="Kontakt"
-              register={() => register('contact')}
+              register={() => register("contact")}
               errors={errors}
             />
             <ImageUploader
@@ -304,13 +269,7 @@ export default function CreateProposedJobForm({
               placeholder="Počet dní"
               min={1}
               defaultValue={1}
-              register={() =>
-                register('requiredDays', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
-              }
+              register={() => register("requiredDays", {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               errors={errors}
             />
             <Label
@@ -323,11 +282,7 @@ export default function CreateProposedJobForm({
                 id="minWorkers"
                 min={1}
                 defaultValue={1}
-                {...register('minWorkers', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })}
+                {...register('minWorkers', { valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
@@ -335,11 +290,7 @@ export default function CreateProposedJobForm({
                 id="maxWorkers"
                 min={1}
                 defaultValue={1}
-                {...register('maxWorkers', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })}
+                {...register('maxWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
               /
               <input
@@ -347,30 +298,22 @@ export default function CreateProposedJobForm({
                 id="strongWorkers"
                 min={0}
                 defaultValue={0}
-                {...register('strongWorkers', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })}
+                {...register('strongWorkers', {valueAsNumber: true, onChange: (e) => e.target.value = formatNumber(e.target.value)})}
               />
             </div>
             {(errors.minWorkers ||
               errors.maxWorkers ||
-              errors.strongWorkers) && (
-              <FormWarning
-                message={
-                  (errors?.minWorkers?.message as string | undefined) ||
-                  (errors?.maxWorkers?.message as string | undefined) ||
-                  (errors?.strongWorkers?.message as string | undefined)
-                }
-              />
-            )}
+              errors.strongWorkers) && (<FormWarning message={
+                errors?.minWorkers?.message as string | undefined ||
+                errors?.maxWorkers?.message as string | undefined ||
+                errors?.strongWorkers?.message as string | undefined
+              } />)}
 
             <div className="d-flex flex-row">
               <DateSelectionInput
                 id="availability"
                 label="Časová dostupnost"
-                register={() => register('availability')}
+                register={() => register("availability")}
                 days={allDates}
               />
             </div>
@@ -388,16 +331,16 @@ export default function CreateProposedJobForm({
             <PillSelectInput
               id="toolsOnSiteCreate"
               label="Nářadí na místě"
-              placeholder={'Vyberte nástroje'}
+              placeholder={"Vyberte nástroje"}
               items={manageToolSelectItems()}
               removeExisting={removeExistingToolOnSite}
               register={selectToolsOnSite}
               errors={errors}
-            />
+            />  
             <PillSelectInput
               id="toolsToTakeWithCreate"
               label="Nářadí s sebou"
-              placeholder={'Vyberte nástroje'}
+              placeholder={"Vyberte nástroje"}
               items={manageToolSelectItems()}
               removeExisting={removeExistingToolToTakeWith}
               register={selectToolsToTakeWith}
@@ -406,22 +349,22 @@ export default function CreateProposedJobForm({
             <GroupButtonsInput
               label="Alergeny"
               mapping={allergyMapping}
-              register={() => register('allergens')}
+              register={() => register("allergens")}
             />
             <OtherAttributesInput
               label="Další vlastnosti"
               register={register}
               objects={[
                 {
-                  id: 'hasFood',
-                  icon: 'fa fa-utensils',
-                  label: 'Strava na místě',
-                },
+                  id: "hasFood",
+                  icon: "fa fa-utensils",
+                  label: "Strava na místě",
+                }, 
                 {
-                  id: 'hasShower',
-                  icon: 'fa fa-shower',
-                  label: 'Sprcha na místě',
-                },
+                  id: "hasShower",
+                  icon: "fa fa-shower",
+                  label: "Sprcha na místě",
+                }
               ]}
             />
 

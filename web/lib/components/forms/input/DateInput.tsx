@@ -29,8 +29,16 @@ export const DateInput = <FormData extends FieldValues>({
 
   return (
     <>
-      <Label id={id} label={label} mdNone={true} />
-      <input className="form-control p-1 fs-5" {...register()} {...rest} />
+      <Label
+        id={id}
+        label={label}
+        mdNone={true}
+      />
+      <input
+        className="form-control p-1 fs-5"
+        {...register()}
+        {...rest}
+      />
       <FormWarning message={error} />
     </>
   )

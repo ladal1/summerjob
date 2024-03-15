@@ -8,11 +8,7 @@ import { useState } from 'react'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
-import {
-  formatPhoneNumber,
-  pick,
-  removeRedundantSpace,
-} from 'lib/helpers/helpers'
+import { formatPhoneNumber, pick, removeRedundantSpace } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { Allergy, Skill } from '../../prisma/client'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
@@ -91,7 +87,8 @@ export default function EditWorker({
     setSaved(false)
     if (isHandlingCar) {
       router.push(`/cars/${carRoute}`)
-    } else if (!isProfilePage) {
+    }
+    else if (!isProfilePage) {
       router.back()
     }
   }
@@ -114,17 +111,11 @@ export default function EditWorker({
   //#region File
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true })
   }
 
   const removeExistingPhoto = () => {
-    setValue('photoFileRemoved', true, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('photoFileRemoved', true, { shouldDirty: true, shouldValidate: true })
   }
 
   const registerPhoto = (fileList: FileList) => {
@@ -149,12 +140,7 @@ export default function EditWorker({
               id="firstName"
               label="Jméno"
               placeholder="Jméno"
-              register={() =>
-                register('firstName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
+              register={() => register("firstName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
               errors={errors}
             />
             <TextInput
@@ -162,31 +148,21 @@ export default function EditWorker({
               label="Příjmení"
               placeholder="Příjmení"
               errors={errors}
-              register={() =>
-                register('lastName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
+              register={() => register("lastName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
             />
             <TextInput
               id="phone"
               label="Telefonní číslo"
               placeholder="(+420) 123 456 789"
               errors={errors}
-              register={() =>
-                register('phone', {
-                  onChange: e =>
-                    (e.target.value = formatPhoneNumber(e.target.value)),
-                })
-              }
+              register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
             />
             <TextInput
               id="email"
               label="Email"
               placeholder="uzivatel@example.cz"
               errors={errors}
-              register={() => register('email')}
+              register={() => register("email")}
             />
             <p className="text-muted mt-1">
               {isProfilePage
@@ -198,7 +174,7 @@ export default function EditWorker({
                 <DateSelectionInput
                   id="availability.workDays"
                   label="Pracovní dostupnost"
-                  register={() => register('availability.workDays')}
+                  register={() => register("availability.workDays")}
                   days={allDates}
                   disableAfter={isProfilePage ? 18 : undefined}
                 />
@@ -206,7 +182,7 @@ export default function EditWorker({
               <DateSelectionInput
                 id="availability.adorationDays"
                 label="Dny adorace"
-                register={() => register('availability.adorationDays')}
+                register={() => register("availability.adorationDays")}
                 days={allDates}
                 disableAfter={isProfilePage ? 18 : undefined}
               />
@@ -214,13 +190,13 @@ export default function EditWorker({
             <GroupButtonsInput
               label="Alergie"
               mapping={allergyMapping}
-              register={() => register('allergyIds')}
+              register={() => register("allergyIds")}
             />
             {!isProfilePage && (
               <GroupButtonsInput
                 label="Dovednosti"
                 mapping={skillMapping}
-                register={() => register('skills')}
+                register={() => register("skills")}
               />
             )}
             {!isProfilePage && (
@@ -229,16 +205,16 @@ export default function EditWorker({
                 register={register}
                 objects={[
                   {
-                    id: 'strong',
-                    icon: 'fas fa-dumbbell',
-                    label: 'Silák',
+                    id: "strong",
+                    icon: "fas fa-dumbbell",
+                    label: "Silák",
                   },
 
                   {
-                    id: 'team',
-                    icon: 'fa-solid fa-people-group',
-                    label: 'Tým',
-                  },
+                    id: "team",
+                    icon: "fa-solid fa-people-group",
+                    label: "Tým",
+                  }
                 ]}
               />
             )}
@@ -247,19 +223,20 @@ export default function EditWorker({
                 id="photoFile"
                 label="Fotografie"
                 secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-                photoInit={
-                  worker.photoPath
-                    ? [{ url: `/api/workers/${worker.id}/photo`, index: '0' }]
-                    : null
-                }
+                photoInit={worker.photoPath ? [{url: `/api/workers/${worker.id}/photo`, index: "0"}] : null}
                 errors={errors}
                 registerPhoto={registerPhoto}
                 removeNewPhoto={removeNewPhoto}
                 removeExistingPhoto={removeExistingPhoto}
               />
             )}
-            {(carAccess || isProfilePage) && <Label id="car" label="Auta" />}
-
+            {(carAccess || isProfilePage) && (
+              <Label
+                id="car"
+                label="Auta"
+              />
+            )}
+          
             {carAccess ? (
               <>
                 {worker.cars.length === 0 && <p>Žádná auta</p>}
@@ -293,24 +270,24 @@ export default function EditWorker({
                 </div>
               )
             )}
-
+          
             {carAccess ? (
-              <div className="d-flex align-items-baseline flex-wrap">
-                <div className="me-3">
-                  <i>Auta je možné přiřadit v záložce Auta: </i>
-                </div>
-                <button
-                  type={'submit'}
-                  className="btn btn-light pt-2 pb-2"
-                  disabled={isMutating}
-                  onClick={handleAddCar}
-                >
-                  <div className="d-flex align-items-center">
-                    <i className="fas fa-plus me-2" />
-                    Přidat auto
+                <div className="d-flex align-items-baseline flex-wrap">
+                  <div className="me-3">
+                    <i>Auta je možné přiřadit v záložce Auta: </i> 
                   </div>
-                </button>
-              </div>
+                  <button
+                    type={'submit'}
+                    className="btn btn-light pt-2 pb-2"
+                    disabled={isMutating}
+                    onClick={handleAddCar}
+                  >
+                    <div className="d-flex align-items-center">
+                      <i className="fas fa-plus me-2" />
+                      Přidat auto
+                    </div>
+                  </button>
+                </div>
             ) : (
               isProfilePage && (
                 <p>
@@ -325,17 +302,13 @@ export default function EditWorker({
                 label="Poznámka"
                 placeholder="Poznámka"
                 rows={1}
-                register={() => register('note')}
+                register={() => register("note")}
               />
             )}
 
-            <div
-              className={`d-flex ${
-                isProfilePage
-                  ? 'justify-content-end'
-                  : 'justify-content-between gap-3'
-              }`}
-            >
+            <div className={`d-flex ${
+                isProfilePage ? 'justify-content-end' : 'justify-content-between gap-3'
+              }`}>
               {!isProfilePage && (
                 <button
                   className="btn btn-secondary mt-4"

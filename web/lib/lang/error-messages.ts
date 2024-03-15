@@ -1,5 +1,5 @@
 export const customErrorMessages = {
-  invalidRegexName: 'Zadejte pouze písmena nebo mezery',
+  invalidRegexName: 'Zadejte pouze písmena nebo mezery', 
   emptyFirstName: 'Zadejte jméno',
   emptyLastName: 'Zadejte příjmení',
 

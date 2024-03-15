@@ -13,12 +13,7 @@ import { PlanJoblessRow } from './PlanJoblessRow'
 import { RidesForJob } from 'lib/types/ride'
 
 const _columns: SortableColumn[] = [
-  {
-    id: 'completed',
-    name: 'Hotovo',
-    sortable: true,
-    style: { maxWidth: '60px' },
-  },
+  { id: 'completed', name: 'Hotovo', sortable: true, style: {maxWidth: "60px"} },
   { id: 'name', name: 'Práce', sortable: true },
   { id: 'workers', name: 'Pracanti', sortable: true },
   { id: 'contact', name: 'Kontaktní osoba', sortable: true },
@@ -26,13 +21,7 @@ const _columns: SortableColumn[] = [
   { id: 'address', name: 'Adresa', sortable: true },
   { id: 'amenities', name: 'Zajištění', sortable: false },
   { id: 'priority', name: 'Priorita', sortable: true },
-  {
-    id: 'actions',
-    name: 'Akce',
-    sortable: false,
-    className: 'smj-sticky-col-right smj-table-header',
-    style: { minWidth: '100px' },
-  },
+  { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"}},
 ]
 
 interface PlanTableProps {
@@ -140,7 +129,7 @@ function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
     contact: job => job.proposedJob.contact,
     workers: job =>
       `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers}`,
-    priority: job => job.proposedJob.priority,
+    priority: job => job.proposedJob.priority
   }
 
   if (sortOrder.columnId in getSortable) {

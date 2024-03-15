@@ -23,7 +23,7 @@ const get = async (
     res.status(404).end()
     return
   }
-
+  
   const fileStat = statSync(worker.photoPath)
   res.writeHead(200, {
     'Content-Type': `image/${worker?.photoPath?.split('.').pop()}`,
@@ -46,7 +46,7 @@ async function isAllowedToAccessWorkerPhoto(
   if (regularAccess) {
     return true
   }
-
+  
   res.status(403).end()
   return false
 }
@@ -58,3 +58,4 @@ export const config = {
     bodyParser: false,
   },
 }
+

@@ -52,7 +52,7 @@ export default function NewEventModal({
           label="Název ročníku"
           placeholder="Název ročníku"
           errors={errors}
-          register={() => register('name')}
+          register={() => register("name")}
           margin={false}
         />
         <label
@@ -68,7 +68,7 @@ export default function NewEventModal({
               label="Začátek"
               type="date"
               errors={errors}
-              register={() => register('startDate')}
+              register={() => register("startDate")}
             />
           </div>
           <div className="fs-3 mx-3 me-3 d-none d-md-block">-</div>
@@ -78,7 +78,7 @@ export default function NewEventModal({
               label="Konec"
               type="date"
               errors={errors}
-              register={() => register('endDate')}
+              register={() => register("endDate")}
             />
           </div>
         </div>

@@ -13,13 +13,13 @@ export const ProgressBar = ({ time }: ProgressBarProps) => {
   const increment = Math.ceil(delay / (time / 100)) + 1
 
   useEffect(() => {
-    if (time <= 100) {
+    if(time <= 100) {
       return
     }
 
     // Update progress at regular intervals
     const updateProgress = () => {
-      setProgress(prevProgress => Math.min(prevProgress + increment, 100))
+      setProgress((prevProgress) => Math.min(prevProgress + increment, 100))
     }
 
     // Start updating progress
@@ -36,13 +36,14 @@ export const ProgressBar = ({ time }: ProgressBarProps) => {
       <div
         className="progress-bar smj-progress-bar"
         role="progressbar"
-        style={{
+        style={{ 
           width: `${progress}%`,
         }}
         aria-valuenow={progress}
         aria-valuemin={0}
         aria-valuemax={100}
-      ></div>
+      >
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react'
+import { CSSProperties } from "react"
 
 export interface SortableColumn {
   id: string
@@ -59,9 +59,7 @@ export function SortableTable({
               <th
                 key={column.id}
                 onClick={() => onSortClicked(column.id)}
-                className={
-                  column.sortable ? 'cursor-pointer ' : '' + column.className
-                }
+                className={column.sortable ? 'cursor-pointer ' : '' + column.className}
                 style={column.style}
               >
                 {column.name}

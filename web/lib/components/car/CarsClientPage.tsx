@@ -21,21 +21,18 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
 
   // get query parameters
   const searchParams = useSearchParams()
-  const searchQ = searchParams?.get('search')
+  const searchQ = searchParams?.get("search")
 
   const [filter, setFilter] = useState(searchQ ?? '')
 
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(
-      `?${new URLSearchParams({
-        search: filter,
-      })}`,
-      {
-        scroll: false,
-      }
-    )
+    router.replace(`?${new URLSearchParams({
+      search: filter
+    })}`, {
+      scroll: false
+    })
   }, [filter, router])
 
   const filterCars = (cars: CarComplete[]) => {
@@ -67,7 +64,10 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <Filters search={filter} onSearchChanged={setFilter} />
+              <Filters 
+                search={filter} 
+                onSearchChanged={setFilter} 
+              />
             </div>
           </div>
           <div className="row gx-3">

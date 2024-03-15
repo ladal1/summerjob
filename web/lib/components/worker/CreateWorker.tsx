@@ -68,10 +68,7 @@ export default function CreateWorker({
   }
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
+    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true })
   }
 
   const registerPhoto = (fileList: FileList) => {
@@ -92,12 +89,7 @@ export default function CreateWorker({
               id="firstName"
               label="Jméno"
               placeholder="Jméno"
-              register={() =>
-                register('firstName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
+              register={() => register("firstName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
               errors={errors}
             />
             <TextInput
@@ -105,67 +97,57 @@ export default function CreateWorker({
               label="Příjmení"
               placeholder="Příjmení"
               errors={errors}
-              register={() =>
-                register('lastName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
+              register={() => register("lastName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
             />
             <TextInput
               id="phone"
               label="Telefonní číslo"
               placeholder="(+420) 123 456 789"
               errors={errors}
-              register={() =>
-                register('phone', {
-                  onChange: e =>
-                    (e.target.value = formatPhoneNumber(e.target.value)),
-                })
-              }
+              register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
             />
             <TextInput
               id="email"
               label="Email"
               placeholder="uzivatel@example.cz"
               errors={errors}
-              register={() => register('email')}
+              register={() => register("email")}
             />
             <div className="d-flex flex-row flex-wrap">
               <div className="me-5">
                 <DateSelectionInput
                   id="availability.workDays"
                   label="Pracovní dostupnost"
-                  register={() => register('availability.workDays')}
+                  register={() => register("availability.workDays")}
                   days={allDates}
                 />
               </div>
               <DateSelectionInput
                 id="availability.adorationDays"
                 label="Dny adorace"
-                register={() => register('availability.adorationDays')}
+                register={() => register("availability.adorationDays")}
                 days={allDates}
               />
             </div>
             <GroupButtonsInput
               label="Alergie"
               mapping={allergyMapping}
-              register={() => register('allergyIds')}
+              register={() => register("allergyIds")}
             />
             <GroupButtonsInput
               label="Dovednosti"
               mapping={skillMapping}
-              register={() => register('skills')}
+              register={() => register("skills")}
             />
             <OtherAttributesInput
               label="Další vlastnosti"
               register={register}
               objects={[
                 {
-                  id: 'strong',
-                  icon: 'fas fa-dumbbell',
-                  label: 'Silák',
-                },
+                  id: "strong",
+                  icon: "fas fa-dumbbell",
+                  label: "Silák",
+                }
               ]}
             />
             <ImageUploader
@@ -197,7 +179,7 @@ export default function CreateWorker({
               label="Poznámka"
               placeholder="Poznámka"
               rows={1}
-              register={() => register('note')}
+              register={() => register("note")}
             />
 
             <div className="d-flex justify-content-between gap-3">
@@ -215,7 +197,7 @@ export default function CreateWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
+            {saved && <SuccessProceedModal onClose={onConfirmationClosed}/>}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

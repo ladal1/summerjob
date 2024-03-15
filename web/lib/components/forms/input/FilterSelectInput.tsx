@@ -33,7 +33,10 @@ export const FilterSelectInput = <FormData extends FieldValues>({
 
   return (
     <div className="d-flex flex-column m-0">
-      <Label id={id} label={label} />
+      <Label
+        id={id}
+        label={label}
+      />
       <FilterSelect
         id={id}
         placeholder={placeholder}

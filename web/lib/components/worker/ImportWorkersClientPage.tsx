@@ -81,8 +81,8 @@ export default function ImportWorkersClientPage({
             <div>
               Import akceptuje data oddělená středníkem v následujícím formátu:
               <pre>
-                Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny
-                práce;Dny adorace
+                Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny práce;Dny
+                adorace
               </pre>
               Příklad:
               <pre>

@@ -1,9 +1,10 @@
-import useZodOpenApi from 'lib/api/useZodOpenApi'
-import { PlanSchema, SummerJobEventSchema } from 'lib/prisma/zod'
+import { Plan, SummerJobEvent } from 'lib/prisma/client'
 import { z } from 'zod'
-import { AreaCompleteSchema } from './area'
+import { AreaComplete, AreaCompleteSchema } from './area'
 import { deserializePlanDate } from './plan'
 import { Serialized } from './serialize'
+import { PlanSchema, SummerJobEventSchema } from 'lib/prisma/zod'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
 
 useZodOpenApi
 

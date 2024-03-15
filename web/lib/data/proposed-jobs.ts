@@ -49,15 +49,17 @@ export async function getProposedJobPhotoIdsById(
     select: {
       photos: {
         select: {
-          id: true,
-        },
+          id: true
+        }
       },
     },
   })
   return jobs
 }
 
-export async function hasProposedJobPhotos(id: string): Promise<boolean> {
+export async function hasProposedJobPhotos(
+  id: string
+): Promise<boolean> {
   const jobs = await getProposedJobPhotoIdsById(id)
   return jobs?.photos?.length !== 0
 }
@@ -154,12 +156,10 @@ export async function updateProposedJob(
   }
   const { allergens, pinnedByChange, ...rest } = proposedJobData
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
-
-  if (pinnedByChange !== undefined && !pinnedByChange.pinned) {
+  
+  if(pinnedByChange !== undefined && !pinnedByChange.pinned) {
     await prisma.pinnedProposedJobByWorker.delete({
-      where: {
-        workerId_jobId: { workerId: pinnedByChange.workerId, jobId: id },
-      },
+      where: { workerId_jobId: { workerId: pinnedByChange.workerId, jobId: id } },
     })
   }
 
@@ -176,7 +176,7 @@ export async function updateProposedJob(
                 id: pinnedByChange.workerId,
               },
             },
-          },
+          }
         }),
       },
       ...rest,

@@ -31,7 +31,7 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   toolsOnSite: z.array(ToolCompleteSchema),
   toolsToTakeWith: z.array(ToolCompleteSchema),
   photos: z.array(PhotoCompleteSchema),
-  pinnedBy: z.array(z.object({ workerId: z.string() })),
+  pinnedBy: z.array(z.object({workerId: z.string()})),
 })
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
@@ -48,7 +48,7 @@ export const ProposedJobCreateSchema = z
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
       .number({ invalid_type_error: err.invalidTypeMaxWorkers })
-      .min(1, { message: err.emptyMaxWorkers })
+      .min(1, {message: err.emptyMaxWorkers })
       .positive({ message: err.nonPositiveMaxWorkers })
       .default(1),
     minWorkers: z
@@ -69,18 +69,18 @@ export const ProposedJobCreateSchema = z
     hasShower: z.boolean(),
     photoFiles: z
       .any()
-      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
-      .refine(fileList => fileList.length <= 10, err.maxCountImage + ' 10')
+      .refine((fileList) => fileList instanceof FileList, err.invalidTypeFile)
+      .refine((fileList) => fileList.length <= 10, err.maxCountImage + ' 10')
       .superRefine((fileList, ctx) => {
         for (let i = 0; i < fileList.length; i++) {
           const file = fileList[i]
-          if (!file || file.size > 1024 * 1024 * 10) {
+          if (!file || (file.size > 1024 * 1024 * 10)) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: err.maxCapacityImage + ' - max 10 MB',
             })
           }
-          if (!file || !file.type?.startsWith('image')) {
+          if (!file || (!file.type?.startsWith("image"))) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: err.unsuportedTypeImage,
@@ -88,7 +88,7 @@ export const ProposedJobCreateSchema = z
           }
         }
       })
-      .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
       .optional(),
     photoIds: z.array(z.string()).optional(),
     photoIdsDeleted: z.array(z.string()).optional(),
@@ -110,6 +110,7 @@ export const ProposedJobCreateSchema = z
   })
   .strict()
 
+
 export type ProposedJobCreateDataInput = z.input<typeof ProposedJobCreateSchema>
 export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>
 
@@ -119,7 +120,7 @@ export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
     hidden: z.boolean(),
     pinnedByChange: z.object({
       workerId: z.string(),
-      pinned: z.boolean(),
+      pinned: z.boolean()
     }),
   })
 )

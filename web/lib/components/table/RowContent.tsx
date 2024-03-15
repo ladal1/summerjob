@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react"
 
 export interface RowContentsInterface {
   label: string | JSX.Element
@@ -10,33 +10,33 @@ interface RowContentProps {
   data: RowContentsInterface[]
 }
 
-export const RowContent = ({ data }: RowContentProps) => {
+export const RowContent = ({
+  data,
+}: RowContentProps) => {
   return (
     <>
-      {data.map(
-        (item, index) =>
-          item.content &&
-          !item.show && (
-            <div key={index}>
-              <div className="smj-light-grey">
-                <div className="ms-4">
-                  {typeof item.content === 'string' ? (
-                    <strong>{item.label}:</strong>
-                  ) : (
-                    <div>{item.label}</div>
-                  )}
-                </div>
-              </div>
-              <div className="ms-5">
+      {data.map((item, index) => (
+        item.content && !item.show && (
+          <div key={index}>
+            <div className="smj-light-grey">
+              <div className="ms-4">
                 {typeof item.content === 'string' ? (
-                  <p>{item.content}</p>
+                  <strong>{item.label}:</strong>
                 ) : (
-                  <div>{item.content}</div>
+                  <div>{item.label}</div>
                 )}
               </div>
             </div>
-          )
-      )}
+            <div className="ms-5">
+              {typeof item.content === 'string' ? (
+                <p>{item.content}</p>
+              ) : (
+                <div>{item.content}</div>
+              )}
+            </div>
+          </div>
+        )
+      ))}
     </>
   )
 }

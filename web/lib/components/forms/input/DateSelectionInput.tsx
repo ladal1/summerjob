@@ -16,16 +16,19 @@ export const DateSelectionInput = ({
   label,
   register,
   days,
-  disableAfter = undefined,
+  disableAfter = undefined
 }: DateSelectionInputProps) => {
   return (
     <div className="d-flex flex-column m-0">
-      <Label id={id} label={label} />
-      <DateSelection
-        name={id}
-        days={days}
+      <Label
+        id={id}
+        label={label}
+      />
+      <DateSelection 
+        name={id} 
+        days={days} 
         disableAfter={disableAfter}
-        register={register}
+        register={register} 
       />
     </div>
   )

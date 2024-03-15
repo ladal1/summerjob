@@ -6,7 +6,10 @@ import { createWorkers, getWorkers } from 'lib/data/workers'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
-import { WorkersCreateDataInput, WorkersCreateSchema } from 'lib/types/worker'
+import {
+  WorkersCreateDataInput,
+  WorkersCreateSchema,
+} from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export type WorkersAPIGetResponse = Awaited<ReturnType<typeof getWorkers>>
@@ -28,11 +31,20 @@ async function post(
   session: ExtendedSession
 ) {
   const { json } = await parseForm(req)
-  const multipleWorkers = validateOrSendError(WorkersCreateSchema, json, res)
+  const multipleWorkers = validateOrSendError(
+    WorkersCreateSchema,
+    json,
+    res
+  )
   if (!multipleWorkers) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_CREATE, 'workers', json, session)
+  await logger.apiRequest(
+    APILogEvent.WORKER_CREATE,
+    'workers',
+    json,
+    session
+  )
   const workers = await createWorkers(multipleWorkers)
   res.status(201).json(workers)
 }
@@ -44,6 +56,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false,
-  },
+    bodyParser: false
+  }
 }
