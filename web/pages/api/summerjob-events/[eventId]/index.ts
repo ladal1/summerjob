@@ -37,7 +37,7 @@ async function patch(
     })
     return
   }
-  await updateSummerJobEvent(id, data)
+  const test = await updateSummerJobEvent(id, data)
   res.status(204).end()
 }
 
