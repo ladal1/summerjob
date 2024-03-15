@@ -106,6 +106,7 @@ export const ProposedJobCreateSchema = z
     toolsOnSiteIdsDeleted: z.array(z.string()).optional(),
     toolsToTakeWithCreate: ToolsCreateSchema.optional(),
     toolsToTakeWithIdsDeleted: z.array(z.string()).optional(),
+    priority: z.number().optional(),
   })
   .strict()
 

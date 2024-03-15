@@ -35,6 +35,7 @@ import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 import { PillSelectItem } from '../filter-select/PillSelect'
 import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { ToolComplete } from 'lib/types/tool'
+import { ScaleInput } from '../forms/input/ScaleInput'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -81,6 +82,7 @@ export default function EditProposedJobForm({
       toolsOnSiteCreate: {tools: job.toolsOnSite},
       toolsToTakeWithCreate: {tools: job.toolsToTakeWith},
       areaId: job.areaId,
+      priority: job.priority,
     },
   })
 
@@ -164,7 +166,7 @@ export default function EditProposedJobForm({
 
   const fetchToolSelectItems = (tools: ToolComplete[]) : PillSelectItem[] => {
     const selectItems: PillSelectItem[] = tools.map((toolItem) => {
-      const { id, tool, amount, proposedJobOnSiteId, proposedJobToTakeWithId } = toolItem
+      const { id, tool, amount } = toolItem
       return {
         databaseId: id,
         id: tool,
@@ -446,6 +448,15 @@ export default function EditProposedJobForm({
                   label: "Sprcha na místě",
                 }
               ]}
+            />
+            <ScaleInput
+              id="priority"
+              label="Priorita jobu"
+              secondaryLabel="1 značí nejmenší a 5 největší"
+              min={1}
+              max={5}
+              register={() => register("priority", { valueAsNumber: true })}
+              errors={errors}
             />
             <div className="d-flex justify-content-between gap-3">
               <button

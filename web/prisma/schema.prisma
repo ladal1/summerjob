@@ -172,6 +172,7 @@ model ProposedJob {
   toolsOnSite        Tool[]                      @relation("ToolOnSite")  
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
   photos             Photo[]                     @relation("PhotoProposedJob")
+  priority           Int                         @default(1)
 }
 
 model PinnedProposedJobByWorker {

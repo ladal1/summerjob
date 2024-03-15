@@ -256,7 +256,8 @@ export default function PlanClientPage({
   }
 
   const toolsToTakeWithList: ToolsList = planData?.jobs.reduce((accumulator: ToolsList, job) => {
-    job.proposedJob.toolsToTakeWith.forEach(({ tool: name, amount }) => {
+    const sortedTools = job.proposedJob.toolsToTakeWith.sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
+    sortedTools.forEach(({ tool: name, amount }) => {
       accumulator[name] = {
         name,
         amount: (accumulator[name]?.amount || 0) + amount,

@@ -397,6 +397,10 @@ img.smj-nav-logo {
   background-color: #adadad;
 }
 
+.smj-range {
+  max-width: 250px;
+}
+
 .smj-checkbox {
   width: 25px;
   height: 25px;
