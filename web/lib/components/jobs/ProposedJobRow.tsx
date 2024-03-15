@@ -181,6 +181,7 @@ function formatJobRow(
     {content: `${job.activeJobs.length} / ${job.requiredDays}`},
     {content: datesAfterDate(job.availability, now).length},
     {content: `${job.minWorkers} - ${job.maxWorkers}`},
+    {content: job.priority},
     {content: <span key={job.id} className="d-inline-flex flex-wrap align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, workerId, setPinned)}

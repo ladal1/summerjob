@@ -20,6 +20,7 @@ const _columns: SortableColumn[] = [
   { id: 'area', name: 'Oblast', sortable: true },
   { id: 'address', name: 'Adresa', sortable: true },
   { id: 'amenities', name: 'Zajištění', sortable: false },
+  { id: 'priority', name: 'Priorita', sortable: true },
   { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"}},
 ]
 
@@ -128,6 +129,7 @@ function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
     contact: job => job.proposedJob.contact,
     workers: job =>
       `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers}`,
+    priority: job => job.proposedJob.priority
   }
 
   if (sortOrder.columnId in getSortable) {

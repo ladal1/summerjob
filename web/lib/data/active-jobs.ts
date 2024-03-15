@@ -326,8 +326,6 @@ export async function createActiveJobs(data: ActiveJobCreateMultipleData) {
     }
     const activeJobs = await tx.activeJob.createMany({
       data: data.jobs.map(job => ({
-        privateDescription: job.privateDescription,
-        publicDescription: job.publicDescription,
         planId: data.planId,
         proposedJobId: job.proposedJobId,
       })),

@@ -17,6 +17,7 @@ const _columns: SortableColumn[] = [
   { id: 'daysPlanned', name: 'Naplánované dny', sortable: true },
   { id: 'daysLeft', name: 'Dostupné dny', sortable: true },
   { id: 'workers', name: 'Pracantů', sortable: true },
+  { id: 'priority', name: 'Priorita', sortable: true },
   { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"} },
 ]
 
@@ -166,6 +167,7 @@ function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
     daysPlanned: job => job.activeJobs.length,
     daysLeft: job => job.availability.length,
     workers: job => job.minWorkers,
+    priority: job => job.priority
   }
 
   if (sortOrder.columnId in getSortable) {

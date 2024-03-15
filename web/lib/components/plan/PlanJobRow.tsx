@@ -127,11 +127,11 @@ export function PlanJobRow({
   const expandedContent: RowContentsInterface[] = [
     {
       label: "Popis",
-      content: `${job.publicDescription}`, 
+      content: `${job.proposedJob.publicDescription}`, 
     },
     {
       label: "Poznámka pro organizátory",
-      content: `${job.privateDescription}`, 
+      content: `${job.proposedJob.privateDescription}`, 
     },
     {
       label: <div className="d-flex gap-1">
@@ -353,6 +353,7 @@ function formatRowData(
     {content: job.proposedJob.area?.name},
     {content: job.proposedJob.address},
     {content: formatAmenities(job)},
+    {content: job.proposedJob.priority},
     {content: 
       <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
         <Link
