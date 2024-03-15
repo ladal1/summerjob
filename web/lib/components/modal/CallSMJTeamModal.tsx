@@ -11,7 +11,7 @@ export default function CallSMJTeamModal({
   return (
     <Modal title="Momentálně nedostupné" size={ModalSize.MEDIUM} onClose={onClose}>
       <p>{additionalText}</p>
-      <span className="text-muted">Pro více informací volejte prosím týmu SummerJob.</span>
+      <span className="text-muted">Pro více informací volejte prosím Job teamu.</span>
     </Modal>
   )
 }

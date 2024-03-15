@@ -65,7 +65,6 @@ export default function DateSelection({
   }
 
   const isDateDisabledDueToAfterHours = (date: Date) => {
-    return true
     return isAfterHours && isDateRightAfterNow(date)
   }
 

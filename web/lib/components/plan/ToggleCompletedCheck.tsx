@@ -55,7 +55,7 @@ export default function ToggleCompletedCheck({
       />
       {showNoteModal && (
         <Modal
-          title={'Upravit poznámku'}
+          title={`Upravit poznámku - ${job.proposedJob.name}`}
           size={ModalSize.MEDIUM}
           onClose={() => setShowNoteModal(false)}
         >
@@ -64,6 +64,7 @@ export default function ToggleCompletedCheck({
               id={'privateDescription'} 
               label={'Poznámka pro organizátory'} 
               register={() => register("privateDescription")}
+              rows={4}
               margin={false}
             />
             <div className="d-flex justify-content-end mt-3">

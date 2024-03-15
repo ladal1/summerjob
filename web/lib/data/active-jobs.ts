@@ -207,8 +207,7 @@ function getActiveJobDetailsById(
 export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   const {
     completed,
-    privateDescription,
-    publicDescription,
+    proposedJob,
     responsibleWorkerId,
     workerIds,
   } = job
@@ -259,14 +258,25 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
       }
     }
 
+    // update proposed job 
+    await tx.proposedJob.update({
+      where: {
+        id: existingActiveJob.proposedJobId,
+      },
+      data: {
+        name: proposedJob?.name,
+        publicDescription: proposedJob?.publicDescription,
+        privateDescription: proposedJob?.privateDescription
+      }
+    })
+  
+    // update active job 
     const activeJob = await tx.activeJob.update({
       where: {
         id,
       },
       data: {
         completed,
-        privateDescription,
-        publicDescription,
         responsibleWorkerId,
         ...workersCommand,
       },
@@ -277,7 +287,7 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
 }
 
 export async function createActiveJob(job: ActiveJobCreateData) {
-  const { proposedJobId, privateDescription, publicDescription, planId } = job
+  const { proposedJobId, planId } = job
   const activeJob = await prisma.$transaction(async tx => {
     const existingActiveJob = await tx.activeJob.findFirst({
       where: {
@@ -290,8 +300,6 @@ export async function createActiveJob(job: ActiveJobCreateData) {
     }
     const activeJob = await tx.activeJob.create({
       data: {
-        privateDescription,
-        publicDescription,
         planId,
         proposedJobId,
       },

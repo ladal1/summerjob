@@ -10,6 +10,12 @@ import { coordinatesZod } from './coordinates'
 
 useZodOpenApi
 
+export const ProposedJobForActiveJobSchema = z.object({
+  privateDescription: z.string(),
+  publicDescription: z.string(),
+  name: z.string().min(1, { message: err.emptyProposedJobName }),
+})
+
 export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
   area: AreaSchema.nullable(),
   toolsOnSite: z.array(ToolCompleteSchema),
