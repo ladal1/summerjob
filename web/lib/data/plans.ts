@@ -27,6 +27,11 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
     throw new NoActiveEventError()
   }
   const plans = await prisma.plan.findMany({
+    where: {
+      summerJobEvent: {
+        isActive: true,
+      },
+    },
     include: {
       jobs: {
         include: {

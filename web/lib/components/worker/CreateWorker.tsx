@@ -18,6 +18,7 @@ import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import FormWarning from '../forms/FormWarning'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -59,6 +60,7 @@ export default function CreateWorker({
   })
 
   const onSubmit = (dataForm: WorkerForm) => {
+    console.log('here')
     trigger(dataForm)
   }
 
@@ -68,7 +70,10 @@ export default function CreateWorker({
   }
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true })
+    setValue('photoFile', undefined, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   const registerPhoto = (fileList: FileList) => {
@@ -77,6 +82,14 @@ export default function CreateWorker({
 
   return (
     <>
+      {true &&
+        Object.values(errors).map((error, index) => (
+          <div key={error.message?.toString()}>
+            <FormWarning
+              message={`${error.ref?.type} + ${error.message?.toString()}`}
+            />
+          </div>
+        ))}
       <div className="row">
         <div className="col">
           <h3>Přidat pracanta</h3>
@@ -89,7 +102,12 @@ export default function CreateWorker({
               id="firstName"
               label="Jméno"
               placeholder="Jméno"
-              register={() => register("firstName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
+              register={() =>
+                register('firstName', {
+                  onChange: e =>
+                    (e.target.value = removeRedundantSpace(e.target.value)),
+                })
+              }
               errors={errors}
             />
             <TextInput
@@ -97,57 +115,72 @@ export default function CreateWorker({
               label="Příjmení"
               placeholder="Příjmení"
               errors={errors}
-              register={() => register("lastName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
+              register={() =>
+                register('lastName', {
+                  onChange: e =>
+                    (e.target.value = removeRedundantSpace(e.target.value)),
+                })
+              }
             />
             <TextInput
               id="phone"
               label="Telefonní číslo"
               placeholder="(+420) 123 456 789"
               errors={errors}
-              register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
+              register={() =>
+                register('phone', {
+                  onChange: e =>
+                    (e.target.value = formatPhoneNumber(e.target.value)),
+                })
+              }
             />
             <TextInput
               id="email"
               label="Email"
               placeholder="uzivatel@example.cz"
               errors={errors}
-              register={() => register("email")}
+              register={() => register('email')}
             />
             <div className="d-flex flex-row flex-wrap">
               <div className="me-5">
                 <DateSelectionInput
                   id="availability.workDays"
                   label="Pracovní dostupnost"
-                  register={() => register("availability.workDays")}
+                  register={() => register('availability.workDays')}
                   days={allDates}
                 />
               </div>
               <DateSelectionInput
                 id="availability.adorationDays"
                 label="Dny adorace"
-                register={() => register("availability.adorationDays")}
+                register={() => register('availability.adorationDays')}
                 days={allDates}
               />
             </div>
             <GroupButtonsInput
               label="Alergie"
               mapping={allergyMapping}
-              register={() => register("allergyIds")}
+              register={() => register('allergyIds')}
             />
             <GroupButtonsInput
               label="Dovednosti"
               mapping={skillMapping}
-              register={() => register("skills")}
+              register={() => register('skills')}
             />
             <OtherAttributesInput
               label="Další vlastnosti"
               register={register}
               objects={[
                 {
-                  id: "strong",
-                  icon: "fas fa-dumbbell",
-                  label: "Silák",
-                }
+                  id: 'strong',
+                  icon: 'fas fa-dumbbell',
+                  label: 'Silák',
+                },
+                {
+                  id: 'team',
+                  icon: 'fa-solid fa-people-group',
+                  label: 'Tým',
+                },
               ]}
             />
             <ImageUploader
@@ -179,7 +212,7 @@ export default function CreateWorker({
               label="Poznámka"
               placeholder="Poznámka"
               rows={1}
-              register={() => register("note")}
+              register={() => register('note')}
             />
 
             <div className="d-flex justify-content-between gap-3">
@@ -197,7 +230,7 @@ export default function CreateWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed}/>}
+            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>
