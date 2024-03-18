@@ -146,6 +146,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                           center={selectedPlan.job.location.coordinates}
                           zoom={11}
                           markerPosition={selectedPlan.job.location.coordinates}
+                          address={selectedPlan.job.location.address}
                         />
                       </div>
                       <div className="d-flex justify-content-end">
