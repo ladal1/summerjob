@@ -158,9 +158,7 @@ export function formatNumber(value: string) {
 }
 
 export function removeAccent(str: string) {
-  const r = str.normalize('NFD').replace(/\p{Diacritic}/gu, '')
-  console.log(r)
-  return r
+  return str.normalize('NFD').replace(/\p{Diacritic}/gu, '')
 }
 
 export function normalizeString(str: string) {

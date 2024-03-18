@@ -1,10 +1,10 @@
-/* TODO: unify this file */ 
+/* TODO: unify this file */
 :root {
---text: #291a00;
---background: #fff0d6;
---primary: #fac505;
---secondary: #ffd97a;
---accent: #ff9500;
+  --text: #291a00;
+  --background: #fff0d6;
+  --primary: #fac505;
+  --secondary: #ffd97a;
+  --accent: #ff9500;
 }
 
 .nav-item .nav-link {
@@ -125,7 +125,7 @@ img.smj-nav-logo {
 }
 
 .smj-table-body {
-  background: rgb(247, 247, 247);
+  background: rgb(247, 247, 247) !important;
 }
 
 .smj-shadow {
@@ -164,13 +164,13 @@ img.smj-nav-logo {
 .smj-sticky-col-right {
   position: sticky;
   right: 0;
-  box-shadow: -5px 0 5px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: -5px 0px 5px -3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .smj-sticky-col-left {
   position: sticky;
   left: 0;
-  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 5px 0px 5px -3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .smj-light-grey {
@@ -198,7 +198,7 @@ img.smj-nav-logo {
 }
 
 .smj-filter-select:focus {
-  box-shadow: inset 0 -2px 0 #fdc345; 
+  box-shadow: inset 0 -2px 0 #fdc345;
 }
 
 .smj-filter-select {
@@ -207,16 +207,16 @@ img.smj-nav-logo {
   padding: 0 30px 0 0px;
   -webkit-padding-end: 30px;
   -webkit-padding-start: 0px;
-  font-size: 20px; 
+  font-size: 20px;
 }
 
 .smj-filter-select option {
   width: 100%;
   color: white !important;
-  font-size: 16px; 
+  font-size: 16px;
   padding: 20px;
-  overflow-y: auto; 
-  overflow-x: auto; 
+  overflow-y: auto;
+  overflow-x: auto;
   max-height: 20px;
 }
 
@@ -238,7 +238,7 @@ img.smj-nav-logo {
 }
 
 .smj-dropdown:focus {
-  box-shadow: inset 0 -2px 0 #fdc345 !important; 
+  box-shadow: inset 0 -2px 0 #fdc345 !important;
 }
 
 .hiddenInput {
@@ -388,7 +388,8 @@ img.smj-nav-logo {
   }
 }
 
-.btn-check:checked + .btn-day-select, .btn-check:checked + .btn-allergy-select {
+.btn-check:checked + .btn-day-select,
+.btn-check:checked + .btn-allergy-select {
   box-shadow: inset 2px 3px 1px 0px #d7c59d;
   background-color: #ffe9b8 !important;
 }
@@ -425,15 +426,15 @@ img.smj-nav-logo {
 }
 
 .smj-textarea:focus {
-  box-shadow: inset 0 -2px 0 #fdc345 !important; 
+  box-shadow: inset 0 -2px 0 #fdc345 !important;
 }
 
 .smj-input:focus {
-  box-shadow: inset 0 -2px 0 #fdc345 !important; 
+  box-shadow: inset 0 -2px 0 #fdc345 !important;
 }
 
 .smj-progress-bar {
-  background-color:#fdc345 !important
+  background-color: #fdc345 !important;
 }
 
 .text-small {
@@ -450,7 +451,7 @@ img.smj-nav-logo {
 
 .smj-completed-job-row td:first-of-type::before {
   background-color: #d4edda !important;
-  content: "";
+  content: '';
   height: 2.5rem;
   width: 0.5rem;
   display: block;
@@ -473,7 +474,7 @@ img.smj-nav-logo {
 
 .smj-hidden-job-row td:first-of-type::before {
   background-color: #dddddd;
-  content: "";
+  content: '';
   height: 2.5rem;
   width: 0.5rem;
   display: block;
@@ -548,7 +549,7 @@ img.smj-nav-logo {
   display: none;
   background-color: #f9f9f9;
   color: #333;
-  margin-left: 5px
+  margin-left: 5px;
 }
 
 .btn:hover .hover-text {
@@ -586,7 +587,7 @@ img.smj-nav-logo {
 
 .smj-map-container {
   height: 370px;
-  width: 100%; 
+  width: 100%;
 }
 
 @media (max-width: 768px) {

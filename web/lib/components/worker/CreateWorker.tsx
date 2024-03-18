@@ -60,7 +60,6 @@ export default function CreateWorker({
   })
 
   const onSubmit = (dataForm: WorkerForm) => {
-    console.log('here')
     trigger(dataForm)
   }
 
