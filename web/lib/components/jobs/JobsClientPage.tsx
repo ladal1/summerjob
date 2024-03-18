@@ -8,7 +8,11 @@ import {
 } from 'lib/types/proposed-job'
 import { useEffect, useMemo, useState } from 'react'
 import { useAPIProposedJobs } from 'lib/fetcher/proposed-job'
-import { datesBetween, filterUniqueById } from 'lib/helpers/helpers'
+import {
+  datesBetween,
+  filterUniqueById,
+  normalizeString,
+} from 'lib/helpers/helpers'
 import Link from 'next/link'
 import { Serialized } from 'lib/types/serialize'
 import { Filters } from '../filters/Filters'
@@ -25,7 +29,7 @@ export default function ProposedJobsClientPage({
   initialData,
   startDate,
   endDate,
-  workerId
+  workerId,
 }: ProposedJobsClientPage) {
   const deserializedData = deserializeProposedJobs(initialData)
   const { data, error, mutate } = useAPIProposedJobs({
@@ -35,13 +39,15 @@ export default function ProposedJobsClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const areaIdQ = searchParams?.get("area")
-  const selectedDayQ = searchParams?.get("day")
-  const searchQ = searchParams?.get("search")
+  const areaIdQ = searchParams?.get('area')
+  const selectedDayQ = searchParams?.get('day')
+  const searchQ = searchParams?.get('search')
 
   //#region Filtering areas
   const areas = getAvailableAreas(data)
-  const [selectedArea, setSelectedArea] = useState(areas.find(a => a.id === areaIdQ) || areas[0])
+  const [selectedArea, setSelectedArea] = useState(
+    areas.find(a => a.id === areaIdQ) || areas[0]
+  )
 
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find(a => a.id === id) || areas[0])
@@ -52,7 +58,9 @@ export default function ProposedJobsClientPage({
   const firstDay = new Date(startDate)
   const lastDay = new Date(endDate)
   const days = getDays(firstDay, lastDay)
-  const [selectedDay, setSelectedDay] = useState(days.find(a => a.id === selectedDayQ) || days[0])
+  const [selectedDay, setSelectedDay] = useState(
+    days.find(a => a.id === selectedDayQ) || days[0]
+  )
 
   const onDaySelected = (day: Date) => {
     setSelectedDay(days.find(d => d.day.getTime() === day.getTime()) || days[0])
@@ -64,13 +72,16 @@ export default function ProposedJobsClientPage({
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(`?${new URLSearchParams({
-      area: selectedArea.id,
-      day: selectedDay.id,
-      search: filter
-    })}`, {
-      scroll: false
-    })
+    router.replace(
+      `?${new URLSearchParams({
+        area: selectedArea.id,
+        day: selectedDay.id,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
   }, [selectedArea, selectedDay, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
@@ -79,7 +90,8 @@ export default function ProposedJobsClientPage({
     const area =
       selectedArea.id === areas[0].id || job.area?.id === selectedArea.id
     const fulltext =
-      fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false
+      fulltextData.get(job.id)?.includes(normalizeString(filter).trimEnd()) ??
+      false
     const day =
       selectedDay.id === days[0].id ||
       job.availability.map(d => d.getTime()).includes(selectedDay.day.getTime())
@@ -114,7 +126,7 @@ export default function ProposedJobsClientPage({
                     options: areas,
                     selected: selectedArea,
                     onSelectChanged: onAreaSelected,
-                    defaultOptionId: 'all'
+                    defaultOptionId: 'all',
                   },
                 ]}
                 selectsDays={[
@@ -123,7 +135,7 @@ export default function ProposedJobsClientPage({
                     options: days,
                     selected: selectedDay,
                     onSelectChanged: onDaySelected,
-                    defaultOptionId: 'all'
+                    defaultOptionId: 'all',
                   },
                 ]}
               />
@@ -173,14 +185,14 @@ function getFulltextData(jobs?: ProposedJobComplete[]) {
   jobs?.forEach(job => {
     map.set(
       job.id,
-      (
+      normalizeString(
         job.name +
-        job.area?.name +
-        job.address +
-        job.contact +
-        job.publicDescription +
-        job.privateDescription
-      ).toLocaleLowerCase()
+          job.area?.name +
+          job.address +
+          job.contact +
+          job.publicDescription +
+          job.privateDescription
+      )
     )
   })
   return map

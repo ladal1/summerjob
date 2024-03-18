@@ -2,14 +2,15 @@
 import ErrorPage from 'lib/components/error-page/ErrorPage'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import { useAPIWorkers } from 'lib/fetcher/worker'
+import { normalizeString } from 'lib/helpers/helpers'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
-import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
-import WorkersTable from './WorkersTable'
 import Image from 'next/image'
-import { Filters } from '../filters/Filters'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { Filters } from '../filters/Filters'
+import WorkersTable from './WorkersTable'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
@@ -25,42 +26,55 @@ export default function WorkersClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const onlyStrongQ = searchParams?.get("area")
-  const onlyWithCarQ = searchParams?.get("day")
-  const searchQ = searchParams?.get("search")
+  const onlyStrongQ = searchParams?.get('area')
+  const onlyWithCarQ = searchParams?.get('day')
+  const searchQ = searchParams?.get('search')
 
   const getBoolean = (value: string) => {
-    switch(value){
-      case "true":
-      case "1":
-      case "ano":
-      case "yes":
-          return true
-      default: 
-          return false
+    switch (value) {
+      case 'true':
+      case '1':
+      case 'ano':
+      case 'yes':
+        return true
+      default:
+        return false
     }
   }
 
   const [filter, setFilter] = useState(searchQ ?? '')
-  const [onlyStrong, setOnlyStrong] = useState(onlyStrongQ ? getBoolean(onlyStrongQ) : false)
-  const [onlyWithCar, setOnlyWithCar] = useState(onlyWithCarQ ? getBoolean(onlyWithCarQ) : false)
-
+  const [onlyStrong, setOnlyStrong] = useState(
+    onlyStrongQ ? getBoolean(onlyStrongQ) : false
+  )
+  const [onlyWithCar, setOnlyWithCar] = useState(
+    onlyWithCarQ ? getBoolean(onlyWithCarQ) : false
+  )
 
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(`?${new URLSearchParams({
-      onlyStrong: `${onlyStrong}`,
-      onlyWithCar: `${onlyWithCar}`,
-      search: filter
-    })}`, {
-      scroll: false
-    })
+    router.replace(
+      `?${new URLSearchParams({
+        onlyStrong: `${onlyStrong}`,
+        onlyWithCar: `${onlyWithCar}`,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
   }, [onlyStrong, onlyWithCar, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(
-    () => filterWorkers(filter, fulltextData, onlyStrong, onlyWithCar, data),
+    () =>
+      filterWorkers(
+        normalizeString(filter).trimEnd(),
+        fulltextData,
+        onlyStrong,
+        onlyWithCar,
+        data
+      ),
     [fulltextData, filter, onlyStrong, onlyWithCar, data]
   )
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
@@ -104,13 +118,13 @@ export default function WorkersClientPage({
                     id: 'onlyStrongCheckbox',
                     label: 'Pouze silní',
                     checked: onlyStrong,
-                    onCheckboxChanged: setOnlyStrong
+                    onCheckboxChanged: setOnlyStrong,
                   },
                   {
                     id: 'onlyWithCarCheckbox',
                     label: 'Pouze s autem',
                     checked: onlyWithCar,
-                    onCheckboxChanged: setOnlyWithCar
+                    onCheckboxChanged: setOnlyWithCar,
                   },
                 ]}
               />
@@ -187,12 +201,9 @@ function getFulltextData(workers?: WorkerComplete[]) {
   workers?.forEach(worker => {
     map.set(
       worker.id,
-      (
-        worker.firstName +
-        worker.lastName +
-        worker.phone +
-        worker.email
-      ).toLocaleLowerCase()
+      normalizeString(
+        worker.firstName + worker.lastName + worker.phone + worker.email
+      )
     )
   })
   return map

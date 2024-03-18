@@ -114,7 +114,6 @@ export function datesAfterDate(dates: Date[], date: Date) {
   return dates.filter(d => d >= date)
 }
 
-
 /**
  * Picks only the specified keys from an object and returns a new object with only those keys and their values
  * @param obj Original object
@@ -139,8 +138,13 @@ export function formatPhoneNumber(value: string) {
   const maxDigits = startsWithPlus ? 12 : 9
   const limitedPhoneNumber = phoneNumber.slice(0, maxDigits)
   // Add spaces after every third digit
-  const formattedPhoneNumber = limitedPhoneNumber.replace(/(\d{3})(?=\d)/g, '$1 ')
-  return startsWithPlus ? `+${formattedPhoneNumber}` : formattedPhoneNumber || ""
+  const formattedPhoneNumber = limitedPhoneNumber.replace(
+    /(\d{3})(?=\d)/g,
+    '$1 '
+  )
+  return startsWithPlus
+    ? `+${formattedPhoneNumber}`
+    : formattedPhoneNumber || ''
 }
 
 // Replace redundant spaces by one space and trim spaces from front.
@@ -151,4 +155,17 @@ export function removeRedundantSpace(value: string) {
 // Get rid of anything that isn't non negative number
 export function formatNumber(value: string) {
   return value.replace(/\D/g, '')
+}
+
+export function removeAccent(str: string) {
+  const r = str.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  console.log(r)
+  return r
+}
+
+export function normalizeString(str: string) {
+  const withoutRedundantSpace = removeRedundantSpace(str)
+  const withRemovedAccent = removeAccent(withoutRedundantSpace)
+  const inLowerCase = withRemovedAccent.toLowerCase()
+  return inLowerCase
 }
