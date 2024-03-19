@@ -16,10 +16,15 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { createDirectory, generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
+import {
+  createDirectory,
+  generateFileName,
+  getUploadDirForImages,
+} from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { ToolType, registerTools } from 'lib/api/register/registerTools'
+import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -47,15 +52,28 @@ async function post(
   res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
+  const activeEventId = await cache_getActiveSummerJobEventId()
   const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDirectory = getUploadDirForImages() + '/proposed-job'
-  const { files, json } = await parseFormWithImages(req, temporaryName, uploadDirectory, 10)
+  const uploadDirectory =
+    getUploadDirForImages() + '/' + activeEventId + '/proposed-job'
+  const { files, json } = await parseFormWithImages(
+    req,
+    temporaryName,
+    uploadDirectory,
+    10
+  )
 
   const result = validateOrSendError(ProposedJobCreateSchema, json, res)
   if (!result) {
     return
   }
-  const {toolsOnSiteCreate, toolsOnSiteIdsDeleted, toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, ...rest} = result
+  const {
+    toolsOnSiteCreate,
+    toolsOnSiteIdsDeleted,
+    toolsToTakeWithCreate,
+    toolsToTakeWithIdsDeleted,
+    ...rest
+  } = result
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
@@ -65,9 +83,21 @@ async function post(
   const job = await createProposedJob(rest)
 
   await registerPhotos(files, undefined, uploadDirectory, job.id, session)
-  await registerTools(toolsOnSiteCreate, toolsOnSiteIdsDeleted, job.id, ToolType.ON_SITE, session)
-  await registerTools(toolsToTakeWithCreate, toolsToTakeWithIdsDeleted, job.id, ToolType.TO_TAKE_WITH, session)
-  
+  await registerTools(
+    toolsOnSiteCreate,
+    toolsOnSiteIdsDeleted,
+    job.id,
+    ToolType.ON_SITE,
+    session
+  )
+  await registerTools(
+    toolsToTakeWithCreate,
+    toolsToTakeWithIdsDeleted,
+    job.id,
+    ToolType.TO_TAKE_WITH,
+    session
+  )
+
   res.status(201).json(job)
 }
 
@@ -78,6 +108,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }
