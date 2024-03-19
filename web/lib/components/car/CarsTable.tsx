@@ -13,15 +13,15 @@ import {
 import { sortData } from '../table/SortData'
 
 const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Název', sortable: true },
-  { id: 'owner', name: 'Majitel', sortable: true },
-  { id: 'seats', name: 'Místa', sortable: true },
-  { id: 'kilometrage', name: 'Najeto km', sortable: true },
-  { id: 'reimbursed', name: 'Proplaceno', sortable: true },
+  { id: 'name', name: 'Název' },
+  { id: 'owner', name: 'Majitel' },
+  { id: 'seats', name: 'Místa' },
+  { id: 'kilometrage', name: 'Najeto km' },
+  { id: 'reimbursment', name: 'Proplaceno' },
   {
     id: 'actions',
     name: 'Akce',
-    className: 'smj-sticky-col-right smj-table-header',
+    stickyRight: true,
   },
 ]
 
@@ -65,14 +65,14 @@ export function CarsTable({ data, reload }: CarTableProps) {
     setSortOrder(direction)
   }
 
+  // names has to be same as collumns ids
   const getSortable = useMemo(
     () => ({
       name: (car: CarComplete) => car.name,
       owner: (car: CarComplete) =>
         `${car.owner.firstName} ${car.owner.lastName}`,
       seats: (car: CarComplete) => car.seats,
-      drivenKilometers: (car: CarComplete) =>
-        car.odometerEnd - car.odometerStart,
+      kilometrage: (car: CarComplete) => car.odometerEnd - car.odometerStart,
       reimbursment: (car: CarComplete) => (car.reimbursed ? 'Ano' : 'Ne'),
     }),
     []
@@ -80,7 +80,7 @@ export function CarsTable({ data, reload }: CarTableProps) {
 
   const sortedData = useMemo(() => {
     return data ? sortData(data, getSortable, sortOrder) : []
-  }, [sortOrder, data])
+  }, [data, getSortable, sortOrder])
   //#endregion
 
   return (

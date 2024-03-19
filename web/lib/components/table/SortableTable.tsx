@@ -3,9 +3,10 @@ import { CSSProperties } from 'react'
 export interface SortableColumn {
   id: string
   name: string
-  sortable?: boolean
+  notSortable?: boolean
   className?: string
   style?: CSSProperties
+  stickyRight?: boolean
 }
 
 export interface SortOrder {
@@ -59,13 +60,17 @@ export function SortableTable({
               <th
                 key={column.id}
                 onClick={() => onSortClicked(column.id)}
-                className={
-                  column.sortable ? 'cursor-pointer ' : '' + column.className
-                }
+                className={`
+                  ${column.notSortable ? '' : 'cursor-pointer'} ${
+                  column.stickyRight
+                    ? 'smj-sticky-col-right smj-table-header'
+                    : ''
+                } ${column.className ? column.className : ''}
+                `}
                 style={column.style}
               >
                 {column.name}
-                {column.sortable && sortIcon(column.id)}
+                {!column.notSortable && sortIcon(column.id)}
               </th>
             ))}
           </tr>

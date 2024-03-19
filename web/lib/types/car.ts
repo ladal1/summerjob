@@ -34,17 +34,22 @@ export const CarCreateSchema = z
       .positive({ message: err.nonPositiveNumber })
       .openapi({ example: 4 }),
     odometerStart: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
-      .min(1, { message: err.emptyOdometerStart })
-      .nonnegative({ message: err.nonPositiveNumber }),
+      .number({
+        invalid_type_error: err.invalidTypeNumber,
+        required_error: err.emptyOdometerStart,
+      })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .default(0),
     odometerEnd: z
       .number({ invalid_type_error: err.invalidTypeNumber })
-      .positive({ message: err.nonPositiveNumber })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .default(0)
       .optional(),
     reimbursed: z.boolean().optional().openapi({ example: false }),
     reimbursementAmount: z
       .number({ invalid_type_error: err.invalidTypeNumber })
-      .positive({ message: err.nonPositiveNumber })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .default(0)
       .optional(),
   })
   .strict()

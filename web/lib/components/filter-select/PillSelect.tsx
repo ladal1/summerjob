@@ -181,6 +181,7 @@ export function PillSelect({
                         boxShadow: 'inset 0 -1px 0 #7e7e7e',
                       }}
                       ref={pillInputRef}
+                      type="number"
                       min={1}
                       defaultValue={selectedItem.amount ?? 1}
                       onChange={e => {

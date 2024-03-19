@@ -38,7 +38,7 @@ const _columns: SortableColumn[] = [
     id: 'actions',
     name: 'Akce',
     sortable: false,
-    className: 'smj-sticky-col-right smj-table-header',
+    stickyRight: true,
     style: { minWidth: '100px' },
   },
 ]
