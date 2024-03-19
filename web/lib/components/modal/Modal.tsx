@@ -13,7 +13,7 @@ export enum ModalSize {
 export function Modal({ children, title, size, onClose }: ModalProps) {
   return (
     <>
-      <div className="modal-backdrop fade show" style={{ zIndex: 1040 }}></div>
+      <div className="modal-backdrop fade show"></div>
       <div className={`modal fade show ${size} d-block`} tabIndex={-1}>
         <div className="modal-dialog">
           <div className="modal-content rounded-3">

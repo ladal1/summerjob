@@ -17,8 +17,8 @@ export interface SortOrder {
 interface SortableTableProps {
   columns: SortableColumn[]
   children: React.ReactNode
-  currentSort: SortOrder
-  onRequestedSort: (direction: SortOrder) => void
+  currentSort?: SortOrder
+  onRequestedSort?: (direction: SortOrder) => void
 }
 
 export function SortableTable({
@@ -28,7 +28,9 @@ export function SortableTable({
   onRequestedSort,
 }: SortableTableProps) {
   const onSortClicked = (columnId: string) => {
-    if (currentSort.columnId === columnId) {
+    if (currentSort === undefined || onRequestedSort === undefined) {
+      return
+    } else if (currentSort.columnId === columnId) {
       onRequestedSort(
         currentSort.direction === 'asc'
           ? { columnId: columnId, direction: 'desc' }
@@ -40,6 +42,9 @@ export function SortableTable({
   }
 
   const sortIcon = (columnId: string) => {
+    if (currentSort === undefined) {
+      return <></>
+    }
     let direction
     if (currentSort.columnId === columnId) {
       direction =

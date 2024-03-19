@@ -10,7 +10,7 @@ export default async function UsersPage() {
   const sUsers = serializeUsers(users)
   return (
     <>
-      <PageHeader title={'Správa uživatelů'} isFluid={false} />
+      <PageHeader title={'Správa uživatelů'} />
       <UsersClientPage sUsers={sUsers} />
     </>
   )

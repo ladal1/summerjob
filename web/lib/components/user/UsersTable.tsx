@@ -3,14 +3,13 @@ import { UserComplete } from 'lib/types/user'
 import { useMemo, useState } from 'react'
 import { MessageRow } from '../table/MessageRow'
 import RowCategory from '../table/RowCategory'
-import UserRow from './UserRow'
 import {
   SortOrder,
   SortableColumn,
   SortableTable,
 } from '../table/SortableTable'
 import { sortData } from '../table/SortData'
-import { Permission } from 'lib/types/auth'
+import UserRow from './UserRow'
 
 const _columns: SortableColumn[] = [
   { id: 'name', name: 'Celé jméno' },
@@ -20,7 +19,6 @@ const _columns: SortableColumn[] = [
     id: 'actions',
     name: 'Akce',
     notSortable: true,
-    stickyRight: true,
   },
 ]
 
@@ -69,6 +67,7 @@ export default function UsersTable({
     return regularUsers ? sortData(regularUsers, getSortable, sortOrder) : []
   }, [regularUsers, getSortable, sortOrder])
   //#endregion
+
   return (
     <SortableTable
       columns={_columns}

@@ -163,7 +163,7 @@ img.smj-nav-logo {
 
 .smj-sticky-col-right {
   position: sticky;
-  z-index: 1;
+  z-index: 0;
   right: 0;
   box-shadow: -5px 0px 5px -3px rgba(0, 0, 0, 0.1) !important;
 }
@@ -587,6 +587,7 @@ img.smj-nav-logo {
 }
 
 .smj-map-container {
+  z-index: 1; /* Fix for too high z-index of zoom panel */
   height: 370px;
   width: 100%;
 }

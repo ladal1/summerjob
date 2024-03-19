@@ -1,16 +1,18 @@
 'use client'
 
 import { useAPIUsers } from 'lib/fetcher/user'
+import { normalizeString } from 'lib/helpers/helpers'
 import { Permission } from 'lib/types/auth'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeUsers, UserComplete } from 'lib/types/user'
-import { useState, useMemo, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import ErrorPage from '../error-page/ErrorPage'
-import UsersTable from './UsersTable'
 import { Filters } from '../filters/Filters'
-import { useSearchParams } from 'next/navigation'
-import { useRouter } from 'next/navigation'
-import { normalizeString } from 'lib/helpers/helpers'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import { Modal, ModalSize } from '../modal/Modal'
+import EditUserForm from './EditUserForm'
+import UsersTable from './UsersTable'
 
 interface UsersClientPageProps {
   sUsers: Serialized
@@ -18,6 +20,7 @@ interface UsersClientPageProps {
 
 export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   const inititalUsers = deserializeUsers(sUsers)
+
   const { data, error, mutate } = useAPIUsers({
     fallbackData: inititalUsers,
   })
@@ -77,8 +80,8 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
 
   return (
     <section>
-      <div className="container">
-        <div className="row">
+      <div className="container-fluid">
+        <div className="row gx-3">
           <div className="col">
             <Filters
               search={filter}
@@ -95,8 +98,8 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
             />
           </div>
         </div>
-        <div className="row">
-          <div className="col-12">
+        <div className="row gx-3">
+          <div className="col-12 col-lg-12">
             <UsersTable users={filteredData || []} onWorkerUpdated={mutate} />
           </div>
         </div>

@@ -111,8 +111,8 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
 
   return (
     <section>
-      <div className="container">
-        <div className="row">
+      <div className="container-fluid">
+        <div className="row gx-3">
           <div className="col">
             <Filters
               search={filter}
@@ -129,8 +129,8 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
             />
           </div>
         </div>
-        <div className="row">
-          <div className="col-12">
+        <div className="row gx-3">
+          <div className="col-12 col-lg-12">
             <LogsTable logs={data!.logs} />
           </div>
         </div>

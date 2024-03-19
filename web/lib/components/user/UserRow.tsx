@@ -1,11 +1,9 @@
 'use client'
 import { useAPIUserUpdate } from 'lib/fetcher/user'
 import { UserComplete } from 'lib/types/user'
-import { useState } from 'react'
-import ConfirmationModal from '../modal/ConfirmationModal'
-import { Modal, ModalSize } from '../modal/Modal'
 import { SimpleRow } from '../table/SimpleRow'
-import EditUserForm from './EditUserForm'
+import { EditIcon } from './EditIcon'
+import { LockIcon } from './LockIcon'
 
 interface UserRowProps {
   user: UserComplete
@@ -44,91 +42,6 @@ function formatUserRow(
           <LockIcon locked={user.blocked} onConfirm={toggleLocked} />
         </span>
       ),
-      stickyRight: true,
     },
   ]
-}
-
-function LockIcon({
-  locked,
-  onConfirm,
-}: {
-  locked: boolean
-  onConfirm: () => void
-}) {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const onDialogConfirmed = () => {
-    setDialogOpen(false)
-    onConfirm()
-  }
-  const onDialogCancelled = () => {
-    setDialogOpen(false)
-  }
-  return (
-    <>
-      <i
-        className={`fas ${
-          locked ? 'fa-lock-open' : 'fa-lock'
-        } smj-action-pin cursor-pointer`}
-        title={`${locked ? 'Odemknout účet' : 'Zamknout účet'}`}
-        onClick={() => setDialogOpen(true)}
-      />
-      {dialogOpen && (
-        <ConfirmationModal
-          onConfirm={onDialogConfirmed}
-          onReject={onDialogCancelled}
-        >
-          <p>Chcete {locked ? 'odemknout' : 'zamknout'} tento účet?</p>
-          {!locked && (
-            <>
-              <p>
-                Uživatel bude odhlášen ze všech zařízení a nebude se moci znovu
-                přihlásit do systému, dokud nedojde k odemčení účtu.
-              </p>
-              <p>
-                S uživatelem bude možné dále manipulovat a přiřazovat ho k
-                úkolům.
-              </p>
-            </>
-          )}
-        </ConfirmationModal>
-      )}
-    </>
-  )
-}
-
-function EditIcon({
-  user,
-  onEdited,
-}: {
-  user: UserComplete
-  onEdited: () => void
-}) {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const onDialogConfirmed = () => {
-    setDialogOpen(false)
-    onEdited()
-  }
-  const onDialogCancelled = () => {
-    setDialogOpen(false)
-  }
-  return (
-    <>
-      <i
-        className="fas fa-edit smj-action-edit cursor-pointer"
-        title="Upravit role"
-        onClick={() => setDialogOpen(true)}
-      />
-
-      {dialogOpen && (
-        <Modal
-          size={ModalSize.MEDIUM}
-          title="Upravit role"
-          onClose={onDialogCancelled}
-        >
-          <EditUserForm onUpdate={onDialogConfirmed} user={user} />
-        </Modal>
-      )}
-    </>
-  )
 }
