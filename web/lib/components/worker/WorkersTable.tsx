@@ -1,6 +1,27 @@
 import { WorkerComplete } from 'lib/types/worker'
+import { useMemo, useState } from 'react'
 import { MessageRow } from '../table/MessageRow'
+import { sortData } from '../table/SortData'
+import {
+  SortOrder,
+  SortableColumn,
+  SortableTable,
+} from '../table/SortableTable'
 import WorkerRow from './WorkerRow'
+
+const _columns: SortableColumn[] = [
+  { id: 'firstName', name: 'Jméno' },
+  { id: 'lastName', name: 'Příjmení' },
+  { id: 'phone', name: 'Telefonní číslo' },
+  { id: 'email', name: 'E-mail' },
+  { id: 'skills', name: 'Vlastnosti' },
+  {
+    id: 'actions',
+    name: 'Akce',
+    notSortable: true,
+    stickyRight: true,
+  },
+]
 
 interface WorkersTableProps {
   workers: WorkerComplete[]
@@ -13,39 +34,50 @@ export default function WorkersTable({
   onUpdated,
   onHover,
 }: WorkersTableProps) {
+  //#region Sort
+  const [sortOrder, setSortOrder] = useState<SortOrder>({
+    columnId: undefined,
+    direction: 'desc',
+  })
+  const onSortRequested = (direction: SortOrder) => {
+    setSortOrder(direction)
+  }
+
+  // names has to be same as collumns ids
+  const getSortable = useMemo(
+    () => ({
+      firstName: (worker: WorkerComplete) => worker.firstName,
+      lastName: (worker: WorkerComplete) => worker.lastName,
+      phone: (worker: WorkerComplete) => worker.phone,
+      email: (worker: WorkerComplete) => worker.email,
+      skills: (worker: WorkerComplete) =>
+        `${+!worker.cars.length > 0}${+!worker.isStrong}${+!worker.isTeam}`,
+    }),
+    []
+  )
+
+  const sortedData = useMemo(() => {
+    return workers ? sortData(workers, getSortable, sortOrder) : []
+  }, [workers, getSortable, sortOrder])
+  //#endregion
+
   return (
-    <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
-      <table className="table table-hover mb-0">
-        <thead className="smj-table-header">
-          <tr>
-            {_columns.map(column => (
-              <th key={column}>{column}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="smj-table-body mb-0">
-          {workers.length === 0 && (
-            <MessageRow message="Žádní pracanti" colspan={_columns.length} />
-          )}
-          {workers.map(worker => (
-            <WorkerRow
-              key={worker.id}
-              worker={worker}
-              onUpdated={onUpdated}
-              onHover={onHover}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <SortableTable
+      columns={_columns}
+      currentSort={sortOrder}
+      onRequestedSort={onSortRequested}
+    >
+      {workers.length === 0 && (
+        <MessageRow message="Žádní pracanti" colspan={_columns.length} />
+      )}
+      {sortedData.map(worker => (
+        <WorkerRow
+          key={worker.id}
+          worker={worker}
+          onUpdated={onUpdated}
+          onHover={onHover}
+        />
+      ))}
+    </SortableTable>
   )
 }
-
-const _columns = [
-  'Jméno',
-  'Příjmení',
-  'Telefonní číslo',
-  'E-mail',
-  'Vlastnosti',
-  'Akce',
-]

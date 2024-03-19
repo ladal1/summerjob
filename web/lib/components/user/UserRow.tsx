@@ -31,16 +31,21 @@ function formatUserRow(
   const permissions = user.permissions
   const permissionString = permissions.join(', ')
   return [
-    `${user.lastName}, ${user.firstName}`,
-    user.email,
-    permissionString,
-    <span
-      key={`actions-${user.id}`}
-      className="d-flex align-items-center gap-3"
-    >
-      <EditIcon onEdited={onUserEdited} user={user} />
-      <LockIcon locked={user.blocked} onConfirm={toggleLocked} />
-    </span>,
+    { content: `${user.lastName}, ${user.firstName}` },
+    { content: user.email },
+    { content: permissionString },
+    {
+      content: (
+        <span
+          key={`actions-${user.id}`}
+          className="d-flex align-items-center gap-3"
+        >
+          <EditIcon onEdited={onUserEdited} user={user} />
+          <LockIcon locked={user.blocked} onConfirm={toggleLocked} />
+        </span>
+      ),
+      stickyRight: true,
+    },
   ]
 }
 
@@ -61,19 +66,13 @@ function LockIcon({
   }
   return (
     <>
-      {!locked ? (
-        <i
-          className="fas fa-lock smj-action-pin cursor-pointer"
-          title="Zamknout účet"
-          onClick={() => setDialogOpen(true)}
-        />
-      ) : (
-        <i
-          className="fas fa-lock-open smj-action-pin cursor-pointer"
-          title="Odemknout účet"
-          onClick={() => setDialogOpen(true)}
-        />
-      )}
+      <i
+        className={`fas ${
+          locked ? 'fa-lock-open' : 'fa-lock'
+        } smj-action-pin cursor-pointer`}
+        title={`${locked ? 'Odemknout účet' : 'Zamknout účet'}`}
+        onClick={() => setDialogOpen(true)}
+      />
       {dialogOpen && (
         <ConfirmationModal
           onConfirm={onDialogConfirmed}

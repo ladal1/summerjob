@@ -21,6 +21,7 @@ const _columns: SortableColumn[] = [
   {
     id: 'actions',
     name: 'Akce',
+    notSortable: true,
     stickyRight: true,
   },
 ]
@@ -73,7 +74,7 @@ export function CarsTable({ data, reload }: CarTableProps) {
         `${car.owner.firstName} ${car.owner.lastName}`,
       seats: (car: CarComplete) => car.seats,
       kilometrage: (car: CarComplete) => car.odometerEnd - car.odometerStart,
-      reimbursment: (car: CarComplete) => (car.reimbursed ? 'Ano' : 'Ne'),
+      reimbursment: (car: CarComplete) => +!car.reimbursed,
     }),
     []
   )

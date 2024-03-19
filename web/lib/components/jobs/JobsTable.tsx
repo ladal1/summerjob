@@ -11,33 +11,30 @@ import {
 import ProposedJobRow from './ProposedJobRow'
 
 const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Název', sortable: true, style: { minWidth: '180px' } },
+  { id: 'name', name: 'Název', style: { minWidth: '180px' } },
   {
     id: 'area',
     name: 'Lokalita',
-    sortable: true,
     style: { minWidth: '180px' },
   },
   {
     id: 'contact',
     name: 'Kontaktní osoba',
-    sortable: false,
     style: { minWidth: '150px' },
   },
   {
     id: 'address',
     name: 'Adresa',
-    sortable: true,
     style: { minWidth: '170px' },
   },
-  { id: 'daysPlanned', name: 'Naplánované dny', sortable: true },
-  { id: 'daysLeft', name: 'Dostupné dny', sortable: true },
-  { id: 'workers', name: 'Pracantů', sortable: true },
-  { id: 'priority', name: 'Priorita', sortable: true },
+  { id: 'daysPlanned', name: 'Naplánované dny' },
+  { id: 'daysLeft', name: 'Dostupné dny' },
+  { id: 'workers', name: 'Pracantů' },
+  { id: 'priority', name: 'Priorita' },
   {
     id: 'actions',
     name: 'Akce',
-    sortable: false,
+    notSortable: true,
     stickyRight: true,
     style: { minWidth: '100px' },
   },
@@ -97,10 +94,13 @@ export function JobsTable({
     () => ({
       name: (job: ProposedJobComplete) => job.name,
       area: (job: ProposedJobComplete) => job.area?.name ?? -1,
+      contact: (job: ProposedJobComplete) => job.contact,
       address: (job: ProposedJobComplete) => job.address,
-      daysPlanned: (job: ProposedJobComplete) => job.activeJobs.length,
+      daysPlanned: (job: ProposedJobComplete) =>
+        `${job.activeJobs.length}${job.requiredDays}`,
       daysLeft: (job: ProposedJobComplete) => job.availability.length,
-      workers: (job: ProposedJobComplete) => job.minWorkers,
+      workers: (job: ProposedJobComplete) =>
+        `${job.minWorkers}${job.maxWorkers}`,
       priority: (job: ProposedJobComplete) => job.priority,
     }),
     []

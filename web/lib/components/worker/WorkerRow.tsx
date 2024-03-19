@@ -51,40 +51,53 @@ function formatWorkerRow(
     )
   }
   return [
-    worker.firstName,
-    worker.lastName,
-    worker.phone,
-    worker.email,
-    <>
-      {worker.cars.length > 0 && (
-        <i className="fas fa-car me-2" title={'Má auto'} />
-      )}
-      {worker.isStrong && <i className="fas fa-dumbbell me-2" title={'Silák'} />}
-      {worker.isTeam && <i className="fa-solid fa-people-group" title={'Tým'} />}
-    </>,
-    <span
-      key={`actions-${worker.id}`}
-      className="d-flex align-items-center gap-3"
-    >
-      <Link
-        href={`/workers/${worker.id}`}
-        onClick={e => e.stopPropagation()}
-        className="smj-action-edit"
-      >
-        <i className="fas fa-edit" title="Upravit"></i>
-      </Link>
-      <DeleteIcon
-        onClick={onRequestDelete}
-        isBeingDeleted={isBeingDeleted}
-        showConfirmation={true}
-        getConfirmationMessage={confirmationText}
-      />
-      {deletingError && (
-        <ErrorMessageModal
-          onClose={resetError}
-          mainMessage={'Nepodařilo se odstranit pracanta.'}
-        />
-      )}
-    </span>,
+    { content: worker.firstName },
+    { content: worker.lastName },
+    { content: worker.phone },
+    { content: worker.email },
+    {
+      content: (
+        <>
+          {worker.cars.length > 0 && (
+            <i className="fas fa-car me-2" title={'Má auto'} />
+          )}
+          {worker.isStrong && (
+            <i className="fas fa-dumbbell me-2" title={'Silák'} />
+          )}
+          {worker.isTeam && (
+            <i className="fa-solid fa-people-group" title={'Tým'} />
+          )}
+        </>
+      ),
+    },
+    {
+      content: (
+        <span
+          key={`actions-${worker.id}`}
+          className="d-flex align-items-center gap-3"
+        >
+          <Link
+            href={`/workers/${worker.id}`}
+            onClick={e => e.stopPropagation()}
+            className="smj-action-edit"
+          >
+            <i className="fas fa-edit" title="Upravit"></i>
+          </Link>
+          <DeleteIcon
+            onClick={onRequestDelete}
+            isBeingDeleted={isBeingDeleted}
+            showConfirmation={true}
+            getConfirmationMessage={confirmationText}
+          />
+          {deletingError && (
+            <ErrorMessageModal
+              onClose={resetError}
+              mainMessage={'Nepodařilo se odstranit pracanta.'}
+            />
+          )}
+        </span>
+      ),
+      stickyRight: true,
+    },
   ]
 }
