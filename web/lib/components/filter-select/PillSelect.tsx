@@ -1,5 +1,6 @@
 import { formatNumber } from 'lib/helpers/helpers'
-import React, { createRef, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { IconAndLabel } from '../forms/IconAndLabel'
 
 export interface PillSelectItem {
   databaseId?: string
@@ -7,6 +8,7 @@ export interface PillSelectItem {
   name: string
   searchable: string
   amount?: number
+  icon?: string
 }
 
 interface PillSelectProps {
@@ -16,6 +18,7 @@ interface PillSelectProps {
   onSelected: (selectedItems: PillSelectItem[]) => void
   defaultSelected?: PillSelectItem[]
   removeExisting: (id: string) => void
+  withNumberSelect?: boolean
   multiple?: boolean
 }
 
@@ -26,6 +29,7 @@ export function PillSelect({
   onSelected,
   defaultSelected,
   removeExisting,
+  withNumberSelect = false,
   multiple = false,
 }: PillSelectProps) {
   const [search, setSearch] = useState('')
@@ -148,7 +152,7 @@ export function PillSelect({
         <div
           className="d-flex flex-wrap"
           onClick={e => {
-            if (e.target === e.currentTarget) {
+            if (e.target === e.currentTarget && withNumberSelect) {
               // click on this container will togle dropdown (but not click on pills)
               toggleDropdown()
             }
@@ -156,49 +160,59 @@ export function PillSelect({
         >
           {selectedItems.map(selectedItem => (
             <div key={selectedItem.id} className="pill">
-              <div
-                className="cursor-pointer"
-                onClick={() => setIsEditingAmountItem(selectedItem)}
-              >
-                {selectedItem.name}
-                {!(
-                  isEditingAmountItem &&
-                  isEditingAmountItem.id === selectedItem.id
-                ) &&
-                  selectedItem.amount !== undefined &&
-                  selectedItem.amount > 1 && (
-                    <span className="ms-1">({selectedItem.amount})</span>
-                  )}
-              </div>
-              {isEditingAmountItem &&
-                isEditingAmountItem.id === selectedItem.id && (
-                  <div className="d-inline-flex align-items-baseline ms-1">
-                    (
-                    <input
-                      className="form-control smj-input p-0"
-                      style={{
-                        maxWidth: '50px',
-                        boxShadow: 'inset 0 -1px 0 #7e7e7e',
-                      }}
-                      ref={pillInputRef}
-                      type="number"
-                      min={1}
-                      defaultValue={selectedItem.amount ?? 1}
-                      onChange={e => {
-                        e.target.value = formatNumber(e.target.value)
-                        const num = e.target.value
-                        if (+num >= 1) {
-                          selectedItem.amount = +num
-                          setItemToRemove(null)
-                        } else if (+num == 0) {
-                          setItemToRemove(selectedItem)
-                        }
-                        onSelected(selectedItems)
-                      }}
-                    />
-                    )
+              {withNumberSelect ? (
+                <>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => setIsEditingAmountItem(selectedItem)}
+                  >
+                    {selectedItem.name}
+                    {!(
+                      isEditingAmountItem &&
+                      isEditingAmountItem.id === selectedItem.id
+                    ) &&
+                      selectedItem.amount !== undefined &&
+                      selectedItem.amount > 1 && (
+                        <span className="ms-1">({selectedItem.amount})</span>
+                      )}
                   </div>
-                )}
+                  {isEditingAmountItem &&
+                    isEditingAmountItem.id === selectedItem.id && (
+                      <div className="d-inline-flex align-items-baseline ms-1">
+                        (
+                        <input
+                          className="form-control smj-input p-0"
+                          style={{
+                            maxWidth: '50px',
+                            boxShadow: 'inset 0 -1px 0 #7e7e7e',
+                          }}
+                          ref={pillInputRef}
+                          type="number"
+                          min={1}
+                          defaultValue={selectedItem.amount ?? 1}
+                          onChange={e => {
+                            e.target.value = formatNumber(e.target.value)
+                            const num = e.target.value
+                            if (+num >= 1) {
+                              selectedItem.amount = +num
+                              setItemToRemove(null)
+                            } else if (+num == 0) {
+                              setItemToRemove(selectedItem)
+                            }
+                            onSelected(selectedItems)
+                          }}
+                        />
+                        )
+                      </div>
+                    )}
+                </>
+              ) : (
+                <IconAndLabel
+                  icon={selectedItem.icon ?? ''}
+                  label={selectedItem.name}
+                />
+              )}
+
               <span
                 className="pill-close"
                 onClick={() => removeSelectedItem(selectedItem)}

@@ -20,9 +20,9 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
     <>
       <nav className="navbar navbar-light navbar-expand-md smj-gray pt-2 pb-2 mb-0">
         <div className="container-fluid">
-          <Link 
-            className="navbar-brand d-flex align-items-center" 
-            href="/home"
+          <Link
+            className="navbar-brand d-flex align-items-center"
+            href="/posts"
             onClick={() => setExpanded(false)}
           >
             <Image
@@ -46,7 +46,7 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
             className={`collapse navbar-collapse ${expanded ? 'show' : ''}`}
             id="navcol-1"
           >
-            <hr/>
+            <hr />
             <ul className="navbar-nav me-auto">
               {paths.map(navPath => {
                 return (
@@ -72,8 +72,8 @@ export function NavbarClient({ paths, username }: NavbarClientProps) {
                 )
               })}
             </ul>
-            <hr/>
-            <div className='d-flex justify-content-end'>
+            <hr />
+            <div className="d-flex justify-content-end">
               {username && (
                 <>
                   <button

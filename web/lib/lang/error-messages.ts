@@ -1,5 +1,5 @@
 export const customErrorMessages = {
-  invalidRegexName: 'Zadejte pouze písmena nebo mezery', 
+  invalidRegexName: 'Zadejte pouze písmena nebo mezery',
   emptyFirstName: 'Zadejte jméno',
   emptyLastName: 'Zadejte příjmení',
 
@@ -36,6 +36,10 @@ export const customErrorMessages = {
   emptyOdometerStart: 'Zadejte počáteční stav tachometru',
 
   emptyAreaName: 'Zadejte název oblasti',
+
+  emptyPostName: 'Zadejte název příspěvku',
+  emptyShortDescription: 'Zadejte krátký popis',
+  invalidRegexTime: 'Zadejte čas ve formátu HH:MM',
 
   nonPositiveNumber: 'Zadejte kladné číslo',
   nonNonNegativeNumber: 'Zadejte nezáporné číslo',

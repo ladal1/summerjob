@@ -474,6 +474,7 @@ export default function EditProposedJobForm({
               items={manageToolSelectItems()}
               init={fetchToolSelectItems(job.toolsOnSite)}
               removeExisting={removeExistingToolOnSite}
+              withNumberSelect={true}
               register={selectToolsOnSite}
               errors={errors}
             />
@@ -484,10 +485,12 @@ export default function EditProposedJobForm({
               items={manageToolSelectItems()}
               init={fetchToolSelectItems(job.toolsToTakeWith)}
               removeExisting={removeExistingToolToTakeWith}
+              withNumberSelect={true}
               register={selectToolsToTakeWith}
               errors={errors}
             />
             <GroupButtonsInput
+              id="allergens"
               label="Alergeny"
               mapping={allergyMapping}
               register={() => register('allergens')}

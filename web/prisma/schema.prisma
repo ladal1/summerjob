@@ -69,6 +69,15 @@ enum Skill {
   STRONG
 }
 
+enum PostTag {
+  EATING
+  SPORTS
+  CULTURAL
+  EDUCATIONAL
+  RELIGIOUS
+  INFORMATIVE
+}
+
 model Tool {
   id                      String       @id @default(uuid())
   tool                    ToolName     
@@ -77,6 +86,35 @@ model Tool {
   proposedJobOnSiteId     String?      
   proposedJobToTakeWith   ProposedJob? @relation("ToolToTakeWith", fields: [proposedJobToTakeWithId], references: [id])
   proposedJobToTakeWithId String?      
+}
+
+
+model Participant {
+  worker   Worker @relation(fields: [workerId], references: [id])
+  workerId String 
+  post     Post   @relation(fields: [postId], references: [id])
+  postId   String  
+
+  @@id([workerId, postId])
+}
+
+model Post {
+  id                    String        @id @default(uuid())
+  name                  String
+  madeIn                DateTime      @default(now())
+  availability          DateTime[]    @db.Date
+  timeFrom              DateTime?     @db.Time
+  timeTo                DateTime?     @db.Time
+  address               String
+  coordinates           Float[]
+  tags                  PostTag[]
+  shortDescription      String
+  longDescription       String?
+  photoPath             String?
+  isOpenForParticipants Boolean       @default(false)
+  isMandatory           Boolean       @default(false)
+  isPinned              Boolean       @default(false)
+  participants          Participant[]
 }
 
 model Photo {
@@ -109,6 +147,7 @@ model Worker {
   note               String                      @default("")
   photoPath          String?
   pinnedProposedJobs PinnedProposedJobByWorker[]
+  attends            Participant[]
 }
 
 model WorkerPermissions {

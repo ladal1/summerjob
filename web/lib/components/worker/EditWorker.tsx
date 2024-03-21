@@ -212,12 +212,14 @@ export default function EditWorker({
               />
             </div>
             <GroupButtonsInput
+              id="allergyIds"
               label="Alergie"
               mapping={allergyMapping}
               register={() => register('allergyIds')}
             />
             {!isProfilePage && (
               <GroupButtonsInput
+                id="skills"
                 label="Dovednosti"
                 mapping={skillMapping}
                 register={() => register('skills')}

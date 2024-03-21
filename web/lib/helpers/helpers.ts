@@ -167,3 +167,7 @@ export function normalizeString(str: string) {
   const inLowerCase = withRemovedAccent.toLowerCase()
   return inLowerCase
 }
+
+export function validateTimeInput(str: string) {
+  return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(str)
+}

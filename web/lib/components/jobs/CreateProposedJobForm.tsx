@@ -320,7 +320,7 @@ export default function CreateProposedJobForm({
             />
             <div className="d-flex w-50">
               <input
-                className="form-control p-1 ps-2"
+                className="form-control smj-input p-1 ps-2"
                 id="minWorkers"
                 type="number"
                 min={1}
@@ -333,7 +333,7 @@ export default function CreateProposedJobForm({
               />
               /
               <input
-                className="form-control p-1 ps-2"
+                className="form-control smj-input p-1 ps-2"
                 id="maxWorkers"
                 type="number"
                 min={1}
@@ -346,7 +346,7 @@ export default function CreateProposedJobForm({
               />
               /
               <input
-                className="form-control p-1 ps-2"
+                className="form-control smj-input p-1 ps-2"
                 id="strongWorkers"
                 type="number"
                 min={0}
@@ -395,6 +395,7 @@ export default function CreateProposedJobForm({
               placeholder={'Vyberte nástroje'}
               items={manageToolSelectItems()}
               removeExisting={removeExistingToolOnSite}
+              withNumberSelect={true}
               register={selectToolsOnSite}
               errors={errors}
             />
@@ -404,10 +405,12 @@ export default function CreateProposedJobForm({
               placeholder={'Vyberte nástroje'}
               items={manageToolSelectItems()}
               removeExisting={removeExistingToolToTakeWith}
+              withNumberSelect={true}
               register={selectToolsToTakeWith}
               errors={errors}
             />
             <GroupButtonsInput
+              id="allergens"
               label="Alergeny"
               mapping={allergyMapping}
               register={() => register('allergens')}

@@ -1,24 +1,23 @@
 'use client'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { WorkerCreateSchema } from 'lib/types/worker'
-import { useState } from 'react'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
-import { useRouter } from 'next/navigation'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
-import { TextInput } from '../forms/input/TextInput'
+import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
+import { WorkerCreateSchema } from 'lib/types/worker'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { DateBool } from 'lib/data/dateSelectionType'
-import { ImageUploader } from '../forms/ImageUploader'
+import { TextInput } from '../forms/input/TextInput'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
-import FormWarning from '../forms/FormWarning'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -68,6 +67,8 @@ export default function CreateWorker({
     router.back()
   }
 
+  //#region Photo
+
   const removeNewPhoto = () => {
     setValue('photoFile', undefined, {
       shouldDirty: true,
@@ -79,16 +80,10 @@ export default function CreateWorker({
     setValue('photoFile', fileList, { shouldDirty: true, shouldValidate: true })
   }
 
+  //#endregion
+
   return (
     <>
-      {true &&
-        Object.values(errors).map((error, index) => (
-          <div key={error.message?.toString()}>
-            <FormWarning
-              message={`${error.ref?.type} + ${error.message?.toString()}`}
-            />
-          </div>
-        ))}
       <div className="row">
         <div className="col">
           <h3>Přidat pracanta</h3>
@@ -157,11 +152,13 @@ export default function CreateWorker({
               />
             </div>
             <GroupButtonsInput
+              id="allergyIds"
               label="Alergie"
               mapping={allergyMapping}
               register={() => register('allergyIds')}
             />
             <GroupButtonsInput
+              id="skills"
               label="Dovednosti"
               mapping={skillMapping}
               register={() => register('skills')}
