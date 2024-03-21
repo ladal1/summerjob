@@ -18,14 +18,20 @@ export type PostComplete = z.infer<typeof PostCompleteSchema>
 
 export const PostCreateSchema = z
   .object({
-    name: z.string().min(1, { message: err.emptyPostName }),
+    name: z.string().min(1, { message: err.emptyPostName }).trim(),
     availability: z.array(z.date()).optional(),
     timeFrom: z
       .string()
-      .refine(time => validateTimeInput(time), {
-        message: err.invalidRegexTime,
-      })
+      .optional()
+      .refine(
+        time =>
+          time === undefined || time.length === 0 || validateTimeInput(time),
+        {
+          message: err.invalidRegexTime,
+        }
+      )
       .transform(time => {
+        if (time === undefined || time.length === 0) return undefined
         const [hours, minutes] = time.split(':').map(Number)
         const now = new Date()
         now.setHours(hours)
@@ -33,14 +39,19 @@ export const PostCreateSchema = z
         now.setSeconds(0)
         now.setMilliseconds(0)
         return now
-      })
-      .optional(),
+      }),
     timeTo: z
       .string()
-      .refine(time => validateTimeInput(time), {
-        message: err.invalidRegexTime,
-      })
+      .optional()
+      .refine(
+        time =>
+          time === undefined || time.length === 0 || validateTimeInput(time),
+        {
+          message: err.invalidRegexTime,
+        }
+      )
       .transform(time => {
+        if (time === undefined || time.length === 0) return undefined
         const [hours, minutes] = time.split(':').map(Number)
         const now = new Date()
         now.setHours(hours)
@@ -48,8 +59,7 @@ export const PostCreateSchema = z
         now.setSeconds(0)
         now.setMilliseconds(0)
         return now
-      })
-      .optional(),
+      }),
     address: z.string().optional(),
     coordinates: coordinatesZod.optional(),
     shortDescription: z.string().min(1, { message: err.emptyShortDescription }),
@@ -72,10 +82,10 @@ export const PostCreateSchema = z
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
       .optional(),
     photoFileRemoved: z.boolean().optional(),
-    photoPath: z.string(),
+    photoPath: z.string().optional(),
     tags: z.array(z.nativeEnum(PostTag)).optional(),
-    isMandatory: z.boolean(),
-    isOpenForParticipants: z.boolean(),
+    isMandatory: z.boolean().optional(),
+    isOpenForParticipants: z.boolean().optional(),
   })
   .strict()
 

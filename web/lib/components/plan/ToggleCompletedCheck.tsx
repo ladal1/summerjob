@@ -22,7 +22,7 @@ export default function ToggleCompletedCheck({
   const {
     register,
     handleSubmit,
-    formState: { dirtyFields },
+    formState: { dirtyFields, errors },
   } = useForm<ActiveJobUpdateData>({
     resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
@@ -75,6 +75,7 @@ export default function ToggleCompletedCheck({
               register={() => register('privateDescription')}
               rows={4}
               margin={false}
+              errors={errors}
             />
             <div className="d-flex justify-content-end mt-3">
               <input

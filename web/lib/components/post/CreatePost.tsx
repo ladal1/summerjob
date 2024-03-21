@@ -23,6 +23,7 @@ import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
+
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>
 
@@ -56,6 +57,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   })
 
   const onSubmit = (dataForm: PostForm) => {
+    console.log(dataForm)
     trigger(dataForm)
   }
 
@@ -124,6 +126,14 @@ export default function CreatePost({ allDates }: CreatePostProps) {
 
   return (
     <>
+      {true &&
+        Object.values(errors).map((error, index) => (
+          <div key={error.message?.toString()}>
+            <FormWarning
+              message={`${error.ref?.type} + ${error.message?.toString()}`}
+            />
+          </div>
+        ))}
       <div className="row">
         <div className="col">
           <h3>Přidat příspěvek</h3>
@@ -150,6 +160,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
               placeholder="Popis"
               rows={2}
               register={() => register('shortDescription')}
+              errors={errors}
             />
             <TextAreaInput
               id="longDescription"
@@ -157,6 +168,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
               placeholder="Popis"
               rows={4}
               register={() => register('longDescription')}
+              errors={errors}
             />
             <div className="d-flex flex-row">
               <DateSelectionInput
@@ -192,7 +204,6 @@ export default function CreatePost({ allDates }: CreatePostProps) {
                 }
               />
             )}
-
             <MapInput
               address={{
                 id: 'address',

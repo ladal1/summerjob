@@ -79,6 +79,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
                 placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
                 rows={4}
                 register={() => register('description')}
+                errors={errors}
               />
               <TextInput
                 id="seats"

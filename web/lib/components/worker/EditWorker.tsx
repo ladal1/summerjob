@@ -327,6 +327,7 @@ export default function EditWorker({
                 placeholder="Poznámka"
                 rows={1}
                 register={() => register('note')}
+                errors={errors}
               />
             )}
 

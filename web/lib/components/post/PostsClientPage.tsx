@@ -1,13 +1,11 @@
 'use client'
 import ErrorPage from 'lib/components/error-page/ErrorPage'
 import PageHeader from 'lib/components/page-header/PageHeader'
+import { useAPIPosts } from 'lib/fetcher/post'
+import { deserializePosts } from 'lib/types/post'
 import { Serialized } from 'lib/types/serialize'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Filters } from '../filters/Filters'
-import { deserializePosts } from 'lib/types/post'
-import { useAPIPosts } from 'lib/fetcher/post'
 
 interface PostsClientPageProps {
   sPosts: Serialized

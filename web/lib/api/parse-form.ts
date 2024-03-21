@@ -49,6 +49,7 @@ export const parseFormWithImages = async (
   json: any
 }> => {
   await createDirectory(uploadDir)
+  console.log('create')
   let count = 0
 
   return await new Promise(async (resolve, reject) => {

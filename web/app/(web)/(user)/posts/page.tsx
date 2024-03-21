@@ -1,5 +1,5 @@
 import { withPermissions } from 'lib/auth/auth'
-import PostsClientPage from 'lib/components/post/PostClientPage'
+import PostsClientPage from 'lib/components/post/PostsClientPage'
 import { getPosts } from 'lib/data/posts'
 import { Permission } from 'lib/types/auth'
 import { serializePosts } from 'lib/types/post'

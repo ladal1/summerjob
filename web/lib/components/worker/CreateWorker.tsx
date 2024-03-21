@@ -209,6 +209,7 @@ export default function CreateWorker({
               placeholder="Poznámka"
               rows={1}
               register={() => register('note')}
+              errors={errors}
             />
 
             <div className="d-flex justify-content-between gap-3">

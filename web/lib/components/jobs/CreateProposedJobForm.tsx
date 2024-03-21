@@ -250,6 +250,7 @@ export default function CreateProposedJobForm({
               placeholder="Popis"
               rows={4}
               register={() => register('publicDescription')}
+              errors={errors}
             />
             <TextAreaInput
               id="privateDescription"
@@ -257,6 +258,7 @@ export default function CreateProposedJobForm({
               placeholder="Poznámka"
               rows={4}
               register={() => register('privateDescription')}
+              errors={errors}
             />
             <FilterSelectInput
               id="areaId"

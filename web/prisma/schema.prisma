@@ -105,7 +105,7 @@ model Post {
   availability          DateTime[]    @db.Date
   timeFrom              DateTime?     @db.Time
   timeTo                DateTime?     @db.Time
-  address               String
+  address               String?
   coordinates           Float[]
   tags                  PostTag[]
   shortDescription      String
