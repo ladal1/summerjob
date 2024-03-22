@@ -46,7 +46,7 @@ export const WorkerCreateSchema = z
       .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
       .transform(
         fileList =>
-          (fileList && fileList.length > 0 && fileList[0]) || undefined
+          (fileList && fileList.length > 0 && fileList[0]) || null || undefined
       )
       .refine(
         file => !file || (!!file && file.size <= 1024 * 1024 * 10),
@@ -57,6 +57,7 @@ export const WorkerCreateSchema = z
         err.unsuportedTypeImage
       ) // any image
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
+      .nullable()
       .optional(),
     photoFileRemoved: z.boolean().optional(),
     photoPath: z.string().optional(),

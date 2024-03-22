@@ -9,7 +9,13 @@ const getJson = (fieldsJsonData: string | string[]): any => {
   const jsonData = Array.isArray(fieldsJsonData)
     ? fieldsJsonData[0]
     : fieldsJsonData
-  return JSON.parse(jsonData)
+  let json
+  try {
+    json = JSON.parse(jsonData)
+  } catch (error) {
+    console.log(error)
+  }
+  return json
 }
 
 /* Get photoPath from uploaded photoFile. */
@@ -49,7 +55,6 @@ export const parseFormWithImages = async (
   json: any
 }> => {
   await createDirectory(uploadDir)
-  console.log('create')
   let count = 0
 
   return await new Promise(async (resolve, reject) => {
@@ -82,7 +87,9 @@ export const parseFormWithImages = async (
     })
 
     form.parse(req, function (err, fields, files) {
-      if (err) reject(err)
+      if (err) {
+        reject(err)
+      }
       const json = getJson(fields.jsonData)
       resolve({ fields, files, json })
     })

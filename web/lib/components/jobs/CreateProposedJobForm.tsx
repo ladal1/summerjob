@@ -1,6 +1,11 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
+import { formatNumber, removeRedundantSpace } from 'lib/helpers/helpers'
 import { Area, JobType, ToolName } from 'lib/prisma/client'
 import { deserializeAreas } from 'lib/types/area'
 import {
@@ -8,30 +13,25 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { Serialized } from 'lib/types/serialize'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
+import { FilterSelectItem } from '../filter-select/FilterSelect'
+import { PillSelectItem } from '../filter-select/PillSelect'
+import FormWarning from '../forms/FormWarning'
+import { ImageUploader } from '../forms/ImageUploader'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { FilterSelectInput } from '../forms/input/FilterSelectInput'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
+import { MapInput } from '../forms/input/MapInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { PillSelectInput } from '../forms/input/PillSelectInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { TextInput } from '../forms/input/TextInput'
+import { Label } from '../forms/Label'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
-import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { TextInput } from '../forms/input/TextInput'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { FilterSelectInput } from '../forms/input/FilterSelectInput'
-import { formatNumber } from 'lib/helpers/helpers'
-import { Label } from '../forms/Label'
-import FormWarning from '../forms/FormWarning'
-import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { FilterSelectItem } from '../filter-select/FilterSelect'
-import { useRouter } from 'next/navigation'
-import { DateBool } from 'lib/data/dateSelectionType'
-import { ImageUploader } from '../forms/ImageUploader'
-import { MapInput } from '../forms/input/MapInput'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
-import { PillSelectInput } from '../forms/input/PillSelectInput'
-import { PillSelectItem } from '../filter-select/PillSelect'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
-import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -241,7 +241,12 @@ export default function CreateProposedJobForm({
               id="name"
               label="Název jobu"
               placeholder="Název"
-              register={() => register('name')}
+              register={() =>
+                register('name', {
+                  onChange: e =>
+                    (e.target.value = removeRedundantSpace(e.target.value)),
+                })
+              }
               errors={errors}
             />
             <TextAreaInput

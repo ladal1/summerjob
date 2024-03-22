@@ -103,8 +103,8 @@ model Post {
   name                  String
   madeIn                DateTime      @default(now())
   availability          DateTime[]    @db.Date
-  timeFrom              DateTime?     @db.Time
-  timeTo                DateTime?     @db.Time
+  timeFrom              String?     
+  timeTo                String?     
   address               String?
   coordinates           Float[]
   tags                  PostTag[]

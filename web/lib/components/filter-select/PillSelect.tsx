@@ -159,7 +159,7 @@ export function PillSelect({
           }}
         >
           {selectedItems.map(selectedItem => (
-            <div key={selectedItem.id} className="pill">
+            <div key={`selected-item-${selectedItem.id}`} className="pill">
               {withNumberSelect ? (
                 <>
                   <div
@@ -212,7 +212,6 @@ export function PillSelect({
                   label={selectedItem.name}
                 />
               )}
-
               <span
                 className="pill-close"
                 onClick={() => removeSelectedItem(selectedItem)}
@@ -242,11 +241,11 @@ export function PillSelect({
           className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}
         >
           {items.map((part, index) => (
-            <React.Fragment key={index}>
+            <React.Fragment key={`dropdown-${index}`}>
               {part.map(
                 item =>
                   shouldShowItem(item) && (
-                    <li key={item.id}>
+                    <li key={`dropdown-item-${item.id}`}>
                       <button
                         className={`dropdown-item smj-dropdown-item fs-5 ${
                           selectedItems.find(

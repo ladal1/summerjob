@@ -6,11 +6,14 @@ import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { useAPIPostCreate } from 'lib/fetcher/post'
 import { removeRedundantSpace } from 'lib/helpers/helpers'
 import { PostTag } from 'lib/prisma/client'
-import { PostCreateSchema } from 'lib/types/post'
+import {
+  PostCreateData,
+  PostCreateDataInput,
+  PostCreateSchema,
+} from 'lib/types/post'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
 import FormWarning from '../forms/FormWarning'
 import { ImageUploader } from '../forms/ImageUploader'
@@ -23,6 +26,7 @@ import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { z } from 'zod'
 
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>
@@ -30,7 +34,6 @@ type PostForm = z.input<typeof schema>
 interface CreatePostProps {
   allDates: DateBool[][]
 }
-
 export default function CreatePost({ allDates }: CreatePostProps) {
   const {
     register,
@@ -58,7 +61,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
 
   const onSubmit = (dataForm: PostForm) => {
     console.log(dataForm)
-    trigger(dataForm)
+    trigger(dataForm as PostCreateData)
   }
 
   const onConfirmationClosed = () => {
@@ -81,7 +84,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   //#region Photo
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
+    setValue('photoFile', null, {
       shouldDirty: true,
       shouldValidate: true,
     })
@@ -119,21 +122,13 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   }
 
   const selectTags = (items: PillSelectItem[]) => {
-    const tags = items.map(item => item.name as PostTag)
+    const tags = items.map(item => item.id as PostTag)
     setValue('tags', tags, { shouldDirty: true, shouldValidate: true })
   }
   //#endregion
 
   return (
     <>
-      {true &&
-        Object.values(errors).map((error, index) => (
-          <div key={error.message?.toString()}>
-            <FormWarning
-              message={`${error.ref?.type} + ${error.message?.toString()}`}
-            />
-          </div>
-        ))}
       <div className="row">
         <div className="col">
           <h3>Přidat příspěvek</h3>

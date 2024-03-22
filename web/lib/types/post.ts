@@ -19,47 +19,45 @@ export type PostComplete = z.infer<typeof PostCompleteSchema>
 export const PostCreateSchema = z
   .object({
     name: z.string().min(1, { message: err.emptyPostName }).trim(),
-    availability: z.array(z.date()).optional(),
+    availability: z
+      .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
+      .openapi({
+        type: 'array',
+        items: {
+          type: 'string',
+          format: 'date',
+        },
+      }),
     timeFrom: z
       .string()
-      .optional()
       .refine(
-        time =>
-          time === undefined || time.length === 0 || validateTimeInput(time),
+        time => time === null || time.length === 0 || validateTimeInput(time),
         {
           message: err.invalidRegexTime,
         }
       )
       .transform(time => {
-        if (time === undefined || time.length === 0) return undefined
-        const [hours, minutes] = time.split(':').map(Number)
-        const now = new Date()
-        now.setHours(hours)
-        now.setMinutes(minutes)
-        now.setSeconds(0)
-        now.setMilliseconds(0)
-        return now
-      }),
+        if (time !== null && time.length === 0) {
+          return null
+        }
+        return time
+      })
+      .nullable(),
     timeTo: z
       .string()
-      .optional()
       .refine(
-        time =>
-          time === undefined || time.length === 0 || validateTimeInput(time),
+        time => time === null || time.length === 0 || validateTimeInput(time),
         {
           message: err.invalidRegexTime,
         }
       )
       .transform(time => {
-        if (time === undefined || time.length === 0) return undefined
-        const [hours, minutes] = time.split(':').map(Number)
-        const now = new Date()
-        now.setHours(hours)
-        now.setMinutes(minutes)
-        now.setSeconds(0)
-        now.setMilliseconds(0)
-        return now
-      }),
+        if (time !== null && time.length === 0) {
+          return null
+        }
+        return time
+      })
+      .nullable(),
     address: z.string().optional(),
     coordinates: coordinatesZod.optional(),
     shortDescription: z.string().min(1, { message: err.emptyShortDescription }),
@@ -69,7 +67,7 @@ export const PostCreateSchema = z
       .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
       .transform(
         fileList =>
-          (fileList && fileList.length > 0 && fileList[0]) || undefined
+          (fileList && fileList.length > 0 && fileList[0]) || null || undefined
       )
       .refine(
         file => !file || (!!file && file.size <= 1024 * 1024 * 10),
@@ -80,10 +78,11 @@ export const PostCreateSchema = z
         err.unsuportedTypeImage
       ) // any image
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
+      .nullable()
       .optional(),
     photoFileRemoved: z.boolean().optional(),
     photoPath: z.string().optional(),
-    tags: z.array(z.nativeEnum(PostTag)).optional(),
+    tags: z.array(z.nativeEnum(PostTag)),
     isMandatory: z.boolean().optional(),
     isOpenForParticipants: z.boolean().optional(),
   })
@@ -112,7 +111,5 @@ export function deserializePostsDates(post: PostComplete) {
   post.madeIn = new Date(post.madeIn)
   if (post.availability)
     post.availability = post.availability.map(date => new Date(date))
-  if (post.timeFrom) post.timeFrom = new Date(post.timeFrom)
-  if (post.timeTo) post.timeTo = new Date(post.timeTo)
   return post
 }

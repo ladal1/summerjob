@@ -114,7 +114,7 @@ export default function EditWorker({
   //#region File
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
+    setValue('photoFile', null, {
       shouldDirty: true,
       shouldValidate: true,
     })

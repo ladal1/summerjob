@@ -1,5 +1,6 @@
-import { PostAPIPostData, PostsAPIGetResponse } from 'pages/api/posts'
+import { PostsAPIGetResponse } from 'pages/api/posts'
 import { useData, useDataCreate } from './fetcher'
+import { PostCreateData } from 'lib/types/post'
 /*
 export function useAPIPostUpdate(postId: string, options?: any) {
   return useDataPartialUpdate<PostAPIPatchData>(
@@ -21,5 +22,5 @@ export function useAPIPostDelete(id: string, options?: any) {
 }*/
 
 export function useAPIPostCreate(options?: any) {
-  return useDataCreate<PostAPIPostData>(`/api/posts`, options)
+  return useDataCreate<PostCreateData>('/api/posts', options)
 }

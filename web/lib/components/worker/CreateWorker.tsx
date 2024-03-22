@@ -70,7 +70,7 @@ export default function CreateWorker({
   //#region Photo
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
+    setValue('photoFile', null, {
       shouldDirty: true,
       shouldValidate: true,
     })

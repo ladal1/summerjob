@@ -25,7 +25,6 @@ async function get(
   res.status(200).json(posts)
 }
 
-export type PostAPIPostData = PostCreateDataInput
 async function post(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -34,7 +33,7 @@ async function post(
   const activeEventId = await cache_getActiveSummerJobEventId()
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/posts'
-  console.log(req)
+  console.log('before')
   const { files, json } = await parseFormWithImages(
     req,
     temporaryName,
@@ -42,13 +41,23 @@ async function post(
     1
   )
   console.log(json)
+  const parsed = PostCreateSchema.safeParse(json)
+  if (!parsed.success) {
+    parsed.error.issues.map(issue => {
+      console.log(issue.code)
+      console.log(issue.message)
+    })
+  } else {
+    console.log(parsed.success)
+  }
 
   const singlePost = validateOrSendError(PostCreateSchema, json, res)
   if (!singlePost) {
     return
   }
   console.log(singlePost)
-  const post = await createPost(singlePost)
+  const { photoFile, ...rest } = singlePost
+  const post = await createPost(rest)
   /* Rename photo file and update post with new photo path to it. */
   if (files.photoFile) {
     const temporaryPhotoPath = getPhotoPath(files.photoFile) // update photoPath
