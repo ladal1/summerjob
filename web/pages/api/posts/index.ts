@@ -13,7 +13,7 @@ import { createPost, getPosts, updatePost } from 'lib/data/posts'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
-import { PostCreateDataInput, PostCreateSchema } from 'lib/types/post'
+import { PostCreateSchema } from 'lib/types/post'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export type PostsAPIGetResponse = Awaited<ReturnType<typeof getPosts>>

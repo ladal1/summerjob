@@ -13,11 +13,11 @@ export const IconAndLabel = ({
       {!reverseOrder ? (
         <>
           <i className={`${icon} me-2`}></i>
-          {label}
+          <span className="overflow-ellipsis">{label}</span>
         </>
       ) : (
         <>
-          <span className="me-2">{label}</span>
+          <span className="me-2 overflow-ellipsis">{label}</span>
           <i className={icon}></i>
         </>
       )}

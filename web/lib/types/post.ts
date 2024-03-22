@@ -58,10 +58,10 @@ export const PostCreateSchema = z
         return time
       })
       .nullable(),
-    address: z.string().optional(),
+    address: z.string(),
     coordinates: coordinatesZod.optional(),
     shortDescription: z.string().min(1, { message: err.emptyShortDescription }),
-    longDescription: z.string().optional(),
+    longDescription: z.string(),
     photoFile: z
       .any()
       .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
@@ -95,6 +95,17 @@ export const PostUpdateSchema = PostCreateSchema.partial().strict()
 
 export type PostUpdateDataInput = z.input<typeof PostUpdateSchema>
 export type PostUpdateData = z.infer<typeof PostUpdateSchema>
+
+export function serializePost(data: PostComplete): Serialized {
+  return {
+    data: JSON.stringify(data),
+  }
+}
+
+export function deserializePost(data: Serialized) {
+  const parsed = JSON.parse(data.data) as PostComplete
+  return deserializePostsDates(parsed)
+}
 
 export function serializePosts(data: PostComplete[]): Serialized {
   return {

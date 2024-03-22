@@ -1,13 +1,13 @@
 import { PostsAPIGetResponse } from 'pages/api/posts'
-import { useData, useDataCreate } from './fetcher'
-import { PostCreateData } from 'lib/types/post'
-/*
+import { useData, useDataCreate, useDataPartialUpdate } from './fetcher'
+import { PostCreateData, PostUpdateDataInput } from 'lib/types/post'
+
 export function useAPIPostUpdate(postId: string, options?: any) {
-  return useDataPartialUpdate<PostAPIPatchData>(
+  return useDataPartialUpdate<PostUpdateDataInput>(
     `/api/posts/${postId}`,
     options
   )
-}*/
+}
 
 export function useAPIPosts(options?: any) {
   return useData<PostsAPIGetResponse>('/api/posts', options)

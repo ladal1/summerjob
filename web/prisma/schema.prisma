@@ -105,11 +105,11 @@ model Post {
   availability          DateTime[]    @db.Date
   timeFrom              String?     
   timeTo                String?     
-  address               String?
+  address               String
   coordinates           Float[]
   tags                  PostTag[]
   shortDescription      String
-  longDescription       String?
+  longDescription       String
   photoPath             String?
   isOpenForParticipants Boolean       @default(false)
   isMandatory           Boolean       @default(false)
