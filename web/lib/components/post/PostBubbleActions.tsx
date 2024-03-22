@@ -3,18 +3,24 @@ import DeleteIcon from '../forms/DeleteIcon'
 
 interface PostBubbleActionsProps {
   postId: string
+  advancedAccess: boolean
 }
 
-export const PostBubbleActions = ({ postId }: PostBubbleActionsProps) => {
+export const PostBubbleActions = ({
+  postId,
+  advancedAccess,
+}: PostBubbleActionsProps) => {
   return (
     <span className="d-flex align-items-center gap-3">
-      <Link
-        href={`/posts/${postId}`}
-        onClick={e => e.stopPropagation()}
-        className="smj-action-edit"
-      >
-        <i className="fas fa-edit" title="Upravit"></i>
-      </Link>
+      {advancedAccess && (
+        <Link
+          href={`/posts/${postId}`}
+          onClick={e => e.stopPropagation()}
+          className="smj-action-edit"
+        >
+          <i className="fas fa-edit" title="Upravit"></i>
+        </Link>
+      )}
     </span>
   )
 }

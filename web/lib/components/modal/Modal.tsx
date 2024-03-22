@@ -18,7 +18,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
         <div className="modal-dialog">
           <div className="modal-content rounded-3">
             <div className="modal-header">
-              <h5 className="modal-title">{title}</h5>
+              <h4 className="modal-title">{title}</h4>
               {onClose && (
                 <button
                   type="button"

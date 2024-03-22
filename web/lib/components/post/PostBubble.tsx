@@ -1,47 +1,65 @@
-import { PostComplete } from 'lib/types/post'
-import { IconAndLabel } from '../forms/IconAndLabel'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
+import { PostComplete } from 'lib/types/post'
+import { useState } from 'react'
+import { PostAddressAndDateTime } from './PostAddressAndDateTime'
 import { PostBubbleActions } from './PostBubbleActions'
+import { PostModal } from './PostModal'
+import { IconAndLabel } from '../forms/IconAndLabel'
+import { Participate } from './Participate'
 
 interface PostBubbleProps {
   item: PostComplete
+  advancedAccess: boolean
 }
 
-export const PostBubble = ({ item }: PostBubbleProps) => {
+export const PostBubble = ({ item, advancedAccess }: PostBubbleProps) => {
+  const [isOpenedInfoModal, setIsOpenedInfoModal] = useState(false)
+  const onCloseModal = () => {
+    setIsOpenedInfoModal(false)
+  }
   return (
-    <div className="bg-white m-2">
-      <div className="p-3">
-        <div className="d-flex justify-content-between gap-3">
-          <h3>{item.name}</h3>
-          <PostBubbleActions postId={item.id} />
-        </div>
-        <div className="row">
-          <div className="d-flex justify-content-start allign-items-center fs-6 text-muted">
-            {item.address && (
-              <IconAndLabel label={item.address} icon="fas fa-map" />
-            )}
-            {item.timeFrom && item.timeTo && (
-              <IconAndLabel
-                label={`${item.timeFrom} - ${item.timeTo}`}
-                icon="fas fa-clock"
-              />
-            )}
-            {item.availability.map(date => (
-              <div key={`date-${date.toString()}`}>{date.toString()}</div>
-            ))}
-          </div>
-        </div>
-        <div className="row">
-          <span className="fs-5">{item.shortDescription}</span>
-        </div>
-        <div className="row">
-          <div className="d-flex justify-content-start allign-items-center fs-6 text-muted gap-2">
-            {item.tags.map(tag => (
-              <span key={tag}>{postTagMappingWithIcon[tag].name}</span>
-            ))}
+    <>
+      {isOpenedInfoModal && <PostModal item={item} onClose={onCloseModal} />}
+      <div
+        className="bg-white m-2 cursor-pointer"
+        onClick={() => setIsOpenedInfoModal(true)}
+      >
+        <div className="p-3">
+          <div className="row">
+            <div className="col">
+              <h4>{item.name}</h4>
+              <PostAddressAndDateTime item={item} />
+              <span className="fs-5">{item.shortDescription}</span>
+              <div className="d-flex flex-wrap fs-6 text-muted">
+                {item.tags.map(tag => (
+                  <span key={tag} className="pill-static">
+                    <IconAndLabel
+                      icon={postTagMappingWithIcon[tag].icon ?? ''}
+                      label={postTagMappingWithIcon[tag].name}
+                    />
+                  </span>
+                ))}
+              </div>
+            </div>{' '}
+            <div className="col d-flex flex-column">
+              <div className="d-flex justify-content-end">
+                <PostBubbleActions
+                  postId={item.id}
+                  advancedAccess={advancedAccess}
+                />
+              </div>
+              <div
+                className="d-flex justify-content-end mt-auto"
+                onClick={e => {
+                  e.stopPropagation()
+                }}
+              >
+                <Participate id={item.id} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

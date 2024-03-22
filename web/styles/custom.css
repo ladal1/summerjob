@@ -607,6 +607,15 @@ img.smj-nav-logo {
   align-items: center;
 }
 
+.pill-static {
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  padding: 4px 10px;
+  margin: 4px 8px 4px 0px;
+  display: flex;
+  align-items: center;
+}
+
 .pill:hover {
   background-color: #b6b6b6;
 }
