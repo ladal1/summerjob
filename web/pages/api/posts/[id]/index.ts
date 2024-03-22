@@ -1,26 +1,17 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import {
-  deleteFile,
-  generateFileName,
-  getUploadDirForImages,
-  renameFile,
-  updatePhotoPathByNewFilename,
-} from 'lib/api/fileManager'
+import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getPhotoPath, parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
+import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
-import {
-  createPost,
-  getPostPhotoById,
-  getPosts,
-  updatePost,
-} from 'lib/data/posts'
+import { getPostPhotoById, updatePost } from 'lib/data/posts'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
+import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
-import { PostCreateSchema, PostUpdateSchema } from 'lib/types/post'
+import { PostUpdateSchema } from 'lib/types/post'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
@@ -40,6 +31,16 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (!postData) {
     return
   }
+
+  // Set coordinates if they are missing
+  if (postData.coordinates === undefined || postData.coordinates.length !== 2) {
+    const fetchedCoords = await getGeocodingData(postData.address)
+    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
+    if (fetchedCoords && parsed.success) {
+      postData.coordinates = parsed.data.coordinates
+    }
+  }
+
   /* Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted. */
   if (files.photoFile) {
     const photoPath = getPhotoPath(files.photoFile) // update photoPath
@@ -59,7 +60,10 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   }
 
   await logger.apiRequest(APILogEvent.POST_MODIFY, id, postData, session!)
-  await updatePost(id, postData)
+
+  const { photoFile, photoFileRemoved, ...rest } = postData
+  const t = await updatePost(id, rest)
+  console.log(t)
 
   res.status(204).end()
 }

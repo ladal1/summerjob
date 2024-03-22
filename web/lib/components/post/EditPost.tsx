@@ -28,6 +28,7 @@ import { Label } from '../forms/Label'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { useAPIPostUpdate } from 'lib/fetcher/post'
+import React from 'react'
 
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>
@@ -48,7 +49,7 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
     resolver: zodResolver(schema),
     defaultValues: {
       name: post.name,
-      availability: post.availability,
+      availability: post.availability.map(day => day.toJSON()),
       timeFrom: post.timeFrom,
       timeTo: post.timeTo,
       address: post.address,
@@ -72,10 +73,11 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
   })
 
   const onSubmit = (dataForm: PostForm) => {
-    console.log(dataForm)
-    /*const modified = pick(dataForm, ...Object.keys(dirtyFields)) as PostForm
-    console.log(modified)*/
-    trigger(dataForm as PostCreateData)
+    const modified = pick(
+      dataForm,
+      ...Object.keys(dirtyFields)
+    ) as unknown as PostForm
+    trigger(modified)
   }
 
   const onConfirmationClosed = () => {
@@ -106,6 +108,13 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
 
   const removeNewPhoto = () => {
     setValue('photoFile', null, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
+  }
+
+  const removeExistingPhoto = () => {
+    setValue('photoFileRemoved', true, {
       shouldDirty: true,
       shouldValidate: true,
     })
@@ -255,12 +264,13 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
               secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
               photoInit={
                 post.photoPath
-                  ? [{ url: `/api/workers/${post.id}/photo`, index: '0' }]
+                  ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
                   : null
               }
               errors={errors}
               registerPhoto={registerPhoto}
               removeNewPhoto={removeNewPhoto}
+              removeExistingPhoto={removeExistingPhoto}
             />
             <PillSelectInput
               id="tags"

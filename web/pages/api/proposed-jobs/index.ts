@@ -25,6 +25,8 @@ import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
+import { CoordinatesSchema } from 'lib/types/coordinates'
+import { getGeocodingData } from 'lib/components/map/GeocodingData'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -67,6 +69,16 @@ async function post(
   if (!result) {
     return
   }
+
+  // Set coordinates if they are missing
+  if (result.coordinates === undefined) {
+    const fetchedCoords = await getGeocodingData(result.address)
+    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
+    if (fetchedCoords && parsed.success) {
+      result.coordinates = parsed.data.coordinates
+    }
+  }
+
   const {
     toolsOnSiteCreate,
     toolsOnSiteIdsDeleted,
