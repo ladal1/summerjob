@@ -640,3 +640,17 @@ img.smj-nav-logo {
   cursor: pointer;
   color: #555;
 }
+
+.smj-post-section {
+  background-color: #ffffff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.smj-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background-color: #cccccc;
+  cursor: pointer;
+}

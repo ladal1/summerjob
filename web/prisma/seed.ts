@@ -312,8 +312,8 @@ async function setEventAsInactive() {
 }
 
 async function main() {
-  await setEventAsInactive()
   console.log('Seting potential active event as inactive...')
+  await setEventAsInactive()
   const mini = process.argv[2] === 'mini'
   console.log('Creating yearly event...')
   const yearlyEvent = await createYearlyEvent()
@@ -341,11 +341,11 @@ async function main() {
   if (!mini) {
     await populatePlan(plan, proposedJobs, workers)
   }
+  console.log('Creating posts...')
   await createPosts(
     yearlyEvent.id,
     datesBetween(yearlyEvent.startDate, yearlyEvent.endDate)
   )
-  console.log('Creating posts...')
 }
 
 main()

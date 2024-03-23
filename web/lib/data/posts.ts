@@ -6,7 +6,9 @@ import { PhotoCreateData } from 'lib/types/photo'
 
 export async function getPosts(): Promise<PostComplete[]> {
   const posts = await prisma.post.findMany({
-    include: {},
+    where: {
+      forEvent: { isActive: true },
+    },
     orderBy: [
       {
         madeIn: 'asc',
@@ -51,11 +53,6 @@ export async function getPostPhotoById(
 }
 
 export async function updatePost(id: string, postData: PostUpdateData) {
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
-
   const post = await prisma.post.update({
     where: {
       id,
@@ -66,8 +63,12 @@ export async function updatePost(id: string, postData: PostUpdateData) {
 }
 
 export async function createPost(data: PostCreateData) {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
   const post = await prisma.post.create({
-    data: data,
+    data: { ...data, forEventId: activeEventId },
   })
   return post
 }

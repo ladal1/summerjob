@@ -58,7 +58,7 @@ export const PostCreateSchema = z
         return time
       })
       .nullable(),
-    address: z.string().optional(),
+    address: z.string().nullable().optional(),
     coordinates: coordinatesZod.optional(),
     shortDescription: z.string().min(1, { message: err.emptyShortDescription }),
     longDescription: z.string(),

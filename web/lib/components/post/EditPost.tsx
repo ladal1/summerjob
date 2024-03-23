@@ -246,7 +246,7 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
                 id: 'address',
                 label: 'Adresa',
                 placeholder: 'Adresa',
-                init: post.address,
+                init: post.address ?? '',
                 register: registerAdress,
               }}
               coordinates={{

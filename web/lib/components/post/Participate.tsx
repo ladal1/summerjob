@@ -12,8 +12,8 @@ export const Participate = ({ id }: ParticipateProps) => {
   }
   return (
     <>
-      <div className="form-check align-self-center align-items-center d-flex gap-2 mt-2">
-        <label className="form-check-label fs-7" htmlFor={id}>
+      <div className="form-check align-self-center align-items-center d-flex ">
+        <label className="form-check-label fs-7 text-truncate" htmlFor={id}>
           <b>Zúčastním se</b>
         </label>
         <input

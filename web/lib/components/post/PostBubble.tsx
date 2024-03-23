@@ -11,12 +11,14 @@ interface PostBubbleProps {
   item: PostComplete
   advancedAccess: boolean
   onUpdated: () => void
+  showTime?: boolean
 }
 
 export const PostBubble = ({
   item,
   advancedAccess,
   onUpdated,
+  showTime = true,
 }: PostBubbleProps) => {
   const [isOpenedInfoModal, setIsOpenedInfoModal] = useState(false)
   const onCloseModal = () => {
@@ -28,36 +30,34 @@ export const PostBubble = ({
       <div
         className={`${
           item.isPinned ? 'smj-color-bubble-pinned' : 'smj-color-bubble'
-        } rounded m-2 cursor-pointer`}
+        } rounded mt-2 mb-2 cursor-pointer`}
         onClick={() => setIsOpenedInfoModal(true)}
       >
         <div className="p-3">
-          <div className="row">
-            <div className="col">
-              <div className="d-flex justify-content-between align-items-center">
-                <h4>{item.name}</h4>
-                <div className="allign-self-end">
-                  <PostBubbleActions
-                    post={item}
-                    advancedAccess={advancedAccess}
-                    onUpdated={onUpdated}
+          <div className="d-flex justify-content-between align-items-baseline">
+            <span className="me-4">
+              <h4>{item.name}</h4>
+            </span>
+            <div className="allign-self-end">
+              <PostBubbleActions
+                post={item}
+                advancedAccess={advancedAccess}
+                onUpdated={onUpdated}
+              />
+            </div>
+          </div>
+          <PostAddressAndDateTime item={item} showTime={showTime} />
+          <span className="fs-6">{item.shortDescription}</span>
+          <div className="d-flex justify-content-between align-items-center">
+            <div className="d-flex flex-wrap fs-7 text-muted">
+              {item.tags.map(tag => (
+                <span key={tag} className="pill-static">
+                  <IconAndLabel
+                    icon={postTagMappingWithIcon[tag].icon ?? ''}
+                    label={postTagMappingWithIcon[tag].name}
                   />
-                </div>
-              </div>
-              <PostAddressAndDateTime item={item} />
-              <span className="fs-6">{item.shortDescription}</span>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="d-flex flex-wrap fs-7 text-muted">
-                  {item.tags.map(tag => (
-                    <span key={tag} className="pill-static">
-                      <IconAndLabel
-                        icon={postTagMappingWithIcon[tag].icon ?? ''}
-                        label={postTagMappingWithIcon[tag].name}
-                      />
-                    </span>
-                  ))}
-                </div>
-              </div>
+                </span>
+              ))}
             </div>
             <div
               className="d-flex justify-content-end"
