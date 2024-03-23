@@ -12,15 +12,14 @@ export const Participate = ({ id }: ParticipateProps) => {
   }
   return (
     <>
-      <label className="form-check-label me-3" htmlFor="participation">
-        Zúčastním se
-      </label>
-      <div className="form-check form-switch">
+      <div className="form-check align-self-center align-items-center d-flex gap-2 mt-2">
+        <label className="form-check-label fs-7" htmlFor={id}>
+          <b>Zúčastním se</b>
+        </label>
         <input
-          className="form-check-input"
+          className="form-check-input smj-checkbox ms-2"
           type="checkbox"
-          role="switch"
-          id="participation"
+          id={id}
         />
       </div>
     </>

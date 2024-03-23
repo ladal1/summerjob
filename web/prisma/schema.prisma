@@ -99,22 +99,24 @@ model Participant {
 }
 
 model Post {
-  id                    String        @id @default(uuid())
-  name                  String
-  madeIn                DateTime      @default(now())
-  availability          DateTime[]    @db.Date
-  timeFrom              String?     
-  timeTo                String?     
-  address               String
-  coordinates           Float[]
-  tags                  PostTag[]
-  shortDescription      String
-  longDescription       String
-  photoPath             String?
-  isOpenForParticipants Boolean       @default(false)
-  isMandatory           Boolean       @default(false)
-  isPinned              Boolean       @default(false)
+  id                    String         @id @default(uuid())
+  name                  String 
+  madeIn                DateTime       @default(now())
+  availability          DateTime[]     @db.Date
+  timeFrom              String?      
+  timeTo                String?      
+  address               String? 
+  coordinates           Float[] 
+  tags                  PostTag[] 
+  shortDescription      String 
+  longDescription       String 
+  photoPath             String? 
+  isOpenForParticipants Boolean        @default(false)
+  isMandatory           Boolean        @default(false)
+  isPinned              Boolean        @default(false)
   participants          Participant[]
+  forEvent              SummerJobEvent @relation(fields: [forEventId], references: [id], onDelete: Cascade)
+  forEventId            String
 }
 
 model Photo {
@@ -278,6 +280,7 @@ model SummerJobEvent {
   plans              Plan[]
   workerAvailability WorkerAvailability[]
   cars               Car[]
+  posts              Post[]
 }
 
 model Logging {

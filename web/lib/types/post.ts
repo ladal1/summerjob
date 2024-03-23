@@ -58,7 +58,7 @@ export const PostCreateSchema = z
         return time
       })
       .nullable(),
-    address: z.string(),
+    address: z.string().optional(),
     coordinates: coordinatesZod.optional(),
     shortDescription: z.string().min(1, { message: err.emptyShortDescription }),
     longDescription: z.string(),
@@ -82,7 +82,7 @@ export const PostCreateSchema = z
       .optional(),
     photoFileRemoved: z.boolean().optional(),
     photoPath: z.string().optional(),
-    tags: z.array(z.nativeEnum(PostTag)),
+    tags: z.array(z.nativeEnum(PostTag)).optional(),
     isMandatory: z.boolean().optional(),
     isOpenForParticipants: z.boolean().optional(),
   })

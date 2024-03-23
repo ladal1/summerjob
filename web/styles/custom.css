@@ -432,6 +432,11 @@ img.smj-nav-logo {
   background-color: #fdc345;
 }
 
+.smj-form-check-input:checked {
+  background-color: #ffbc06 !important;
+  border-color: #ffbc06 !important;
+}
+
 .smj-textarea {
   border-radius: 5px;
 }

@@ -33,7 +33,7 @@ export const PostModal = ({ item, onClose }: PostModalProps) => {
     return (
       item.availability.length > 0 ||
       (item.timeFrom !== null && item.timeTo !== null) ||
-      item.address.length > 0
+      (item.address !== null && item.address.length > 0)
     )
   }, [item.address, item.availability.length, item.timeFrom, item.timeTo])
 
@@ -41,7 +41,7 @@ export const PostModal = ({ item, onClose }: PostModalProps) => {
     <>
       <Modal title={item.name} size={ModalSize.LARGE} onClose={onClose}>
         <PostAddressAndDateTime item={item} />
-        {coords && (
+        {coords && item.address && (
           <div
             className={`row align-items-end ${shouldShowMargin ? 'mt-4' : ''}`}
           >
@@ -99,6 +99,7 @@ export const PostModal = ({ item, onClose }: PostModalProps) => {
             </span>
           ))}
         </div>
+        <hr />
         <div className="d-flex justify-content-end mt-auto">
           <Participate id={item.id} />
         </div>

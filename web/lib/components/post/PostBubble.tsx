@@ -34,36 +34,38 @@ export const PostBubble = ({
         <div className="p-3">
           <div className="row">
             <div className="col">
-              <h4>{item.name}</h4>
+              <div className="d-flex justify-content-between align-items-center">
+                <h4>{item.name}</h4>
+                <div className="allign-self-end">
+                  <PostBubbleActions
+                    post={item}
+                    advancedAccess={advancedAccess}
+                    onUpdated={onUpdated}
+                  />
+                </div>
+              </div>
               <PostAddressAndDateTime item={item} />
-              <span className="fs-5">{item.shortDescription}</span>
-              <div className="d-flex flex-wrap fs-6 text-muted">
-                {item.tags.map(tag => (
-                  <span key={tag} className="pill-static">
-                    <IconAndLabel
-                      icon={postTagMappingWithIcon[tag].icon ?? ''}
-                      label={postTagMappingWithIcon[tag].name}
-                    />
-                  </span>
-                ))}
+              <span className="fs-6">{item.shortDescription}</span>
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex flex-wrap fs-7 text-muted">
+                  {item.tags.map(tag => (
+                    <span key={tag} className="pill-static">
+                      <IconAndLabel
+                        icon={postTagMappingWithIcon[tag].icon ?? ''}
+                        label={postTagMappingWithIcon[tag].name}
+                      />
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>{' '}
-            <div className="col d-flex flex-column">
-              <div className="d-flex justify-content-end">
-                <PostBubbleActions
-                  post={item}
-                  advancedAccess={advancedAccess}
-                  onUpdated={onUpdated}
-                />
-              </div>
-              <div
-                className="d-flex justify-content-end mt-auto"
-                onClick={e => {
-                  e.stopPropagation()
-                }}
-              >
-                <Participate id={item.id} />
-              </div>
+            </div>
+            <div
+              className="d-flex justify-content-end"
+              onClick={e => {
+                e.stopPropagation()
+              }}
+            >
+              <Participate id={item.id} />
             </div>
           </div>
         </div>
