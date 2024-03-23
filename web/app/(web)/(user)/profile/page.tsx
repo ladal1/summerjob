@@ -1,11 +1,9 @@
-import { getSMJSession, withPermissions } from 'lib/auth/auth'
+import { getSMJSession } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import EditBox from 'lib/components/forms/EditBox'
-import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getWorkerById } from 'lib/data/workers'
-import { Permission } from 'lib/types/auth'
 import { serializeWorker } from 'lib/types/worker'
 
 export const metadata = {
@@ -25,19 +23,15 @@ export default async function MyProfilePage() {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
   const { startDate, endDate } = summerJobEvent!
 
-  const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
-
-  const isCarAccessAllowed = await withPermissions([Permission.CARS])
-
   return (
     <>
       <section className="mb-3">
         <EditBox>
           <EditWorker
             serializedWorker={serializedWorker}
-            allDates={allDates}
+            eventStartDate={startDate.toJSON()}
+            eventEndDate={endDate.toJSON()}
             isProfilePage={true}
-            carAccess={isCarAccessAllowed.success}
           />
         </EditBox>
       </section>

@@ -14,7 +14,6 @@ import {
   useDataDelete,
   useDataPartialUpdate,
 } from './fetcher'
-import { WorkerAPIPostData } from 'pages/api/workers/new'
 
 export function useAPIWorkerUpdate(workerId: string, options?: any) {
   return useDataPartialUpdate<WorkerAPIPatchData>(
@@ -53,7 +52,7 @@ export function useAPIWorkerDelete(id: string, options?: any) {
 }
 
 export function useAPIWorkerCreate(options?: any) {
-  return useDataCreate<WorkerAPIPostData>('/api/workers/new', options)
+  return useDataCreate<WorkersAPIPostData>('/api/workers', options)
 }
 
 export function useAPIWorkersCreate(options?: any) {

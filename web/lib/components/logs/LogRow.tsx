@@ -1,38 +1,44 @@
 import { ExpandableRow } from '../table/ExpandableRow'
+import { SimpleRow } from '../table/SimpleRow'
 import { Logging } from 'lib/prisma/client'
-import { RowContent, RowContentsInterface } from '../table/RowContent'
 
 interface LogRowProps {
   log: Logging
 }
 
 export default function LogRow({ log }: LogRowProps) {
-  const expandedContent: RowContentsInterface[] = [
-    {
-      label: 'Autor',
-      content: `${log.authorName}`,
-    },
-    {
-      label: 'ID autora',
-      content: `${log.authorId}`,
-    },
-    {
-      label: 'ID cíle',
-      content: `${log.authorId}`,
-    },
-    {
-      label: 'Data',
-      content: (
-        <pre className="text-prewrap">
-          {JSON.stringify(JSON.parse(log.message || '{}'), null, 2)}
-        </pre>
-      ),
-    },
-  ]
-
   return (
     <ExpandableRow key={log.id} data={formatLogRow(log)}>
-      <RowContent data={expandedContent} />
+      <div className="row">
+        <div className="col">
+          <b>Autor: </b>
+          {log.authorName}
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <b>ID autora: </b>
+          {log.authorId}
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <b>ID cíle: </b>
+          {log.resourceId}
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <b>Data: </b>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col">
+          <pre className="text-prewrap">
+            {JSON.stringify(JSON.parse(log.message || '{}'), null, 2)}
+          </pre>
+        </div>
+      </div>
     </ExpandableRow>
   )
 }
@@ -44,9 +50,17 @@ function formatLogRow(log: Logging) {
       ? log.message.substring(0, MESSAGE_MAX_LENGTH - 3) + '...'
       : log.message
   return [
-    { content: log.timestamp.toLocaleString('cs') },
-    { content: log.eventType },
-    { content: log.authorName },
-    { content: message },
+    log.timestamp.toLocaleString('cs'),
+    log.eventType,
+    log.authorName,
+    message,
   ]
 }
+
+/*
+{logs.map((log) => (
+            <pre className="text-prewrap" key={log.id}>
+              {JSON.stringify(JSON.parse(log.message || "{}"), null, 2)}
+            </pre>
+          ))}
+*/

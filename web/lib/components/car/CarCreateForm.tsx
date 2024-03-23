@@ -3,12 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { CarCreateData, CarCreateSchema } from 'lib/types/car'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import { useForm } from 'react-hook-form'
-import { TextInput } from '../forms/input/TextInput'
-import { FilterSelectInput } from '../forms/input/FilterSelectInput'
-import { FilterSelectItem } from '../filter-select/FilterSelect'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { useRouter } from 'next/navigation'
-import { formatNumber } from 'lib/helpers/helpers'
+import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
 
 type CarEditFormProps = {
   onSubmit: (data: CarCreateData) => void
@@ -33,18 +28,10 @@ export default function CarCreateForm({
     },
   })
 
-  const router = useRouter()
+  const ownerItems = owners.map(workerToSelectItem)
 
-  const onOwnerSelected = (id: string) => {
-    setValue('ownerId', id)
-  }
-
-  function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
-    return {
-      id: worker.id,
-      name: `${worker.firstName} ${worker.lastName}`,
-      searchable: `${worker.firstName} ${worker.lastName}`,
-    }
+  const onOwnerSelected = (item: FilterSelectItem) => {
+    setValue('ownerId', item.id)
   }
 
   return (
@@ -57,65 +44,79 @@ export default function CarCreateForm({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <TextInput
+            <label className="form-label fw-bold mt-4" htmlFor="name">
+              Název
+            </label>
+            <input
               id="name"
-              label="Název"
+              className="form-control p-2 fs-5"
+              type="text"
               placeholder="Model auta, značka"
-              errors={errors}
-              register={() => register('name')}
+              {...register('name')}
             />
-            <TextAreaInput
+            {errors.name?.message && (
+              <p className="text-danger">{errors.name.message as string}</p>
+            )}
+            <label className="form-label fw-bold mt-4" htmlFor="description">
+              Poznámka pro organizátory
+            </label>
+            <textarea
               id="description"
-              label="Poznámka pro organizátory"
+              className="form-control border p-2 fs-5"
+              rows={3}
               placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
-              rows={4}
-              register={() => register('description')}
+              {...register('description')}
             />
-            <TextInput
+            <label className="form-label fw-bold mt-4" htmlFor="seats">
+              Počet sedadel
+            </label>
+            <input
               id="seats"
+              className="form-control p-2 fs-5"
               type="number"
-              label="Počet sedadel"
               placeholder="Počet sedadel"
-              min={1}
-              defaultValue={4}
-              register={() =>
-                register('seats', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
-              }
-              errors={errors}
+              min="1"
+              {...register('seats', { valueAsNumber: true })}
             />
-            <FilterSelectInput
-              id="ownerId"
-              label="Majitel"
+            {errors.seats?.message && (
+              <p className="text-danger">{errors.seats.message as string}</p>
+            )}
+
+            <label className="form-label fw-bold mt-4" htmlFor="owner">
+              Majitel
+            </label>
+            <FilterSelect
               placeholder="Vyberte majitele"
-              items={owners.map(workerToSelectItem)}
+              items={ownerItems}
               onSelected={onOwnerSelected}
-              errors={errors}
             />
-            <TextInput
-              id="odometerStart"
+            <input type={'hidden'} {...register('ownerId')} />
+            {errors.ownerId?.message && (
+              <p className="text-danger">Vyberte majitele auta.</p>
+            )}
+
+            <label className="form-label fw-bold mt-4" htmlFor="odometer-start">
+              Počáteční stav kilometrů
+            </label>
+            <input
+              id="odometer-start"
+              className="form-control p-2 fs-5"
               type="number"
-              label="Počáteční stav kilometrů"
               placeholder="Počáteční stav kilometrů"
-              min={0}
-              register={() =>
-                register('odometerStart', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
-              }
-              errors={errors}
+              min="0"
+              {...register('odometerStart', { valueAsNumber: true })}
             />
+            {errors.odometerStart?.message && (
+              <p className="text-danger">
+                {errors.odometerStart.message as string}
+              </p>
+            )}
 
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
                 type="button"
-                onClick={() => router.back()}
+                onClick={() => window.history.back()}
               >
                 Zpět
               </button>
@@ -131,4 +132,17 @@ export default function CarCreateForm({
       </div>
     </>
   )
+}
+
+function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
+  return {
+    id: worker.id,
+    name: `${worker.firstName} ${worker.lastName}`,
+    searchable: `${worker.firstName} ${worker.lastName}`,
+    item: (
+      <div>
+        {worker.firstName} {worker.lastName}
+      </div>
+    ),
+  }
 }

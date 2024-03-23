@@ -1,4 +1,3 @@
-import { getSMJSession } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import PlanClientPage from 'lib/components/plan/PlanClientPage'
 import { getPlanById } from 'lib/data/plans'
@@ -13,7 +12,6 @@ type PathProps = {
 }
 
 export default async function PlanPage({ params }: PathProps) {
-  const session = await getSMJSession()
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
   const serialized = serializePlan(plan)
@@ -25,7 +23,6 @@ export default async function PlanPage({ params }: PathProps) {
       id={params.id}
       initialDataPlan={serialized}
       initialDataJoblessWorkers={joblessSerialized}
-      workerId={session!.userID}
     />
   )
 }

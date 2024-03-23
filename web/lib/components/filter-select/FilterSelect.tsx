@@ -1,75 +1,64 @@
 'use client'
-import { createRef, useEffect, useState } from 'react'
+import { createRef, CSSProperties, useState } from 'react'
 
 export interface FilterSelectItem {
   id: string
   name: string
   searchable: string
+  item: React.ReactNode
 }
 
 interface FilterSelectProps {
-  id: string,
   items: FilterSelectItem[]
   placeholder: string
-  onSelected: (id: string) => void
+  onSelected: (item: FilterSelectItem) => void
   defaultSelected?: FilterSelectItem
 }
 
+const DEFAULT: FilterSelectItem = {
+  id: 'DEFAULT_OPTION',
+  name: 'Vyberte možnost',
+  searchable: '',
+  item: <></>,
+}
+
 export function FilterSelect({
-  id,
   items,
   placeholder,
   onSelected,
   defaultSelected,
 }: FilterSelectProps) {
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
-  const [selected, setSelected] = useState(defaultSelected?.name ?? '')
-  const [isOpen, setIsOpen] = useState(false)
+  const [selected, setSelected] = useState(defaultSelected ?? DEFAULT)
+  const inputRef = createRef<HTMLInputElement>()
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({})
 
-  const dropdown = createRef<HTMLInputElement>()
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // if dropdown-menu isn't even open do nothing
-      if(!isOpen) 
-        return
-      
-      /* 
-      if we click anywhere outside of dropdown-menu it will close it
-      even though when you click inside of dropdown-menu it will close it, 
-      but also it will set selected item, that's the reason why we are exluding it from here
-      */
-      if (dropdown.current && !dropdown.current.contains(event.target as Node)) {
-        hideDropdown()
-      }
-    }
-
-    // if it register mouse click anywhere on the window it will call handleCLickOutside
-    document.addEventListener('mousedown', handleClickOutside) // alternatively use window. instead of document.
-
-    // clean up
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [dropdown, isOpen]) // dependencies
-  
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen)
+  const showDropdown = () => {
+    setDropdownStyle({
+      display: 'block',
+      transform: `translate(0px, ${inputRef.current?.scrollHeight}px)`,
+    })
   }
 
   const hideDropdown = () => {
-    setIsOpen(false)
+    setDropdownStyle({})
   }
 
   const selectItem = (item: FilterSelectItem) => {
-    hideDropdown()
-    setSelected(item.name)
-    onSelected(item.id) // save to form
+    setSelected(item)
     setSearch(item.name)
+    hideDropdown()
+    onSelected(item)
+  }
+
+  const onBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      hideDropdown()
+    }
   }
 
   const shouldShowItem = (item: FilterSelectItem) => {
-    const isSearchEmpty = search.length === 0 || search === selected
+    const isSearchEmpty = search.length === 0 || search === selected.name
     return (
       isSearchEmpty ||
       item.searchable.toLowerCase().includes(search.toLowerCase())
@@ -77,37 +66,41 @@ export function FilterSelect({
   }
 
   return (
-    <>
-      <div className="p-0" aria-expanded={isOpen}>
+    <div className="dropdown" onBlur={onBlur}>
+      <div className="p-0" aria-expanded="false">
         <input
-          id={id}
-          className="smj-dropdown fs-5"
+          className="p-2 w-100"
           type="text"
           placeholder={placeholder}
+          style={{ border: '0px', outline: '0px' }}
+          onFocus={showDropdown}
+          onClick={showDropdown}
+          ref={inputRef}
           value={search}
-          onClick={toggleDropdown}
           onChange={e => setSearch(e.target.value)}
         ></input>
       </div>
-      <div className="btn-group" ref={dropdown}>
-        <ul
-          className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}
-        >
-          {items.map(item => {
-            return ( shouldShowItem(item) && ( 
-                <li key={item.id}>
-                  <button
-                    className="dropdown-item smj-dropdown-item fs-5"
-                    type="button"
-                    onClick={() => selectItem(item)}
-                  >
-                    {item.name}
-                  </button>
-                </li>
-              ))
-          })}
-        </ul>
-      </div>
-    </>
+
+      <ul
+        className="dropdown-menu smj-dropdown-menu w-100 overflow-auto"
+        style={dropdownStyle}
+      >
+        {items.map(item => {
+          return (
+            shouldShowItem(item) && (
+              <li key={item.id}>
+                <button
+                  className="dropdown-item"
+                  type="button"
+                  onClick={() => selectItem(item)}
+                >
+                  {item.item}
+                </button>
+              </li>
+            )
+          )
+        })}
+      </ul>
+    </div>
   )
 }

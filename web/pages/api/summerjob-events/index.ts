@@ -1,6 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { parseForm } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import {
   createSummerJobEvent,
@@ -24,15 +23,14 @@ async function post(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  const { json } = await parseForm(req)
-  const data = validateOrSendError(SummerJobEventCreateSchema, json, res)
+  const data = validateOrSendError(SummerJobEventCreateSchema, req.body, res)
   if (!data) {
     return
   }
   await logger.apiRequest(
     APILogEvent.SMJEVENT_CREATE,
     'summerjob-events',
-    json,
+    req.body,
     session
   )
   const event = await createSummerJobEvent(data)
@@ -54,9 +52,3 @@ export default APIAccessController(
   [Permission.ADMIN],
   APIMethodHandler({ get, post })
 )
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}

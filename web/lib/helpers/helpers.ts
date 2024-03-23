@@ -2,12 +2,12 @@ export const capitalizeFirstLetter = (text: string) => {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-export const formatDateLong = (date: Date, capitalize = true) => {
+export const formatDateLong = (date: Date, capitalize: boolean) => {
   const options: Intl.DateTimeFormatOptions = {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
-    timeZone: 'Europe/Prague',
+    timeZone: 'UTC',
   }
   const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
   return capitalize ? capitalizeFirstLetter(formatted) : formatted
@@ -18,7 +18,7 @@ export const formatDateNumeric = (date: Date) => {
     month: 'numeric',
     day: 'numeric',
     year: 'numeric',
-    timeZone: 'Europe/Prague',
+    timeZone: 'UTC',
   }
   const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
   return formatted
@@ -29,40 +29,9 @@ export const formatDateShort = (date: Date) => {
     month: 'numeric',
     weekday: 'short',
     day: 'numeric',
-    timeZone: 'Europe/Prague',
+    timeZone: 'UTC',
   }
   return new Intl.DateTimeFormat('cs-CZ', options).format(date)
-}
-
-export const getMonthName = (date: Date, capitalize = true) => {
-  const options: Intl.DateTimeFormatOptions = {
-    month: 'long',
-    timeZone: 'Europe/Prague',
-  }
-  const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
-  return capitalize ? capitalizeFirstLetter(formatted) : formatted
-}
-
-export const getWeekdayName = (date: Date, capitalize = true) => {
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'short',
-    timeZone: 'Europe/Prague',
-  }
-  const formatted = new Intl.DateTimeFormat('cs-CZ', options).format(date)
-  return capitalize ? capitalizeFirstLetter(formatted) : formatted
-}
-
-export const getWeekdayNames = (capitalize = true) => {
-  const weekdayNames: string[] = []
-
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(2024, 0, 29) // Day starting with monday
-    date.setDate(date.getDate() + i)
-    const formatted = getWeekdayName(date, capitalize)
-    weekdayNames.push(formatted)
-  }
-
-  return weekdayNames
 }
 
 export function datesBetween(start: Date, end: Date) {
@@ -75,10 +44,6 @@ export function datesBetween(start: Date, end: Date) {
     dates.push(new Date(date))
   }
   return dates
-}
-
-export function isBetweenDates(start: Date, end: Date, date: Date) {
-  return date >= start && date <= end
 }
 
 export function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
@@ -127,43 +92,4 @@ export function pick<
   return Object.fromEntries(
     keys.map(key => [key, obj[key as unknown as keyof T]])
   ) as { [key in K]: key extends keyof T ? T[key] : undefined }
-}
-
-export function formatPhoneNumber(value: string) {
-  // Remove any existing spaces and non-numeric characters
-  const phoneNumber = formatNumber(value)
-  // Start with +
-  const startsWithPlus = value.startsWith('+')
-  // Limitation
-  const maxDigits = startsWithPlus ? 12 : 9
-  const limitedPhoneNumber = phoneNumber.slice(0, maxDigits)
-  // Add spaces after every third digit
-  const formattedPhoneNumber = limitedPhoneNumber.replace(
-    /(\d{3})(?=\d)/g,
-    '$1 '
-  )
-  return startsWithPlus
-    ? `+${formattedPhoneNumber}`
-    : formattedPhoneNumber || ''
-}
-
-// Replace redundant spaces by one space and trim spaces from front.
-export function removeRedundantSpace(value: string) {
-  return value.replace(/\s+/g, ' ').trimStart()
-}
-
-// Get rid of anything that isn't non negative number
-export function formatNumber(value: string) {
-  return value.replace(/\D/g, '')
-}
-
-export function removeAccent(str: string) {
-  return str.normalize('NFD').replace(/\p{Diacritic}/gu, '')
-}
-
-export function normalizeString(str: string) {
-  const withoutRedundantSpace = removeRedundantSpace(str)
-  const withRemovedAccent = removeAccent(withoutRedundantSpace)
-  const inLowerCase = withRemovedAccent.toLowerCase()
-  return inLowerCase
 }

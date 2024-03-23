@@ -1,86 +1,8 @@
-# Rozvoj aplikace pro dobrovolnickou brigádu SummerJob
+# Aplikace pro dobrovolnickou brigádu SummerJob
 
-Rozvoj webové aplikace pro organizaci SummerJob. Jedná se o projekt vyvíjený v rámci bakalářské práce pro FIT ČVUT v Praze. Tento projekt navazuje na [diplomovou práci Ing. Matyáše Ješiny](https://github.com/jesinmat/diplomova-prace/), resp. [zde](https://github.com/jesinmat/summerjob).
+Webová aplikace pro organizaci SummerJob, vyvíjená jako diplomová práce na FIT ČVUT v Praze.
 
-## DEV Instalace a první spuštění
-
-Potřebné nástroje:
-
-- [docker-compose](https://docs.docker.com/compose/)
-- [npm + node + npx](https://www.npmjs.com/)
-  - *Při instalaci npm na Ubuntu si dejte pozor na verzi. Při instalaci přes `apt install npm` se stáhne zastaralá verze node.js pro tento projekt. Doporučuji postupovat dle [tohoto návodu](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm).*
-
-### Kořenová složka projektu
-
-- Přejmenujte soubor `.env.sample` na `.env`.
-- V souboru `docker-compose.yaml` zakomentujte části týkající se **summerjob-web** a **summerjob-planner**.
-- Spusťte kontejnery:
-    ```console
-    [summerjob]$ docker-compose up -d
-    ```
-
-### Složka `web`
-
-- Přejmenujte soubor `.env.sample` na `.env`.
-- Nainstalujte závislosti:
-    ```console
-    [summerjob/web]$ npm ci
-    ```
-- Nechte si vygenerovat databázi:
-    ```console
-    [summerjob/web]$ npx prisma generate
-    ```
-- Tuhle databázi pak použijte do aplikace:
-    ```console
-    [summerjob/web]$ npx prisma db push
-    ```
-- Vytvořte si administrátorský účet (*POZN: Vytvořeným emailem se budete přihlašovat.*):
-    ```console
-    [summerjob/web]$ npm run create-admin
-    ```
-- Můžete spustit aplikaci:
-    ```console
-    [summerjob/web]$ npm run dev
-    ```
-## Spuštění a zastavování
-
-- Spusťte kontejnery:
-    ```console
-    [summerjob]$ docker-compose up -d
-    ```
-- Spusťte aplikaci:
-    ```console
-    [summerjob/web]$ npm run dev
-    ```
-- Zastavte aplikaci (*CTRL + C*)
-    ```console
-    [summerjob/web]$ ^C
-    ```
-
-- Zastavte kontejnery:
-    ```console
-    [summerjob]$ docker-compose down
-    ```
-
-Aplikace defaultně běží na adrese: http://localhost:3000 .
-
-## Časté problémy
-
-### API handler should not return a value, received object.
-
-Pokud se v konzoli vypisuje toto, poté co se pokusíte přihlásit a email je korektní:
-
-```console
-- wait compiling /api/auth/[...nextauth] (client and server)...
-- event compiled successfully in 316 ms (68 modules)
-E-mails are not sent in dev mode. You will be logged in automatically.
-API handler should not return a value, received object.
-```
-Poté zkuste v prohlížeči smazat údaje o prohlížení resp. cookies.
-
----
-
-## Instalace a první spuštění - pův. znění
+## Instalace a první spuštění
 
 Potřebné nástroje:
 

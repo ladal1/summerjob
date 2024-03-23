@@ -1,11 +1,10 @@
 import { z } from 'zod'
 import { Serialized } from './serialize'
 import { Area, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
-import { customErrorMessages as err } from 'lib/lang/error-messages'
 
 export const AreaCreateSchema = z
   .object({
-    name: z.string().min(1, { message: err.emptyAreaName }),
+    name: z.string().min(1),
     requiresCar: z.boolean(),
     supportsAdoration: z.boolean(),
     summerJobEventId: z.string().min(1),

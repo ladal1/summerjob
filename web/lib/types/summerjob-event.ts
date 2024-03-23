@@ -30,13 +30,6 @@ export const SummerJobEventCreateSchema = z
       .openapi({ type: 'string', format: 'date' }),
   })
   .strict()
-  .refine(
-    data => data.startDate <= data.endDate,
-    data => ({
-      message: 'Konečné datum musí být po datu zahájení',
-      path: ['endDate'],
-    })
-  )
 
 export type SummerJobEventCreateDataInput = z.input<
   typeof SummerJobEventCreateSchema

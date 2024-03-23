@@ -28,7 +28,7 @@ export default async function PrintPlanPage({ params }: PathProps) {
     <>
       <div className="print-a4">
         <div className="header">
-          <h1>{formatDateLong(plan.day)}</h1>
+          <h1>{formatDateLong(plan.day, true)}</h1>
           <Image
             src={logoImage}
             className="smj-logo"
@@ -60,7 +60,7 @@ function JobInfo({
       <div className="job-data-col">
         <div className="w-50">
           <h2>{job.proposedJob.name}</h2>
-          <p>{job.proposedJob.publicDescription}</p>
+          <p>{job.publicDescription}</p>
           <div>
             <i className="fas fa-user-group me-1"></i>
             {job.workers.length == 0 && 'Nikdo'}

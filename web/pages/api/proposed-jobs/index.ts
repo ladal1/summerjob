@@ -6,7 +6,6 @@ import {
   createProposedJob,
   getProposedJobs,
   getProposedJobsAssignableTo,
-  updateProposedJob,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
@@ -16,15 +15,6 @@ import {
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
-import {
-  createDirectory,
-  generateFileName,
-  getUploadDirForImages,
-} from 'lib/api/fileManager'
-import { parseFormWithImages } from 'lib/api/parse-form'
-import { registerPhotos } from 'lib/api/register/registerPhotos'
-import { ToolType, registerTools } from 'lib/api/register/registerTools'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>
@@ -52,52 +42,17 @@ async function post(
   res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDirectory =
-    getUploadDirForImages() + '/' + activeEventId + '/proposed-job'
-  const { files, json } = await parseFormWithImages(
-    req,
-    temporaryName,
-    uploadDirectory,
-    10
-  )
-
-  const result = validateOrSendError(ProposedJobCreateSchema, json, res)
+  const result = validateOrSendError(ProposedJobCreateSchema, req.body, res)
   if (!result) {
     return
   }
-  const {
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    ...rest
-  } = result
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
-    result,
+    req.body,
     session
   )
-  const job = await createProposedJob(rest)
-
-  await registerPhotos(files, undefined, uploadDirectory, job.id, session)
-  await registerTools(
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    job.id,
-    ToolType.ON_SITE,
-    session
-  )
-  await registerTools(
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    job.id,
-    ToolType.TO_TAKE_WITH,
-    session
-  )
-
+  const job = await createProposedJob(result)
   res.status(201).json(job)
 }
 
@@ -105,9 +60,3 @@ export default APIAccessController(
   [Permission.JOBS, Permission.PLANS],
   APIMethodHandler({ get, post })
 )
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}

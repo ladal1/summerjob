@@ -25,7 +25,7 @@ export default function SimpleDatePicker({
         <i className="fas fa-chevron-left"></i>
       </button>
       <span className="form-control p-2 text-center align-self-center border-bottom">
-        {formatDateLong(initialDate)}
+        {formatDateLong(initialDate, true)}
       </span>
       <button
         className="btn btn-secondary p-2 pe-3 ps-3"

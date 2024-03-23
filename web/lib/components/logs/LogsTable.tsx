@@ -1,6 +1,5 @@
 import { Logging } from 'lib/prisma/client'
 import { MessageRow } from '../table/MessageRow'
-import { SortableColumn, SortableTable } from '../table/SortableTable'
 import LogRow from './LogRow'
 
 interface LogsTableProps {
@@ -9,20 +8,26 @@ interface LogsTableProps {
 
 export default function LogsTable({ logs }: LogsTableProps) {
   return (
-    <SortableTable columns={_columns}>
-      {logs.length === 0 && (
-        <MessageRow message="Žádné logy" colspan={_columns.length} />
-      )}
-      {logs.map(log => (
-        <LogRow key={log.id} log={log} />
-      ))}
-    </SortableTable>
+    <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
+      <table className="table table-hover mb-0">
+        <thead className="smj-table-header">
+          <tr>
+            {_columns.map(column => (
+              <th key={column}>{column}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="smj-table-body mb-0">
+          {logs.length === 0 && (
+            <MessageRow message="Žádné logy" colspan={_columns.length} />
+          )}
+          {logs.map(log => (
+            <LogRow key={log.id} log={log} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
-const _columns: SortableColumn[] = [
-  { id: 'time', name: 'Čas', notSortable: true },
-  { id: 'type', name: 'Typ', notSortable: true },
-  { id: 'author', name: 'Autor', notSortable: true },
-  { id: 'data', name: 'Data', notSortable: true },
-]
+const _columns = ['Čas', 'Typ', 'Autor', 'Data']

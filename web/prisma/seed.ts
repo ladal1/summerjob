@@ -1,5 +1,4 @@
 import {
-  Allergy,
   Car,
   Plan,
   PrismaClient,
@@ -28,13 +27,13 @@ function chooseWithProbability<T>(array: T[], probability: number): T[] {
   return array.filter((_, i) => Math.random() < probability)
 }
 
-function createAllergies(): Allergy[] {
-  const allergies: Allergy[] = ['DUST', 'ANIMALS', 'HAY']
+function createAllergies() {
+  const allergies = ['DUST', 'ANIMALS', 'HAY']
   return allergies
 }
 
 async function createWorkers(
-  allergies: Allergy[],
+  allergies: string[],
   eventId: string,
   days: Date[],
   count = 100
@@ -150,7 +149,7 @@ async function createProposedJobs(
   areaIds: string[],
   eventId: string,
   days: Date[],
-  allergens: Allergy[],
+  allergens: string[],
   count = 70
 ) {
   let titles = [

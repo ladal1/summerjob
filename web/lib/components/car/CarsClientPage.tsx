@@ -1,13 +1,11 @@
 'use client'
 import { useAPICars } from 'lib/fetcher/car'
-import { normalizeString } from 'lib/helpers/helpers'
 import { CarComplete, deserializeCars } from 'lib/types/car'
 import { Serialized } from 'lib/types/serialize'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Filters } from '../filters/Filters'
+import { useState } from 'react'
 import PageHeader from '../page-header/PageHeader'
+import { CarsFilters } from './CarsFilters'
 import { CarsTable } from './CarsTable'
 
 interface CarsClientPageProps {
@@ -19,33 +17,14 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
   const { data, error, isLoading, mutate } = useAPICars({
     fallbackData: initialCars,
   })
-
-  // get query parameters
-  const searchParams = useSearchParams()
-  const searchQ = searchParams?.get('search')
-
-  const [filter, setFilter] = useState(searchQ ?? '')
-
-  // replace url with new query parameters
-  const router = useRouter()
-  useEffect(() => {
-    router.replace(
-      `?${new URLSearchParams({
-        search: filter,
-      })}`,
-      {
-        scroll: false,
-      }
-    )
-  }, [filter, router])
+  const [filter, setFilter] = useState('')
 
   const filterCars = (cars: CarComplete[]) => {
-    const filterString = normalizeString(filter).trimEnd()
+    const filterString = filter.toLocaleLowerCase()
     return cars.filter(car => {
-      const name = normalizeString(car.name)
+      const name = car.name.toLowerCase()
       const owner =
-        normalizeString(car.owner.firstName) +
-        normalizeString(car.owner.lastName)
+        car.owner.firstName.toLowerCase() + car.owner.lastName.toLowerCase()
       return name.includes(filterString) || owner.includes(filterString)
     })
   }
@@ -69,7 +48,7 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <Filters search={filter} onSearchChanged={setFilter} />
+              <CarsFilters search={filter} onSearchChanged={setFilter} />
             </div>
           </div>
           <div className="row gx-3">

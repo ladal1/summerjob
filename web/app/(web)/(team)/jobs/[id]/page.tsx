@@ -6,7 +6,6 @@ import { getProposedJobById } from 'lib/data/proposed-jobs'
 import { serializeProposedJob } from 'lib/types/proposed-job'
 import { serializeAreas } from '../../../../../lib/types/area'
 import { getAreas } from '../../../../../lib/data/areas'
-import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 
 type PathProps = {
   params: {
@@ -25,15 +24,14 @@ export default async function EditProposedJobPage({ params }: PathProps) {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
   const { startDate, endDate } = summerJobEvent!
 
-  const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
-
   return (
     <section>
       <EditBox>
         <EditProposedJobForm
           serializedJob={serialized}
           serializedAreas={serializedAreas}
-          allDates={allDates}
+          eventStartDate={startDate.toJSON()}
+          eventEndDate={endDate.toJSON()}
         />
       </EditBox>
     </section>

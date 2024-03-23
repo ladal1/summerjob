@@ -9,7 +9,6 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ApiError } from 'next/dist/server/api-utils'
-import { parseForm } from 'lib/api/parse-form'
 
 export type AreasAPIGetResponse = Awaited<ReturnType<typeof getAreas>>
 async function get(
@@ -28,10 +27,9 @@ async function post(
   session: ExtendedSession
 ) {
   const summerJobEventId = req.query.eventId as string
-  const { json } = await parseForm(req)
   const result = validateOrSendError(
     AreaCreateSchema,
-    { ...json, summerJobEventId },
+    { ...req.body, summerJobEventId },
     res
   )
   if (!result) {
@@ -40,7 +38,7 @@ async function post(
   await logger.apiRequest(
     APILogEvent.AREA_CREATE,
     `summerjob-events/${summerJobEventId}/areas`,
-    json,
+    req.body,
     session
   )
   const area = await createArea(result)
@@ -51,9 +49,3 @@ export default APIAccessController(
   [Permission.ADMIN],
   APIMethodHandler({ get, post })
 )
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}

@@ -1,6 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { parseForm } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { requestPlanner } from 'lib/data/planner'
 import logger from 'lib/logger/logger'
@@ -15,15 +14,14 @@ async function post(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  const { json } = await parseForm(req)
-  const result = validateOrSendError(PlannerSubmitSchema, json, res)
+  const result = validateOrSendError(PlannerSubmitSchema, req.body, res)
   if (!result) {
     return
   }
   await logger.apiRequest(
     APILogEvent.PLAN_PLANNER_START,
     'planner',
-    json,
+    req.body,
     session
   )
   await requestPlanner(result.planId)
@@ -34,9 +32,3 @@ export default APIAccessController(
   [Permission.PLANS],
   APIMethodHandler({ post })
 )
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}

@@ -50,12 +50,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
       icon: 'fas fa-calendar-week',
       permissions: [],
     },
-    {
-      path: '/profile',
-      name: 'Profil',
-      icon: 'fas fa-user',
-      permissions: [],
-    },
+    { path: '/profile', name: 'Profil', icon: 'fas fa-user', permissions: [] },
   ]
 
   const availablePaths = navPaths.filter(path => {

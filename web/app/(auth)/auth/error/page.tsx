@@ -1,8 +1,9 @@
 import { getSMJSession } from 'lib/auth/auth'
-import CenteredBox from 'lib/components/auth/CenteredBox'
-import Image from 'next/image'
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import logoImage from 'public/logo-smj-yellow.png'
+import CenteredBox from 'lib/components/auth/CenteredBox'
+import { string } from 'zod'
 
 type Props = {
   searchParams?: { [key: string]: string | string[] | undefined }

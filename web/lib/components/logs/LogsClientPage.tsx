@@ -1,13 +1,11 @@
 'use client'
-import { useAPILogs } from 'lib/fetcher/log'
-import useDebounce from 'lib/helpers/debounce'
-import { APILogEvent, deserializeLogs } from 'lib/types/logger'
-import { Serialized } from 'lib/types/serialize'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
-import { Filters } from '../filters/Filters'
 import LogsTable from './LogsTable'
-import { normalizeString } from 'lib/helpers/helpers'
+import { APILogEvent, FilteredLogs, deserializeLogs } from 'lib/types/logger'
+import { Serialized } from 'lib/types/serialize'
+import { LogsFilters, LogsFiltersEventType } from './LogsFilters'
+import { useMemo, useState } from 'react'
+import useDebounce from 'lib/helpers/debounce'
+import { useAPILogs } from 'lib/fetcher/log'
 
 interface LogsClientPageProps {
   sLogs: Serialized
@@ -17,36 +15,15 @@ const PAGE_SIZE = 10
 
 export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
   const logs = deserializeLogs(sLogs)
-
-  // get query parameters
-  const searchParams = useSearchParams()
-  const eventTypeQ = searchParams?.get('eventType')
-  const searchQ = searchParams?.get('search')
-
-  const [filter, setFilter] = useState(searchQ ?? '')
+  const [filter, setFilter] = useState('')
   const debouncedSearch = useDebounce(filter, 500)
   const [page, setPage] = useState(1)
   const eventTypes = useMemo(() => getEventTypes(), [])
-  const [filterEventType, setFilterEventType] = useState(
-    eventTypes.find(a => a.id === eventTypeQ) || eventTypes[0]
+  const [filterEventType, setFilterEventType] = useState<LogsFiltersEventType>(
+    eventTypes[0]
   )
-
-  // replace url with new query parameters
-  const router = useRouter()
-  useEffect(() => {
-    router.replace(
-      `?${new URLSearchParams({
-        eventType: filterEventType.id,
-        search: filter,
-      })}`,
-      {
-        scroll: false,
-      }
-    )
-  }, [filterEventType, filter, router])
-
   const { data } = useAPILogs(
-    normalizeString(debouncedSearch).trimEnd(),
+    debouncedSearch,
     filterEventType.id,
     (page - 1) * PAGE_SIZE,
     PAGE_SIZE,
@@ -111,26 +88,20 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
 
   return (
     <section>
-      <div className="container-fluid">
-        <div className="row gx-3">
+      <div className="container">
+        <div className="row">
           <div className="col">
-            <Filters
+            <LogsFilters
               search={filter}
               onSearchChanged={onFilterChanged}
-              selects={[
-                {
-                  id: 'eventType',
-                  options: eventTypes,
-                  selected: filterEventType,
-                  onSelectChanged: eventTypeSelectChanged,
-                  defaultOptionId: 'all',
-                },
-              ]}
+              eventTypes={eventTypes}
+              onEventTypeSelected={eventTypeSelectChanged}
+              selectedEventType={filterEventType}
             />
           </div>
         </div>
-        <div className="row gx-3">
-          <div className="col-12 col-lg-12">
+        <div className="row">
+          <div className="col-12">
             <LogsTable logs={data!.logs} />
           </div>
         </div>
@@ -177,7 +148,7 @@ function PaginationButton({
   )
 }
 
-function getEventTypes() {
+function getEventTypes(): LogsFiltersEventType[] {
   const types = [{ id: 'all', name: 'Vyberte typ události' }]
   const events = Object.values(APILogEvent)
   events.sort()

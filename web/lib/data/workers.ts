@@ -10,7 +10,6 @@ import {
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
 import { deleteUserSessions } from './users'
-import { PhotoCreateData } from 'lib/types/photo'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -65,24 +64,6 @@ export async function getWorkers(
   >[0][]
   const res = correctType.map(databaseWorkerToWorkerComplete)
   return res
-}
-
-export async function getWorkerPhotoById(
-  id: string
-): Promise<PhotoCreateData | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
-  const worker = await prisma.worker.findUnique({
-    where: {
-      id: id,
-    },
-    select: {
-      photoPath: true,
-    },
-  })
-  return worker
 }
 
 export async function getWorkerById(
@@ -166,9 +147,6 @@ export async function deleteWorker(id: string) {
         email: `${id}@deleted.xyz`,
         phone: '00000000',
         allergies: {
-          set: [],
-        },
-        skills: {
           set: [],
         },
         availability: {
@@ -259,9 +237,6 @@ export async function createWorker(
         set: data.allergyIds,
       },
       age: data.age,
-      skills: {
-        set: data.skills,
-      },
       blocked: false,
       availability: {
         create: {
@@ -281,15 +256,11 @@ export async function createWorker(
       email: data.email.toLowerCase(),
       phone: data.phone,
       isStrong: data.strong,
-      isTeam: data.team,
       note: data.note,
       allergies: {
         set: data.allergyIds,
       },
       age: data.age,
-      skills: {
-        set: data.skills,
-      },
       availability: {
         create: {
           workDays: data.availability?.workDays ?? [],
@@ -306,7 +277,6 @@ export async function createWorker(
           permissions: [],
         },
       },
-      photoPath: data.photoPath ?? '',
     },
   })
 }
@@ -340,10 +310,6 @@ export async function internal_updateWorker(
     ? { allergies: { set: data.allergyIds } }
     : {}
 
-  const skillsUpdate = data.skills
-    ? { skills: { set: data.skills } }
-    : {}
-
   return await prismaClient.worker.update({
     where: {
       id,
@@ -354,12 +320,8 @@ export async function internal_updateWorker(
       email: data.email,
       phone: data.phone,
       isStrong: data.strong,
-      isTeam: data.team,
-      photoPath: data.photoPath,
-      note: data.note,
       ...allergyUpdate,
       age: data.age,
-      ...skillsUpdate,
       availability: {
         update: {
           where: {

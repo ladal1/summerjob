@@ -40,8 +40,6 @@ export async function getActiveJobById(
       proposedJob: {
         include: {
           area: true,
-          toolsOnSite: true,
-          toolsToTakeWith: true,
         },
       },
       responsibleWorker: true,
@@ -206,8 +204,8 @@ function getActiveJobDetailsById(
 
 export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   const {
-    completed,
-    proposedJob,
+    privateDescription,
+    publicDescription,
     responsibleWorkerId,
     workerIds,
   } = job
@@ -258,25 +256,13 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
       }
     }
 
-    // update proposed job 
-    await tx.proposedJob.update({
-      where: {
-        id: existingActiveJob.proposedJobId,
-      },
-      data: {
-        name: proposedJob?.name,
-        publicDescription: proposedJob?.publicDescription,
-        privateDescription: proposedJob?.privateDescription
-      }
-    })
-  
-    // update active job 
     const activeJob = await tx.activeJob.update({
       where: {
         id,
       },
       data: {
-        completed,
+        privateDescription,
+        publicDescription,
         responsibleWorkerId,
         ...workersCommand,
       },
@@ -287,7 +273,7 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
 }
 
 export async function createActiveJob(job: ActiveJobCreateData) {
-  const { proposedJobId, planId } = job
+  const { proposedJobId, privateDescription, publicDescription, planId } = job
   const activeJob = await prisma.$transaction(async tx => {
     const existingActiveJob = await tx.activeJob.findFirst({
       where: {
@@ -300,6 +286,8 @@ export async function createActiveJob(job: ActiveJobCreateData) {
     }
     const activeJob = await tx.activeJob.create({
       data: {
+        privateDescription,
+        publicDescription,
         planId,
         proposedJobId,
       },
@@ -326,6 +314,8 @@ export async function createActiveJobs(data: ActiveJobCreateMultipleData) {
     }
     const activeJobs = await tx.activeJob.createMany({
       data: data.jobs.map(job => ({
+        privateDescription: job.privateDescription,
+        publicDescription: job.publicDescription,
         planId: data.planId,
         proposedJobId: job.proposedJobId,
       })),

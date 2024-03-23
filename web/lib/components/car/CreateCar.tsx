@@ -6,7 +6,6 @@ import { useState } from 'react'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import CarCreateForm from './CarCreateForm'
-import { useRouter } from 'next/navigation'
 
 export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
   const [saved, setSaved] = useState(false)
@@ -15,16 +14,8 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
       setSaved(true)
     },
   })
-
-  const router = useRouter()
-
   const onSubmit = (data: CarCreateData) => {
     trigger(data)
-  }
-  
-  const onConfirmationClosed = () => {
-    setSaved(false)
-    router.back()
   }
 
   return (
@@ -34,7 +25,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
         isSending={isMutating}
         owners={workers}
       />
-      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
+      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   )

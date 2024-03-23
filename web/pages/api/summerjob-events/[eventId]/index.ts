@@ -14,7 +14,6 @@ import {
   SummerJobEventUpdateSchema,
 } from 'lib/types/summerjob-event'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm } from 'lib/api/parse-form'
 
 export type SummerJobEventsAPIPatchData = SummerJobEventUpdateDataInput
 async function patch(
@@ -23,12 +22,11 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.eventId as string
-  const { json } = await parseForm(req)
-  const data = validateOrSendError(SummerJobEventUpdateSchema, json, res)
+  const data = validateOrSendError(SummerJobEventUpdateSchema, req.body, res)
   if (!data) {
     return
   }
-  await logger.apiRequest(APILogEvent.SMJEVENT_MODIFY, id, json, session)
+  await logger.apiRequest(APILogEvent.SMJEVENT_MODIFY, id, req.body, session)
   if (!data.isActive) {
     res.status(400).json({
       error: new ApiBadRequestError(
@@ -47,7 +45,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.eventId as string
-  await logger.apiRequest(APILogEvent.SMJEVENT_DELETE, id, {}, session)
+  await logger.apiRequest(APILogEvent.SMJEVENT_DELETE, id, req.body, session)
   await deleteSummerJobEvent(id)
   res.status(204).end()
 }
@@ -56,9 +54,3 @@ export default APIAccessController(
   [Permission.ADMIN],
   APIMethodHandler({ patch, del })
 )
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}

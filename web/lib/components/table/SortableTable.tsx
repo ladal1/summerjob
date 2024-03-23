@@ -1,12 +1,7 @@
-import { CSSProperties } from 'react'
-
 export interface SortableColumn {
   id: string
   name: string
-  notSortable?: boolean
-  className?: string
-  style?: CSSProperties
-  stickyRight?: boolean
+  sortable: boolean
 }
 
 export interface SortOrder {
@@ -17,8 +12,8 @@ export interface SortOrder {
 interface SortableTableProps {
   columns: SortableColumn[]
   children: React.ReactNode
-  currentSort?: SortOrder
-  onRequestedSort?: (direction: SortOrder) => void
+  currentSort: SortOrder
+  onRequestedSort: (direction: SortOrder) => void
 }
 
 export function SortableTable({
@@ -28,9 +23,7 @@ export function SortableTable({
   onRequestedSort,
 }: SortableTableProps) {
   const onSortClicked = (columnId: string) => {
-    if (currentSort === undefined || onRequestedSort === undefined) {
-      return
-    } else if (currentSort.columnId === columnId) {
+    if (currentSort.columnId === columnId) {
       onRequestedSort(
         currentSort.direction === 'asc'
           ? { columnId: columnId, direction: 'desc' }
@@ -42,9 +35,6 @@ export function SortableTable({
   }
 
   const sortIcon = (columnId: string) => {
-    if (currentSort === undefined) {
-      return <></>
-    }
     let direction
     if (currentSort.columnId === columnId) {
       direction =
@@ -57,25 +47,18 @@ export function SortableTable({
   }
 
   return (
-    <div className="table-responsive mb-2 smj-shadow rounded-3">
+    <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
       <table className="table mb-0">
-        <thead className="smj-table-header text-nowrap">
+        <thead className="smj-table-header">
           <tr>
             {columns.map(column => (
               <th
                 key={column.id}
                 onClick={() => onSortClicked(column.id)}
-                className={`
-                  ${column.notSortable ? '' : 'cursor-pointer'} ${
-                  column.stickyRight
-                    ? 'smj-sticky-col-right smj-table-header'
-                    : ''
-                } ${column.className ? column.className : ''}
-                `}
-                style={column.style}
+                className={column.sortable ? 'cursor-pointer' : ''}
               >
                 {column.name}
-                {!column.notSortable && sortIcon(column.id)}
+                {column.sortable && sortIcon(column.id)}
               </th>
             ))}
           </tr>

@@ -4,38 +4,35 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useState } from 'react'
+import AllergyPill from '../forms/AllergyPill'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
+import SuccessProceedModal from '../modal/SuccessProceedModal'
+import DaysSelection from '../forms/DaysSelection'
+import { datesBetween } from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
-import { TextInput } from '../forms/input/TextInput'
-import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { DateBool } from 'lib/data/dateSelectionType'
-import { ImageUploader } from '../forms/ImageUploader'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 import FormWarning from '../forms/FormWarning'
+import { allergyMapping } from '../../data/allergyMapping'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
 
-interface CreateWorkerProps {
-  allDates: DateBool[][]
-  carAccess: boolean
+interface EditWorkerProps {
+  eventStartDate: string
+  eventEndDate: string
 }
 
 export default function CreateWorker({
-  allDates,
-  carAccess,
-}: CreateWorkerProps) {
+  eventStartDate,
+  eventEndDate,
+}: EditWorkerProps) {
+  const allDates = datesBetween(
+    new Date(eventStartDate),
+    new Date(eventEndDate)
+  )
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
@@ -49,18 +46,15 @@ export default function CreateWorker({
   })
 
   const router = useRouter()
-
   const [saved, setSaved] = useState(false)
-
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true)
-      router.refresh()
     },
   })
 
-  const onSubmit = (dataForm: WorkerForm) => {
-    trigger(dataForm)
+  const onSubmit = (data: WorkerForm) => {
+    trigger(data)
   }
 
   const onConfirmationClosed = () => {
@@ -68,27 +62,8 @@ export default function CreateWorker({
     router.back()
   }
 
-  const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
-  }
-
-  const registerPhoto = (fileList: FileList) => {
-    setValue('photoFile', fileList, { shouldDirty: true, shouldValidate: true })
-  }
-
   return (
     <>
-      {true &&
-        Object.values(errors).map((error, index) => (
-          <div key={error.message?.toString()}>
-            <FormWarning
-              message={`${error.ref?.type} + ${error.message?.toString()}`}
-            />
-          </div>
-        ))}
       <div className="row">
         <div className="col">
           <h3>Přidat pracanta</h3>
@@ -97,28 +72,32 @@ export default function CreateWorker({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <TextInput
-              id="firstName"
-              label="Jméno"
+            <label className="form-label fw-bold mt-4" htmlFor="name">
+              Jméno
+            </label>
+            <input
+              id="name"
+              className="form-control p-0 fs-5"
+              type="text"
               placeholder="Jméno"
-              register={() =>
-                register('firstName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
-              errors={errors}
+              {...register('firstName')}
             />
-            <TextInput
-              id="lastName"
-              label="Příjmení"
+            <FormWarning
+              message={errors.firstName?.message ? 'Zadejte jméno' : undefined}
+            />
+            <label className="form-label fw-bold mt-4" htmlFor="surname">
+              Příjmení
+            </label>
+            <input
+              id="surname"
+              className="form-control p-0 fs-5"
+              type="text"
               placeholder="Příjmení"
-              errors={errors}
-              register={() =>
-                register('lastName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
+              {...register('lastName')}
+            />
+            <FormWarning
+              message={
+                errors.lastName?.message ? 'Zadejte příjmení' : undefined
               }
             />
             <label className="form-label fw-bold mt-4" htmlFor="age">
@@ -132,98 +111,96 @@ export default function CreateWorker({
               min="1"
               {...register('age', { valueAsNumber: true })}
             />
-            <TextInput
+            <label className="form-label fw-bold mt-4" htmlFor="phone">
+              Telefonní číslo
+            </label>
+            <input
               id="phone"
-              label="Telefonní číslo"
+              className="form-control p-0 fs-5"
+              type="tel"
+              maxLength={20}
+              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
               placeholder="(+420) 123 456 789"
-              errors={errors}
-              register={() =>
-                register('phone', {
-                  onChange: e =>
-                    (e.target.value = formatPhoneNumber(e.target.value)),
-                })
+              {...register('phone')}
+            />
+            <FormWarning
+              message={
+                errors.phone?.message ? 'Zadejte telefonní číslo' : undefined
               }
             />
-            <TextInput
+            <label className="form-label fw-bold mt-4" htmlFor="email">
+              E-mail
+            </label>
+            <input
               id="email"
-              label="Email"
+              className="form-control p-0 fs-5"
+              type="email"
               placeholder="uzivatel@example.cz"
-              errors={errors}
-              register={() => register('email')}
+              {...register('email')}
             />
-            <div className="d-flex flex-row flex-wrap">
-              <div className="me-5">
-                <DateSelectionInput
-                  id="availability.workDays"
-                  label="Pracovní dostupnost"
-                  register={() => register('availability.workDays')}
-                  days={allDates}
-                />
-              </div>
-              <DateSelectionInput
-                id="availability.adorationDays"
-                label="Dny adorace"
-                register={() => register('availability.adorationDays')}
-                days={allDates}
-              />
+            <FormWarning
+              message={errors.email?.message ? 'Zadejte e-mail' : undefined}
+            />
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="availability.workDays"
+            >
+              Může pracovat v následující dny
+            </label>
+            <DaysSelection
+              name="availability.workDays"
+              days={allDates}
+              register={() => register('availability.workDays')}
+            />
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="availability.adorationDays"
+            >
+              Chce adorovat v následující dny
+            </label>
+            <DaysSelection
+              name="availability.adorationDays"
+              days={allDates}
+              register={() => register('availability.adorationDays')}
+            />
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="allergy"
+            >
+              Alergie
+            </label>
+            <div className="form-check-inline">
+              {Object.entries(allergyMapping).map(
+                ([allergyKey, allergyName]) => (
+                  <AllergyPill
+                    key={allergyKey}
+                    allergyId={allergyKey}
+                    allergyName={allergyName}
+                    register={() => register('allergyIds')}
+                  />
+                )
+              )}
             </div>
-            <GroupButtonsInput
-              label="Alergie"
-              mapping={allergyMapping}
-              register={() => register('allergyIds')}
-            />
-            <GroupButtonsInput
-              label="Dovednosti"
-              mapping={skillMapping}
-              register={() => register('skills')}
-            />
-            <OtherAttributesInput
-              label="Další vlastnosti"
-              register={register}
-              objects={[
-                {
-                  id: 'strong',
-                  icon: 'fas fa-dumbbell',
-                  label: 'Silák',
-                },
-                {
-                  id: 'team',
-                  icon: 'fa-solid fa-people-group',
-                  label: 'Tým',
-                },
-              ]}
-            />
-            <ImageUploader
-              id="photoFile"
-              label="Fotografie"
-              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-              errors={errors}
-              registerPhoto={registerPhoto}
-              removeNewPhoto={removeNewPhoto}
-            />
+            <label className="form-label d-block fw-bold mt-4">
+              Další vlastnosti
+            </label>
+            <div className="form-check align-self-center align-items-center d-flex gap-2 ms-2">
+              <input
+                type="checkbox"
+                className="fs-5 form-check-input"
+                id="strong"
+                {...register('strong')}
+              />
+              <label className="form-check-label" htmlFor="strong">
+                Silák
+                <i className="fas fa-dumbbell ms-2"></i>
+              </label>
+            </div>
 
-            {carAccess && (
-              <>
-                <label
-                  className="form-label d-block fw-bold mt-4"
-                  htmlFor="car"
-                >
-                  Auta
-                </label>
-                <p>
-                  <i>
-                    Auta je možné přiřadit v záložce Auta po vytvořeni pracanta.
-                  </i>
-                </p>
-              </>
-            )}
-            <TextAreaInput
-              id="note"
-              label="Poznámka"
-              placeholder="Poznámka"
-              rows={1}
-              register={() => register('note')}
-            />
+            <label className="form-label d-block fw-bold mt-4" htmlFor="car">
+              Auta
+            </label>
+            <p>Auta je možné přiřadit v záložce Auta po vytvoření pracanta.</p>
 
             <div className="d-flex justify-content-between gap-3">
               <button

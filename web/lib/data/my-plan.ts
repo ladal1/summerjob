@@ -18,16 +18,6 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
       day: plan.day,
     }
   }
-  // Find sequence number of job
-  const sortedJobs = plan.jobs.sort((a, b) =>
-    a.proposedJob.name.localeCompare(b.proposedJob.name)
-  )
-  let seqNum: string | undefined = undefined
-  const index = sortedJobs.findIndex(job => job.id === myJob.id)
-  if (index !== -1) {
-    seqNum = (index + 1).toString()
-  }
-
   // Find if worker has a ride
   const isInRide = (ride: RideComplete) =>
     ride.driver.id === workerId ||
@@ -61,13 +51,11 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
   const responsibleWorkerName = myJob.responsibleWorker
     ? `${myJob.responsibleWorker.firstName} ${myJob.responsibleWorker.lastName}`
     : 'Není'
-
   return {
     day: plan.day,
     job: {
-      seqNum: seqNum,
       name: myJob.proposedJob.name,
-      description: myJob.proposedJob.publicDescription,
+      description: myJob.publicDescription,
       responsibleWorkerName: responsibleWorkerName,
       workerNames: myJob.workers.map(
         worker => `${worker.firstName} ${worker.lastName}`
@@ -77,15 +65,6 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
       location: {
         name: myJob.proposedJob.area?.name ?? 'Zatím neznáma',
         address: myJob.proposedJob.address,
-        coordinates:
-          myJob.proposedJob.coordinates &&
-          myJob.proposedJob.coordinates.at(0) &&
-          myJob.proposedJob.coordinates.at(1)
-            ? [
-                myJob.proposedJob.coordinates.at(0) as number,
-                myJob.proposedJob.coordinates.at(1) as number,
-              ]
-            : null,
       },
       hasFood: myJob.proposedJob.hasFood,
       hasShower: myJob.proposedJob.hasShower,

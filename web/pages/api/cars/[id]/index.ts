@@ -1,6 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { parseForm } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { deleteCar, getCarById, updateCar } from 'lib/data/cars'
 import logger from 'lib/logger/logger'
@@ -29,12 +28,11 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  const { json } = await parseForm(req)
-  const carData = validateOrSendError(CarUpdateSchema, json, res)
+  const carData = validateOrSendError(CarUpdateSchema, req.body, res)
   if (!carData) {
     return
   }
-  await logger.apiRequest(APILogEvent.CAR_MODIFY, id, json, session)
+  await logger.apiRequest(APILogEvent.CAR_MODIFY, id, req.body, session)
   await updateCar(id, carData)
   res.status(204).end()
 }
@@ -45,7 +43,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  await logger.apiRequest(APILogEvent.CAR_DELETE, id, {}, session)
+  await logger.apiRequest(APILogEvent.CAR_DELETE, id, req.body, session)
   await deleteCar(id)
   res.status(204).end()
 }
@@ -54,9 +52,3 @@ export default APIAccessController(
   [Permission.CARS],
   APIMethodHandler({ get, patch, del })
 )
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}

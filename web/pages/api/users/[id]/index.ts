@@ -7,7 +7,6 @@ import { UserUpdateData, UserUpdateSchema } from 'lib/types/user'
 import { NextApiRequest, NextApiResponse } from 'next'
 import logger from 'lib/logger/logger'
 import { APILogEvent } from 'lib/types/logger'
-import { parseForm } from 'lib/api/parse-form'
 
 export type UserAPIPatchData = UserUpdateData
 async function patch(
@@ -16,12 +15,11 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  const { json } = await parseForm(req)
-  const userData = validateOrSendError(UserUpdateSchema, json, res)
+  const userData = validateOrSendError(UserUpdateSchema, req.body, res)
   if (!userData) {
     return
   }
-  await logger.apiRequest(APILogEvent.USER_MODIFY, id, json, session)
+  await logger.apiRequest(APILogEvent.USER_MODIFY, id, req.body, session)
   await updateUser(id, userData)
   res.status(204).end()
 }
@@ -30,9 +28,3 @@ export default APIAccessController(
   [Permission.ADMIN],
   APIMethodHandler({ patch })
 )
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}

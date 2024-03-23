@@ -1,9 +1,8 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { RowCells } from './RowCells'
 
 interface RowProps {
-  data: RowCells[]
+  data: any[]
   children: React.ReactNode
   colspan?: number
   className?: string
@@ -21,22 +20,13 @@ function Cell({
   contents,
   tooltip,
   colspan,
-  stickyRight = false,
 }: {
   contents: any
   tooltip?: string
   colspan?: number
-  stickyRight?: boolean
 }) {
   return (
-    <td
-      className={
-        'text-truncate text-wrap ' +
-        (stickyRight ? 'smj-sticky-col-right smj-expandable-row' : '')
-      }
-      title={tooltip}
-      colSpan={colspan}
-    >
+    <td className="text-truncate" title={tooltip} colSpan={colspan}>
       {contents}
     </td>
   )
@@ -81,7 +71,7 @@ export function ExpandableRow({
               <>
                 {expanded && <ExpandedArrow />}
                 {!expanded && <Arrow />}
-                {field.content}
+                {field}
               </>
             }
             colspan={colspan}
@@ -90,27 +80,20 @@ export function ExpandableRow({
         {data.slice(1).map((field, index) => (
           <Cell
             key={index + 1}
-            contents={field.content}
-            tooltip={
-              typeof field.content === 'string' ? field.content : undefined
-            }
-            stickyRight={field.stickyRight}
+            contents={field}
+            tooltip={typeof field === 'string' ? field : undefined}
           />
         ))}
       </tr>
 
-      <tr
-        className="smj-details-row no-hover"
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-      >
+      <tr className="smj-details-row" onDrop={onDrop} onDragOver={onDragOver}>
         <td colSpan={colspan ?? data.length}>
           <div
             className="smj-row-collapsible"
             ref={collapsibleContentRef}
             style={{ maxHeight: expanded ? `${expandedHeight}px` : '0px' }}
           >
-            <div className="pt-2">{children}</div>
+            <div className="p-2">{children}</div>
           </div>
         </td>
       </tr>
