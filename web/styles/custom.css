@@ -5,6 +5,16 @@
   --primary: #fac505;
   --secondary: #ffd97a;
   --accent: #ff9500;
+  --pinned: #ffdb56;
+  --bubble: #ffea9c;
+}
+
+.smj-color-bubble-pinned {
+  background-color: var(--pinned);
+}
+
+.smj-color-bubble {
+  background-color: var(--bubble);
 }
 
 .nav-item .nav-link {

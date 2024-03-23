@@ -6,7 +6,7 @@ import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
-import { getPostPhotoById, updatePost } from 'lib/data/posts'
+import { deletePost, getPostPhotoById, updatePost } from 'lib/data/posts'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { CoordinatesSchema } from 'lib/types/coordinates'
@@ -68,6 +68,25 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end()
 }
 
+async function del(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string
+  const session = await getSMJSessionAPI(req, res)
+  const allowed = await isAllowedToAccessPost(session, res)
+  if (!allowed) {
+    return
+  }
+
+  const post = await getPostPhotoById(id)
+  if (post && post.photoPath) {
+    deleteFile(post.photoPath) // delete original image if it exists
+  }
+
+  await logger.apiRequest(APILogEvent.POST_DELETE, id, {}, session!)
+  await deletePost(id)
+
+  res.status(204).end()
+}
+
 async function isAllowedToAccessPost(
   session: ExtendedSession | null,
   res: NextApiResponse
@@ -86,7 +105,7 @@ async function isAllowedToAccessPost(
 
 export default APIAccessController(
   [Permission.POSTS],
-  APIMethodHandler({ patch })
+  APIMethodHandler({ patch, del })
 )
 
 export const config = {

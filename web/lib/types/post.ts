@@ -91,7 +91,13 @@ export const PostCreateSchema = z
 export type PostCreateDataInput = z.input<typeof PostCreateSchema>
 export type PostCreateData = z.infer<typeof PostCreateSchema>
 
-export const PostUpdateSchema = PostCreateSchema.partial().strict()
+export const PostUpdateSchema = PostCreateSchema.merge(
+  z.object({
+    isPinned: z.boolean(),
+  })
+)
+  .strict()
+  .partial()
 
 export type PostUpdateDataInput = z.input<typeof PostUpdateSchema>
 export type PostUpdateData = z.infer<typeof PostUpdateSchema>

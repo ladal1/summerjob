@@ -10,9 +10,14 @@ import { Participate } from './Participate'
 interface PostBubbleProps {
   item: PostComplete
   advancedAccess: boolean
+  onUpdated: () => void
 }
 
-export const PostBubble = ({ item, advancedAccess }: PostBubbleProps) => {
+export const PostBubble = ({
+  item,
+  advancedAccess,
+  onUpdated,
+}: PostBubbleProps) => {
   const [isOpenedInfoModal, setIsOpenedInfoModal] = useState(false)
   const onCloseModal = () => {
     setIsOpenedInfoModal(false)
@@ -21,7 +26,9 @@ export const PostBubble = ({ item, advancedAccess }: PostBubbleProps) => {
     <>
       {isOpenedInfoModal && <PostModal item={item} onClose={onCloseModal} />}
       <div
-        className="bg-white m-2 cursor-pointer"
+        className={`${
+          item.isPinned ? 'smj-color-bubble-pinned' : 'smj-color-bubble'
+        } rounded m-2 cursor-pointer`}
         onClick={() => setIsOpenedInfoModal(true)}
       >
         <div className="p-3">
@@ -44,8 +51,9 @@ export const PostBubble = ({ item, advancedAccess }: PostBubbleProps) => {
             <div className="col d-flex flex-column">
               <div className="d-flex justify-content-end">
                 <PostBubbleActions
-                  postId={item.id}
+                  post={item}
                   advancedAccess={advancedAccess}
+                  onUpdated={onUpdated}
                 />
               </div>
               <div

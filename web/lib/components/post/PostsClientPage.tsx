@@ -40,7 +40,11 @@ export default function PostsClientPage({
       </PageHeader>
       {data?.map((item, index) => (
         <React.Fragment key={index}>
-          <PostBubble item={item} advancedAccess={advancedAccess} />
+          <PostBubble
+            item={item}
+            advancedAccess={advancedAccess}
+            onUpdated={mutate}
+          />
         </React.Fragment>
       ))}
     </>

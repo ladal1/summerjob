@@ -71,3 +71,11 @@ export async function createPost(data: PostCreateData) {
   })
   return post
 }
+
+export async function deletePost(id: string) {
+  await prisma.post.delete({
+    where: {
+      id,
+    },
+  })
+}
