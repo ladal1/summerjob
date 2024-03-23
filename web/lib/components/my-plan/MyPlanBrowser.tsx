@@ -5,6 +5,9 @@ import { useMemo, useState } from 'react'
 import SimpleDatePicker from '../date-picker/date-picker'
 import EditBox from '../forms/EditBox'
 import PageHeader from '../page-header/PageHeader'
+import { RowContent } from '../table/RowContent'
+import Map from '../map/Map'
+import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]
@@ -34,9 +37,10 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
   const selectedPlan = useMemo(() => {
     return sortedPlans.find(plan => plan.day.getTime() === date.getTime())
   }, [date, sortedPlans])
+
   return (
     <>
-      <PageHeader title={formatDateLong(date, true)} isFluid={false}>
+      <PageHeader title={formatDateLong(date)} isFluid={false}>
         <div className="bg-white">
           <SimpleDatePicker initialDate={date} onDateChanged={onDateChanged} />
         </div>
@@ -45,69 +49,115 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
         <div className="container">
           <EditBox>
             <h5>
-              {selectedPlan?.job?.name ||
+              {(selectedPlan?.job &&
+                (selectedPlan?.job?.seqNum
+                  ? selectedPlan?.job?.seqNum + ' - '
+                  : '') + selectedPlan?.job?.name) ||
                 'Tento den nemáte naplánovanou práci.'}
             </h5>
             {selectedPlan?.job && (
-              <>
-                <p>{selectedPlan.job.description}</p>
-                <p>
-                  <strong>Zodpovědný pracant: </strong>
-                  {selectedPlan.job.responsibleWorkerName}
-                </p>
-                <p>
-                  <strong>Pracanti: </strong>
-                  {selectedPlan.job.workerNames.join(', ')}
-                </p>
-                <p>
-                  <strong>Kontaktní osoba: </strong>
-                  {selectedPlan.job.contact}
-                </p>
-                <p>
-                  <strong>Alergeny: </strong>
-                  {selectedPlan.job.allergens.join(', ') || 'Žádné'}
-                </p>
-                <p>
-                  <strong>Adresa: </strong>
-                  {selectedPlan.job.location.address},{' '}
-                  {selectedPlan.job.location.name}
-                </p>
-                <p>
-                  <strong>Občerstvení k dispozici: </strong>
-                  {selectedPlan.job.hasFood ? 'Ano' : 'Ne'}
-                </p>
-                <p>
-                  <strong>Sprcha k dispozici: </strong>
-                  {selectedPlan.job.hasShower ? 'Ano' : 'Ne'}
-                </p>
-                <div>
-                  <strong>Doprava</strong>
-                  {!selectedPlan.job.ride && <div className="ms-2">Pěšky</div>}
-                  {selectedPlan.job.ride && (
-                    <>
-                      <div className="ms-2">
-                        <div>
-                          <strong>Auto: </strong>
-                          {selectedPlan.job.ride.car}
-                        </div>
-                        <div>
-                          <strong>Řidič: </strong>
-                          {selectedPlan.job.ride.driverName}
-                          {', '}
-                          {selectedPlan.job.ride.driverPhone}
-                        </div>
-                        {!selectedPlan.job.ride.endsAtMyJob && (
-                          <>
-                            Sdílená doprava. Auto jede na job{' '}
-                            <i>{selectedPlan.job.ride.endJobName}</i>, tebe
-                            vysadí cestou.
-                          </>
-                        )}
+              <div className="container-fluid">
+                <div className="row">
+                  <div
+                    className={`${
+                      selectedPlan.job.location.coordinates ? 'col-lg-6' : 'col'
+                    } " mb-3"`}
+                  >
+                    <RowContent
+                      data={[
+                        {
+                          label: 'Popis',
+                          content: `${selectedPlan.job.description}`,
+                        },
+                        {
+                          label: 'Zodpovědný pracant',
+                          content: `${selectedPlan.job.responsibleWorkerName}`,
+                        },
+                        {
+                          label: 'Pracanti',
+                          content: `${selectedPlan.job.workerNames.join(', ')}`,
+                        },
+                        {
+                          label: 'Kontaktní osoba',
+                          content: `${selectedPlan.job.contact}`,
+                        },
+                        {
+                          label: 'Alergeny',
+                          content: `${
+                            selectedPlan.job.allergens.join(', ') || 'Žádné'
+                          }`,
+                        },
+                        {
+                          label: 'Adresa',
+                          content: `${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`,
+                        },
+                        {
+                          label: 'Občerstvení k dispozici',
+                          content: `${selectedPlan.job.hasFood ? 'Ano' : 'Ne'}`,
+                        },
+                        {
+                          label: 'Sprcha k dispozici',
+                          content: `${
+                            selectedPlan.job.hasShower ? 'Ano' : 'Ne'
+                          }`,
+                        },
+                        {
+                          label: <strong>Doprava:</strong>,
+                          content: (
+                            <>
+                              {!selectedPlan.job.ride && (
+                                <div className="ms-2">Pěšky</div>
+                              )}
+                              {selectedPlan.job.ride && (
+                                <>
+                                  <div className="ms-2 pt-2">
+                                    <div>
+                                      <strong>Auto: </strong>
+                                      {selectedPlan.job.ride.car}
+                                    </div>
+                                    <div>
+                                      <strong>Řidič: </strong>
+                                      {selectedPlan.job.ride.driverName}
+                                      {', '}
+                                      {selectedPlan.job.ride.driverPhone}
+                                    </div>
+                                    {!selectedPlan.job.ride.endsAtMyJob && (
+                                      <>
+                                        Sdílená doprava. Auto jede na job{' '}
+                                        <i>
+                                          {selectedPlan.job.ride.endJobName}
+                                        </i>
+                                        , tebe vysadí cestou.
+                                      </>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                            </>
+                          ),
+                        },
+                      ]}
+                    />
+                  </div>
+                  {selectedPlan.job.location.coordinates && (
+                    <div className="col-lg-6">
+                      <div className="mb-3">
+                        <Map
+                          center={selectedPlan.job.location.coordinates}
+                          zoom={11}
+                          markerPosition={selectedPlan.job.location.coordinates}
+                          address={selectedPlan.job.location.address}
+                        />
                       </div>
-                    </>
+                      <div className="d-flex justify-content-end">
+                        <OpenNavigationButton
+                          coordinates={selectedPlan.job.location.coordinates}
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
-              </>
+              </div>
             )}
           </EditBox>
         </div>

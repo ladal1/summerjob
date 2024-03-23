@@ -1,25 +1,38 @@
-import { ActiveJobNoPlan } from 'lib/types/active-job'
 import type { Worker } from 'lib/prisma/client'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { PlanComplete } from 'lib/types/plan'
+import { RidesForJob } from 'lib/types/ride'
+import { WorkerComplete } from 'lib/types/worker'
+import { useCallback, useMemo, useState } from 'react'
 import {
   SortableColumn,
   SortableTable,
   SortOrder,
 } from '../table/SortableTable'
-import { useCallback, useMemo, useState } from 'react'
-import { WorkerComplete } from 'lib/types/worker'
-import { PlanJobRow } from './PlanJobRow'
+import { sortData } from '../table/SortData'
 import { PlanJoblessRow } from './PlanJoblessRow'
-import { RidesForJob } from 'lib/types/ride'
+import { PlanJobRow } from './PlanJobRow'
 
 const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Práce', sortable: true },
-  { id: 'workers', name: 'Pracanti', sortable: true },
-  { id: 'contact', name: 'Kontaktní osoba', sortable: true },
-  { id: 'area', name: 'Oblast', sortable: true },
-  { id: 'address', name: 'Adresa', sortable: true },
-  { id: 'amenities', name: 'Zajištění', sortable: false },
-  { id: 'actions', name: 'Akce', sortable: false },
+  {
+    id: 'completed',
+    name: 'Hotovo',
+    style: { maxWidth: '100px' },
+  },
+  { id: 'name', name: 'Práce' },
+  { id: 'workers', name: 'Pracanti' },
+  { id: 'contact', name: 'Kontaktní osoba' },
+  { id: 'area', name: 'Oblast' },
+  { id: 'address', name: 'Adresa' },
+  { id: 'amenities', name: 'Zajištění' },
+  { id: 'priority', name: 'Priorita' },
+  {
+    id: 'actions',
+    name: 'Akce',
+    notSortable: true,
+    stickyRight: true,
+    style: { minWidth: '100px' },
+  },
 ]
 
 interface PlanTableProps {
@@ -39,6 +52,23 @@ export function PlanTable({
   reloadPlan,
   onHover,
 }: PlanTableProps) {
+  //#region Sort
+  const getSortable = useMemo(
+    () => ({
+      completed: (job: ActiveJobNoPlan) => +!job.completed,
+      name: (job: ActiveJobNoPlan) => job.proposedJob.name,
+      area: (job: ActiveJobNoPlan) => job.proposedJob.area?.name ?? -1,
+      address: (job: ActiveJobNoPlan) => job.proposedJob.address,
+      amenities: (job: ActiveJobNoPlan) =>
+        `${+!job.proposedJob.hasFood}${+!job.proposedJob.hasShower}`,
+      days: (job: ActiveJobNoPlan) => job.proposedJob.requiredDays,
+      contact: (job: ActiveJobNoPlan) => job.proposedJob.contact,
+      workers: (job: ActiveJobNoPlan) =>
+        `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers} .. ${job.proposedJob.strongWorkers}`,
+      priority: (job: ActiveJobNoPlan) => job.proposedJob.priority,
+    }),
+    []
+  )
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: 'name',
     direction: 'asc',
@@ -47,8 +77,8 @@ export function PlanTable({
     setSortOrder(direction)
   }
   const sortedJobs = useMemo(() => {
-    return plan ? sortJobsInPlan(plan, sortOrder) : []
-  }, [sortOrder, plan])
+    return plan ? sortData(plan.jobs, getSortable, sortOrder) : []
+  }, [plan, getSortable, sortOrder])
 
   const onWorkerDragStart = useCallback((worker: Worker, sourceId: string) => {
     return (e: React.DragEvent<HTMLTableRowElement>) => {
@@ -56,6 +86,7 @@ export function PlanTable({
       e.dataTransfer.setData('source-id', sourceId)
     }
   }, [])
+  //#endregion
 
   const rides = useMemo(() => {
     return (
@@ -108,37 +139,4 @@ export function PlanTable({
       )}
     </SortableTable>
   )
-}
-
-function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
-  if (sortOrder.columnId === undefined) {
-    return data.jobs
-  }
-  const jobs = [...data.jobs]
-
-  const getSortable: {
-    [b: string]: (job: ActiveJobNoPlan) => string | number
-  } = {
-    name: job => job.proposedJob.name,
-    area: job => job.proposedJob.area?.name ?? -1,
-    address: job => job.proposedJob.address,
-    days: job => job.proposedJob.requiredDays,
-    contact: job => job.proposedJob.contact,
-    workers: job =>
-      `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers}`,
-  }
-
-  if (sortOrder.columnId in getSortable) {
-    const sortKey = getSortable[sortOrder.columnId]
-    return jobs.sort((a, b) => {
-      if (sortKey(a) < sortKey(b)) {
-        return sortOrder.direction === 'desc' ? 1 : -1
-      }
-      if (sortKey(a) > sortKey(b)) {
-        return sortOrder.direction === 'desc' ? -1 : 1
-      }
-      return 0
-    })
-  }
-  return jobs
 }

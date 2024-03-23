@@ -82,7 +82,7 @@ export default function PlansClientPage({
               >
                 <div className="row">
                   <div className="col">
-                    <h5>{formatDateLong(plan.day, true)}</h5>
+                    <h5>{formatDateLong(plan.day)}</h5>
                     <p>{plan.jobs.length} jobů</p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">

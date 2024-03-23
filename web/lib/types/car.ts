@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { Serialized } from './serialize'
 import { CarSchema, RideSchema, WorkerSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
+import { customErrorMessages as err } from 'lib/lang/error-messages'
 
 useZodOpenApi
 
@@ -24,14 +25,32 @@ export function deserializeCars(cars: Serialized): CarComplete[] {
 
 export const CarCreateSchema = z
   .object({
-    ownerId: z.string().min(1),
-    name: z.string().min(3),
+    ownerId: z.string().min(1, { message: err.emptyOwnerOfCar }),
+    name: z.string().min(1, { message: err.emptyCarName }),
     description: z.string(),
-    seats: z.number().positive().openapi({ example: 4 }),
-    odometerStart: z.number(),
-    odometerEnd: z.number().optional(),
+    seats: z
+      .number({ invalid_type_error: err.invalidTypeNumber })
+      .min(1, { message: err.emptyCarSeats })
+      .positive({ message: err.nonPositiveNumber })
+      .openapi({ example: 4 }),
+    odometerStart: z
+      .number({
+        invalid_type_error: err.invalidTypeNumber,
+        required_error: err.emptyOdometerStart,
+      })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .default(0),
+    odometerEnd: z
+      .number({ invalid_type_error: err.invalidTypeNumber })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .default(0)
+      .optional(),
     reimbursed: z.boolean().optional().openapi({ example: false }),
-    reimbursementAmount: z.number().optional(),
+    reimbursementAmount: z
+      .number({ invalid_type_error: err.invalidTypeNumber })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .default(0)
+      .optional(),
   })
   .strict()
 

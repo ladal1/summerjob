@@ -1,4 +1,6 @@
 'use client'
+import { mapToolNameToSkill } from 'lib/data/enumMapping/mapToolNameToSkill'
+import { Skill } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { useMemo } from 'react'
@@ -76,6 +78,11 @@ export function ActiveJobIssueBanner({
                   <div className="col">V této oblasti není možné adorovat.</div>
                 </div>
               )}
+              {issues.lowSkilledWorkers && (
+                <div className="row">
+                  <div className="col">Na jobu nejsou dostatečně zruční pracanti.</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -111,6 +118,7 @@ function getIssues(
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
     adorations: adorations(job, day),
+    lowSkilledWorkers: lowSkilledWorkers(job)
   }
 }
 
@@ -173,4 +181,31 @@ function adorations(job: ActiveJobNoPlan, day: Date) {
     }
   }
   return false
+}
+
+function lowSkilledWorkers(job: ActiveJobNoPlan) {
+  const requiredSkills: Set<keyof typeof Skill> = new Set()
+
+  // Iterate over toolsOnSite to collect required skills
+  job.proposedJob.toolsOnSite.forEach(tool => {
+    const skills = mapToolNameToSkill(tool.tool)
+    skills.forEach(skill => requiredSkills.add(skill))
+  })
+
+  const workersSkills: Set<keyof typeof Skill> = new Set()
+
+  // Sum all workers skills
+  job.workers.forEach(worker => {
+    worker.skills.forEach(skill => workersSkills.add(skill))
+  }) 
+
+  // Check if needs for skills are met
+  let allRequiredSkillsPresent = true
+  requiredSkills.forEach(skill => {
+    if(!workersSkills.has(skill)) 
+      allRequiredSkillsPresent = false
+      return
+  })
+
+  return !allRequiredSkillsPresent
 }

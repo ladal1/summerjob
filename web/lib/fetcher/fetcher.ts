@@ -1,56 +1,47 @@
-import { ApiError, ApiErrorSchema } from 'lib/types/api-error'
 import useSWR, { Key } from 'swr'
 import useSWRMutation from 'swr/mutation'
+import { resultResolver } from './fetcher-res-resolver'
 
 const send = (method: string) => async (url: string) => {
   const res = await fetch(url, { method: method })
-
-  if (!res.ok) {
-    const data = await res.json()
-    const parsingResult = ApiErrorSchema.safeParse(data.error)
-    if (parsingResult.success) {
-      throw new ApiError(
-        parsingResult.data.reason,
-        parsingResult.data.type,
-        parsingResult.data.issues
-      )
-    }
-    throw new Error('An error occurred during this request.')
-  }
-  if (res.status === 204) {
-    return
-  }
-
-  return res.json()
+  return resultResolver(res, 'An error occurred during this request.')
 }
 
 const sendData =
   (method: string) =>
   async (url: string, { arg }: { arg: any }) => {
+    const formData = new FormData()
+
+    let jsonData = "{"
+    let first = true
+    const convertData = (key: string, value: any) => {
+      if (value instanceof (File || Blob)) {
+        formData.append(key, value)
+      } 
+      else if (value instanceof FileList) {
+        for (let i = 0; i < value.length; i++) {
+          const file = value[i]
+          formData.append(`file${i}`, file)
+        }
+      }
+      else {
+        jsonData += (first ? '' : ',') + '"' + key + '"' + ':' + (JSON.stringify(value))
+        first = false
+      }
+    }
+    Object.entries(arg).forEach(([key, value]) => {
+      convertData(key, value)
+    })
+    jsonData += '}'
+    
+    // JSON.stringify(arg) could be used here, but among arg can be file or blob too, so we want to avoid those keys
+    formData.append('jsonData', jsonData)
+
     const res = await fetch(url, {
       method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(arg),
+      body: formData,
     })
-
-    if (!res.ok) {
-      const data = await res.json()
-      const parsingResult = ApiErrorSchema.safeParse(data.error)
-      if (parsingResult.success) {
-        throw new ApiError(
-          parsingResult.data.reason,
-          parsingResult.data.type,
-          parsingResult.data.issues
-        )
-      }
-      throw new Error('An error occurred while submitting the data.')
-    }
-    if (res.status === 204 || res.status === 202) {
-      return
-    }
-    return await res.json()
+    return resultResolver(res, 'An error occurred while submitting the data.')
   }
 
 const get = send('GET')

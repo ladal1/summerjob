@@ -10,15 +10,18 @@ import {
   ActiveJobCreateSchema,
 } from 'lib/types/active-job'
 import { ProposedJobComplete } from 'lib/types/proposed-job'
-import { ReactNode, useMemo } from 'react'
+import React, { ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Select, { FormatOptionLabelMeta } from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
+import { formatDateLong, formatDateShort } from 'lib/helpers/helpers'
+import { Issue } from './Issue'
 
 interface AddJobToPlanFormProps {
   planId: string
   onComplete: () => void
+  workerId: string
 }
 
 type ActiveJobCreateFormData = { jobs: Omit<ActiveJobCreateData, 'planId'>[] }
@@ -29,6 +32,7 @@ const ActiveJobCreateFormSchema = z.object({
 export default function AddJobToPlanForm({
   planId,
   onComplete,
+  workerId
 }: AddJobToPlanFormProps) {
   const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId)
   const { trigger, isMutating } = useAPIActiveJobCreateMultiple(planId, {
@@ -52,17 +56,20 @@ export default function AddJobToPlanForm({
     }
     const sorted = new Array(...data)
     sorted.sort((a, b) => {
-      if (a.pinned && !b.pinned) {
+      const isPinnedA = isPinned(a, workerId)
+      const isPinnedB = isPinned(b, workerId)
+      
+      if (isPinnedA && !isPinnedB) {
         return -1
       }
-      if (!a.pinned && b.pinned) {
+      if (!isPinnedA && isPinnedB) {
         return 1
       }
       return a.name.localeCompare(b.name)
     })
 
-    return sorted.map<SelectItem>(jobToSelectItem)
-  }, [data])
+    return sorted.map<SelectItem>((job) => jobToSelectItem(job, workerId))
+  }, [data, workerId])
 
   const itemToFormData = (item: SelectItem) => ({
     proposedJobId: item.id,
@@ -84,7 +91,7 @@ export default function AddJobToPlanForm({
         item: <></>,
       }
     }
-    return jobToSelectItem(job)
+    return jobToSelectItem(job, workerId)
   }
 
   const formatOptionLabel = (
@@ -143,23 +150,44 @@ export default function AddJobToPlanForm({
   )
 }
 
-function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
+function AddJobSelectItem({ job, workerId }: { job: ProposedJobComplete, workerId: string }) {
   return (
     <>
       <div className="text-wrap">
         {job.name} ({job.area?.name})
-        {job.pinned && (
-          <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
+        {isPinned(job, workerId) && (
+          <i className="ms-2 fas fa-thumbtack smj-action-pinned"/>
+        )}
+        {(job.requiredDays - job.activeJobs.length) >= job.availability.length && (
+          <>
+            <i className="ms-2 fas fa-triangle-exclamation smj-action-pinned"/>
+            <Issue>
+              <span>
+                Job musí být naplánován
+                <i className="text-muted">
+                  {' - poslední dostupné dny'}
+                </i>
+              </span>
+            </Issue>
+          </>
         )}
       </div>
       <div className="text-muted text-wrap text-small">
         Naplánováno: {job.activeJobs.length}/{job.requiredDays}
+        <br/>
+        Dostupné dny:
+        {job.availability.map((day, index) => (
+          <span key={index}>
+            {index === 0 ? ' ' : ', '}
+            {formatDateShort(new Date(day))}
+          </span>
+        ))}  
       </div>
     </>
   )
 }
 
-function jobToSelectItem(job: ProposedJobComplete): SelectItem {
+function jobToSelectItem(job: ProposedJobComplete, workerId: string): SelectItem {
   return {
     id: job.id,
     name: job.name,
@@ -171,7 +199,7 @@ function jobToSelectItem(job: ProposedJobComplete): SelectItem {
     ).toLocaleLowerCase(),
     publicDescription: job.publicDescription,
     privateDescription: job.privateDescription,
-    item: <AddJobSelectItem job={job} />,
+    item: <AddJobSelectItem job={job} workerId={workerId} />,
   }
 }
 
@@ -183,3 +211,7 @@ type SelectItem = {
   publicDescription: string
   privateDescription: string
 }
+
+function isPinned (job: ProposedJobComplete, workerId: string) {
+  return job.pinnedBy.some(worker => worker.workerId === workerId)
+} 

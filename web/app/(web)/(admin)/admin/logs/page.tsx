@@ -10,9 +10,7 @@ export default async function LogsPage() {
   const sLogs = serializeLogs(logs)
   return (
     <>
-      <PageHeader title={'Logy'} isFluid={false}>
-        {}
-      </PageHeader>
+      <PageHeader title={'Logy'} />
       <LogsClientPage sLogs={sLogs} />
     </>
   )

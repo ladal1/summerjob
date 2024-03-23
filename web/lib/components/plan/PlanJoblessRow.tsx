@@ -1,10 +1,11 @@
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
+import type { Worker } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { WorkerComplete } from 'lib/types/worker'
+import { useEffect, useState } from 'react'
 import { ExpandableRow } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
-import type { Worker } from 'lib/prisma/client'
-import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
-import { useEffect, useState } from 'react'
 import MoveWorkerModal from './MoveWorkerModal'
 
 const NO_JOB = 'NO_JOB'
@@ -86,13 +87,15 @@ export function PlanJoblessRow({
   return (
     <>
       <ExpandableRow
-        data={[`Bez práce (${joblessWorkers.length})`]}
+        data={[{ content: `Bez práce (${joblessWorkers.length})` }]}
         colspan={numColumns}
         className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
         onDrop={onWorkerDropped()}
       >
-        <div className="ms-2">
-          <b>Následující pracanti nemají přiřazenou práci:</b>
+        <div className="smj-light-grey">
+          <div className="ms-2">
+            <b>Následující pracanti nemají přiřazenou práci:</b>
+          </div>
         </div>
         <div className="table-responsive text-nowrap">
           <table className="table table-hover">
@@ -124,7 +127,7 @@ export function PlanJoblessRow({
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
                   onMouseEnter={() =>
                     worker.photoPath
-                      ? onWorkerHover(`/api/workers/${worker.id}/image`)
+                      ? onWorkerHover(`/api/workers/${worker.id}/photo`)
                       : onWorkerHover(null)
                   }
                   onMouseLeave={() => onWorkerHover(null)}
@@ -152,29 +155,38 @@ function formatWorkerData(
   requestMoveWorker: (worker: WorkerComplete) => void
 ) {
   const name = `${worker.firstName} ${worker.lastName} (${worker.age ?? '?'})`
-  const abilities = []
-
-  if (worker.cars.length > 0) abilities.push('Auto')
-  if (worker.isStrong) abilities.push('Silák')
-  if (
-    worker.availability.adorationDays.find(
-      x => x.getTime() === planDay.getTime()
-    )
-  )
-    abilities.push('Adoruje')
   const allergies = worker.allergies
+  const allergiesMapped = allergies.map(key => allergyMapping[key])
 
   return [
-    name,
-    worker.phone,
-    abilities.join(', '),
-    allergies.join(', '),
-    <span
-      key={`actions-${worker.id}`}
-      className="d-flex align-items-center gap-3"
-    >
-      {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
-    </span>,
+    { content: name },
+    { content: worker.phone },
+    {
+      content: (
+        <>
+          {worker.cars.length > 0 && (
+            <i className="fas fa-car me-2" title={'Auto'} />
+          )}
+          {worker.isStrong && (
+            <i className="fas fa-dumbbell me-2" title={'Silák'} />
+          )}
+          {worker.availability.adorationDays.find(
+            x => x.getTime() === planDay.getTime()
+          ) && <i className="fa fa-church" title={'Adoruje'} />}
+        </>
+      ),
+    },
+    { content: allergiesMapped.join(', ') },
+    {
+      content: (
+        <span
+          key={`actions-${worker.id}`}
+          className="d-flex align-items-center gap-3"
+        >
+          {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
+        </span>
+      ),
+    },
   ]
 }
 

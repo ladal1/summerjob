@@ -2,12 +2,20 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ApiError, WrappedError } from 'lib/types/api-error'
-import { deleteWorker, getWorkerById, updateWorker } from 'lib/data/workers'
+import {
+  deleteWorker,
+  getWorkerById,
+  getWorkerPhotoById,
+  updateWorker,
+} from 'lib/data/workers'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getPhotoPath, parseFormWithImages } from 'lib/api/parse-form'
+import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
+import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>
 async function get(
@@ -36,12 +44,37 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed) {
     return
   }
-  const workerData = validateOrSendError(WorkerUpdateSchema, req.body, res)
+
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/workers'
+  const { files, json } = await parseFormWithImages(req, id, uploadDir, 1)
+
+  /* Validate simple data from json. */
+  const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, req.body, session!)
+  /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
+  if (files.photoFile) {
+    const photoPath = getPhotoPath(files.photoFile) // update photoPath
+    const worker = await getWorkerPhotoById(id)
+    if (worker?.photoPath && worker?.photoPath !== photoPath) {
+      // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
+      deleteFile(worker.photoPath) // delete original image if necessary
+    }
+    workerData.photoPath = photoPath
+  } else if (workerData.photoFileRemoved) {
+    /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
+    const worker = await getWorkerPhotoById(id)
+    if (worker?.photoPath) {
+      deleteFile(worker.photoPath) // delete original image if necessary
+    }
+    workerData.photoPath = ''
+  }
+
+  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
   await updateWorker(id, workerData)
+
   res.status(204).end()
 }
 
@@ -52,8 +85,15 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_DELETE, id, req.body, session!)
+
+  const worker = await getWorkerPhotoById(id)
+  if (worker && worker.photoPath) {
+    deleteFile(worker.photoPath) // delete original image if it exists
+  }
+
+  await logger.apiRequest(APILogEvent.WORKER_DELETE, id, {}, session!)
   await deleteWorker(id)
+
   res.status(204).end()
 }
 
@@ -95,3 +135,9 @@ async function isAllowedToDeleteWorker(
 
 // Access control is done individually in this case to allow users to access their own data
 export default APIMethodHandler({ get, patch, del })
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}

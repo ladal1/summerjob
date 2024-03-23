@@ -1,6 +1,6 @@
 interface ModalProps {
   children: React.ReactNode
-  title: string
+  title?: string
   size: ModalSize
   onClose?: () => void
 }
@@ -14,11 +14,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
   return (
     <>
       <div className="modal-backdrop fade show"></div>
-      <div
-        className={`modal fade show ${size}`}
-        style={{ display: 'block' }}
-        tabIndex={-1}
-      >
+      <div className={`modal fade show ${size} d-block`} tabIndex={-1}>
         <div className="modal-dialog">
           <div className="modal-content rounded-3">
             <div className="modal-header">
@@ -29,7 +25,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
                   className="btn-close"
                   onClick={() => onClose()}
                   aria-label="Close"
-                ></button>
+                />
               )}
             </div>
             <div className="modal-body text-wrap">{children}</div>

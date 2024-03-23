@@ -11,7 +11,7 @@ export default function SuccessProceedModal({
       <p>Změny byly úspěšně uloženy.</p>
       <button
         className="btn pt-2 pb-2 btn-primary float-end"
-        onClick={() => onClose()}
+        onClick={onClose}
       >
         Pokračovat
       </button>

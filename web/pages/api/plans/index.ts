@@ -13,6 +13,7 @@ import {
   validateOrSendError,
 } from 'lib/api/validator'
 import { PlanCreateDataInput, PlanCreateSchema } from 'lib/types/plan'
+import { parseForm } from 'lib/api/parse-form'
 
 export type PlansAPIGetResponse = Awaited<ReturnType<typeof getPlans>>
 async function get(
@@ -33,7 +34,8 @@ async function post(
   res: NextApiResponse<PlansAPIPostResponse | WrappedError<ApiBadRequestError>>,
   session: ExtendedSession
 ) {
-  const parsed = validateOrSendError(PlanCreateSchema, req.body, res)
+  const { json } = await parseForm(req)
+  const parsed = validateOrSendError(PlanCreateSchema, json, res)
   if (!parsed) {
     return
   }
@@ -48,7 +50,7 @@ async function post(
       .json({ error: new ApiBadRequestError('Date out of range.') })
     return
   }
-  await logger.apiRequest(APILogEvent.PLAN_CREATE, 'plans', req.body, session)
+  await logger.apiRequest(APILogEvent.PLAN_CREATE, 'plans', json, session)
   try {
     const plan = await createPlan(date)
     res.status(201).json(plan)
@@ -72,3 +74,9 @@ export default APIAccessController(
   [Permission.PLANS],
   APIMethodHandler({ get, post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+}
