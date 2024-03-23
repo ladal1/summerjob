@@ -138,17 +138,22 @@ export default function EditWorker({
               {...register('lastName')}
             />
             <FormWarning message={errors.lastName?.message} />
-            <label className="form-label fw-bold mt-4" htmlFor="seats">
-              Věk
-            </label>
-            <input
-              id="age"
-              className="form-control p-2 fs-5"
-              type="number"
-              placeholder="Věk"
-              min="1"
-              {...register('age', { valueAsNumber: true })}
-            />
+            {!isProfilePage && (
+              <>
+                <label className="form-label fw-bold mt-4" htmlFor="age">
+                  Věk
+                </label>
+                <input
+                  id="age"
+                  className="form-control p-0 fs-5"
+                  type="number"
+                  placeholder="Věk"
+                  min="1"
+                  {...register('age', { valueAsNumber: true })}
+                />
+              </>
+            )}
+
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>
