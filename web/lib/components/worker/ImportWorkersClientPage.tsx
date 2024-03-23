@@ -80,12 +80,12 @@ export default function ImportWorkersClientPage({
             <div>
               Import akceptuje data oddělená středníkem v následujícím formátu:
               <pre>
-                Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dny práce;Dny
+                Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dny práce;Dny
                 adorace
               </pre>
               Příklad:
               <pre>
-                Jan;Novák;jan.novak@gmail.com;+420123456789;DUST,ANIMALS;2022/07/01,2022/07/02,2022/07/04;2022/07/02,2022/07/04
+                Jan;Novák;19;jan.novak@gmail.com;+420123456789;DUST,ANIMALS;2022/07/01,2022/07/02,2022/07/04;2022/07/02,2022/07/04
               </pre>
             </div>
             <p>
@@ -101,7 +101,7 @@ export default function ImportWorkersClientPage({
               name="data"
               className="form-control border p-1"
               rows={10}
-              placeholder="Jméno;Příjmení;E-mail;Telefonní číslo;Alergie;Dny práce;Dny adorace"
+              placeholder="Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dny práce;Dny adorace"
               value={importData}
               onChange={e => setImportData(e.target.value)}
             />
@@ -154,6 +154,8 @@ function ResultBox({
           <b>
             {' '}
             {result.data.firstName} {result.data.lastName}
+            {', '}
+            {result.data.age}
           </b>{' '}
           <small className="text-muted">
             {result.data.email} {result.data.phone}
@@ -206,6 +208,7 @@ function getWorkerInfo(
   const [
     firstName,
     lastName,
+    age,
     email,
     phone,
     allergiesStr,
@@ -228,6 +231,7 @@ function getWorkerInfo(
   const parsed = WorkerCreateSchema.safeParse({
     firstName,
     lastName,
+    age: +age,
     email,
     phone,
     strong: false,

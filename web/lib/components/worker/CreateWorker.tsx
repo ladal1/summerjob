@@ -100,12 +100,12 @@ export default function CreateWorker({
                 errors.lastName?.message ? 'Zadejte příjmení' : undefined
               }
             />
-            <label className="form-label fw-bold mt-4" htmlFor="seats">
+            <label className="form-label fw-bold mt-4" htmlFor="age">
               Věk
             </label>
             <input
               id="age"
-              className="form-control p-2 fs-5"
+              className="form-control p-0 fs-5"
               type="number"
               placeholder="Věk"
               min="1"
