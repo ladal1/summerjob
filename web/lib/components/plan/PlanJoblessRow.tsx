@@ -154,7 +154,9 @@ function formatWorkerData(
   planDay: Date,
   requestMoveWorker: (worker: WorkerComplete) => void
 ) {
-  const name = `${worker.firstName} ${worker.lastName} (${worker.age ?? '?'})`
+  const name = `${worker.firstName} ${worker.lastName}${
+    worker.age ? `, ${worker.age}` : ''
+  }`
   const allergies = worker.allergies
   const allergiesMapped = allergies.map(key => allergyMapping[key])
 

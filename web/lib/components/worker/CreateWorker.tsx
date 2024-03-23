@@ -5,7 +5,11 @@ import { z } from 'zod'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useState } from 'react'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
+import {
+  formatNumber,
+  formatPhoneNumber,
+  removeRedundantSpace,
+} from 'lib/helpers/helpers'
 import { useRouter } from 'next/navigation'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import { TextInput } from '../forms/input/TextInput'
@@ -121,16 +125,19 @@ export default function CreateWorker({
                 })
               }
             />
-            <label className="form-label fw-bold mt-4" htmlFor="age">
-              Věk
-            </label>
-            <input
+            <TextInput
               id="age"
-              className="form-control p-0 fs-5"
-              type="number"
+              label="Věk"
               placeholder="Věk"
-              min="1"
-              {...register('age', { valueAsNumber: true })}
+              min={1}
+              register={() =>
+                register('age', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
+              errors={errors}
             />
             <TextInput
               id="phone"

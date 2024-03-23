@@ -425,7 +425,9 @@ function formatWorkerData(
   requestMoveWorker: (worker: WorkerComplete) => void,
   reloadPlan: () => void
 ) {
-  const name = `${worker.firstName} ${worker.lastName} (${worker.age ?? '?'})`
+  const name = `${worker.firstName} ${worker.lastName}${
+    worker.age ? `, ${worker.age}` : ''
+  }`
   const abilities = []
   const isDriver = job?.rides.map(r => r.driverId).includes(worker.id) || false
   const wantsAdoration = worker.availability.adorationDays

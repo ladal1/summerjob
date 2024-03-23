@@ -9,6 +9,7 @@ import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
 import {
+  formatNumber,
   formatPhoneNumber,
   pick,
   removeRedundantSpace,
@@ -62,7 +63,7 @@ export default function EditWorker({
       team: worker.isTeam,
       note: worker.note,
       allergyIds: worker.allergies as Allergy[],
-      age: worker.age
+      age: worker.age,
       skills: worker.skills as Skill[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
@@ -171,19 +172,20 @@ export default function EditWorker({
               }
             />
             {!isProfilePage && (
-              <>
-                <label className="form-label fw-bold mt-4" htmlFor="age">
-                  Věk
-                </label>
-                <input
-                  id="age"
-                  className="form-control p-0 fs-5"
-                  type="number"
-                  placeholder="Věk"
-                  min="1"
-                  {...register('age', { valueAsNumber: true })}
-                />
-              </>
+              <TextInput
+                id="age"
+                label="Věk"
+                placeholder="Věk"
+                min={1}
+                register={() =>
+                  register('age', {
+                    valueAsNumber: true,
+                    onChange: e =>
+                      (e.target.value = formatNumber(e.target.value)),
+                  })
+                }
+                errors={errors}
+              />
             )}
             <TextInput
               id="phone"
