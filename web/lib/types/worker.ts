@@ -45,6 +45,11 @@ export const WorkerCreateSchema = z
     skills: z.array(z.nativeEnum(Skill)),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
+    age: z
+      .number({ invalid_type_error: 'Zadejte číslo' })
+      .int({ message: 'Zadejte celé číslo' })
+      .positive({ message: 'Zadejte pozitivní číslo' })
+      .nullable(),
     photoFile: z
       .any()
       .refine((fileList) => fileList instanceof FileList, err.invalidTypeFile)

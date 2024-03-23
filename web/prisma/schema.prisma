@@ -108,7 +108,8 @@ model Worker {
   permissionsId      String                      @unique
   note               String                      @default("")
   photoPath          String?
-  pinnedProposedJobs PinnedProposedJobByWorker[]
+  pinnedProposedJobs PinnedProposedJobByWorker[]  
+  age                Int?
 }
 
 model WorkerPermissions {

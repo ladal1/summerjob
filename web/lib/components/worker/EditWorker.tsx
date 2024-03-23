@@ -62,6 +62,7 @@ export default function EditWorker({
       team: worker.isTeam,
       note: worker.note,
       allergyIds: worker.allergies as Allergy[],
+      age: worker.age
       skills: worker.skills as Skill[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
@@ -169,6 +170,21 @@ export default function EditWorker({
                 })
               }
             />
+            {!isProfilePage && (
+              <>
+                <label className="form-label fw-bold mt-4" htmlFor="age">
+                  Věk
+                </label>
+                <input
+                  id="age"
+                  className="form-control p-0 fs-5"
+                  type="number"
+                  placeholder="Věk"
+                  min="1"
+                  {...register('age', { valueAsNumber: true })}
+                />
+              </>
+            )}
             <TextInput
               id="phone"
               label="Telefonní číslo"

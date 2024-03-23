@@ -258,6 +258,7 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      age: data.age,
       skills: {
         set: data.skills,
       },
@@ -285,6 +286,7 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      age: data.age,
       skills: {
         set: data.skills,
       },
@@ -356,6 +358,7 @@ export async function internal_updateWorker(
       photoPath: data.photoPath,
       note: data.note,
       ...allergyUpdate,
+      age: data.age,
       ...skillsUpdate,
       availability: {
         update: {

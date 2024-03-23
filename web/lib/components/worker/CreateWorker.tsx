@@ -121,6 +121,17 @@ export default function CreateWorker({
                 })
               }
             />
+            <label className="form-label fw-bold mt-4" htmlFor="age">
+              Věk
+            </label>
+            <input
+              id="age"
+              className="form-control p-0 fs-5"
+              type="number"
+              placeholder="Věk"
+              min="1"
+              {...register('age', { valueAsNumber: true })}
+            />
             <TextInput
               id="phone"
               label="Telefonní číslo"
