@@ -654,3 +654,20 @@ img.smj-nav-logo {
   background-color: #cccccc;
   cursor: pointer;
 }
+
+.smj-sort-choice {
+  cursor: pointer;
+  background-color: #e0e0e0;
+}
+
+.smj-sort-choice:hover {
+  background-color: #b6b6b6;
+}
+
+.smj-sort-choice.selected {
+  background-color: #fdc345;
+}
+
+.smj-sort-choice.selected:hover {
+  background-color: #eeb12f;
+}

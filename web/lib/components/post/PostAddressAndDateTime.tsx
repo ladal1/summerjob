@@ -5,12 +5,12 @@ import { IconAndLabel } from '../forms/IconAndLabel'
 
 interface PostAddressAndDateTimeProps {
   item: PostComplete
-  showTime: boolean
+  showTime?: boolean
 }
 
 export const PostAddressAndDateTime = ({
   item,
-  showTime,
+  showTime = true,
 }: PostAddressAndDateTimeProps) => {
   return (
     <>

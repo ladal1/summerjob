@@ -89,7 +89,7 @@ export const PostModal = ({ item, onClose }: PostModalProps) => {
             </div>
           </div>
         )}
-        <div className="d-flex justify-content-start allign-items-center fs-7 text-muted gap-2">
+        <div className="d-flex flex-wrap justify-content-start allign-items-center fs-7 text-muted gap-2">
           {item.tags.map(tag => (
             <span key={tag} className="pill-static">
               <IconAndLabel

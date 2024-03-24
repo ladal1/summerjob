@@ -7,7 +7,7 @@ interface PostTypeProps {
   children: React.ReactNode
 }
 export default function PostType({ title, children }: PostTypeProps) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
   const toggleExpanded = () => {
     setExpanded(!expanded)
   }

@@ -6,14 +6,11 @@ import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { useAPIPostCreate } from 'lib/fetcher/post'
 import { removeRedundantSpace } from 'lib/helpers/helpers'
 import { PostTag } from 'lib/prisma/client'
-import {
-  PostCreateData,
-  PostCreateDataInput,
-  PostCreateSchema,
-} from 'lib/types/post'
+import { PostCreateData, PostCreateSchema } from 'lib/types/post'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
 import FormWarning from '../forms/FormWarning'
 import { ImageUploader } from '../forms/ImageUploader'
@@ -26,7 +23,6 @@ import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { z } from 'zod'
 
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>
