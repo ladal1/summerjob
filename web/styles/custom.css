@@ -7,7 +7,7 @@
   --accent: #ff9500;
   --pinned: #ffdb56;
   --bubble: #ffea9c;
-  --grey: #eeeeee;
+  --grey: #dbdbdb;
 }
 
 .smj-grey {
@@ -144,7 +144,7 @@ img.smj-nav-logo {
 }
 
 .smj-shadow {
-  box-shadow: 2px 2px 2px 3px rgba(76, 0, 255, 0.2);
+  box-shadow: 2px 2px 2px 3px rgba(0, 38, 255, 0.2);
 }
 
 .smj-expandable-row,

@@ -16,7 +16,7 @@ export const PostCompleteSchema = PostSchema.extend({
 
 export type PostComplete = z.infer<typeof PostCompleteSchema>
 
-export const PostCreateSchema = z
+export const PostBasicSchema = z
   .object({
     name: z.string().min(1, { message: err.emptyPostName }).trim(),
     availability: z
@@ -87,6 +87,33 @@ export const PostCreateSchema = z
     isOpenForParticipants: z.boolean().optional(),
   })
   .strict()
+
+export const PostCreateSchema = PostBasicSchema.refine(
+  value => {
+    return (
+      (value.timeFrom !== null && value.timeTo !== null) ||
+      (value.timeFrom === null && value.timeTo === null)
+    )
+  },
+  {
+    message: err.bothTimes,
+    path: ['timeFrom'],
+  }
+)
+
+export type PostCreateDataInput = z.input<typeof PostCreateSchema>
+export type PostCreateData = z.infer<typeof PostCreateSchema>
+
+/* Note: because refine returns ZodEffects, there is no way to apply for example merge as on ZodObject,
+this issue is discussed here: https://github.com/colinhacks/zod/issues/2474
+for now it is settled that there will be duplicates of code (using same refine) */
+export const PostUpdateSchema = PostBasicSchema.merge(
+  z.object({
+    isPinned: z.boolean(),
+  })
+)
+  .strict()
+  .partial()
   .refine(
     value => {
       return (
@@ -99,16 +126,6 @@ export const PostCreateSchema = z
       path: ['timeFrom'],
     }
   )
-
-export type PostCreateDataInput = z.input<typeof PostCreateSchema>
-export type PostCreateData = z.infer<typeof PostCreateSchema>
-
-const PostUpdateSchema = z.union([
-  PostCreateSchema,
-  z.object({
-    isPinned: z.boolean(),
-  }),
-])
 
 export type PostUpdateDataInput = z.input<typeof PostUpdateSchema>
 export type PostUpdateData = z.infer<typeof PostUpdateSchema>

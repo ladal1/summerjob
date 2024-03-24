@@ -1,5 +1,4 @@
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
-import EditBox from 'lib/components/forms/EditBox'
 import CreateProposedJobForm from 'lib/components/jobs/CreateProposedJobForm'
 import { getAreas } from 'lib/data/areas'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
@@ -16,11 +15,9 @@ export default async function CreateProposedJobPage() {
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
 
   return (
-    <EditBox>
-      <CreateProposedJobForm
-        serializedAreas={serializedAreas}
-        allDates={allDates}
-      />
-    </EditBox>
+    <CreateProposedJobForm
+      serializedAreas={serializedAreas}
+      allDates={allDates}
+    />
   )
 }

@@ -34,14 +34,14 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
   // Set coordinates if they are missing
   if (postData.coordinates === undefined || postData.coordinates.length !== 2) {
-    const fetchedCoords = await getGeocodingData(postData.address)
+    const fetchedCoords = await getGeocodingData(postData.address ?? undefined)
     const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
     if (fetchedCoords && parsed.success) {
       postData.coordinates = parsed.data.coordinates
     }
   }
 
-  /* Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted. */
+  // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
   if (files.photoFile) {
     const photoPath = getPhotoPath(files.photoFile) // update photoPath
     const post = await getPostPhotoById(id)
@@ -51,7 +51,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     }
     postData.photoPath = photoPath
   } else if (postData.photoFileRemoved) {
-    /* If original file was deleted on client and was not replaced (it is not in files) file should be deleted. */
+    // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
     const post = await getPostPhotoById(id)
     if (post?.photoPath) {
       deleteFile(post.photoPath) // delete original image if necessary
@@ -62,7 +62,8 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   await logger.apiRequest(APILogEvent.POST_MODIFY, id, postData, session!)
 
   const { photoFile, photoFileRemoved, ...rest } = postData
-  const t = await updatePost(id, rest)
+
+  const t = await updatePost(id, postData)
   console.log(t)
 
   res.status(204).end()

@@ -1,6 +1,5 @@
 import { withPermissions } from 'lib/auth/auth'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
-import EditBox from 'lib/components/forms/EditBox'
 import CreateWorker from 'lib/components/worker/CreateWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { Permission } from 'lib/types/auth'
@@ -17,14 +16,10 @@ export default async function CreateWorkerPage() {
 
   return (
     <>
-      <section className="mb-3">
-        <EditBox>
-          <CreateWorker
-            allDates={allDates}
-            carAccess={isCarAccessAllowed.success}
-          />
-        </EditBox>
-      </section>
+      <CreateWorker
+        allDates={allDates}
+        carAccess={isCarAccessAllowed.success}
+      />
     </>
   )
 }

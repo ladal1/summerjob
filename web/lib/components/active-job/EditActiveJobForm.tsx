@@ -10,17 +10,16 @@ import {
 import { Serialized } from 'lib/types/serialize'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
-import RidesList from './RidesList'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
-import { useRouter } from 'next/navigation'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
+import { Form } from '../post/Form'
+import RidesList from './RidesList'
 
 interface EditActiveJobProps {
   serializedJob: Serialized
@@ -93,114 +92,84 @@ export default function EditActiveJobForm({
   }
 
   const workerSelectItems = job.workers.map(workerToSelectItem)
-
-  const [name, setName] = useState(getValues('proposedJob.name'))
-
   return (
     <>
-      <div className="row">
-        <div className="col">
-          <h3>{name}</h3>
-          <small className="text-muted">{formatDateLong(job.plan.day)}</small>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <TextInput
-              id="proposedJob.name"
-              label="Název jobu"
-              placeholder="Název jobu"
-              register={() =>
-                register('proposedJob.name', {
-                  onChange: e => {
-                    setName(e.target.value)
-                  },
-                })
-              }
-              errors={errors}
-            />
-            <TextAreaInput
-              id="proposedJob.publicDescription"
-              label="Veřejný popis"
-              placeholder="Popis"
-              rows={4}
-              register={() => register('proposedJob.publicDescription')}
-              errors={errors}
-            />
-            <TextAreaInput
-              id="proposedJob.privateDescription"
-              label="Poznámka pro organizátory"
-              placeholder="Poznámka"
-              rows={4}
-              register={() => register('proposedJob.privateDescription')}
-              errors={errors}
-            />
-            <FilterSelectInput
-              id="responsibleWorkerId"
-              label="Zodpovědný pracant"
-              placeholder="Vyberte pracanta"
-              items={workerSelectItems}
-              onSelected={selectResponsibleWorker}
-              {...(job.responsibleWorker && {
-                defaultSelected: workerToSelectItem(job.responsibleWorker),
-              })}
-              defaultSelected={workerSelectItems.find(
-                item => item.id === job.responsibleWorkerId
-              )}
-              errors={errors}
-            />
-
-            <label className="form-label fw-bold mt-4" htmlFor="rides">
-              Přiřazené jízdy
-            </label>
-            {job.rides.length > 0 ? (
-              <RidesList job={job} />
-            ) : (
-              <p>Žádné jízdy</p>
+      <Form
+        label="Upravit job z plánu"
+        secondaryLabel={formatDateLong(job.plan.day)}
+        isInputDisabled={isMutating}
+        onConfirmationClosed={onConfirmationClosed}
+        resetForm={reset}
+        saved={saved}
+        error={error}
+        formId="edit-active-job"
+      >
+        <form id="edit-active-job" onSubmit={handleSubmit(onSubmit)}>
+          <TextInput
+            id="proposedJob.name"
+            label="Název jobu"
+            placeholder="Název jobu"
+            register={() => register('proposedJob.name')}
+            errors={errors}
+          />
+          <TextAreaInput
+            id="proposedJob.publicDescription"
+            label="Veřejný popis"
+            placeholder="Popis"
+            rows={4}
+            register={() => register('proposedJob.publicDescription')}
+            errors={errors}
+          />
+          <TextAreaInput
+            id="proposedJob.privateDescription"
+            label="Poznámka pro organizátory"
+            placeholder="Poznámka"
+            rows={4}
+            register={() => register('proposedJob.privateDescription')}
+            errors={errors}
+          />
+          <FilterSelectInput
+            id="responsibleWorkerId"
+            label="Zodpovědný pracant"
+            placeholder="Vyberte pracanta"
+            items={workerSelectItems}
+            onSelected={selectResponsibleWorker}
+            {...(job.responsibleWorker && {
+              defaultSelected: workerToSelectItem(job.responsibleWorker),
+            })}
+            defaultSelected={workerSelectItems.find(
+              item => item.id === job.responsibleWorkerId
             )}
-            <OtherAttributesInput
-              label="Příznak"
-              register={register}
-              objects={[
-                {
-                  id: 'completed',
-                  icon: 'fa-solid fa-user-check',
-                  label: 'Hotovo',
-                },
-              ]}
-            />
-            <div className="list-group mt-4 w-50">
-              <Link
-                className="list-group-item d-flex justify-content-between align-items-center"
-                href={`/jobs/${job.proposedJobId}`}
-              >
-                <span className="fw-bold">Upravit další parametry jobu</span>
-                <span className="badge rounded-pill bg-warning smj-shadow">
-                  <i className="fas fa-chevron-right p-1"></i>
-                </span>
-              </Link>
-            </div>
-            <div className="d-flex justify-content-between gap-3">
-              <button
-                className="btn btn-secondary mt-4"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Zpět
-              </button>
-              <input
-                type={'submit'}
-                className="btn btn-primary mt-4"
-                value={'Uložit'}
-                disabled={isMutating}
-              />
-            </div>
-          </form>
-        </div>
-      </div>
-      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
-      {error && <ErrorMessageModal onClose={reset} />}
+            errors={errors}
+          />
+          <label className="form-label fw-bold mt-4" htmlFor="rides">
+            Přiřazené jízdy
+          </label>
+          {job.rides.length > 0 ? <RidesList job={job} /> : <p>Žádné jízdy</p>}
+          <OtherAttributesInput
+            label="Příznak"
+            register={register}
+            objects={[
+              {
+                id: 'completed',
+                icon: 'fa-solid fa-user-check',
+                label: 'Hotovo',
+              },
+            ]}
+          />
+          <div className="list-group mt-4 w-50">
+            <Link
+              className="list-group-item d-flex justify-content-between align-items-center"
+              href={`/jobs/${job.proposedJobId}`}
+            >
+              <span className="fw-bold">Upravit další parametry jobu</span>
+              <span className="badge rounded-pill bg-warning smj-shadow">
+                <i className="fas fa-chevron-right p-1"></i>
+              </span>
+            </Link>
+          </div>
+        </form>
+      </Form>
     </>
   )
 }

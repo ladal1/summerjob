@@ -1,7 +1,6 @@
 import { withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
-import EditBox from 'lib/components/forms/EditBox'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getWorkerById } from 'lib/data/workers'
@@ -29,16 +28,12 @@ export default async function EditWorkerPage({ params }: Params) {
 
   return (
     <>
-      <section className="mb-3">
-        <EditBox>
-          <EditWorker
-            serializedWorker={serializedWorker}
-            allDates={allDates}
-            isProfilePage={false}
-            carAccess={isCarAccessAllowed.success}
-          />
-        </EditBox>
-      </section>
+      <EditWorker
+        serializedWorker={serializedWorker}
+        allDates={allDates}
+        isProfilePage={false}
+        carAccess={isCarAccessAllowed.success}
+      />
     </>
   )
 }

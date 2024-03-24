@@ -25,7 +25,7 @@ export function deserializeCars(cars: Serialized): CarComplete[] {
 
 export const CarCreateSchema = z
   .object({
-    ownerId: z.string().min(1, { message: err.emptyOwnerOfCar }),
+    ownerId: z.string({ required_error: err.emptyOwnerOfCar }),
     name: z.string().min(1, { message: err.emptyCarName }),
     description: z.string(),
     seats: z

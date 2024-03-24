@@ -1,12 +1,11 @@
 import ErrorPage404 from 'lib/components/404/404'
-import EditBox from 'lib/components/forms/EditBox'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditProposedJobForm from 'lib/components/jobs/EditProposedJobForm'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getProposedJobById } from 'lib/data/proposed-jobs'
 import { serializeProposedJob } from 'lib/types/proposed-job'
-import { serializeAreas } from '../../../../../lib/types/area'
 import { getAreas } from '../../../../../lib/data/areas'
-import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
+import { serializeAreas } from '../../../../../lib/types/area'
 
 type PathProps = {
   params: {
@@ -28,14 +27,10 @@ export default async function EditProposedJobPage({ params }: PathProps) {
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
 
   return (
-    <section>
-      <EditBox>
-        <EditProposedJobForm
-          serializedJob={serialized}
-          serializedAreas={serializedAreas}
-          allDates={allDates}
-        />
-      </EditBox>
-    </section>
+    <EditProposedJobForm
+      serializedJob={serialized}
+      serializedAreas={serializedAreas}
+      allDates={allDates}
+    />
   )
 }

@@ -31,9 +31,7 @@ export default async function EditPostPage({ params }: Params) {
   return (
     <>
       {isAdvancedAccessAllowed.success ? (
-        <section className="mb-3">
-          <EditPost serializedPost={serializedPost} allDates={allDates} />
-        </section>
+        <EditPost serializedPost={serializedPost} allDates={allDates} />
       ) : (
         <AccessDeniedPage />
       )}

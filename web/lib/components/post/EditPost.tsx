@@ -3,16 +3,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { LabelWithIcon } from 'lib/data/enumMapping/enumMapping'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
+import { useAPIPostUpdate } from 'lib/fetcher/post'
 import { pick, removeRedundantSpace } from 'lib/helpers/helpers'
 import { PostTag } from 'lib/prisma/client'
-import {
-  deserializePost,
-  PostCreateData,
-  PostCreateSchema,
-} from 'lib/types/post'
+import { deserializePost, PostUpdateSchema } from 'lib/types/post'
 import { Serialized } from 'lib/types/serialize'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
@@ -25,13 +22,9 @@ import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { useAPIPostUpdate } from 'lib/fetcher/post'
-import React from 'react'
 import { Form } from './Form'
 
-const schema = PostCreateSchema
+const schema = PostUpdateSchema
 type PostForm = z.input<typeof schema>
 
 interface EditPostProps {
@@ -165,23 +158,31 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
   }
   //#endregion
 
+  const onConfirmationClosed = () => {
+    setSaved(false)
+    router.back()
+  }
+
   return (
     <Form
-      label={post.name}
-      disableInput={isMutating}
+      label="Upravit příspěvek"
+      isInputDisabled={isMutating}
+      onConfirmationClosed={onConfirmationClosed}
       resetForm={reset}
       saved={saved}
       error={error}
+      formId="edit-post"
     >
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form id="edit-post" onSubmit={handleSubmit(onSubmit)}>
         <TextInput
           id="name"
           label="Název"
           placeholder="Název"
           register={() =>
             register('name', {
-              onChange: e =>
-                (e.target.value = removeRedundantSpace(e.target.value)),
+              onChange: e => {
+                e.target.value = removeRedundantSpace(e.target.value)
+              },
             })
           }
           errors={errors}

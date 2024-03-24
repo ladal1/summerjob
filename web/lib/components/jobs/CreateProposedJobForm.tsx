@@ -30,8 +30,7 @@ import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
+import { Form } from '../post/Form'
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -229,236 +228,217 @@ export default function CreateProposedJobForm({
   //#endregion
   return (
     <>
-      <div className="row">
-        <div className="col">
-          <h3>Přidat job</h3>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <TextInput
-              id="name"
-              label="Název jobu"
-              placeholder="Název"
-              register={() =>
-                register('name', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
-              errors={errors}
-            />
-            <TextAreaInput
-              id="publicDescription"
-              label="Popis navrhované práce"
-              placeholder="Popis"
-              rows={4}
-              register={() => register('publicDescription')}
-              errors={errors}
-            />
-            <TextAreaInput
-              id="privateDescription"
-              label="Poznámka pro organizátory"
-              placeholder="Poznámka"
-              rows={4}
-              register={() => register('privateDescription')}
-              errors={errors}
-            />
-            <FilterSelectInput
-              id="areaId"
-              label="Oblast jobu"
-              placeholder="Vyberte oblast"
-              items={areas.map(areaToSelectItem)}
-              onSelected={selectArea}
-              errors={errors}
-            />
-            <MapInput
-              address={{
-                id: 'address',
-                label: 'Adresa',
-                placeholder: 'Adresa',
-                register: registerAdress,
-              }}
-              coordinates={{
-                id: 'coordinates',
-                label: 'Souřadnice',
-                placeholder: '0, 0',
-                register: registerCoordinates,
-              }}
-              errors={errors}
-            />
-            <TextInput
-              id="contact"
-              label="Kontakt"
-              placeholder="Kontakt"
-              register={() => register('contact')}
-              errors={errors}
-            />
-            <ImageUploader
-              id="photoFiles"
-              label="Fotografie"
-              secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
-              errors={errors}
-              registerPhoto={registerPhoto}
-              removeNewPhoto={removeNewPhoto}
-              multiple
-              maxPhotos={10}
-            />
-            <TextInput
-              id="requiredDays"
+      <Form
+        label="Vytvořit job"
+        isInputDisabled={isMutating}
+        onConfirmationClosed={onConfirmationClosed}
+        resetForm={reset}
+        saved={saved}
+        error={error}
+        formId="create-job"
+      >
+        <form
+          id="create-job"
+          onSubmit={handleSubmit(onSubmit)}
+          autoComplete="off"
+        >
+          <TextInput
+            id="name"
+            label="Název jobu"
+            placeholder="Název"
+            register={() =>
+              register('name', {
+                onChange: e =>
+                  (e.target.value = removeRedundantSpace(e.target.value)),
+              })
+            }
+            errors={errors}
+          />
+          <TextAreaInput
+            id="publicDescription"
+            label="Popis navrhované práce"
+            placeholder="Popis"
+            rows={4}
+            register={() => register('publicDescription')}
+            errors={errors}
+          />
+          <TextAreaInput
+            id="privateDescription"
+            label="Poznámka pro organizátory"
+            placeholder="Poznámka"
+            rows={4}
+            register={() => register('privateDescription')}
+            errors={errors}
+          />
+          <FilterSelectInput
+            id="areaId"
+            label="Oblast jobu"
+            placeholder="Vyberte oblast"
+            items={areas.map(areaToSelectItem)}
+            onSelected={selectArea}
+            errors={errors}
+          />
+          <MapInput
+            address={{
+              id: 'address',
+              label: 'Adresa',
+              placeholder: 'Adresa',
+              register: registerAdress,
+            }}
+            coordinates={{
+              id: 'coordinates',
+              label: 'Souřadnice',
+              placeholder: '0, 0',
+              register: registerCoordinates,
+            }}
+            errors={errors}
+          />
+          <TextInput
+            id="contact"
+            label="Kontakt"
+            placeholder="Kontakt"
+            register={() => register('contact')}
+            errors={errors}
+          />
+          <ImageUploader
+            id="photoFiles"
+            label="Fotografie"
+            secondaryLabel="Maximálně 10 souborů, každý o maximální velikosti 10 MB."
+            errors={errors}
+            registerPhoto={registerPhoto}
+            removeNewPhoto={removeNewPhoto}
+            multiple
+            maxPhotos={10}
+          />
+          <TextInput
+            id="requiredDays"
+            type="number"
+            label="Celkový počet dní na splnění"
+            placeholder="Počet dní"
+            min={1}
+            defaultValue={1}
+            register={() =>
+              register('requiredDays', {
+                valueAsNumber: true,
+                onChange: e => (e.target.value = formatNumber(e.target.value)),
+              })
+            }
+            errors={errors}
+          />
+          <Label
+            id="minWorkers"
+            label="Počet pracantů minimálně / maximálně / z toho silných"
+          />
+          <div className="d-flex w-50">
+            <input
+              className="form-control smj-input p-1 ps-2"
+              id="minWorkers"
               type="number"
-              label="Celkový počet dní na splnění"
-              placeholder="Počet dní"
               min={1}
               defaultValue={1}
-              register={() =>
-                register('requiredDays', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
+              {...register('minWorkers', {
+                valueAsNumber: true,
+                onChange: e => (e.target.value = formatNumber(e.target.value)),
+              })}
+            />
+            /
+            <input
+              className="form-control smj-input p-1 ps-2"
+              id="maxWorkers"
+              type="number"
+              min={1}
+              defaultValue={1}
+              {...register('maxWorkers', {
+                valueAsNumber: true,
+                onChange: e => (e.target.value = formatNumber(e.target.value)),
+              })}
+            />
+            /
+            <input
+              className="form-control smj-input p-1 ps-2"
+              id="strongWorkers"
+              type="number"
+              min={0}
+              defaultValue={0}
+              {...register('strongWorkers', {
+                valueAsNumber: true,
+                onChange: e => (e.target.value = formatNumber(e.target.value)),
+              })}
+            />
+          </div>
+          {(errors.minWorkers || errors.maxWorkers || errors.strongWorkers) && (
+            <FormWarning
+              message={
+                (errors?.minWorkers?.message as string | undefined) ||
+                (errors?.maxWorkers?.message as string | undefined) ||
+                (errors?.strongWorkers?.message as string | undefined)
               }
-              errors={errors}
             />
-            <Label
-              id="minWorkers"
-              label="Počet pracantů minimálně / maximálně / z toho silných"
+          )}
+
+          <div className="d-flex flex-row">
+            <DateSelectionInput
+              id="availability"
+              label="Časová dostupnost"
+              register={() => register('availability')}
+              days={allDates}
             />
-            <div className="d-flex w-50">
-              <input
-                className="form-control smj-input p-1 ps-2"
-                id="minWorkers"
-                type="number"
-                min={1}
-                defaultValue={1}
-                {...register('minWorkers', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })}
-              />
-              /
-              <input
-                className="form-control smj-input p-1 ps-2"
-                id="maxWorkers"
-                type="number"
-                min={1}
-                defaultValue={1}
-                {...register('maxWorkers', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })}
-              />
-              /
-              <input
-                className="form-control smj-input p-1 ps-2"
-                id="strongWorkers"
-                type="number"
-                min={0}
-                defaultValue={0}
-                {...register('strongWorkers', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })}
-              />
-            </div>
-            {(errors.minWorkers ||
-              errors.maxWorkers ||
-              errors.strongWorkers) && (
-              <FormWarning
-                message={
-                  (errors?.minWorkers?.message as string | undefined) ||
-                  (errors?.maxWorkers?.message as string | undefined) ||
-                  (errors?.strongWorkers?.message as string | undefined)
-                }
-              />
+          </div>
+          <FilterSelectInput
+            id="jobType"
+            label="Typ práce"
+            placeholder="Vyberte typ práce"
+            items={jobTypeSelectItems}
+            onSelected={selectJobType}
+            defaultSelected={jobTypeSelectItems.find(
+              item => item.id === JobType.OTHER
             )}
-
-            <div className="d-flex flex-row">
-              <DateSelectionInput
-                id="availability"
-                label="Časová dostupnost"
-                register={() => register('availability')}
-                days={allDates}
-              />
-            </div>
-            <FilterSelectInput
-              id="jobType"
-              label="Typ práce"
-              placeholder="Vyberte typ práce"
-              items={jobTypeSelectItems}
-              onSelected={selectJobType}
-              defaultSelected={jobTypeSelectItems.find(
-                item => item.id === JobType.OTHER
-              )}
-              errors={errors}
-            />
-            <PillSelectInput
-              id="toolsOnSiteCreate"
-              label="Nářadí na místě"
-              placeholder={'Vyberte nástroje'}
-              items={manageToolSelectItems()}
-              removeExisting={removeExistingToolOnSite}
-              withNumberSelect={true}
-              register={selectToolsOnSite}
-              errors={errors}
-            />
-            <PillSelectInput
-              id="toolsToTakeWithCreate"
-              label="Nářadí s sebou"
-              placeholder={'Vyberte nástroje'}
-              items={manageToolSelectItems()}
-              removeExisting={removeExistingToolToTakeWith}
-              withNumberSelect={true}
-              register={selectToolsToTakeWith}
-              errors={errors}
-            />
-            <GroupButtonsInput
-              id="allergens"
-              label="Alergeny"
-              mapping={allergyMapping}
-              register={() => register('allergens')}
-            />
-            <OtherAttributesInput
-              label="Další vlastnosti"
-              register={register}
-              objects={[
-                {
-                  id: 'hasFood',
-                  icon: 'fa fa-utensils',
-                  label: 'Strava na místě',
-                },
-                {
-                  id: 'hasShower',
-                  icon: 'fa fa-shower',
-                  label: 'Sprcha na místě',
-                },
-              ]}
-            />
-
-            <div className="d-flex justify-content-between gap-3">
-              <button
-                className="btn btn-secondary mt-4"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Zpět
-              </button>
-              <input
-                type={'submit'}
-                className="btn btn-primary mt-4"
-                value={'Uložit'}
-                disabled={isMutating}
-              />
-            </div>
-          </form>
-        </div>
-      </div>
-      {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
-      {error && <ErrorMessageModal onClose={reset} />}
+            errors={errors}
+          />
+          <PillSelectInput
+            id="toolsOnSiteCreate"
+            label="Nářadí na místě"
+            placeholder={'Vyberte nástroje'}
+            items={manageToolSelectItems()}
+            removeExisting={removeExistingToolOnSite}
+            withNumberSelect={true}
+            register={selectToolsOnSite}
+            errors={errors}
+          />
+          <PillSelectInput
+            id="toolsToTakeWithCreate"
+            label="Nářadí s sebou"
+            placeholder={'Vyberte nástroje'}
+            items={manageToolSelectItems()}
+            removeExisting={removeExistingToolToTakeWith}
+            withNumberSelect={true}
+            register={selectToolsToTakeWith}
+            errors={errors}
+          />
+          <GroupButtonsInput
+            id="allergens"
+            label="Alergeny"
+            mapping={allergyMapping}
+            register={() => register('allergens')}
+          />
+          <OtherAttributesInput
+            label="Další vlastnosti"
+            register={register}
+            objects={[
+              {
+                id: 'hasFood',
+                icon: 'fa fa-utensils',
+                label: 'Strava na místě',
+              },
+              {
+                id: 'hasShower',
+                icon: 'fa fa-shower',
+                label: 'Sprcha na místě',
+              },
+            ]}
+          />
+        </form>
+      </Form>
     </>
   )
 }

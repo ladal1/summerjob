@@ -1,6 +1,5 @@
 import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
-import EditBox from 'lib/components/forms/EditBox'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
@@ -31,16 +30,12 @@ export default async function MyProfilePage() {
 
   return (
     <>
-      <section className="mb-3">
-        <EditBox>
-          <EditWorker
-            serializedWorker={serializedWorker}
-            allDates={allDates}
-            isProfilePage={true}
-            carAccess={isCarAccessAllowed.success}
-          />
-        </EditBox>
-      </section>
+      <EditWorker
+        serializedWorker={serializedWorker}
+        allDates={allDates}
+        isProfilePage={true}
+        carAccess={isCarAccessAllowed.success}
+      />
     </>
   )
 }
