@@ -44,4 +44,6 @@ export const customErrorMessages = {
   nonPositiveNumber: 'Zadejte kladné číslo',
   nonNonNegativeNumber: 'Zadejte nezáporné číslo',
   invalidTypeNumber: 'Zadejte číslo',
+
+  bothTimes: 'Zadejte buď oba časy nebo žádný',
 }

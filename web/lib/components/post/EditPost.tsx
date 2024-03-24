@@ -11,8 +11,8 @@ import {
   PostCreateSchema,
 } from 'lib/types/post'
 import { Serialized } from 'lib/types/serialize'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
@@ -29,6 +29,7 @@ import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import { useAPIPostUpdate } from 'lib/fetcher/post'
 import React from 'react'
+import { Form } from './Form'
 
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>
@@ -78,11 +79,6 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
       ...Object.keys(dirtyFields)
     ) as unknown as PostForm
     trigger(modified)
-  }
-
-  const onConfirmationClosed = () => {
-    setSaved(false)
-    router.back()
   }
 
   //#region Coordinates and Address
@@ -170,155 +166,137 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
   //#endregion
 
   return (
-    <>
-      <div className="row">
-        <div className="col">
-          <h3>{post.name}</h3>
+    <Form
+      label={post.name}
+      disableInput={isMutating}
+      resetForm={reset}
+      saved={saved}
+      error={error}
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <TextInput
+          id="name"
+          label="Název"
+          placeholder="Název"
+          register={() =>
+            register('name', {
+              onChange: e =>
+                (e.target.value = removeRedundantSpace(e.target.value)),
+            })
+          }
+          errors={errors}
+          mandatory
+          margin={false}
+        />
+        <TextAreaInput
+          id="shortDescription"
+          label="Krátký popis"
+          placeholder="Popis"
+          rows={2}
+          register={() => register('shortDescription')}
+          errors={errors}
+          mandatory
+        />
+        <TextAreaInput
+          id="longDescription"
+          label="Dlouhý popis"
+          placeholder="Popis"
+          rows={4}
+          register={() => register('longDescription')}
+          errors={errors}
+        />
+        <div className="d-flex flex-row">
+          <DateSelectionInput
+            id="availability"
+            label="Platné pro dny"
+            register={() => register('availability')}
+            days={allDates}
+          />
         </div>
-      </div>
-      <div className="row">
-        <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <TextInput
-              id="name"
-              label="Název"
-              placeholder="Název"
-              register={() =>
-                register('name', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
-              errors={errors}
-            />
-            <TextAreaInput
-              id="shortDescription"
-              label="Krátký popis"
-              placeholder="Popis"
-              rows={2}
-              register={() => register('shortDescription')}
-              errors={errors}
-            />
-            <TextAreaInput
-              id="longDescription"
-              label="Dlouhý popis"
-              placeholder="Popis"
-              rows={4}
-              register={() => register('longDescription')}
-              errors={errors}
-            />
-            <div className="d-flex flex-row">
-              <DateSelectionInput
-                id="availability"
-                label="Platné pro dny"
-                register={() => register('availability')}
-                days={allDates}
-              />
-            </div>
-            <Label id="timeFrom" label="Čas" />
-            <div className="d-flex w-50">
-              <input
-                className="form-control smj-input p-0 fs-5"
-                id="timeFrom"
-                placeholder="00:00"
-                type="time"
-                {...register('timeFrom')}
-              />
-              <span className="ps-4 pe-4">-</span>
-              <input
-                className="form-control smj-input p-0 fs-5"
-                id="timeTo"
-                placeholder="00:00"
-                type="time"
-                {...register('timeTo')}
-              />
-            </div>
-            {(errors.timeFrom || errors.timeTo) && (
-              <FormWarning
-                message={
-                  (errors?.timeFrom?.message as string | undefined) ||
-                  (errors?.timeTo?.message as string | undefined)
-                }
-              />
-            )}
-            <MapInput
-              address={{
-                id: 'address',
-                label: 'Adresa',
-                placeholder: 'Adresa',
-                init: post.address ?? '',
-                register: registerAdress,
-              }}
-              coordinates={{
-                id: 'coordinates',
-                label: 'Souřadnice',
-                placeholder: '0, 0',
-                init: getCoordinates(),
-                register: registerCoordinates,
-              }}
-              errors={errors}
-            />
-            <ImageUploader
-              id="photoFile"
-              label="Fotografie"
-              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-              photoInit={
-                post.photoPath
-                  ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
-                  : null
-              }
-              errors={errors}
-              registerPhoto={registerPhoto}
-              removeNewPhoto={removeNewPhoto}
-              removeExistingPhoto={removeExistingPhoto}
-            />
-            <PillSelectInput
-              id="tags"
-              label="Tagy"
-              placeholder={'Vyberte tagy'}
-              items={manageTagSelectItems()}
-              init={fetchTagSelectItems(post.tags)}
-              removeExisting={removeExistingTag}
-              register={selectTags}
-              errors={errors}
-            />
-            <OtherAttributesInput
-              label="Další vlastnosti"
-              register={register}
-              objects={[
-                {
-                  id: 'isMandatory',
-                  icon: 'fas fa-people-pulling',
-                  label: 'Povinná účast pro všechny',
-                },
-                {
-                  id: 'isOpenForParticipants',
-                  icon: 'fas fa-door-open',
-                  label: 'Otevřeno pro zapsání účastníky',
-                },
-              ]}
-            />
-
-            <div className="d-flex justify-content-between gap-3">
-              <button
-                className="btn btn-secondary mt-4"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Zpět
-              </button>
-              <input
-                type={'submit'}
-                className="btn btn-primary mt-4"
-                value={'Uložit'}
-                disabled={isMutating}
-              />
-            </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
-            {error && <ErrorMessageModal onClose={reset} />}
-          </form>
+        <Label id="timeFrom" label="Čas" />
+        <div className="d-flex w-50">
+          <input
+            className="form-control smj-input p-0 fs-5"
+            id="timeFrom"
+            placeholder="00:00"
+            type="time"
+            {...register('timeFrom')}
+          />
+          <span className="ps-4 pe-4">-</span>
+          <input
+            className="form-control smj-input p-0 fs-5"
+            id="timeTo"
+            placeholder="00:00"
+            type="time"
+            {...register('timeTo')}
+          />
         </div>
-      </div>
-    </>
+        {(errors.timeFrom || errors.timeTo) && (
+          <FormWarning
+            message={
+              (errors?.timeFrom?.message as string | undefined) ||
+              (errors?.timeTo?.message as string | undefined)
+            }
+          />
+        )}
+        <MapInput
+          address={{
+            id: 'address',
+            label: 'Adresa',
+            placeholder: 'Adresa',
+            init: post.address ?? '',
+            register: registerAdress,
+          }}
+          coordinates={{
+            id: 'coordinates',
+            label: 'Souřadnice',
+            placeholder: '0, 0',
+            init: getCoordinates(),
+            register: registerCoordinates,
+          }}
+          errors={errors}
+        />
+        <ImageUploader
+          id="photoFile"
+          label="Fotografie"
+          secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+          photoInit={
+            post.photoPath
+              ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
+              : null
+          }
+          errors={errors}
+          registerPhoto={registerPhoto}
+          removeNewPhoto={removeNewPhoto}
+          removeExistingPhoto={removeExistingPhoto}
+        />
+        <PillSelectInput
+          id="tags"
+          label="Tagy"
+          placeholder={'Vyberte tagy'}
+          items={manageTagSelectItems()}
+          init={fetchTagSelectItems(post.tags)}
+          removeExisting={removeExistingTag}
+          register={selectTags}
+          errors={errors}
+        />
+        <OtherAttributesInput
+          label="Další vlastnosti"
+          register={register}
+          objects={[
+            {
+              id: 'isMandatory',
+              icon: 'fas fa-people-pulling',
+              label: 'Povinná účast pro všechny',
+            },
+            {
+              id: 'isOpenForParticipants',
+              icon: 'fas fa-door-open',
+              label: 'Otevřeno pro zapsání účastníky',
+            },
+          ]}
+        />
+      </form>
+    </Form>
   )
 }

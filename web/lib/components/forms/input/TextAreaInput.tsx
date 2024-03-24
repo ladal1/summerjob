@@ -13,6 +13,7 @@ interface TextAreaProps
   register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   margin?: boolean
+  mandatory?: boolean
 }
 
 export const TextAreaInput = ({
@@ -21,13 +22,14 @@ export const TextAreaInput = ({
   register,
   errors,
   margin = true,
+  mandatory = false,
   ...rest
 }: TextAreaProps) => {
   const error = errors?.[id as Path<FormData>]?.message as string | undefined
 
   return (
     <>
-      <Label id={id} label={label} margin={margin} />
+      <Label id={id} label={label} margin={margin} mandatory={mandatory} />
       <textarea
         id={id}
         className="form-control border smj-textarea p-2 fs-5"

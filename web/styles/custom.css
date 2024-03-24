@@ -7,6 +7,11 @@
   --accent: #ff9500;
   --pinned: #ffdb56;
   --bubble: #ffea9c;
+  --grey: #eeeeee;
+}
+
+.smj-grey {
+  background-color: var(--grey);
 }
 
 .smj-color-bubble-pinned {
@@ -139,7 +144,7 @@ img.smj-nav-logo {
 }
 
 .smj-shadow {
-  box-shadow: 1px 1px 6px;
+  box-shadow: 2px 2px 2px 3px rgba(76, 0, 255, 0.2);
 }
 
 .smj-expandable-row,
@@ -171,6 +176,12 @@ img.smj-nav-logo {
   transition: all 0.2s ease-out;
 }
 
+.smj-sticky-col-bottom {
+  position: sticky;
+  z-index: 100;
+  bottom: 0;
+}
+
 .smj-sticky-col-right {
   position: sticky;
   z-index: 0;
@@ -180,6 +191,7 @@ img.smj-nav-logo {
 
 .smj-sticky-col-left {
   position: sticky;
+  z-index: 0;
   left: 0;
   box-shadow: 5px 0px 5px -3px rgba(0, 0, 0, 0.1) !important;
 }

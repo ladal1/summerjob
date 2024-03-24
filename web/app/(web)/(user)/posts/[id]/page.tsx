@@ -2,7 +2,6 @@ import { withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
-import EditBox from 'lib/components/forms/EditBox'
 import EditPost from 'lib/components/post/EditPost'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getPostById } from 'lib/data/posts'
@@ -33,9 +32,7 @@ export default async function EditPostPage({ params }: Params) {
     <>
       {isAdvancedAccessAllowed.success ? (
         <section className="mb-3">
-          <EditBox>
-            <EditPost serializedPost={serializedPost} allDates={allDates} />
-          </EditBox>
+          <EditPost serializedPost={serializedPost} allDates={allDates} />
         </section>
       ) : (
         <AccessDeniedPage />

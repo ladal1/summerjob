@@ -87,17 +87,28 @@ export const PostCreateSchema = z
     isOpenForParticipants: z.boolean().optional(),
   })
   .strict()
+  .refine(
+    value => {
+      return (
+        (value.timeFrom !== null && value.timeTo !== null) ||
+        (value.timeFrom === null && value.timeTo === null)
+      )
+    },
+    {
+      message: err.bothTimes,
+      path: ['timeFrom'],
+    }
+  )
 
 export type PostCreateDataInput = z.input<typeof PostCreateSchema>
 export type PostCreateData = z.infer<typeof PostCreateSchema>
 
-export const PostUpdateSchema = PostCreateSchema.merge(
+const PostUpdateSchema = z.union([
+  PostCreateSchema,
   z.object({
     isPinned: z.boolean(),
-  })
-)
-  .strict()
-  .partial()
+  }),
+])
 
 export type PostUpdateDataInput = z.input<typeof PostUpdateSchema>
 export type PostUpdateData = z.infer<typeof PostUpdateSchema>
