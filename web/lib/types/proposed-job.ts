@@ -38,12 +38,12 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
 export const ProposedJobCreateSchema = z
   .object({
-    areaId: z.string().min(1, { message: err.emptyAreaId }).nullable(),
+    areaId: z.string({ required_error: err.emptyAreaId }).nullable(),
     allergens: z.array(z.nativeEnum(Allergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
     name: z.string().min(1, { message: err.emptyProposedJobName }),
-    address: z.string().min(1, { message: err.emptyAdress }),
+    address: z.string({ required_error: err.emptyAdress }),
     coordinates: coordinatesZod.optional(),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z

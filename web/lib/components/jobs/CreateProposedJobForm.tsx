@@ -253,6 +253,8 @@ export default function CreateProposedJobForm({
               })
             }
             errors={errors}
+            mandatory
+            margin={false}
           />
           <TextAreaInput
             id="publicDescription"
@@ -277,6 +279,7 @@ export default function CreateProposedJobForm({
             items={areas.map(areaToSelectItem)}
             onSelected={selectArea}
             errors={errors}
+            mandatory
           />
           <MapInput
             address={{
@@ -284,6 +287,7 @@ export default function CreateProposedJobForm({
               label: 'Adresa',
               placeholder: 'Adresa',
               register: registerAdress,
+              mandatory: true,
             }}
             coordinates={{
               id: 'coordinates',
@@ -299,6 +303,7 @@ export default function CreateProposedJobForm({
             placeholder="Kontakt"
             register={() => register('contact')}
             errors={errors}
+            mandatory
           />
           <ImageUploader
             id="photoFiles"

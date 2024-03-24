@@ -322,6 +322,8 @@ export default function EditProposedJobForm({
               })
             }
             errors={errors}
+            mandatory
+            margin={false}
           />
           <TextAreaInput
             id="publicDescription"
@@ -349,6 +351,7 @@ export default function EditProposedJobForm({
               item => item.id === job.areaId
             )}
             errors={errors}
+            mandatory
           />
           <MapInput
             address={{
@@ -357,6 +360,7 @@ export default function EditProposedJobForm({
               placeholder: 'Adresa',
               init: job.address,
               register: registerAdress,
+              mandatory: true,
             }}
             coordinates={{
               id: 'coordinates',
@@ -385,6 +389,7 @@ export default function EditProposedJobForm({
             placeholder="Kontakt"
             register={() => register('contact')}
             errors={errors}
+            mandatory
           />
           <TextInput
             id="requiredDays"

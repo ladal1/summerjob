@@ -147,6 +147,8 @@ export default function CreatePost({ allDates }: CreatePostProps) {
               })
             }
             errors={errors}
+            mandatory
+            margin={false}
           />
           <TextAreaInput
             id="shortDescription"
@@ -155,6 +157,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
             rows={2}
             register={() => register('shortDescription')}
             errors={errors}
+            mandatory
           />
           <TextAreaInput
             id="longDescription"

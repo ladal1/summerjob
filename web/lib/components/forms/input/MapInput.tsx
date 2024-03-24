@@ -15,6 +15,7 @@ interface AddressInput {
   placeholder: string
   init?: string
   register: (address: string) => void
+  mandatory?: boolean
 }
 
 interface CoordinatesInput {
@@ -84,7 +85,11 @@ export const MapInput = ({ address, coordinates, errors }: MapInputProps) => {
       <div className="container p-0 m-0">
         <div className="row align-items-end">
           <div className="col">
-            <Label id={address.id} label={address.label} />
+            <Label
+              id={address.id}
+              label={address.label}
+              mandatory={address.mandatory}
+            />
             <input
               className="form-control smj-input p-0 fs-5"
               value={addressValue}

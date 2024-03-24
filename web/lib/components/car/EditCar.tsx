@@ -72,6 +72,8 @@ export default function EditCar({ car }: { car: CarComplete }) {
             placeholder="Model auta, značka"
             errors={errors}
             register={() => register('name')}
+            mandatory
+            margin={false}
           />
           <TextAreaInput
             id="description"
@@ -94,6 +96,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
               })
             }
             errors={errors}
+            mandatory
           />
           <TextInput
             id="odometerStart"
@@ -108,6 +111,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
               })
             }
             errors={errors}
+            mandatory
           />
           <TextInput
             id="odometerEnd"
@@ -122,6 +126,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
               })
             }
             errors={errors}
+            mandatory
           />
           <TextInput
             id="reimbursementAmount"
@@ -136,6 +141,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
               })
             }
             errors={errors}
+            mandatory
           />
           <OtherAttributesInput
             register={register}

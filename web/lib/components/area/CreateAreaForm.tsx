@@ -65,6 +65,8 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
             placeholder="Název oblasti"
             register={() => register('name')}
             errors={errors}
+            mandatory
+            margin={false}
           />
           <OtherAttributesInput
             register={register}

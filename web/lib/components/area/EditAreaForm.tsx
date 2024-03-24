@@ -71,6 +71,8 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
             placeholder="Název oblasti"
             register={() => register('name')}
             errors={errors}
+            mandatory
+            margin={false}
           />
           <OtherAttributesInput
             register={register}

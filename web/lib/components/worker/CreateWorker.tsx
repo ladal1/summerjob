@@ -106,6 +106,8 @@ export default function CreateWorker({
               })
             }
             errors={errors}
+            mandatory
+            margin={false}
           />
           <TextInput
             id="lastName"
@@ -118,6 +120,7 @@ export default function CreateWorker({
                   (e.target.value = removeRedundantSpace(e.target.value)),
               })
             }
+            mandatory
           />
           <TextInput
             id="phone"
@@ -130,6 +133,7 @@ export default function CreateWorker({
                   (e.target.value = formatPhoneNumber(e.target.value)),
               })
             }
+            mandatory
           />
           <TextInput
             id="email"
@@ -137,6 +141,7 @@ export default function CreateWorker({
             placeholder="uzivatel@example.cz"
             errors={errors}
             register={() => register('email')}
+            mandatory
           />
           <div className="d-flex flex-row flex-wrap">
             <div className="me-5">

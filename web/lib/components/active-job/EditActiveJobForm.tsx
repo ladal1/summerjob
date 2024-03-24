@@ -20,6 +20,7 @@ import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Form } from '../post/Form'
 import RidesList from './RidesList'
+import FormWarning from '../forms/FormWarning'
 
 interface EditActiveJobProps {
   serializedJob: Serialized
@@ -40,7 +41,6 @@ export default function EditActiveJobForm({
     handleSubmit,
     formState: { errors, dirtyFields },
     setValue,
-    getValues,
   } = useForm<ActiveJobUpdateData>({
     resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
@@ -106,11 +106,16 @@ export default function EditActiveJobForm({
       >
         <form id="edit-active-job" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
-            id="proposedJob.name"
+            id="proposedJob"
             label="Název jobu"
             placeholder="Název jobu"
             register={() => register('proposedJob.name')}
             errors={errors}
+            mandatory
+            margin={false}
+          />
+          <FormWarning
+            message={errors?.proposedJob?.name?.message as string | undefined}
           />
           <TextAreaInput
             id="proposedJob.publicDescription"

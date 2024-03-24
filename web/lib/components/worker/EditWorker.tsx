@@ -158,6 +158,8 @@ export default function EditWorker({
               })
             }
             errors={errors}
+            mandatory
+            margin={false}
           />
           <TextInput
             id="lastName"
@@ -170,6 +172,7 @@ export default function EditWorker({
                   (e.target.value = removeRedundantSpace(e.target.value)),
               })
             }
+            mandatory
           />
           <TextInput
             id="phone"
@@ -182,6 +185,7 @@ export default function EditWorker({
                   (e.target.value = formatPhoneNumber(e.target.value)),
               })
             }
+            mandatory
           />
           <TextInput
             id="email"
@@ -189,6 +193,7 @@ export default function EditWorker({
             placeholder="uzivatel@example.cz"
             errors={errors}
             register={() => register('email')}
+            mandatory
           />
           <p className="text-muted mt-1">
             {isProfilePage

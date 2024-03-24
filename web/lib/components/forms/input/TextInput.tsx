@@ -2,6 +2,7 @@ import { type DetailedHTMLProps, type InputHTMLAttributes } from 'react'
 import {
   FieldErrors,
   FieldValues,
+  Path,
   UseFormRegisterReturn,
 } from 'react-hook-form'
 import FormWarning from '../FormWarning'

@@ -423,6 +423,12 @@ export default function PlanClientPage({
                                 </tr>
                               )
                             )}
+                            {Object.entries(toolsToTakeWithList).length ===
+                              0 && (
+                              <tr key="none" className="text-end">
+                                <td>žádné</td>
+                              </tr>
+                            )}
                           </tbody>
                         </table>
                       </li>

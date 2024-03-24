@@ -78,6 +78,8 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
             placeholder="Model auta, značka"
             errors={errors}
             register={() => register('name')}
+            mandatory
+            margin={false}
           />
           <TextAreaInput
             id="description"
@@ -101,6 +103,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
               })
             }
             errors={errors}
+            mandatory
           />
           <FilterSelectInput
             id="ownerId"
@@ -109,6 +112,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
             items={workers.map(workerToSelectItem)}
             onSelected={onOwnerSelected}
             errors={errors}
+            mandatory
           />
           <TextInput
             id="odometerStart"
@@ -123,6 +127,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
               })
             }
             errors={errors}
+            mandatory
           />
         </form>
       </Form>
