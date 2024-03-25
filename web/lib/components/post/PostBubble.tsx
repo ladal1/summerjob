@@ -12,6 +12,7 @@ interface PostBubbleProps {
   advancedAccess: boolean
   onUpdated: () => void
   showTime?: boolean
+  userId: string
 }
 
 export const PostBubble = ({
@@ -19,6 +20,7 @@ export const PostBubble = ({
   advancedAccess,
   onUpdated,
   showTime = true,
+  userId,
 }: PostBubbleProps) => {
   const [isOpenedInfoModal, setIsOpenedInfoModal] = useState(false)
   const onCloseModal = () => {
@@ -26,7 +28,17 @@ export const PostBubble = ({
   }
   return (
     <>
-      {isOpenedInfoModal && <PostModal item={item} onClose={onCloseModal} />}
+      {isOpenedInfoModal && (
+        <PostModal
+          item={item}
+          onClose={onCloseModal}
+          onUpdated={() => {
+            //setIsOpenedInfoModal(false)
+            onUpdated()
+          }}
+          userId={userId}
+        />
+      )}
       <div
         className={`${
           item.isPinned ? 'smj-color-bubble-pinned' : 'smj-color-bubble'
@@ -65,7 +77,7 @@ export const PostBubble = ({
                 e.stopPropagation()
               }}
             >
-              <Participate id={item.id} />
+              <Participate post={item} onUpdated={onUpdated} userId={userId} />
             </div>
           </div>
         </div>

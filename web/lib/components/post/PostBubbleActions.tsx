@@ -55,7 +55,7 @@ export const PostBubbleActions = ({
           <DeleteIcon
             onClick={trigger}
             isBeingDeleted={isMutating}
-            showConfirmation={true}
+            showConfirmation={post.isOpenForParticipants || post.isMandatory}
             getConfirmationMessage={confirmationText}
           />
           {error && (

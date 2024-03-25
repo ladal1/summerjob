@@ -346,6 +346,7 @@ export default function PostsClientPage({
               item={item}
               advancedAccess={advancedAccess}
               onUpdated={mutate}
+              userId={userId}
             />
           </React.Fragment>
         ))}
@@ -377,6 +378,7 @@ export default function PostsClientPage({
               item={item}
               advancedAccess={advancedAccess}
               onUpdated={mutate}
+              userId={userId}
             />
           ))}
         </PostType>
@@ -400,6 +402,7 @@ export default function PostsClientPage({
                     advancedAccess={advancedAccess}
                     onUpdated={mutate}
                     showTime={false}
+                    userId={userId}
                   />
                 </div>
               </div>

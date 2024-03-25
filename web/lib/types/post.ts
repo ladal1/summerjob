@@ -85,6 +85,7 @@ const PostBasicSchema = z
     tags: z.array(z.nativeEnum(PostTag)).optional(),
     isMandatory: z.boolean().optional(),
     isOpenForParticipants: z.boolean().optional(),
+    participantsIds: z.array(z.string()),
   })
   .strict()
 
@@ -122,6 +123,7 @@ for now it is settled that there will be duplicates of code (using same refine) 
 export const PostUpdateSchema = PostBasicSchema.merge(
   z.object({
     isPinned: z.boolean(),
+    newParticipantId: z.string(),
   })
 )
   .strict()

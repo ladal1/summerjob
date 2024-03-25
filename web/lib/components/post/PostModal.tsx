@@ -13,9 +13,16 @@ import { Participate } from './Participate'
 interface PostModalProps {
   item: PostComplete
   onClose: () => void
+  onUpdated: () => void
+  userId: string
 }
 
-export const PostModal = ({ item, onClose }: PostModalProps) => {
+export const PostModal = ({
+  item,
+  onClose,
+  onUpdated,
+  userId,
+}: PostModalProps) => {
   const getCoordinates = (
     coordinates: number[] | null
   ): [number, number] | null => {
@@ -99,10 +106,19 @@ export const PostModal = ({ item, onClose }: PostModalProps) => {
             </span>
           ))}
         </div>
-        <hr />
-        <div className="d-flex justify-content-end mt-auto">
-          <Participate id={item.id} />
-        </div>
+        {item.isMandatory ||
+          (item.isOpenForParticipants && (
+            <>
+              <hr />
+              <div className="d-flex justify-content-end mt-auto">
+                <Participate
+                  post={item}
+                  onUpdated={onUpdated}
+                  userId={userId}
+                />
+              </div>
+            </>
+          ))}
       </Modal>
     </>
   )

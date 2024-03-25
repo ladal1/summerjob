@@ -2,6 +2,7 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getPhotoPath, parseFormWithImages } from 'lib/api/parse-form'
+import { registerParticipant } from 'lib/api/register/registerParticipant'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { getGeocodingData } from 'lib/components/map/GeocodingData'
@@ -61,10 +62,12 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
   await logger.apiRequest(APILogEvent.POST_MODIFY, id, postData, session!)
 
-  const { photoFile, photoFileRemoved, ...rest } = postData
+  const { photoFile, photoFileRemoved, newParticipantId, ...rest } = postData
 
-  const t = await updatePost(id, postData)
-  console.log(t)
+  await updatePost(id, rest)
+
+  if (newParticipantId)
+    await registerParticipant(newParticipantId, id, session!)
 
   res.status(204).end()
 }
