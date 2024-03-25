@@ -1,10 +1,10 @@
-import { Plan, SummerJobEvent } from 'lib/prisma/client'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+import { customErrorMessages as err } from 'lib/lang/error-messages'
+import { PlanSchema, SummerJobEventSchema } from 'lib/prisma/zod'
 import { z } from 'zod'
-import { AreaComplete, AreaCompleteSchema } from './area'
+import { AreaCompleteSchema } from './area'
 import { deserializePlanDate } from './plan'
 import { Serialized } from './serialize'
-import { PlanSchema, SummerJobEventSchema } from 'lib/prisma/zod'
-import useZodOpenApi from 'lib/api/useZodOpenApi'
 
 useZodOpenApi
 
@@ -19,7 +19,7 @@ export type SummerJobEventComplete = z.infer<
 
 export const SummerJobEventCreateSchema = z
   .object({
-    name: z.string().min(1),
+    name: z.string().min(1, { message: err.emptyEventName }),
     startDate: z
       .date()
       .or(z.string().min(1).pipe(z.coerce.date()))
@@ -31,11 +31,13 @@ export const SummerJobEventCreateSchema = z
   })
   .strict()
   .refine(
-    data => data.startDate <= data.endDate,
-    data => ({
-      message: 'Konečné datum musí být po datu zahájení',
+    value => {
+      return value.startDate <= value.endDate
+    },
+    {
+      message: err.eventStartDateMoreThanEndDate,
       path: ['endDate'],
-    })
+    }
   )
 
 export type SummerJobEventCreateDataInput = z.input<

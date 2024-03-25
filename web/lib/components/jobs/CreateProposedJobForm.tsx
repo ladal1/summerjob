@@ -31,6 +31,10 @@ import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { Form } from '../post/Form'
+import { z } from 'zod'
+
+const schema = ProposedJobCreateSchema
+type PostForm = z.input<typeof schema>
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized
@@ -50,8 +54,8 @@ export default function CreateProposedJobForm({
     formState: { errors },
     setValue,
     getValues,
-  } = useForm<ProposedJobCreateData>({
-    resolver: zodResolver(ProposedJobCreateSchema),
+  } = useForm<PostForm>({
+    resolver: zodResolver(schema),
     defaultValues: {
       availability: [],
       allergens: [],
@@ -62,8 +66,8 @@ export default function CreateProposedJobForm({
 
   const router = useRouter()
 
-  const onSubmit = (data: ProposedJobCreateData) => {
-    trigger(data, {
+  const onSubmit = (data: PostForm) => {
+    trigger(data as ProposedJobCreateData, {
       onError: e => {
         console.log(e)
       },
@@ -329,14 +333,16 @@ export default function CreateProposedJobForm({
               })
             }
             errors={errors}
+            mandatory
           />
           <Label
             id="minWorkers"
             label="Počet pracantů minimálně / maximálně / z toho silných"
+            mandatory
           />
           <div className="d-flex w-50">
             <input
-              className="form-control smj-input p-1 ps-2"
+              className="form-control smj-input p-1 ps-2 fs-5"
               id="minWorkers"
               type="number"
               min={1}
@@ -348,7 +354,7 @@ export default function CreateProposedJobForm({
             />
             /
             <input
-              className="form-control smj-input p-1 ps-2"
+              className="form-control smj-input p-1 ps-2 fs-5"
               id="maxWorkers"
               type="number"
               min={1}
@@ -360,7 +366,7 @@ export default function CreateProposedJobForm({
             />
             /
             <input
-              className="form-control smj-input p-1 ps-2"
+              className="form-control smj-input p-1 ps-2 fs-5"
               id="strongWorkers"
               type="number"
               min={0}
@@ -389,6 +395,9 @@ export default function CreateProposedJobForm({
               days={allDates}
             />
           </div>
+          <FormWarning
+            message={errors?.availability?.message as string | undefined}
+          />
           <FilterSelectInput
             id="jobType"
             label="Typ práce"

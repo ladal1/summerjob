@@ -405,10 +405,12 @@ export default function EditProposedJobForm({
               })
             }
             errors={errors}
+            mandatory
           />
           <Label
             id="minWorkers"
             label="Počet pracantů minimálně / maximálně / z toho silných"
+            mandatory
           />
           <div className="d-flex w-50">
             <input
@@ -465,6 +467,9 @@ export default function EditProposedJobForm({
               days={allDates}
             />
           </div>
+          <FormWarning
+            message={errors?.availability?.message as string | undefined}
+          />
           <FilterSelectInput
             id="jobType"
             label="Typ práce"

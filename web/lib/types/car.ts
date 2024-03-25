@@ -23,7 +23,7 @@ export function deserializeCars(cars: Serialized): CarComplete[] {
   return JSON.parse(cars.data)
 }
 
-export const CarCreateSchema = z
+const CarBasicSchema = z
   .object({
     ownerId: z.string({ required_error: err.emptyOwnerOfCar }),
     name: z.string().min(1, { message: err.emptyCarName }),
@@ -54,10 +54,26 @@ export const CarCreateSchema = z
   })
   .strict()
 
+export const CarCreateSchema = CarBasicSchema
+
 export type CarCreateData = z.infer<typeof CarCreateSchema>
 
 export const CarUpdateSchema = CarCreateSchema.omit({
   ownerId: true,
-}).partial()
+})
+  .partial()
+  .refine(
+    value => {
+      return (
+        value.odometerStart === undefined ||
+        value.odometerEnd === undefined ||
+        value.odometerStart <= value.odometerEnd
+      )
+    },
+    {
+      message: err.moreThan + ' konečnému stavu kilometrů',
+      path: ['odometerStart'],
+    }
+  )
 
 export type CarUpdateData = z.infer<typeof CarUpdateSchema>

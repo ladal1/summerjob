@@ -36,33 +36,50 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
-export const ProposedJobCreateSchema = z
+const ProposedJobBasicSchema = z
   .object({
     areaId: z.string({ required_error: err.emptyAreaId }).nullable(),
     allergens: z.array(z.nativeEnum(Allergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
-    name: z.string().min(1, { message: err.emptyProposedJobName }),
-    address: z.string({ required_error: err.emptyAdress }),
+    name: z
+      .string({ required_error: err.emptyProposedJobName })
+      .min(1, { message: err.emptyProposedJobName }),
+    address: z
+      .string({ required_error: err.emptyAdress })
+      .min(1, { message: err.emptyAdress }),
     coordinates: coordinatesZod.optional(),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
-      .number({ invalid_type_error: err.invalidTypeMaxWorkers })
-      .min(1, { message: err.emptyMaxWorkers })
+      .number({
+        invalid_type_error: err.invalidTypeMaxWorkers,
+        required_error: err.emptyMaxWorkers,
+      })
+      .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveMaxWorkers })
       .default(1),
     minWorkers: z
-      .number({ invalid_type_error: err.invalidTypeMinWorkers })
-      .min(1, { message: err.emptyMinWorkers })
+      .number({
+        invalid_type_error: err.invalidTypeMinWorkers,
+        required_error: err.emptyMinWorkers,
+      })
+      .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveMinWorkers })
       .default(1),
     strongWorkers: z
-      .number({ invalid_type_error: err.invalidTypeStrongWorkers })
+      .number({
+        invalid_type_error: err.invalidTypeStrongWorkers,
+        required_error: err.emptyStrongWorkers,
+      })
+      .int({ message: err.nonInteger })
       .nonnegative({ message: err.nonNonNegativeStrongWorkers })
       .default(0),
     requiredDays: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
-      .min(1, { message: err.emptyRequiredDays })
+      .number({
+        invalid_type_error: err.invalidTypeNumber,
+        required_error: err.emptyRequiredDays,
+      })
+      .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveNumber })
       .default(1),
     hasFood: z.boolean(),
@@ -110,10 +127,42 @@ export const ProposedJobCreateSchema = z
   })
   .strict()
 
+export const ProposedJobCreateSchema = ProposedJobBasicSchema.superRefine(
+  (val, ctx) => {
+    if (val.minWorkers > val.maxWorkers) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.minWorkerslessThanOrEqualMaxWorkers,
+        path: ['minWorkers'],
+      })
+    }
+
+    if (val.maxWorkers < val.strongWorkers) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.strongWorkerslessThanOrEqualMaxWorkers,
+        path: ['strongWorkers'],
+      })
+    }
+
+    if (
+      (val.availability === undefined && val.requiredDays > 0) ||
+      (val.availability !== undefined &&
+        val.availability?.length < val.requiredDays)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.requiredDaysLessThanOrEqualAvailability,
+        path: ['availability'],
+      })
+    }
+  }
+)
+
 export type ProposedJobCreateDataInput = z.input<typeof ProposedJobCreateSchema>
 export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>
 
-export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
+export const ProposedJobUpdateSchema = ProposedJobBasicSchema.merge(
   z.object({
     completed: z.boolean(),
     hidden: z.boolean(),
@@ -125,6 +174,44 @@ export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
 )
   .strict()
   .partial()
+  .superRefine((val, ctx) => {
+    if (
+      val.minWorkers !== undefined &&
+      val.maxWorkers !== undefined &&
+      val.minWorkers > val.maxWorkers
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.minWorkerslessThanOrEqualMaxWorkers,
+        path: ['minWorkers'],
+      })
+    }
+
+    if (
+      val.maxWorkers !== undefined &&
+      val.strongWorkers !== undefined &&
+      val.maxWorkers < val.strongWorkers
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.strongWorkerslessThanOrEqualMaxWorkers,
+        path: ['strongWorkers'],
+      })
+    }
+
+    if (
+      val.requiredDays !== undefined &&
+      ((val.availability === undefined && val.requiredDays > 0) ||
+        (val.availability !== undefined &&
+          val.availability?.length < val.requiredDays))
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.requiredDaysLessThanOrEqualAvailability,
+        path: ['availability'],
+      })
+    }
+  })
 
 export type ProposedJobUpdateDataInput = z.input<typeof ProposedJobUpdateSchema>
 export type ProposedJobUpdateData = z.infer<typeof ProposedJobUpdateSchema>

@@ -16,7 +16,7 @@ export const PostCompleteSchema = PostSchema.extend({
 
 export type PostComplete = z.infer<typeof PostCompleteSchema>
 
-export const PostBasicSchema = z
+const PostBasicSchema = z
   .object({
     name: z.string().min(1, { message: err.emptyPostName }).trim(),
     availability: z
