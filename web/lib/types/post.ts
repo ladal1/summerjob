@@ -88,18 +88,30 @@ const PostBasicSchema = z
   })
   .strict()
 
-export const PostCreateSchema = PostBasicSchema.refine(
-  value => {
-    return (
-      (value.timeFrom !== null && value.timeTo !== null) ||
-      (value.timeFrom === null && value.timeTo === null)
-    )
-  },
-  {
-    message: err.bothTimes,
-    path: ['timeFrom'],
+export const PostCreateSchema = PostBasicSchema.superRefine((value, ctx) => {
+  if (
+    (value.timeFrom === null && value.timeTo !== null) ||
+    (value.timeFrom !== null && value.timeTo === null)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: err.bothTimes,
+      path: ['timeFrom'],
+    })
   }
-)
+
+  if (
+    value.timeFrom !== null &&
+    value.timeTo !== null &&
+    value.timeFrom.localeCompare(value.timeTo) > 0
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: err.timeMoreThanOrEqualOtherTime,
+      path: ['timeFrom'],
+    })
+  }
+})
 
 export type PostCreateDataInput = z.input<typeof PostCreateSchema>
 export type PostCreateData = z.infer<typeof PostCreateSchema>
@@ -114,19 +126,31 @@ export const PostUpdateSchema = PostBasicSchema.merge(
 )
   .strict()
   .partial()
-  .refine(
-    value => {
-      return (
-        (value.timeFrom !== null && value.timeTo !== null) ||
-        (value.timeFrom === null && value.timeTo === null)
-      )
-    },
-    {
-      message: err.bothTimes,
-      path: ['timeFrom'],
+  .superRefine((value, ctx) => {
+    if (
+      (value.timeFrom === null && value.timeTo !== null) ||
+      (value.timeFrom !== null && value.timeTo === null)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.bothTimes,
+        path: ['timeFrom'],
+      })
     }
-  )
-
+    if (
+      value.timeFrom !== null &&
+      value.timeTo !== null &&
+      value.timeFrom !== undefined &&
+      value.timeTo !== undefined &&
+      value.timeFrom.localeCompare(value.timeTo) > 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.timeMoreThanOrEqualOtherTime,
+        path: ['timeFrom'],
+      })
+    }
+  })
 export type PostUpdateDataInput = z.input<typeof PostUpdateSchema>
 export type PostUpdateData = z.infer<typeof PostUpdateSchema>
 
@@ -157,3 +181,42 @@ export function deserializePostsDates(post: PostComplete) {
   post.availability = post.availability.map(date => new Date(date))
   return post
 }
+
+export const PostFilterSchema = z.object({
+  availability: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
+  timeFrom: z
+    .string()
+    .refine(
+      time => time === null || time.length === 0 || validateTimeInput(time),
+      {
+        message: err.invalidRegexTime,
+      }
+    )
+    .transform(time => {
+      if (time !== null && time.length === 0) {
+        return null
+      }
+      return time
+    })
+    .nullable(),
+  timeTo: z
+    .string()
+    .refine(
+      time => time === null || time.length === 0 || validateTimeInput(time),
+      {
+        message: err.invalidRegexTime,
+      }
+    )
+    .transform(time => {
+      if (time !== null && time.length === 0) {
+        return null
+      }
+      return time
+    })
+    .nullable(),
+  tags: z.array(z.nativeEnum(PostTag)).optional(),
+  participate: z.boolean(),
+})
+
+export type PostFilterDataInput = z.input<typeof PostFilterSchema>
+export type PostFilterData = z.infer<typeof PostFilterSchema>

@@ -2,8 +2,17 @@
 import ErrorPage from 'lib/components/error-page/ErrorPage'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import { useAPIPosts } from 'lib/fetcher/post'
-import { datesBetween, normalizeString } from 'lib/helpers/helpers'
-import { deserializePosts, PostComplete } from 'lib/types/post'
+import {
+  datesBetween,
+  normalizeString,
+  validateTimeInput,
+} from 'lib/helpers/helpers'
+import {
+  deserializePosts,
+  deserializePostsDates,
+  PostComplete,
+  PostFilterDataInput,
+} from 'lib/types/post'
 import { Serialized } from 'lib/types/serialize'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -12,14 +21,11 @@ import { Filters } from '../filters/Filters'
 import { PostBubble } from './PostBubble'
 import PostType from './PostType'
 import { Sort, SortObject, SortPostsBy } from './SortPostsBy'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { FilterPostsBy } from './FilterPostsBy'
+import { PostTag } from 'lib/prisma/client'
 
 const sorts: Sort[] = [
-  {
-    id: 'default',
-    icon: 'fas fa-arrows-up-down',
-    label: '',
-    content: [{ id: 'default', label: 'Defaultní' }],
-  },
   {
     id: 'sort-name',
     icon: 'fas fa-t',
@@ -58,18 +64,33 @@ const sorts: Sort[] = [
   },
 ]
 
+const test = [
+  { id: 'name-a-z', label: 'Název (A - Z)' },
+  { id: 'name-z-a', label: 'Název (Z - A)' },
+  { id: 'address-a-z', label: 'Adresa (A - Z)' },
+  { id: 'address-z-a', label: 'Adresa (Z - A)' },
+  { id: 'date-new-old', label: 'Datum (nejnovější - nejstarší)' },
+  { id: 'date-old-new', label: 'Datum (nejstarší - nejnovější)' },
+  { id: 'time-new-old', label: 'Čas (nejnovější - nejstarší)' },
+  { id: 'time-old-new', label: 'Čas (nejstarší - nejnovější)' },
+]
+
 interface PostsClientPageProps {
   sPosts: Serialized
   startDate: string
   endDate: string
+  allDates: DateBool[][]
   advancedAccess: boolean
+  userId: string
 }
 
 export default function PostsClientPage({
   sPosts,
   startDate,
   endDate,
+  allDates,
   advancedAccess,
+  userId,
 }: PostsClientPageProps) {
   const inititalPosts = deserializePosts(sPosts)
   const { data, error, mutate } = useAPIPosts({
@@ -78,30 +99,136 @@ export default function PostsClientPage({
 
   const firstDay = new Date(startDate)
   const lastDay = new Date(endDate)
-  const days = datesBetween(firstDay, lastDay)
+  const days = getDays(firstDay, lastDay)
 
   // get query parameters
   const searchParams = useSearchParams()
+
+  //#region Search
+
   const searchQ = searchParams?.get('search')
-  const selectedDayQ = searchParams?.get('day' ?? '')
-  const selectedSortQ = searchParams?.get('sort')
-
   const [search, setSearch] = useState(searchQ ?? '')
-  const [selectedDay, setSelectedDay] = useState(
-    days.find(
-      day => typeof selectedDayQ === 'string' && day === new Date(selectedDayQ)
-    ) || days[0]
-  )
 
-  const [selectedSort, setSelectedSort] = useState(
-    safelyParseSortJSON(
-      selectedSortQ ?? "{ id: 'default', label: 'Defaultní' }"
-    ) ?? { id: 'default', label: 'Defaultní' }
-  )
+  //#endregion
 
-  const onDaySelected = (day: Date) => {
-    setSelectedDay(days.find(d => d.getTime() === day.getTime()) || days[0])
+  //#region Sort
+
+  const selectedSortQ = searchParams?.get('sort') ?? 'time-new-old'
+
+  const getSelectedSortFromQuery = (): SortObject => {
+    const result = test.find(t => t.id === selectedSortQ)
+    return result !== undefined
+      ? result
+      : { id: 'time-new-old', label: 'Čas (nejnovější - nejstarší)' }
   }
+
+  const [selectedSort, setSelectedSort] = useState(getSelectedSortFromQuery())
+
+  //#endregion
+
+  //#region Days
+
+  const selectedDaysQ = searchParams?.get('days')
+  const today = () => {
+    const todayDate = new Date()
+    return { id: todayDate.toJSON(), day: new Date(todayDate) }
+  }
+
+  const getSelectedDaysFromQuery = () => {
+    const result = days.filter(day =>
+      (selectedDaysQ ? selectedDaysQ.split(';') : ['']).includes(day.id)
+    )
+    return result.length === 0 ? [today()] : result
+  }
+
+  const [selectedDays, setSelectedDays] = useState(getSelectedDaysFromQuery())
+
+  //#endregion
+
+  //#region Participate
+
+  const participateQ = searchParams?.get('participate')
+  const getBoolean = (value: string) => {
+    switch (value) {
+      case 'true':
+      case '1':
+      case 'ano':
+      case 'yes':
+        return true
+      default:
+        return false
+    }
+  }
+
+  const [participate, setParticipate] = useState(
+    participateQ ? getBoolean(participateQ) : false
+  )
+
+  //#endregion
+
+  //#region Time
+
+  const timeFromQ = searchParams?.get('timeFrom')
+  const timeToQ = searchParams?.get('timeTo')
+
+  const getTimeFromQuery = (time: string | null | undefined) => {
+    if (time === null || time === undefined || !validateTimeInput(time)) {
+      return null
+    }
+    return formateTime(time)
+  }
+  const [timeFrom, setTimeFrom] = useState<string | null>(
+    getTimeFromQuery(timeFromQ)
+  )
+  const [timeTo, setTimeTo] = useState<string | null>(getTimeFromQuery(timeToQ))
+
+  //#endregion
+
+  //#region Tags
+
+  const tagsQ = searchParams?.get('tags')
+  const [tags, setTags] = useState<PostTag[] | undefined>(
+    (tagsQ?.split(';') as PostTag[]) ?? Object.values(PostTag)
+  )
+
+  //#endregion
+
+  //#region Filters
+
+  const [filters, setFilters] = useState<PostFilterDataInput>({
+    availability: selectedDays.map(day => new Date(day.day)),
+    timeFrom: timeFrom,
+    timeTo: timeTo,
+    tags: tags,
+    participate: participate,
+  })
+
+  useMemo(() => {
+    setSelectedDays(
+      filters.availability.map(date => ({
+        id: typeof date === 'string' ? date : date.toJSON(),
+        day: new Date(date),
+      }))
+    )
+  }, [filters.availability])
+
+  useMemo(() => {
+    setParticipate(filters.participate)
+  }, [filters.participate])
+
+  useMemo(() => {
+    setTimeFrom(filters.timeFrom)
+  }, [filters.timeFrom])
+
+  useMemo(() => {
+    setTimeTo(filters.timeTo)
+  }, [filters.timeTo])
+
+  useMemo(() => {
+    setTags(filters.tags)
+  }, [filters.tags])
+
+  //#endregion
 
   // replace url with new query parameters
   const router = useRouter()
@@ -109,30 +236,45 @@ export default function PostsClientPage({
     router.replace(
       `?${new URLSearchParams({
         search: search,
-        //day: selectedDay.toJSON(),
-        sort: JSON.stringify(selectedSort),
+        day: selectedDays.map(d => d.id).join(';') ?? '',
+        sort: selectedSort.id,
+        participate: `${participate}`,
+        timeFrom: timeFrom === null ? '' : timeFrom,
+        timeTo: timeTo === null ? '' : timeTo,
+        tags: tags?.join(';') ?? '',
       })}`,
       {
         scroll: false,
       }
     )
-  }, [search, selectedSort, selectedDay, router])
+  }, [
+    search,
+    selectedSort,
+    selectedDays,
+    router,
+    participate,
+    timeFrom,
+    timeTo,
+    tags,
+  ])
 
   const [pinnedPosts, otherPosts] = useMemo(() => {
-    const { pinned, other } = data!.reduce(
-      (acc, post) => {
-        if (post.isPinned) {
-          acc.pinned.push(post)
-        } else {
-          acc.other.push(post)
+    const { pinned, other } = data!
+      .map(item => deserializePostsDates(item))
+      .reduce(
+        (acc, post) => {
+          if (post.isPinned) {
+            acc.pinned.push(post)
+          } else {
+            acc.other.push(post)
+          }
+          return acc
+        },
+        { pinned: [], other: [] } as {
+          pinned: Array<PostComplete>
+          other: Array<PostComplete>
         }
-        return acc
-      },
-      { pinned: [], other: [] } as {
-        pinned: Array<PostComplete>
-        other: Array<PostComplete>
-      }
-    )
+      )
 
     return [pinned, other]
   }, [data])
@@ -140,17 +282,27 @@ export default function PostsClientPage({
   const fulltextData = useMemo(() => getFulltextData(otherPosts), [otherPosts])
 
   const filteredData = useMemo(() => {
-    const sortedOtherPosts =
-      selectedSort.id === 'default'
-        ? otherPosts
-        : sortPosts(selectedSort, otherPosts)
     return filterPosts(
       normalizeString(search).trimEnd(),
-      selectedDay,
+      selectedDays,
+      participate,
+      timeFrom,
+      timeTo,
+      tags,
       fulltextData,
-      sortedOtherPosts
+      sortPosts(selectedSort, otherPosts)
     )
-  }, [fulltextData, search, selectedSort, selectedDay, otherPosts])
+  }, [
+    search,
+    selectedDays,
+    participate,
+    timeFrom,
+    timeTo,
+    tags,
+    fulltextData,
+    selectedSort,
+    otherPosts,
+  ])
 
   const [regularPosts, timePosts] = useMemo(() => {
     const { regular, time } = filteredData!.reduce(
@@ -198,10 +350,10 @@ export default function PostsClientPage({
           </React.Fragment>
         ))}
         <div className="mt-3">
-          <div className="d-flex flex-wrap justify-content-between allign-items-baseline gap-3">
+          <div className="d-flex flex-wrap justify-content-between allign-items-baseline ">
             <Filters search={search} onSearchChanged={setSearch} />
             <div className="row">
-              <div className="col-auto">
+              <div className="col-auto mb-2">
                 <SortPostsBy
                   sorts={sorts}
                   selected={selectedSort}
@@ -209,7 +361,11 @@ export default function PostsClientPage({
                 />
               </div>
               <div className="col-auto">
-                <div className="ms-2">{'bbbbb'}</div>
+                <FilterPostsBy
+                  filters={filters}
+                  setFilters={setFilters}
+                  allDates={allDates}
+                />
               </div>
             </div>
           </div>
@@ -255,8 +411,12 @@ export default function PostsClientPage({
   )
 }
 
+function getHourAndMinute(time: string) {
+  return time.split(':').map(part => parseInt(part))
+}
+
 function formateTime(time: string) {
-  const [hours, minutes] = time.split(':').map(part => parseInt(part))
+  const [hours, minutes] = getHourAndMinute(time)
 
   const formattedHours = hours < 10 ? '0' + hours : hours.toString()
   const formattedMinutes = minutes < 10 ? '0' + minutes : minutes.toString()
@@ -279,17 +439,72 @@ function getFulltextData(posts?: PostComplete[]) {
 
 function filterPosts(
   text: string,
-  selectedDay: Date,
+  selectedDays: Day[],
+  participate: boolean,
+  timeFrom: string | null,
+  timeTo: string | null,
+  tags: PostTag[] | undefined,
   searchable: Map<string, string>,
   posts?: PostComplete[]
 ) {
   if (!posts) return []
-  return posts.filter(post => {
-    if (text.length > 0) {
-      return searchable.get(post.id)?.includes(text.toLowerCase()) ?? true
-    }
-    return true
-  })
+  return (
+    posts
+      .filter(post => {
+        if (text.length > 0) {
+          return searchable.get(post.id)?.includes(text.toLowerCase()) ?? true
+        }
+        return true
+      }) /*
+      .filter(post => {
+        return selectedDays.some(selected => {
+          return (
+            post.availability &&
+            post.availability.some(availDay => {
+              return (
+                selected.day && availDay.getTime() === selected.day.getTime()
+              )
+            })
+          )
+        })
+      })*/
+      //.filter(post => post.participants.some(participant => participant.id === userId))
+      .filter(post => {
+        if (timeFrom !== null && post.timeFrom !== null) {
+          const [postHour, postMinute] = getHourAndMinute(post.timeFrom)
+          const [filterHour, filterMinute] = getHourAndMinute(timeFrom)
+          return (
+            postHour > filterHour ||
+            (postHour === filterHour && postMinute >= filterMinute)
+          )
+        }
+        return true
+      })
+      .filter(post => {
+        if (timeTo !== null && post.timeTo !== null) {
+          const [postHour, postMinute] = getHourAndMinute(post.timeTo)
+          const [filterHour, filterMinute] = getHourAndMinute(timeTo)
+          return (
+            postHour < filterHour ||
+            (postHour === filterHour && postMinute <= filterMinute)
+          )
+        }
+        return true
+      })
+      .filter(post => {
+        if (tags === undefined) {
+          return true
+        }
+        return tags.some(tag => {
+          return (
+            post.tags &&
+            post.tags.some(postTag => {
+              return postTag === tag
+            })
+          )
+        })
+      })
+  )
 }
 
 function sortPosts(selectedSort: SortObject, posts: PostComplete[]) {
@@ -335,15 +550,8 @@ function compareDates(dateA: Date[], dateB: Date[]) {
   if (!firstDateA && !firstDateB) return 0
   if (!firstDateA) return 1
   if (!firstDateB) return -1
-  if (!(firstDateA instanceof Date) || !(firstDateB instanceof Date)) {
-    return 0 // Pokud první datum není instancí Date, vrátí 0
-  }
-  console.log(dateA)
-  console.log(firstDateA)
-  const string = firstDateA.toLocaleDateString()
-  console.log(string)
 
-  return 1
+  return firstDateA.getTime() - firstDateB.getTime()
 }
 
 function compareTimes(timeA: string | null, timeB: string | null) {
@@ -353,29 +561,15 @@ function compareTimes(timeA: string | null, timeB: string | null) {
   return formateTime(timeA).localeCompare(formateTime(timeB))
 }
 
-function safelyParseSortJSON(json: string): SortObject {
-  let parsed
-
-  try {
-    parsed = JSON.parse(json)
-    if (!parsed.id || !parsed.label) {
-      throw new Error('Invalid sort object format')
-    }
-  } catch (e) {
-    return { id: 'default', label: 'Defaultní' }
-  }
-
-  return parsed
+interface Day {
+  id: string
+  day: Date
 }
 
 function getDays(firstDay: Date, lastDay: Date) {
-  const days = datesBetween(firstDay, lastDay).map(date => ({
+  const days: Day[] = datesBetween(firstDay, lastDay).map(date => ({
     id: date.toJSON(),
-    day: date,
+    day: new Date(date),
   }))
-  const ALL_DAYS = { id: 'all', day: new Date() }
-  days.unshift(ALL_DAYS)
-  const NO_DAYS = { id: 'none', day: new Date() }
-  days.unshift(NO_DAYS)
   return days
 }

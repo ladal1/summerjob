@@ -68,14 +68,6 @@
   padding-bottom: 0.5rem;
 }
 
-.row-plan-job {
-  padding-top: 11px;
-  padding-bottom: 11px;
-  background: #f4f1b6;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
 .row-plan-no-assignment {
   background: rgb(255, 207, 204);
 }
@@ -143,6 +135,10 @@ img.smj-nav-logo {
   background: rgb(247, 247, 247) !important;
 }
 
+.btn {
+  box-shadow: 1px 1px 2px 2px rgba(0, 38, 255, 0.2);
+}
+
 .smj-shadow {
   box-shadow: 2px 2px 2px 3px rgba(0, 38, 255, 0.2);
 }
@@ -154,7 +150,7 @@ img.smj-nav-logo {
 }
 
 .smj-expandable-row {
-  background-color: #f4f1b6 !important;
+  background-color: #ececec !important;
 }
 
 .smj-expandable-row > td:first-child > i,
@@ -180,6 +176,11 @@ img.smj-nav-logo {
   position: sticky;
   z-index: 100;
   bottom: 0;
+}
+.smj-sticky-col-top {
+  position: sticky;
+  z-index: 100;
+  top: 0;
 }
 
 .smj-sticky-col-right {

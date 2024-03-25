@@ -54,6 +54,7 @@ export const customErrorMessages = {
   invalidTypeNumber: 'Zadejte číslo',
   nonInteger: 'Zadejte celé číslo',
 
+  timeMoreThanOrEqualOtherTime: 'Čas od musí být menší času do',
   bothTimes: 'Zadejte buď oba časy nebo žádný',
   moreThan: 'Zadejte číslo menší nebo rovno',
   lessThanOrEqual: 'Zadejte číslo větší než',

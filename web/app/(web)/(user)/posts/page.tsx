@@ -1,4 +1,5 @@
-import { withPermissions } from 'lib/auth/auth'
+import { getSMJSession, withPermissions } from 'lib/auth/auth'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import PostsClientPage from 'lib/components/post/PostsClientPage'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getPosts } from 'lib/data/posts'
@@ -19,12 +20,16 @@ export default async function PostsPage() {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
   const { startDate, endDate } = summerJobEvent!
 
+  const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
+  const session = await getSMJSession()
   return (
     <PostsClientPage
       sPosts={sPosts}
       startDate={startDate.toJSON()}
       endDate={endDate.toJSON()}
+      allDates={allDates}
       advancedAccess={isAdvancedAccessAllowed.success}
+      userId={session!.userID}
     />
   )
 }

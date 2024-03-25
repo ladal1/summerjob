@@ -24,6 +24,7 @@ async function get(
   res: NextApiResponse<PostsAPIGetResponse>
 ) {
   const posts = await getPosts()
+  posts.map(post => post.availability.map(a => new Date(a)))
   res.status(200).json(posts)
 }
 
@@ -50,7 +51,7 @@ async function post(
 
   // Set coordinates if they are missing
   if (postData.coordinates === undefined) {
-    const fetchedCoords = await getGeocodingData(postData.address)
+    const fetchedCoords = await getGeocodingData(postData.address ?? undefined)
     const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
     if (fetchedCoords && parsed.success) {
       postData.coordinates = parsed.data.coordinates
