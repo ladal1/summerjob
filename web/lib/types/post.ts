@@ -12,6 +12,7 @@ useZodOpenApi
 export const PostCompleteSchema = PostSchema.extend({
   availability: z.array(z.date()),
   tags: z.array(z.nativeEnum(PostTag)),
+  participants: z.array(z.object({ workerId: z.string() })),
 })
 
 export type PostComplete = z.infer<typeof PostCompleteSchema>
@@ -85,7 +86,6 @@ const PostBasicSchema = z
     tags: z.array(z.nativeEnum(PostTag)).optional(),
     isMandatory: z.boolean().optional(),
     isOpenForParticipants: z.boolean().optional(),
-    participantsIds: z.array(z.string()),
   })
   .strict()
 
@@ -123,7 +123,10 @@ for now it is settled that there will be duplicates of code (using same refine) 
 export const PostUpdateSchema = PostBasicSchema.merge(
   z.object({
     isPinned: z.boolean(),
-    newParticipantId: z.string(),
+    participateChange: z.object({
+      workerId: z.string(),
+      isEnrolled: z.boolean(),
+    }),
   })
 )
   .strict()

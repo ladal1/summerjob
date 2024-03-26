@@ -2,12 +2,18 @@
 :root {
   --text: #291a00;
   --background: #fff0d6;
+  --dark-background: #302f2f;
   --primary: #fac505;
   --secondary: #ffd97a;
   --accent: #ff9500;
   --pinned: #ffdb56;
   --bubble: #ffea9c;
   --grey: #dbdbdb;
+  --shadow: rgba(0, 38, 255, 0.2);
+}
+
+.smj-dark {
+  background-color: var(--dark-background);
 }
 
 .smj-grey {
@@ -136,11 +142,11 @@ img.smj-nav-logo {
 }
 
 .btn {
-  box-shadow: 1px 1px 2px 2px rgba(0, 38, 255, 0.2);
+  box-shadow: 1px 1px 2px 2px var(--shadow);
 }
 
 .smj-shadow {
-  box-shadow: 2px 2px 2px 3px rgba(0, 38, 255, 0.2);
+  box-shadow: 2px 2px 2px 3px var(--shadow);
 }
 
 .smj-expandable-row,
@@ -187,14 +193,14 @@ img.smj-nav-logo {
   position: sticky;
   z-index: 0;
   right: 0;
-  box-shadow: -5px 0px 5px -3px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: -5px 0px 5px -3px var(--shadow) !important;
 }
 
 .smj-sticky-col-left {
   position: sticky;
   z-index: 0;
   left: 0;
-  box-shadow: 5px 0px 5px -3px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 5px 0px 5px -3px var(--shadow) !important;
 }
 
 .smj-light-grey {
@@ -669,7 +675,6 @@ img.smj-nav-logo {
 }
 
 .smj-sort-choice {
-  cursor: pointer;
   background-color: #e0e0e0;
 }
 
@@ -679,8 +684,4 @@ img.smj-nav-logo {
 
 .smj-sort-choice.selected {
   background-color: #fdc345;
-}
-
-.smj-sort-choice.selected:hover {
-  background-color: #eeb12f;
 }

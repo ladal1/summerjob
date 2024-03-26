@@ -55,7 +55,6 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   })
 
   const onSubmit = (dataForm: PostForm) => {
-    console.log(dataForm)
     trigger(dataForm as PostCreateData)
   }
 

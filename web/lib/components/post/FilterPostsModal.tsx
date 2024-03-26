@@ -48,7 +48,6 @@ export const FilterPostsModal = ({
     },
   })
   const onSubmit = (dataForm: PostFilterForm) => {
-    console.log(dataForm)
     setFilters(dataForm)
     onClose()
   }

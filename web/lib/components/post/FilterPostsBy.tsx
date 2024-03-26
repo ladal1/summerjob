@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
-import { FilterPostsModal } from './FilterPostsModal'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { PostFilterDataInput } from 'lib/types/post'
+import { useMemo, useState } from 'react'
+import { FilterPostsModal } from './FilterPostsModal'
 
 interface FilterPostsByProps {
   filters: PostFilterDataInput

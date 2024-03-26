@@ -8,6 +8,7 @@ import PageHeader from '../page-header/PageHeader'
 import { RowContent } from '../table/RowContent'
 import Map from '../map/Map'
 import { OpenNavigationButton } from '../forms/OpenNavigationButton'
+import MyParticipateFromPosts from './MyParticipateFromPosts'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]
@@ -161,6 +162,9 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
             )}
           </EditBox>
         </div>
+      </section>
+      <section>
+        <MyParticipateFromPosts />
       </section>
     </>
   )

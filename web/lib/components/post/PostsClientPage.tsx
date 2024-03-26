@@ -4,6 +4,8 @@ import PageHeader from 'lib/components/page-header/PageHeader'
 import { useAPIPosts } from 'lib/fetcher/post'
 import {
   datesBetween,
+  formateTime,
+  getHourAndMinute,
   normalizeString,
   validateTimeInput,
 } from 'lib/helpers/helpers'
@@ -131,14 +133,18 @@ export default function PostsClientPage({
   const selectedDaysQ = searchParams?.get('days')
   const today = () => {
     const todayDate = new Date()
-    return { id: todayDate.toJSON(), day: new Date(todayDate) }
+    const todayDay = { id: todayDate.toJSON(), day: new Date(todayDate) }
+    if (days.includes(todayDay)) {
+      return [todayDay]
+    }
+    return []
   }
 
   const getSelectedDaysFromQuery = () => {
     const result = days.filter(day =>
       (selectedDaysQ ? selectedDaysQ.split(';') : ['']).includes(day.id)
     )
-    return result.length === 0 ? [today()] : result
+    return result.length === 0 ? today() : result
   }
 
   const [selectedDays, setSelectedDays] = useState(getSelectedDaysFromQuery())
@@ -187,8 +193,14 @@ export default function PostsClientPage({
   //#region Tags
 
   const tagsQ = searchParams?.get('tags')
+
+  const isValidPostTag = (tag: string) => {
+    const postTags = Object.values(PostTag)
+    return postTags.includes(tag as PostTag)
+  }
+
   const [tags, setTags] = useState<PostTag[] | undefined>(
-    (tagsQ?.split(';') as PostTag[]) ?? Object.values(PostTag)
+    (tagsQ?.split(';').filter(tag => isValidPostTag(tag)) as PostTag[]) ?? []
   )
 
   //#endregion
@@ -290,6 +302,7 @@ export default function PostsClientPage({
       timeTo,
       tags,
       fulltextData,
+      userId,
       sortPosts(selectedSort, otherPosts)
     )
   }, [
@@ -301,6 +314,7 @@ export default function PostsClientPage({
     tags,
     fulltextData,
     selectedSort,
+    userId,
     otherPosts,
   ])
 
@@ -414,19 +428,6 @@ export default function PostsClientPage({
   )
 }
 
-function getHourAndMinute(time: string) {
-  return time.split(':').map(part => parseInt(part))
-}
-
-function formateTime(time: string) {
-  const [hours, minutes] = getHourAndMinute(time)
-
-  const formattedHours = hours < 10 ? '0' + hours : hours.toString()
-  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes.toString()
-
-  return `${formattedHours}:${formattedMinutes}`
-}
-
 function getFulltextData(posts?: PostComplete[]) {
   const map = new Map<string, string>()
   posts?.forEach(post => {
@@ -448,18 +449,21 @@ function filterPosts(
   timeTo: string | null,
   tags: PostTag[] | undefined,
   searchable: Map<string, string>,
+  userId: string,
   posts?: PostComplete[]
 ) {
   if (!posts) return []
-  return (
-    posts
-      .filter(post => {
-        if (text.length > 0) {
-          return searchable.get(post.id)?.includes(text.toLowerCase()) ?? true
-        }
+  return posts
+    .filter(post => {
+      if (text.length > 0) {
+        return searchable.get(post.id)?.includes(text.toLowerCase()) ?? true
+      }
+      return true
+    })
+    .filter(post => {
+      if (selectedDays.length === 0) {
         return true
-      }) /*
-      .filter(post => {
+      } else {
         return selectedDays.some(selected => {
           return (
             post.availability &&
@@ -470,44 +474,55 @@ function filterPosts(
             })
           )
         })
-      })*/
-      //.filter(post => post.participants.some(participant => participant.id === userId))
-      .filter(post => {
-        if (timeFrom !== null && post.timeFrom !== null) {
-          const [postHour, postMinute] = getHourAndMinute(post.timeFrom)
-          const [filterHour, filterMinute] = getHourAndMinute(timeFrom)
-          return (
-            postHour > filterHour ||
-            (postHour === filterHour && postMinute >= filterMinute)
-          )
-        }
+      }
+    })
+    .filter(post => {
+      if (participate) {
+        return (
+          post.isMandatory ||
+          (post.isOpenForParticipants &&
+            post.participants.some(participant => {
+              return participant.workerId === userId
+            }))
+        )
+      }
+      return true
+    })
+    .filter(post => {
+      if (timeFrom !== null && post.timeFrom !== null) {
+        const [postHour, postMinute] = getHourAndMinute(post.timeFrom)
+        const [filterHour, filterMinute] = getHourAndMinute(timeFrom)
+        return (
+          postHour > filterHour ||
+          (postHour === filterHour && postMinute >= filterMinute)
+        )
+      }
+      return true
+    })
+    .filter(post => {
+      if (timeTo !== null && post.timeTo !== null) {
+        const [postHour, postMinute] = getHourAndMinute(post.timeTo)
+        const [filterHour, filterMinute] = getHourAndMinute(timeTo)
+        return (
+          postHour < filterHour ||
+          (postHour === filterHour && postMinute <= filterMinute)
+        )
+      }
+      return true
+    })
+    .filter(post => {
+      if (tags === undefined || tags.length === 0) {
         return true
+      }
+      return tags.some(tag => {
+        return (
+          post.tags &&
+          post.tags.some(postTag => {
+            return postTag === tag
+          })
+        )
       })
-      .filter(post => {
-        if (timeTo !== null && post.timeTo !== null) {
-          const [postHour, postMinute] = getHourAndMinute(post.timeTo)
-          const [filterHour, filterMinute] = getHourAndMinute(timeTo)
-          return (
-            postHour < filterHour ||
-            (postHour === filterHour && postMinute <= filterMinute)
-          )
-        }
-        return true
-      })
-      .filter(post => {
-        if (tags === undefined) {
-          return true
-        }
-        return tags.some(tag => {
-          return (
-            post.tags &&
-            post.tags.some(postTag => {
-              return postTag === tag
-            })
-          )
-        })
-      })
-  )
+    })
 }
 
 function sortPosts(selectedSort: SortObject, posts: PostComplete[]) {
@@ -564,7 +579,7 @@ function compareTimes(timeA: string | null, timeB: string | null) {
   return formateTime(timeA).localeCompare(formateTime(timeB))
 }
 
-interface Day {
+export interface Day {
   id: string
   day: Date
 }

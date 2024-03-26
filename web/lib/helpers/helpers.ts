@@ -171,3 +171,16 @@ export function normalizeString(str: string) {
 export function validateTimeInput(str: string) {
   return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(str)
 }
+
+export function getHourAndMinute(time: string) {
+  return time.split(':').map(part => parseInt(part))
+}
+
+export function formateTime(time: string) {
+  const [hours, minutes] = getHourAndMinute(time)
+
+  const formattedHours = hours < 10 ? '0' + hours : hours.toString()
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes.toString()
+
+  return `${formattedHours}:${formattedMinutes}`
+}

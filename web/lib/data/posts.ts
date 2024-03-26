@@ -9,6 +9,13 @@ export async function getPosts(): Promise<PostComplete[]> {
     where: {
       forEvent: { isActive: true },
     },
+    include: {
+      participants: {
+        select: {
+          workerId: true,
+        },
+      },
+    },
     orderBy: [
       {
         madeIn: 'asc',
@@ -26,6 +33,13 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
   const post = await prisma.post.findUnique({
     where: {
       id,
+    },
+    include: {
+      participants: {
+        select: {
+          workerId: true,
+        },
+      },
     },
   })
   if (!post) {
@@ -53,11 +67,32 @@ export async function getPostPhotoById(
 }
 
 export async function updatePost(id: string, postData: PostUpdateData) {
+  const { participateChange, ...rest } = postData
+  if (participateChange !== undefined && !participateChange.isEnrolled) {
+    await prisma.participant.delete({
+      where: {
+        workerId_postId: { workerId: participateChange.workerId, postId: id },
+      },
+    })
+  }
   const post = await prisma.post.update({
     where: {
       id,
     },
-    data: postData,
+    data: {
+      participants: {
+        ...(participateChange?.isEnrolled && {
+          create: {
+            worker: {
+              connect: {
+                id: participateChange.workerId,
+              },
+            },
+          },
+        }),
+      },
+      ...rest,
+    },
   })
   return post
 }

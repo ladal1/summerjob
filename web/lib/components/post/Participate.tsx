@@ -9,38 +9,52 @@ interface ParticipateProps {
 
 // TODO
 export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
-  const { trigger, isMutating, error, reset } = useAPIPostUpdate(post.id, {
+  const { trigger, isMutating } = useAPIPostUpdate(post.id, {
     onSuccess: onUpdated,
   })
 
-  const triggerParticipate = () => {
-    trigger({ newParticipantId: userId })
+  const triggerParticipate = (isEnrolled: boolean) => {
+    trigger({ participateChange: { workerId: userId, isEnrolled } })
+  }
+
+  const isDisabled = () => {
+    return post.isMandatory || isMutating
+  }
+
+  const isEnrolled =
+    post.participants && post.participants.map(t => t.workerId).includes(userId)
+
+  const defaultChecked = () => {
+    console.log(isEnrolled || post.isMandatory)
+    console.log(post.name)
+    return isEnrolled || post.isMandatory
   }
 
   return (
     <>
-      {post.isMandatory ||
-        (post.isOpenForParticipants && (
-          <div className="form-check align-self-center align-posts-center d-flex ">
-            <label
-              className="form-check-label fs-7 text-truncate"
-              htmlFor={post.id}
-            >
-              <b>Zúčastním se</b>
-            </label>
-            <input
-              className="form-check-input smj-checkbox ms-2"
-              type="checkbox"
-              id={post.id}
-              disabled={post.isMandatory}
-              checked={post.isMandatory}
-              onClick={e => {
-                e.stopPropagation()
-                triggerParticipate()
-              }}
-            />
-          </div>
-        ))}
+      {(post.isMandatory || post.isOpenForParticipants) && (
+        <div className="form-check align-self-center align-items-center d-flex ">
+          <label
+            className="form-check-label fs-7 text-truncate cursor-pointer"
+            htmlFor={post.id}
+          >
+            <span className={`${isDisabled() ? 'text-muted' : 'fw-bold'}`}>
+              Zúčastním se
+            </span>
+          </label>
+          <input
+            className="form-check-input smj-checkbox ms-2 cursor-default"
+            type="checkbox"
+            id={post.id}
+            disabled={isDisabled()}
+            defaultChecked={defaultChecked()}
+            onClick={e => {
+              e.stopPropagation()
+              triggerParticipate(!isEnrolled)
+            }}
+          />
+        </div>
+      )}
     </>
   )
 }

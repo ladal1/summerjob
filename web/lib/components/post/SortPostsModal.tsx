@@ -27,11 +27,9 @@ export const SortPostsModal = ({
               <div key={choice.id}>
                 <div
                   className={`smj-sort-choice p-2 ${
-                    selected.id === choice.id ? 'selected' : ''
+                    selected.id === choice.id ? 'selected' : 'cursor-pointer'
                   }`}
-                  onClick={e => {
-                    e.preventDefault()
-                    e.stopPropagation()
+                  onClick={() => {
                     onSelected({
                       id: choice.id,
                       label: `${sort.label} (${choice.label})`,
