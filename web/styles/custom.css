@@ -12,6 +12,14 @@
   --bubble-hover: #e9d385;
   --grey: #dbdbdb;
   --shadow: rgba(0, 38, 255, 0.2);
+  --white: #ffffff;
+  --white-hover: #f5f5f5;
+}
+.smj-white {
+  background-color: var(--white);
+}
+.smj-white:hover {
+  background-color: var(--white-hover);
 }
 
 .smj-dark {
@@ -144,6 +152,10 @@ img.smj-nav-logo {
 
 .smj-gray {
   background-color: #f5f5f5 !important;
+}
+
+.smj-white {
+  background: rgb(247, 247, 247) !important;
 }
 
 .smj-table-body {
@@ -503,6 +515,14 @@ img.smj-nav-logo {
 
 .bg-category-done:hover {
   background-color: #b4ceba !important;
+}
+
+.bg-jobless {
+  background-color: #f1a697 !important;
+}
+
+.bg-jobless:hover {
+  background-color: #da6f5a !important;
 }
 
 .smj-completed-job-row td:first-of-type::before {

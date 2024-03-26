@@ -17,6 +17,9 @@ import { deserializePostsDates, PostComplete } from 'lib/types/post'
 import { MyEvents } from './MyEvents'
 import { FormHeader } from '../forms/FormHeader'
 import { Label } from '../forms/Label'
+import { IconAndLabel } from '../forms/IconAndLabel'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { Allergy } from 'lib/prisma/client'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]
@@ -82,91 +85,119 @@ export default function MyPlanBrowser({
           <EditBox>
             <FormHeader label={craftLabel()} />
             {selectedPlan?.job && (
-              <div className="container-fluid mt-2">
+              <div className="container-fluid">
                 <div className="row">
                   <div
                     className={`${
                       selectedPlan.job.location.coordinates ? 'col-lg-6' : 'col'
-                    } " mb-3"`}
+                    }`}
                   >
-                    <RowContent
-                      data={[
-                        {
-                          label: 'Popis',
-                          content: `${selectedPlan.job.description}`,
-                        },
-                        {
-                          label: 'Zodpovědný pracant',
-                          content: `${selectedPlan.job.responsibleWorkerName}`,
-                        },
-                        {
-                          label: 'Pracanti',
-                          content: `${selectedPlan.job.workerNames.join(', ')}`,
-                        },
-                        {
-                          label: 'Kontaktní osoba',
-                          content: `${selectedPlan.job.contact}`,
-                        },
-                        {
-                          label: 'Alergeny',
-                          content: `${
-                            selectedPlan.job.allergens.join(', ') || 'Žádné'
-                          }`,
-                        },
-                        {
-                          label: 'Adresa',
-                          content: `${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`,
-                        },
-                        {
-                          label: 'Občerstvení k dispozici',
-                          content: `${selectedPlan.job.hasFood ? 'Ano' : 'Ne'}`,
-                        },
-                        {
-                          label: 'Sprcha k dispozici',
-                          content: `${
-                            selectedPlan.job.hasShower ? 'Ano' : 'Ne'
-                          }`,
-                        },
-                        {
-                          label: 'Doprava',
-                          content: (
+                    <Label id="description" label="Popis" />
+                    {selectedPlan.job.description}
+                    <Label id="contact" label="Kontaktní osoba" />
+                    {selectedPlan.job.contact}
+                    <Label id="onSite" label="Na místě" />
+                    {selectedPlan.job.hasFood && selectedPlan.job.hasShower && (
+                      <div className="d-flex gap-4">
+                        {selectedPlan.job.hasFood && (
+                          <div>
+                            <IconAndLabel
+                              label={'Občerstvení'}
+                              icon={'fas fa-utensils'}
+                            />
+                          </div>
+                        )}
+                        {selectedPlan.job.hasShower && (
+                          <div>
+                            <IconAndLabel
+                              label={'Sprcha'}
+                              icon={'fas fa-shower'}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <Label id="allergens" label="Alergeny" />
+                    {selectedPlan.job.allergens.length === 0 ? (
+                      'Žádné'
+                    ) : (
+                      <div className="d-flex flex-wrap justify-content-start allign-items-center text-muted gap-1">
+                        {selectedPlan.job.allergens.map(allergen => (
+                          <span key={allergen} className="pill-static">
+                            {allergyMapping[allergen as Allergy]}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <Label id="worker" label="Pracanti" />
+                    {selectedPlan.job.workerNames
+                      .sort((a, b) => a.localeCompare(b))
+                      .map(name => (
+                        <div key={name}>
+                          {name}
+                          {name === selectedPlan.job?.responsibleWorkerName && (
+                            <span className="text-muted">
+                              {' '}
+                              (zodpovědný pracant)
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    <Label id="ride" label="Doprava" />
+                    <>
+                      {!selectedPlan.job.ride ? (
+                        <IconAndLabel label="Pěšky" icon="fas fa-shoe-prints" />
+                      ) : (
+                        <>
+                          {!selectedPlan.job.ride.endsAtMyJob ? (
                             <>
-                              {!selectedPlan.job.ride && (
-                                <div className="ms-2">Pěšky</div>
-                              )}
-                              {selectedPlan.job.ride && (
-                                <>
-                                  <div className="ms-2 pt-2">
-                                    <div>
-                                      <strong>Auto: </strong>
-                                      {selectedPlan.job.ride.car}
-                                    </div>
-                                    <div>
-                                      <strong>Řidič: </strong>
-                                      {selectedPlan.job.ride.driverName}
-                                      {', '}
-                                      {selectedPlan.job.ride.driverPhone}
-                                    </div>
-                                    {!selectedPlan.job.ride.endsAtMyJob && (
-                                      <>
-                                        Sdílená doprava. Auto jede na job{' '}
-                                        <i>
-                                          {selectedPlan.job.ride.endJobName}
-                                        </i>
-                                        , ale vysadí tě cestou.
-                                      </>
-                                    )}
-                                  </div>
-                                </>
-                              )}
+                              <IconAndLabel
+                                label="Sdílená doprava"
+                                icon="fas fa-car-on"
+                              />
+                              <span className="text-muted">
+                                {' ('}Auto jede na job{' '}
+                                <i>{selectedPlan.job.ride.endJobName}</i>, ale
+                                vysadí tě cestou.{')'}
+                              </span>
                             </>
-                          ),
-                        },
-                      ]}
-                    />
+                          ) : (
+                            <div>
+                              <IconAndLabel label="Auto" icon="fas fa-car" />
+                            </div>
+                          )}
+                          <div>
+                            <div>
+                              <IconAndLabel
+                                label="O autu: "
+                                icon="fas fa-circle-info"
+                              />
+                              {selectedPlan.job.ride.car}
+                            </div>
+                            <div>
+                              <IconAndLabel
+                                label="Řidič: "
+                                icon="fas fa-user"
+                              />
+                              {selectedPlan.job.ride.driverName}
+                              {', '}
+                              {selectedPlan.job.ride.driverPhone}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </>
+                    {!selectedPlan.job.location.coordinates && (
+                      <div>
+                        <Label id="address" label="Adresa" />
+                        {`${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`}
+                      </div>
+                    )}
                   </div>
                   {selectedPlan.job.location.coordinates && (
                     <div className="col-lg-6">
+                      <Label id="address" label="Adresa" />
+                      {`${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`}
                       <div className="mb-3">
                         <Map
                           center={selectedPlan.job.location.coordinates}

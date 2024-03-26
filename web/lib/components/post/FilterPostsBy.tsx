@@ -55,7 +55,7 @@ export const FilterPostsBy = ({
         onClick={() => setIsOpenedFilterModal(true)}
       >
         <i className="fas fa-filter me-2"></i>
-        <div className="bg-white p-2">
+        <div className="smj-white p-2">
           <span>Filtry</span>
           {activeFilter > 0 && (
             <span>

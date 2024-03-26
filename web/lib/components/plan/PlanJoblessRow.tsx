@@ -89,7 +89,9 @@ export function PlanJoblessRow({
       <ExpandableRow
         data={[{ content: `Bez práce (${joblessWorkers.length})` }]}
         colspan={numColumns}
-        className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
+        className={
+          joblessWorkers.length > 0 ? 'smj-background-error bg-jobless' : ''
+        }
         onDrop={onWorkerDropped()}
       >
         <div className="smj-light-grey">

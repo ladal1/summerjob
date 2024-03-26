@@ -358,7 +358,10 @@ export default function PostsClientPage({
       <div className="m-3">
         <div className="row">
           {pinnedPosts.map((item, index) => (
-            <div className="col-md-4" key={index}>
+            <div
+              className={`col-md-${12 / Math.min(3, pinnedPosts.length)}`}
+              key={index}
+            >
               <PostBubble
                 item={item}
                 advancedAccess={advancedAccess}

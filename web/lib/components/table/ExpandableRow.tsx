@@ -106,7 +106,7 @@ export function ExpandableRow({
       >
         <td colSpan={colspan ?? data.length}>
           <div
-            className="smj-row-collapsible"
+            className="smj-row-collapsible smj-white"
             ref={collapsibleContentRef}
             style={{ maxHeight: expanded ? `${expandedHeight}px` : '0px' }}
           >

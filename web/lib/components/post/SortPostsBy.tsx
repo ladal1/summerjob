@@ -47,7 +47,7 @@ export const SortPostsBy = ({
         onClick={() => setIsOpenedSortModal(true)}
       >
         <i className={`fas fa-arrows-up-down me-2`}></i>
-        <div className="bg-white p-2">
+        <div className="smj-white p-2">
           <span className="overflow-ellipsis">{selected.label}</span>
         </div>
       </div>
