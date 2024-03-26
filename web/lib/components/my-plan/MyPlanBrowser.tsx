@@ -15,7 +15,8 @@ import PageHeader from '../page-header/PageHeader'
 import { RowContent } from '../table/RowContent'
 import { deserializePostsDates, PostComplete } from 'lib/types/post'
 import { MyEvents } from './MyEvents'
-import { FormHeader } from '../post/FormHeader'
+import { FormHeader } from '../forms/FormHeader'
+import { Label } from '../forms/Label'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]
@@ -81,7 +82,7 @@ export default function MyPlanBrowser({
           <EditBox>
             <FormHeader label={craftLabel()} />
             {selectedPlan?.job && (
-              <div className="container-fluid mt-4">
+              <div className="container-fluid mt-2">
                 <div className="row">
                   <div
                     className={`${
@@ -127,7 +128,7 @@ export default function MyPlanBrowser({
                           }`,
                         },
                         {
-                          label: <strong>Doprava:</strong>,
+                          label: 'Doprava',
                           content: (
                             <>
                               {!selectedPlan.job.ride && (
@@ -152,7 +153,7 @@ export default function MyPlanBrowser({
                                         <i>
                                           {selectedPlan.job.ride.endJobName}
                                         </i>
-                                        , tebe vysadí cestou.
+                                        , ale vysadí tě cestou.
                                       </>
                                     )}
                                   </div>

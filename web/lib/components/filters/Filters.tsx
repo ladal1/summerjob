@@ -85,8 +85,11 @@ export function Filters({
     <>
       <div className="row">
         <div className="col-auto mb-3">
-          <i className="fas fa-magnifying-glass me-2"></i>
+          <label htmlFor="search">
+            <i className="fas fa-magnifying-glass me-2"></i>
+          </label>
           <input
+            id="search"
             type="text"
             className="p-2 d-inline-block outline-none border-0 smj-filter-input smj-input"
             placeholder="Vyhledat..."

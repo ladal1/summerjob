@@ -1,32 +1,30 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
-import { useState } from 'react'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { Serialized } from 'lib/types/serialize'
 import {
   formatPhoneNumber,
   pick,
   removeRedundantSpace,
 } from 'lib/helpers/helpers'
+import { Serialized } from 'lib/types/serialize'
+import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Allergy, Skill } from '../../prisma/client'
-import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { TextInput } from '../forms/input/TextInput'
-import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { Label } from '../forms/Label'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { DateBool } from 'lib/data/dateSelectionType'
+import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
-import { Form } from '../post/Form'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { TextInput } from '../forms/input/TextInput'
+import { Label } from '../forms/Label'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -36,6 +34,7 @@ interface EditWorkerProps {
   allDates: DateBool[][]
   isProfilePage: boolean
   carAccess: boolean
+  label: string
 }
 
 export default function EditWorker({
@@ -43,6 +42,7 @@ export default function EditWorker({
   allDates,
   isProfilePage,
   carAccess,
+  label,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker)
 
@@ -137,7 +137,7 @@ export default function EditWorker({
   return (
     <>
       <Form
-        label="Upravit pracanta"
+        label={label}
         isInputDisabled={isMutating}
         onConfirmationClosed={onConfirmationClosed}
         resetForm={reset}

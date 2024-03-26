@@ -41,12 +41,15 @@ export const SortPostsBy = ({
           onClose={onCloseModal}
         />
       )}
+
       <div
+        className="d-inline-flex align-items-baseline cursor-pointer "
         onClick={() => setIsOpenedSortModal(true)}
-        className="bg-white cursor-pointer p-2"
       >
         <i className={`fas fa-arrows-up-down me-2`}></i>
-        <span className="overflow-ellipsis">{selected.label}</span>
+        <div className="bg-white p-2">
+          <span className="overflow-ellipsis">{selected.label}</span>
+        </div>
       </div>
     </>
   )

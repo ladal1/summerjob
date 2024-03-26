@@ -68,7 +68,7 @@ export const PostBubbleActions = ({
       ) : (
         <>
           {post.isPinned && (
-            <i className="fas fa-thumbtack smj-action-pinned"></i>
+            <i className="fas fa-thumbtack smj-action-pinned-color"></i>
           )}
         </>
       )}

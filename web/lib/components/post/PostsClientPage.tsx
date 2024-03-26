@@ -370,7 +370,9 @@ export default function PostsClientPage({
         </div>
         <div className="mt-3">
           <div className="d-flex flex-wrap justify-content-between allign-items-baseline ">
-            <Filters search={search} onSearchChanged={setSearch} />
+            <div className="me-2">
+              <Filters search={search} onSearchChanged={setSearch} />
+            </div>
             <div className="row">
               <div className="col-auto mb-2">
                 <SortPostsBy

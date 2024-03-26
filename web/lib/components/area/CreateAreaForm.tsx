@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextInput } from '../forms/input/TextInput'
-import { Form } from '../post/Form'
+import { Form } from '../forms/Form'
 
 interface CreateAreaProps {
   eventId: string

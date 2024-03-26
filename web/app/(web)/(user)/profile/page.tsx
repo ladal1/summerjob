@@ -35,6 +35,7 @@ export default async function MyProfilePage() {
         allDates={allDates}
         isProfilePage={true}
         carAccess={isCarAccessAllowed.success}
+        label="Upravit profil"
       />
     </>
   )

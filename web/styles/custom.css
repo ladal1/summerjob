@@ -7,7 +7,9 @@
   --secondary: #ffd97a;
   --accent: #ff9500;
   --pinned: #ffdb56;
+  --pinned-hover: #e0ba31;
   --bubble: #ffea9c;
+  --bubble-hover: #e9d385;
   --grey: #dbdbdb;
   --shadow: rgba(0, 38, 255, 0.2);
 }
@@ -23,9 +25,16 @@
 .smj-color-bubble-pinned {
   background-color: var(--pinned);
 }
+.smj-color-bubble-pinned:hover {
+  background-color: var(--pinned-hover);
+}
 
 .smj-color-bubble {
   background-color: var(--bubble);
+}
+
+.smj-color-bubble:hover {
+  background-color: var(--bubble-hover);
 }
 
 .nav-item .nav-link {
@@ -141,6 +150,10 @@ img.smj-nav-logo {
   background: rgb(247, 247, 247) !important;
 }
 
+.smj-table-body:hover {
+  background: rgb(228, 228, 228) !important;
+}
+
 .btn {
   box-shadow: 1px 1px 2px 2px var(--shadow);
 }
@@ -157,6 +170,10 @@ img.smj-nav-logo {
 
 .smj-expandable-row {
   background-color: #ececec !important;
+}
+
+.smj-expandable-row:hover {
+  background-color: #dddddd !important;
 }
 
 .smj-expandable-row > td:first-child > i,
@@ -353,6 +370,10 @@ img.smj-nav-logo {
   color: #e40000;
 }
 
+.smj-action-pinned-color {
+  color: #d76e13;
+}
+
 .smj-action-pinned {
   color: #d76e13;
 }
@@ -481,7 +502,7 @@ img.smj-nav-logo {
 }
 
 .bg-category-done:hover {
-  background-color: #b4ceba;
+  background-color: #b4ceba !important;
 }
 
 .smj-completed-job-row td:first-of-type::before {
@@ -500,11 +521,11 @@ img.smj-nav-logo {
 }
 
 .bg-category-hidden {
-  background-color: #dddddd;
+  background-color: #b6b6b6;
 }
 
 .bg-category-hidden:hover {
-  background-color: #b9b9b9;
+  background-color: #a3a3a3;
 }
 
 .smj-hidden-job-row td:first-of-type::before {
@@ -671,6 +692,14 @@ img.smj-nav-logo {
   justify-content: space-between;
   align-items: baseline;
   background-color: #cccccc;
+  cursor: pointer;
+}
+
+.smj-section-header:hover {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background-color: #b6b6b6;
   cursor: pointer;
 }
 

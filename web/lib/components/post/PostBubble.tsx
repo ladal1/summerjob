@@ -59,7 +59,11 @@ export const PostBubble = ({
               </div>
             )}
           </div>
-          <PostAddressAndDateTime item={item} showTime={showTime} />
+          <PostAddressAndDateTime
+            item={item}
+            showTime={showTime}
+            fontSize="fs-7"
+          />
           <span className="fs-6">{item.shortDescription}</span>
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex flex-wrap fs-7 text-muted">

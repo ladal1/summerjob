@@ -58,7 +58,7 @@ export function SortableTable({
 
   return (
     <div className="table-responsive mb-2 smj-shadow rounded-3">
-      <table className="table mb-0">
+      <table className="table  mb-0">
         <thead className="smj-table-header text-nowrap">
           <tr>
             {columns.map(column => (
@@ -80,7 +80,7 @@ export function SortableTable({
             ))}
           </tr>
         </thead>
-        <tbody className="smj-table-body mb-0">{children}</tbody>
+        <tbody className="mb-0">{children}</tbody>
       </table>
     </div>
   )

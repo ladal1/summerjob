@@ -34,7 +34,7 @@ import { ScaleInput } from '../forms/input/ScaleInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
-import { Form } from '../post/Form'
+import { Form } from '../forms/Form'
 
 interface EditProposedJobProps {
   serializedJob: Serialized

@@ -21,7 +21,7 @@ import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
-import { Form } from './Form'
+import { Form } from '../forms/Form'
 
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>

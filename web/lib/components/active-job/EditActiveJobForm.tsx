@@ -18,7 +18,7 @@ import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
-import { Form } from '../post/Form'
+import { Form } from '../forms/Form'
 import RidesList from './RidesList'
 import FormWarning from '../forms/FormWarning'
 

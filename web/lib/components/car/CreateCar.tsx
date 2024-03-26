@@ -11,7 +11,7 @@ import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { useRouter } from 'next/navigation'
-import { Form } from '../post/Form'
+import { Form } from '../forms/Form'
 
 export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
   const [saved, setSaved] = useState(false)

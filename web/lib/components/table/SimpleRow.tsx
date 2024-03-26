@@ -26,6 +26,7 @@ RowProps) {
       onDragStart={onDragStart}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      className="smj-table-body"
     >
       {data.map((field, index) => {
         return (

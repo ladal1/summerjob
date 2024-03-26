@@ -15,7 +15,7 @@ import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { Form } from '../post/Form'
+import { Form } from '../forms/Form'
 
 export default function EditCar({ car }: { car: CarComplete }) {
   const {

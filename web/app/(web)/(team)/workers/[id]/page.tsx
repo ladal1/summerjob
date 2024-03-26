@@ -33,6 +33,7 @@ export default async function EditWorkerPage({ params }: Params) {
         allDates={allDates}
         isProfilePage={false}
         carAccess={isCarAccessAllowed.success}
+        label="Upravit pracanta"
       />
     </>
   )

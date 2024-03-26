@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextInput } from '../forms/input/TextInput'
-import { Form } from '../post/Form'
+import { Form } from '../forms/Form'
 
 interface EditAreaProps {
   sArea: Serialized

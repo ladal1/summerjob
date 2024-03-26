@@ -1,7 +1,7 @@
 import { deserializePostsDates, PostComplete } from 'lib/types/post'
 import { PostBubble } from '../post/PostBubble'
 import EditBox from '../forms/EditBox'
-import { FormHeader } from '../post/FormHeader'
+import { FormHeader } from '../forms/FormHeader'
 import { compareDates, compareTimes } from 'lib/helpers/helpers'
 import { useMemo } from 'react'
 

@@ -51,17 +51,19 @@ export const FilterPostsBy = ({
         />
       )}
       <div
+        className="d-inline-flex align-items-baseline cursor-pointer "
         onClick={() => setIsOpenedFilterModal(true)}
-        className="bg-white cursor-pointer p-2"
       >
-        <i className={`fas fa-filter me-2`}></i>
-        <span>Filtry</span>
-        {activeFilter > 0 && (
-          <span>
-            {' | '}
-            <span style={{ color: 'red' }}> {activeFilter}</span>
-          </span>
-        )}
+        <i className="fas fa-filter me-2"></i>
+        <div className="bg-white p-2">
+          <span>Filtry</span>
+          {activeFilter > 0 && (
+            <span>
+              {' | '}
+              <span style={{ color: 'red' }}> {activeFilter}</span>
+            </span>
+          )}
+        </div>
       </div>
     </>
   )
