@@ -30,7 +30,6 @@ async function patch(
 ) {
   const id = req.query.id as string
   const { json } = await parseForm(req)
-  console.log(json)
   const carData = validateOrSendError(CarUpdateSchema, json, res)
   if (!carData) {
     return

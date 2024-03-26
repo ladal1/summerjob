@@ -36,7 +36,6 @@ async function post(
   const activeEventId = await cache_getActiveSummerJobEventId()
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/posts'
-  console.log('before')
   const { files, json } = await parseFormWithImages(
     req,
     temporaryName,

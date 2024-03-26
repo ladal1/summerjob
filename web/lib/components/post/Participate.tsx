@@ -24,8 +24,6 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
     post.participants && post.participants.map(t => t.workerId).includes(userId)
 
   const defaultChecked = () => {
-    console.log(isEnrolled || post.isMandatory)
-    console.log(post.name)
     return isEnrolled || post.isMandatory
   }
 

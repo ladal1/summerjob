@@ -72,21 +72,17 @@ export const PostBubble = ({
                 </span>
               ))}
             </div>
-            {onUpdated && (
-              <div
-                className="d-flex justify-content-end"
-                onClick={e => {
-                  e.stopPropagation()
-                }}
-              >
-                <Participate
-                  post={item}
-                  onUpdated={onUpdated}
-                  userId={userId}
-                />
-              </div>
-            )}
           </div>
+          {onUpdated && (
+            <div
+              className="d-flex justify-content-end"
+              onClick={e => {
+                e.stopPropagation()
+              }}
+            >
+              <Participate post={item} onUpdated={onUpdated} userId={userId} />
+            </div>
+          )}
         </div>
       </div>
     </>

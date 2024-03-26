@@ -356,16 +356,18 @@ export default function PostsClientPage({
         )}
       </PageHeader>
       <div className="m-3">
-        {pinnedPosts.map((item, index) => (
-          <React.Fragment key={index}>
-            <PostBubble
-              item={item}
-              advancedAccess={advancedAccess}
-              onUpdated={mutate}
-              userId={userId}
-            />
-          </React.Fragment>
-        ))}
+        <div className="row">
+          {pinnedPosts.map((item, index) => (
+            <div className="col-md-4" key={index}>
+              <PostBubble
+                item={item}
+                advancedAccess={advancedAccess}
+                onUpdated={mutate}
+                userId={userId}
+              />
+            </div>
+          ))}
+        </div>
         <div className="mt-3">
           <div className="d-flex flex-wrap justify-content-between allign-items-baseline ">
             <Filters search={search} onSearchChanged={setSearch} />
@@ -387,44 +389,50 @@ export default function PostsClientPage({
             </div>
           </div>
         </div>
-        <PostType title="Obecné">
-          {regularPosts.map((item, index) => (
-            <PostBubble
-              key={index}
-              item={item}
-              advancedAccess={advancedAccess}
-              onUpdated={mutate}
-              userId={userId}
-            />
-          ))}
-        </PostType>
-        <PostType title="Časové">
-          {timePosts.map((item, index) => (
-            <React.Fragment key={`time-${index}`}>
-              <div className="row align-items-center justify-content-between">
-                <div className="col-sm-1 me-2">
-                  {item.timeFrom && item.timeTo && (
-                    <div className="fw-bold text-center">
-                      <div>{formateTime(item.timeFrom)}</div>
-                      {' - '}
-                      <div>{formateTime(item.timeTo)}</div>
+        <div className="row">
+          <div className="col-md-3">
+            <PostType title="Obecné">
+              {regularPosts.map((item, index) => (
+                <PostBubble
+                  key={index}
+                  item={item}
+                  advancedAccess={advancedAccess}
+                  onUpdated={mutate}
+                  userId={userId}
+                />
+              ))}
+            </PostType>
+          </div>
+          <div className="col">
+            <PostType title="Časové">
+              {timePosts.map((item, index) => (
+                <React.Fragment key={`time-${index}`}>
+                  <div className="row align-items-center justify-content-between">
+                    <div className="col-sm-1 me-2">
+                      {item.timeFrom && item.timeTo && (
+                        <div className="fw-bold text-center">
+                          <div>{formateTime(item.timeFrom)}</div>
+                          {' - '}
+                          <div>{formateTime(item.timeTo)}</div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <div className="col">
-                  <PostBubble
-                    key={index}
-                    item={item}
-                    advancedAccess={advancedAccess}
-                    onUpdated={mutate}
-                    showTime={false}
-                    userId={userId}
-                  />
-                </div>
-              </div>
-            </React.Fragment>
-          ))}
-        </PostType>
+                    <div className="col">
+                      <PostBubble
+                        key={index}
+                        item={item}
+                        advancedAccess={advancedAccess}
+                        onUpdated={mutate}
+                        showTime={false}
+                        userId={userId}
+                      />
+                    </div>
+                  </div>
+                </React.Fragment>
+              ))}
+            </PostType>
+          </div>
+        </div>
       </div>
     </>
   )
