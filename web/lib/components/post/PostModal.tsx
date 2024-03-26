@@ -13,7 +13,7 @@ import { Participate } from './Participate'
 interface PostModalProps {
   item: PostComplete
   onClose: () => void
-  onUpdated: () => void
+  onUpdated?: () => void
   userId: string
 }
 
@@ -106,19 +106,14 @@ export const PostModal = ({
             </span>
           ))}
         </div>
-        {item.isMandatory ||
-          (item.isOpenForParticipants && (
-            <>
-              <hr />
-              <div className="d-flex justify-content-end mt-auto">
-                <Participate
-                  post={item}
-                  onUpdated={onUpdated}
-                  userId={userId}
-                />
-              </div>
-            </>
-          ))}
+        {onUpdated && (item.isMandatory || item.isOpenForParticipants) && (
+          <>
+            <hr />
+            <div className="d-flex justify-content-end mt-auto">
+              <Participate post={item} onUpdated={onUpdated} userId={userId} />
+            </div>
+          </>
+        )}
       </Modal>
     </>
   )

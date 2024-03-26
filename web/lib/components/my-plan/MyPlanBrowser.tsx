@@ -1,20 +1,33 @@
 'use client'
-import { formatDateLong } from 'lib/helpers/helpers'
+import {
+  compareDates,
+  compareTimes,
+  formatDateLong,
+  formateTime,
+} from 'lib/helpers/helpers'
 import { MyPlan } from 'lib/types/my-plan'
 import { useMemo, useState } from 'react'
 import SimpleDatePicker from '../date-picker/date-picker'
 import EditBox from '../forms/EditBox'
+import { OpenNavigationButton } from '../forms/OpenNavigationButton'
+import Map from '../map/Map'
 import PageHeader from '../page-header/PageHeader'
 import { RowContent } from '../table/RowContent'
-import Map from '../map/Map'
-import { OpenNavigationButton } from '../forms/OpenNavigationButton'
-import MyParticipateFromPosts from './MyParticipateFromPosts'
+import { deserializePostsDates, PostComplete } from 'lib/types/post'
+import { MyEvents } from './MyEvents'
+import { FormHeader } from '../post/FormHeader'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]
+  events: PostComplete[]
+  userId: string
 }
 
-export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
+export default function MyPlanBrowser({
+  plans,
+  events,
+  userId,
+}: MyPlanBrowserProps) {
   const latestPlan = plans.reduce((a, b) => (a.day > b.day ? a : b))
   const [date, setDate] = useState(latestPlan.day)
   const sortedPlans = useMemo(() => {
@@ -39,6 +52,23 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
     return sortedPlans.find(plan => plan.day.getTime() === date.getTime())
   }, [date, sortedPlans])
 
+  const eventsWithNewDatesAndSorted = useMemo(() => {
+    return sortEvents(events.map(item => deserializePostsDates(item)))
+  }, [events])
+
+  const filteredEvents = useMemo(() => {
+    return filterEvents(date, eventsWithNewDatesAndSorted)
+  }, [date, eventsWithNewDatesAndSorted])
+
+  const craftLabel = () => {
+    return (
+      (selectedPlan?.job &&
+        (selectedPlan?.job?.seqNum ? selectedPlan?.job?.seqNum + ' - ' : '') +
+          selectedPlan?.job?.name) ||
+      'Tento den nemáte naplánovanou práci.'
+    )
+  }
+
   return (
     <>
       <PageHeader title={formatDateLong(date)} isFluid={false}>
@@ -49,15 +79,9 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
       <section>
         <div className="container">
           <EditBox>
-            <h5>
-              {(selectedPlan?.job &&
-                (selectedPlan?.job?.seqNum
-                  ? selectedPlan?.job?.seqNum + ' - '
-                  : '') + selectedPlan?.job?.name) ||
-                'Tento den nemáte naplánovanou práci.'}
-            </h5>
+            <FormHeader label={craftLabel()} />
             {selectedPlan?.job && (
-              <div className="container-fluid">
+              <div className="container-fluid mt-4">
                 <div className="row">
                   <div
                     className={`${
@@ -163,9 +187,30 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
           </EditBox>
         </div>
       </section>
-      <section>
-        <MyParticipateFromPosts />
-      </section>
+      {filteredEvents.length !== 0 && (
+        <MyEvents events={filteredEvents} userId={userId} date={date} />
+      )}
     </>
   )
+}
+
+function filterEvents(selectedDay: Date, posts: PostComplete[]) {
+  if (!posts) return []
+  return posts.filter(post => {
+    return (
+      (post.availability &&
+        post.availability.some(availDay => {
+          return selectedDay && availDay.getTime() === selectedDay.getTime()
+        })) ||
+      post.availability === undefined ||
+      post.availability.length === 0
+    )
+  })
+}
+function sortEvents(posts: PostComplete[]) {
+  return [...posts].sort((a, b) => {
+    const compareDatesResult = compareDates(a.availability, b.availability)
+    if (compareDatesResult === 0) return compareTimes(a.timeFrom, b.timeFrom)
+    return compareDatesResult
+  })
 }

@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
+import { FormHeader } from './FormHeader'
 
 interface FormProps {
   label: string
@@ -32,12 +33,7 @@ export const Form = ({
     <section className="mb-3">
       <div className="container pt-3">
         <div className="smj-shadow rounded-3">
-          <div className="px-3 py-2 smj-dark text-white rounded-top">
-            <h2 className="mb-0">{label}</h2>
-            {secondaryLabel && (
-              <small className="text-white">{secondaryLabel}</small>
-            )}
-          </div>
+          <FormHeader label={label} secondaryLabel={secondaryLabel} />
           <hr className="my-0" />
           <div className="bg-white">
             <div className="p-3 pb-2 rounded-bottom">

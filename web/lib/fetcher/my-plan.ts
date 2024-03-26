@@ -1,5 +1,6 @@
 import { MyPlansAPIGetResponse } from 'pages/api/my-plans'
 import { useData } from './fetcher'
+import { MyEventsAPIGetResponse } from 'pages/api/my-events'
 
 const MINUTES_10 = 10 * 60 * 1000
 
@@ -13,4 +14,8 @@ export function useAPIMyPlans(options?: any) {
     }
   }
   return properties
+}
+
+export function useAPIMyEvents(options?: any) {
+  return useData<MyEventsAPIGetResponse>('/api/my-events', options)
 }

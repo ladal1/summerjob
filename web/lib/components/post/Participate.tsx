@@ -7,7 +7,6 @@ interface ParticipateProps {
   userId: string
 }
 
-// TODO
 export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
   const { trigger, isMutating } = useAPIPostUpdate(post.id, {
     onSuccess: onUpdated,

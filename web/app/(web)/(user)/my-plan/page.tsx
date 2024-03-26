@@ -1,9 +1,11 @@
 import { getSMJSession } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import MyPlanClientPage from 'lib/components/my-plan/MyPlanClientPage'
+import { getMyEvents } from 'lib/data/my-events'
 import { getMyPlans } from 'lib/data/my-plan'
 import { getWorkerById } from 'lib/data/workers'
 import { MyPlan, serializeMyPlans } from 'lib/types/my-plan'
+import { serializePosts } from 'lib/types/post'
 
 export const metadata = {
   title: 'Můj plán',
@@ -21,5 +23,13 @@ export default async function MyPlanPage() {
   try {
     plans = await getMyPlans(worker.id)
   } catch (e) {}
-  return <MyPlanClientPage sPlan={serializeMyPlans(plans)} />
+  const events = await getMyEvents(session!.userID)
+  const sEvents = serializePosts(events)
+  return (
+    <MyPlanClientPage
+      sPlan={serializeMyPlans(plans)}
+      sEvents={sEvents}
+      userId={session!.userID}
+    />
+  )
 }

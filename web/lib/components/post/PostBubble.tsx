@@ -9,15 +9,15 @@ import { Participate } from './Participate'
 
 interface PostBubbleProps {
   item: PostComplete
-  advancedAccess: boolean
-  onUpdated: () => void
+  advancedAccess?: boolean
+  onUpdated?: () => void
   showTime?: boolean
   userId: string
 }
 
 export const PostBubble = ({
   item,
-  advancedAccess,
+  advancedAccess = false,
   onUpdated,
   showTime = true,
   userId,
@@ -32,16 +32,15 @@ export const PostBubble = ({
         <PostModal
           item={item}
           onClose={onCloseModal}
-          onUpdated={() => {
-            //setIsOpenedInfoModal(false)
-            onUpdated()
-          }}
+          onUpdated={onUpdated}
           userId={userId}
         />
       )}
       <div
         className={`${
-          item.isPinned ? 'smj-color-bubble-pinned' : 'smj-color-bubble'
+          onUpdated && item.isPinned
+            ? 'smj-color-bubble-pinned'
+            : 'smj-color-bubble'
         } rounded mt-2 mb-2 cursor-pointer`}
         onClick={() => setIsOpenedInfoModal(true)}
       >
@@ -50,13 +49,15 @@ export const PostBubble = ({
             <span className="me-4">
               <h4>{item.name}</h4>
             </span>
-            <div className="allign-self-end">
-              <PostBubbleActions
-                post={item}
-                advancedAccess={advancedAccess}
-                onUpdated={onUpdated}
-              />
-            </div>
+            {onUpdated && (
+              <div className="allign-self-end">
+                <PostBubbleActions
+                  post={item}
+                  advancedAccess={advancedAccess}
+                  onUpdated={onUpdated}
+                />
+              </div>
+            )}
           </div>
           <PostAddressAndDateTime item={item} showTime={showTime} />
           <span className="fs-6">{item.shortDescription}</span>
@@ -71,14 +72,20 @@ export const PostBubble = ({
                 </span>
               ))}
             </div>
-            <div
-              className="d-flex justify-content-end"
-              onClick={e => {
-                e.stopPropagation()
-              }}
-            >
-              <Participate post={item} onUpdated={onUpdated} userId={userId} />
-            </div>
+            {onUpdated && (
+              <div
+                className="d-flex justify-content-end"
+                onClick={e => {
+                  e.stopPropagation()
+                }}
+              >
+                <Participate
+                  post={item}
+                  onUpdated={onUpdated}
+                  userId={userId}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -184,3 +184,25 @@ export function formateTime(time: string) {
 
   return `${formattedHours}:${formattedMinutes}`
 }
+
+export function compareDates(dateA: Date[], dateB: Date[]) {
+  if (!dateA && !dateB) return 0
+  if (!dateA) return 1
+  if (!dateB) return -1
+
+  const firstDateA = dateA[0]
+  const firstDateB = dateB[0]
+
+  if (!firstDateA && !firstDateB) return 0
+  if (!firstDateA) return 1
+  if (!firstDateB) return -1
+
+  return firstDateA.getTime() - firstDateB.getTime()
+}
+
+export function compareTimes(timeA: string | null, timeB: string | null) {
+  if (!timeA && !timeB) return 0
+  if (!timeA) return 1
+  if (!timeB) return -1
+  return formateTime(timeA).localeCompare(formateTime(timeB))
+}
