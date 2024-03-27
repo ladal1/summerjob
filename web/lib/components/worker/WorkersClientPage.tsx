@@ -119,7 +119,6 @@ export default function WorkersClientPage({
           amount: (accumulator[skill]?.amount || 0) + 1,
         }
       })
-      console.log(accumulator)
       return accumulator
     },
     {}

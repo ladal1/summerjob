@@ -106,7 +106,7 @@ export default function EditWorker({
     setLinkToOtherForm(`/cars/${id}`)
   }
   const handleSubmitFromLink = () => {
-    setLinkToOtherForm('/cars/')
+    setLinkToOtherForm('/cars/new')
   }
   //#endregion
 
@@ -333,17 +333,3 @@ export default function EditWorker({
     </>
   )
 }
-
-/*
-<button
-                type={'submit'}
-                className="btn btn-light pt-2 pb-2"
-                disabled={isMutating}
-                onClick={handleAddCar}
-              >
-                <div className="d-flex align-items-center">
-                  <i className="fas fa-plus me-2" />
-                  Přidat auto
-                </div>
-              </button>
-*/

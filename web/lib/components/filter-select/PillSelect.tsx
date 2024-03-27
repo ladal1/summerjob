@@ -1,5 +1,5 @@
 import { formatNumber } from 'lib/helpers/helpers'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { IconAndLabel } from '../forms/IconAndLabel'
 
 export interface PillSelectItem {
@@ -45,19 +45,22 @@ export function PillSelect({
   const dropdownInputRef = useRef<HTMLInputElement>(null)
   const pillInputRef = useRef<HTMLInputElement>(null)
 
-  const removeSelectedItem = (item: PillSelectItem) => {
-    // Filter out the removed item
-    const updatedSelectedItems = selectedItems.filter(
-      selectedItem => selectedItem.id !== item.id
-    )
-    // Update the state and notify the parent component
-    setSelectedItems(updatedSelectedItems)
-    if (item.databaseId !== undefined) {
-      removeExisting(item.databaseId)
-    } else {
-      onSelected(updatedSelectedItems)
-    }
-  }
+  const removeSelectedItem = useCallback(
+    (item: PillSelectItem) => {
+      // Filter out the removed item
+      const updatedSelectedItems = selectedItems.filter(
+        selectedItem => selectedItem.id !== item.id
+      )
+      // Update the state and notify the parent component
+      setSelectedItems(updatedSelectedItems)
+      if (item.databaseId !== undefined) {
+        removeExisting(item.databaseId)
+      } else {
+        onSelected(updatedSelectedItems)
+      }
+    },
+    [onSelected, removeExisting, selectedItems]
+  )
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -104,6 +107,7 @@ export function PillSelect({
     isEditingAmountItem,
     setIsEditingAmountItem,
     itemToRemove,
+    removeSelectedItem,
   ])
 
   const toggleDropdown = () => {
