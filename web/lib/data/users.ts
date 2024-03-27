@@ -191,9 +191,24 @@ export async function addAdminsToEvent(
     select: {
       email: true,
       availability: true,
+      cars: true,
     },
   })
   for (const admin of admins) {
+    for (const car of admin.cars) {
+      const carAlreadyRegistered = car.forEventId === eventId
+      if (carAlreadyRegistered) {
+        continue
+      }
+      await transaction.car.update({
+        where: {
+          id: car.id,
+        },
+        data: {
+          forEventId: eventId,
+        },
+      })
+    }
     const alreadyRegistered = admin.availability
       .map(av => av.eventId)
       .includes(eventId)
