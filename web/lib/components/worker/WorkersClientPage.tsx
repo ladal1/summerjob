@@ -113,7 +113,6 @@ export default function WorkersClientPage({
       const sortedSkills = worker.skills.sort((a, b) =>
         skillMapping[a].localeCompare(skillMapping[b])
       )
-      console.log(sortedSkills)
       sortedSkills.forEach(skill => {
         accumulator[skill] = {
           name: skill,

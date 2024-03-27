@@ -129,6 +129,10 @@ export function pick<
   ) as { [key in K]: key extends keyof T ? T[key] : undefined }
 }
 
+export function formatNumberAfterThreeDigits(value: string) {
+  return value.replace(/(?=(\d{3})+(?!\d))/g, ' ')
+}
+
 export function formatPhoneNumber(value: string) {
   // Remove any existing spaces and non-numeric characters
   const phoneNumber = formatNumber(value)

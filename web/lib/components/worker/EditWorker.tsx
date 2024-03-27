@@ -25,6 +25,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
+import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -90,25 +91,22 @@ export default function EditWorker({
 
   const onConfirmationClosed = () => {
     setSaved(false)
-    if (isHandlingCar) {
-      router.push(`/cars/${carRoute}`)
+    if (linkToOtherForm) {
+      router.push(linkToOtherForm)
     } else if (!isProfilePage) {
       router.back()
     }
   }
   //#endregion
 
-  //#region Car
-  const [isHandlingCar, setIsHandlingCar] = useState(false)
-  const [carRoute, setCarRoute] = useState('new')
+  //#region Other form
 
-  const handleAddCar = () => {
-    setIsHandlingCar(true)
+  const [linkToOtherForm, setLinkToOtherForm] = useState<string | null>(null)
+  const handleEditCar = (id: string) => {
+    setLinkToOtherForm(`/cars/${id}`)
   }
-
-  const handleEditCar = (route: string) => {
-    setIsHandlingCar(true)
-    setCarRoute(route)
+  const handleSubmitFromLink = () => {
+    setLinkToOtherForm('/cars/')
   }
   //#endregion
 
@@ -266,22 +264,25 @@ export default function EditWorker({
               removeExistingPhoto={removeExistingPhoto}
             />
           )}
-          {(carAccess || isProfilePage) && <Label id="car" label="Auta" />}
+          {(carAccess || isProfilePage) && (
+            <>
+              <Label id="car" label="Auta" />
+              {worker.cars.length === 0 && <p>Žádná auta</p>}{' '}
+            </>
+          )}
 
           {carAccess ? (
             <>
-              {worker.cars.length === 0 && <p>Žádná auta</p>}
               {worker.cars.length > 0 && (
                 <div className="list-group mb-2">
                   {worker.cars.map(car => (
-                    <input
-                      key={car.id}
-                      type={'submit'}
-                      className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
-                      value={car.name}
-                      disabled={isMutating}
-                      onClick={() => handleEditCar(car.id)}
-                    />
+                    <div key={car.id} onClick={() => handleEditCar(car.id)}>
+                      <LinkToOtherForm
+                        label={car.name}
+                        labelBold={false}
+                        margin={false}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -304,20 +305,10 @@ export default function EditWorker({
 
           {carAccess ? (
             <div className="d-flex align-items-baseline flex-wrap">
-              <div className="me-3">
-                <i>Auta je možné přiřadit v záložce Auta: </i>
-              </div>
-              <button
-                type={'submit'}
-                className="btn btn-light pt-2 pb-2"
-                disabled={isMutating}
-                onClick={handleAddCar}
-              >
-                <div className="d-flex align-items-center">
-                  <i className="fas fa-plus me-2" />
-                  Přidat auto
-                </div>
-              </button>
+              <LinkToOtherForm
+                label="Auta je možné přiřadit v záložce Auta"
+                handleEditedForm={handleSubmitFromLink}
+              />
             </div>
           ) : (
             isProfilePage && (
@@ -342,3 +333,17 @@ export default function EditWorker({
     </>
   )
 }
+
+/*
+<button
+                type={'submit'}
+                className="btn btn-light pt-2 pb-2"
+                disabled={isMutating}
+                onClick={handleAddCar}
+              >
+                <div className="d-flex align-items-center">
+                  <i className="fas fa-plus me-2" />
+                  Přidat auto
+                </div>
+              </button>
+*/

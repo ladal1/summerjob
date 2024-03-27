@@ -21,6 +21,7 @@ import { TextInput } from '../forms/input/TextInput'
 import { Form } from '../forms/Form'
 import RidesList from './RidesList'
 import FormWarning from '../forms/FormWarning'
+import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 
 interface EditActiveJobProps {
   serializedJob: Serialized
@@ -56,6 +57,12 @@ export default function EditActiveJobForm({
 
   const router = useRouter()
 
+  const [linkToOtherForm, setLinkToOtherForm] = useState<string | null>(null)
+
+  const handleSubmitFromLink = () => {
+    setLinkToOtherForm(`/jobs/${job.proposedJobId}`)
+  }
+
   const onSubmit = (data: ActiveJobUpdateData) => {
     if (data.responsibleWorkerId === '') {
       delete data.responsibleWorkerId
@@ -73,7 +80,8 @@ export default function EditActiveJobForm({
 
   const onConfirmationClosed = () => {
     setSaved(false)
-    router.back()
+    if (linkToOtherForm) router.push(linkToOtherForm)
+    else router.back()
   }
 
   const selectResponsibleWorker = (id: string) => {
@@ -92,6 +100,7 @@ export default function EditActiveJobForm({
   }
 
   const workerSelectItems = job.workers.map(workerToSelectItem)
+
   return (
     <>
       <Form
@@ -162,17 +171,10 @@ export default function EditActiveJobForm({
               },
             ]}
           />
-          <div className="list-group mt-4 w-50">
-            <Link
-              className="list-group-item d-flex justify-content-between align-items-center"
-              href={`/jobs/${job.proposedJobId}`}
-            >
-              <span className="fw-bold">Upravit další parametry jobu</span>
-              <span className="badge rounded-pill bg-warning smj-shadow">
-                <i className="fas fa-chevron-right p-1"></i>
-              </span>
-            </Link>
-          </div>
+          <LinkToOtherForm
+            label="Upravit další parametry jobu"
+            handleEditedForm={handleSubmitFromLink}
+          />
         </form>
       </Form>
     </>

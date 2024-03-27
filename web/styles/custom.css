@@ -15,6 +15,15 @@
   --white: #ffffff;
   --white-hover: #f5f5f5;
 }
+
+.smj-text {
+  color: #291a00;
+}
+
+.smj-text:hover {
+  color: #ff9500;
+}
+
 .smj-white-bubble {
   background-color: var(--white);
 }
