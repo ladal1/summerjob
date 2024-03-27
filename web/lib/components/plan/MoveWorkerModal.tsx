@@ -27,7 +27,7 @@ export default function MoveWorkerModal({
   const getNewJobId = () => selectedJob?.id
   const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
     getNewJobId,
-    jobs[0].planId,
+    jobs[0] ? jobs[0].planId : '',
     {
       onSuccess: () => {
         onSuccess()
@@ -66,15 +66,17 @@ export default function MoveWorkerModal({
       </b>{' '}
       na job:
       <div className="m-3 ms-0">
-        <FilterSelect
-          id="moveWorker"
-          items={items}
-          placeholder={'Vyberte job'}
-          onSelected={onItemSelected}
-          {...(defaultSelect && {
-            defaultSelected: defaultSelect,
-          })}
-        />
+        <div className="d-flex  flex-column ">
+          <FilterSelect
+            id="moveWorker"
+            items={items}
+            placeholder={'Vyberte job'}
+            onSelected={onItemSelected}
+            {...(defaultSelect && {
+              defaultSelected: defaultSelect,
+            })}
+          />
+        </div>
       </div>
       <div className="d-flex justify-content-between">
         <button

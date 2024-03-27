@@ -8,9 +8,13 @@ import {
   ActiveJobCreateSchema,
 } from 'lib/types/active-job'
 import { ProposedJobComplete } from 'lib/types/proposed-job'
-import { ReactNode, useMemo } from 'react'
+import { CSSProperties, ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import Select, { FormatOptionLabelMeta } from 'react-select'
+import Select, {
+  FormatOptionLabelMeta,
+  GroupBase,
+  StylesConfig,
+} from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
 import { Issue } from './Issue'
@@ -109,6 +113,23 @@ export default function AddJobToPlanForm({
     return <ErrorPage error={error} />
   }
 
+  const colourStyles: StylesConfig<SelectItem, true> = {
+    control: styles => ({
+      ...styles,
+      backgroundColor: 'white',
+      border: 0,
+      boxShadow: '1px 1px 2px 2px rgba(0, 38, 255, 0.2)',
+    }),
+    option: styles => ({
+      ...styles,
+      backgroundColor: 'white',
+      color: 'black',
+      '&:hover': {
+        backgroundColor: '#ffea9c',
+      },
+    }),
+  }
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -128,6 +149,7 @@ export default function AddJobToPlanForm({
               formatOptionLabel={formatOptionLabel}
               isMulti
               getOptionValue={option => option.searchable}
+              styles={colourStyles}
             />
           )}
         />

@@ -15,10 +15,10 @@
   --white: #ffffff;
   --white-hover: #f5f5f5;
 }
-.smj-white {
+.smj-white-bubble {
   background-color: var(--white);
 }
-.smj-white:hover {
+.smj-white-bubble:hover {
   background-color: var(--white-hover);
 }
 
@@ -212,9 +212,10 @@ img.smj-nav-logo {
   z-index: 100;
   bottom: 0;
 }
+
 .smj-sticky-col-top {
   position: sticky;
-  z-index: 100;
+  z-index: 500;
   top: 0;
 }
 

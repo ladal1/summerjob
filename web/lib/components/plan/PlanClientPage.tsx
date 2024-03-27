@@ -382,23 +382,23 @@ export default function PlanClientPage({
                     <hr />
                     <ul className="list-group list-group-flush">
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Nasazených pracantů
+                        <span className="me-2">Nasazených pracantů</span>
                         <span>
                           {planData?.jobs.flatMap(x => x.workers).length}
                         </span>
                       </li>
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Bez práce
+                        <span className="me-2">Bez práce</span>
                         <span>
                           {workersWithoutJob && workersWithoutJob.length}
                         </span>
                       </li>
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Naplánované joby
+                        <span className="me-2">Naplánované joby</span>
                         <span>{planData && planData.jobs.length}</span>
                       </li>
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Celkem míst v jobech
+                        <span className="me-2">Celkem míst v jobech</span>
                         <span>
                           {planData &&
                             planData.jobs
@@ -412,7 +412,7 @@ export default function PlanClientPage({
                         </span>
                       </li>
                       <li className="list-group-item ps-0 pe-0 smj-gray">
-                        Potřebné nástroje
+                        <span className="me-2">Potřebné nástroje</span>
                         <table className="table">
                           <tbody>
                             {Object.entries(toolsToTakeWithList).map(
@@ -434,44 +434,45 @@ export default function PlanClientPage({
                       </li>
                     </ul>
                   </div>
-                  <div
-                    className="smj-search-stack smj-shadow rounded-3"
-                    style={{
-                      width: '100%',
-                      maxWidth: '100%',
-                      padding: '10px',
-                      top: '20px',
-                      position: 'sticky',
-                    }}
-                  >
-                    <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
-                      Foto
-                    </h5>
-                    <hr />
-                    {workerPhotoURL ? (
-                      <Image
-                        src={workerPhotoURL}
-                        alt="Pracant"
-                        style={{
-                          objectFit: 'cover',
-                          width: '100%',
-                          height: '100%',
-                        }}
-                        width={500}
-                        height={500}
-                      />
-                    ) : (
-                      <svg
-                        viewBox="0 0 64 64"
-                        xmlns="http://www.w3.org/2000/svg"
-                        strokeWidth="3"
-                        stroke="#000000"
-                        fill="none"
-                      >
-                        <circle cx="32" cy="18.14" r="11.14" />
-                        <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
-                      </svg>
-                    )}
+                  <div className="smj-sticky-col-top" style={{ zIndex: '300' }}>
+                    <div
+                      className="smj-search-stack smj-shadow rounded-3"
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%',
+                        padding: '10px',
+                        top: '20px',
+                      }}
+                    >
+                      <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
+                        Foto
+                      </h5>
+                      <hr />
+                      {workerPhotoURL ? (
+                        <Image
+                          src={workerPhotoURL}
+                          alt="Pracant"
+                          style={{
+                            objectFit: 'cover',
+                            width: '100%',
+                            height: '100%',
+                          }}
+                          width={500}
+                          height={500}
+                        />
+                      ) : (
+                        <svg
+                          viewBox="0 0 64 64"
+                          xmlns="http://www.w3.org/2000/svg"
+                          strokeWidth="3"
+                          stroke="#000000"
+                          fill="none"
+                        >
+                          <circle cx="32" cy="18.14" r="11.14" />
+                          <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

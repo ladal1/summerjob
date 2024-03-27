@@ -11,6 +11,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Filters } from '../filters/Filters'
 import WorkersTable from './WorkersTable'
+import { Skill } from 'lib/prisma/client'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
@@ -83,6 +85,46 @@ export default function WorkersClientPage({
     return <ErrorPage error={error} />
   }
 
+  const calculateWithCar = () => {
+    const count = data?.reduce((accumulator, current) => {
+      return accumulator + (current.cars.length > 0 ? 1 : 0)
+    }, 0)
+
+    return count ?? 0
+  }
+
+  const calculateIsStrong = () => {
+    const count = data?.reduce((accumulator, current) => {
+      return accumulator + +current.isStrong
+    }, 0)
+
+    return count ?? 0
+  }
+
+  interface SkillsList {
+    [key: string]: {
+      name: string
+      amount: number
+    }
+  }
+
+  const skillsList: SkillsList = (data || []).reduce(
+    (accumulator: SkillsList, worker) => {
+      const sortedSkills = worker.skills.sort((a, b) =>
+        skillMapping[a].localeCompare(skillMapping[b])
+      )
+      console.log(sortedSkills)
+      sortedSkills.forEach(skill => {
+        accumulator[skill] = {
+          name: skill,
+          amount: (accumulator[skill]?.amount || 0) + 1,
+        }
+      })
+      console.log(accumulator)
+      return accumulator
+    },
+    {}
+  )
   return (
     <>
       <PageHeader title="Pracanti">
@@ -144,8 +186,34 @@ export default function WorkersClientPage({
                 <hr />
                 <ul className="list-group list-group-flush ">
                   <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Pracantů
+                    <span className="me-2">Pracantů</span>
                     <span>{data?.length}</span>
+                  </li>
+                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                    <span className="me-2">S autem</span>
+                    <span>{calculateWithCar()}</span>
+                  </li>
+                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                    <span className="me-2">Silných</span>
+                    <span>{calculateIsStrong()}</span>
+                  </li>
+                  <li className="list-group-item ps-0 pe-0 smj-gray">
+                    <span className="me-2">Dovednosti</span>
+                    <table className="table">
+                      <tbody>
+                        {Object.entries(skillsList).map(([key, skill]) => (
+                          <tr key={key} className="text-end">
+                            <td>{skillMapping[skill.name as Skill]}</td>
+                            <td>{skill.amount}</td>
+                          </tr>
+                        ))}
+                        {Object.entries(skillsList).length === 0 && (
+                          <tr key="none" className="text-end">
+                            <td>žádné</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </li>
                 </ul>
               </div>
