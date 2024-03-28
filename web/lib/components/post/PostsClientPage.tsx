@@ -321,7 +321,7 @@ export default function PostsClientPage({
   ])
 
   const [regularPosts, timePosts] = useMemo(() => {
-    const { regular, time } = filteredData!.reduce(
+    const { regular, time } = filteredData.reduce(
       (acc, post) => {
         if (post.timeFrom && post.timeTo) {
           acc.time.push(post)

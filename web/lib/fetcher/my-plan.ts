@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { MyPlansAPIGetResponse } from 'pages/api/my-plans'
 import { useData } from './fetcher'
 import { MyEventsAPIGetResponse } from 'pages/api/my-events'

@@ -10,10 +10,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Filters } from '../filters/Filters'
-import WorkersTable from './WorkersTable'
-import { Skill } from 'lib/prisma/client'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 import { WorkersStatistics } from './WorkersStatistics'
+import WorkersTable from './WorkersTable'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized

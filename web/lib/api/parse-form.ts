@@ -5,6 +5,7 @@ import { createDirectory } from './fileManager'
 export const FormidableError = formidable.errors.FormidableError
 
 /* Get simple data from string jsonData containing json data. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getJson = (fieldsJsonData: string | string[]): any => {
   const jsonData = Array.isArray(fieldsJsonData)
     ? fieldsJsonData[0]
@@ -32,6 +33,7 @@ export const parseForm = async (
 ): Promise<{
   fields: formidable.Fields
   files: formidable.Files
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   json: any
 }> => {
   return await new Promise(async (resolve, reject) => {
@@ -52,6 +54,7 @@ export const parseFormWithImages = async (
 ): Promise<{
   fields: formidable.Fields
   files: formidable.Files
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   json: any
 }> => {
   await createDirectory(uploadDir)

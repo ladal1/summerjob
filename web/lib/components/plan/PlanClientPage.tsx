@@ -1,8 +1,8 @@
 'use client'
 import ErrorPage from 'lib/components/error-page/ErrorPage'
-import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
 import { Modal, ModalSize } from 'lib/components/modal/Modal'
 import PageHeader from 'lib/components/page-header/PageHeader'
+import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
 import { PlanTable } from 'lib/components/plan/PlanTable'
 import {
   useAPIPlan,
@@ -18,18 +18,16 @@ import {
 } from 'lib/helpers/helpers'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { deserializePlan, PlanComplete } from 'lib/types/plan'
-import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import ErrorPage404 from '../404/404'
-import ConfirmationModal from '../modal/ConfirmationModal'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
+import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ErrorPage404 from '../404/404'
 import { Filters } from '../filters/Filters'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
-import { ToolName } from 'lib/prisma/client'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { PlanStatistics } from './PlanStatistics'
 
 interface PlanClientPageProps {
@@ -81,7 +79,7 @@ export default function PlanClientPage({
     useState(false)
 
   const generatePlan = () => {
-    triggerGenerate({ planId: planData!.id })
+    if (planData) triggerGenerate({ planId: planData.id })
   }
 
   const onGeneratingErrorMessageClose = () => {
@@ -98,7 +96,7 @@ export default function PlanClientPage({
     trigger: triggerDelete,
     error: deleteError,
     reset: resetDeleteError,
-  } = useAPIPlanDelete(planData!.id, {
+  } = useAPIPlanDelete(planData?.id ?? '', {
     onSuccess: () => window.history.back(),
   })
 
@@ -129,20 +127,15 @@ export default function PlanClientPage({
     },
   })
 
-  const {
-    trigger: triggerPublish,
-    error: publishError,
-    reset: resetPublishError,
-  } = useAPIPlanPublish(planData!.id, {})
+  const { trigger: triggerPublish, error: publishError } = useAPIPlanPublish(
+    planData?.id ?? '',
+    {}
+  )
 
   const switchPublish = () => {
     if (!planData) return
     planData.published = !planData.published
     triggerPublish({ published: planData.published })
-  }
-
-  const onPublishErrorMessageClose = () => {
-    resetPublishError()
   }
 
   //#endregion Publish plan
@@ -428,7 +421,7 @@ export default function PlanClientPage({
                 onReject={() => setShowDeleteConfirmation(false)}
               >
                 <p>Opravdu chcete smazat tento plán?</p>
-                {planData!.jobs.length > 0 && (
+                {planData && planData.jobs.length > 0 && (
                   <div className="alert alert-danger">
                     Tento plán obsahuje naplánované joby!
                     <br /> Jeho odstraněním zároveň odstraníte i odpovídající

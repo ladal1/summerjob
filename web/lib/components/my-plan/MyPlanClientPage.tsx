@@ -19,7 +19,7 @@ export default function MyPlanClientPage({
 }: MyPlanProps) {
   const plans = deserializeMyPlans(sPlan)
   const events = deserializePosts(sEvents)
-  const { data, error, isLoading } = useAPIMyPlans({
+  const { data } = useAPIMyPlans({
     fallbackData: plans,
   })
 
@@ -31,7 +31,11 @@ export default function MyPlanClientPage({
     <>
       {(!data || data.length === 0) &&
         (!dataEvents || dataEvents?.length === 0) && <MyPlanEmpty />}
-      <MyPlanBrowser plans={data!} events={dataEvents!} userId={userId} />
+      <MyPlanBrowser
+        plans={data ?? []}
+        events={dataEvents ?? []}
+        userId={userId}
+      />
     </>
   )
 }

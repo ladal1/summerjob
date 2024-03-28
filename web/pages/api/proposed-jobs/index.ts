@@ -1,32 +1,27 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
+import { generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { parseFormWithImages } from 'lib/api/parse-form'
+import { registerPhotos } from 'lib/api/register/registerPhotos'
+import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
-import { WrappedError, ApiError } from 'lib/types/api-error'
+import { getGeocodingData } from 'lib/components/map/GeocodingData'
+import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import {
   createProposedJob,
   getProposedJobs,
   getProposedJobsAssignableTo,
-  updateProposedJob,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
+import { ApiError, WrappedError } from 'lib/types/api-error'
 import { ExtendedSession, Permission } from 'lib/types/auth'
+import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import {
   ProposedJobCreateData,
   ProposedJobCreateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
-import {
-  createDirectory,
-  generateFileName,
-  getUploadDirForImages,
-} from 'lib/api/fileManager'
-import { parseFormWithImages } from 'lib/api/parse-form'
-import { registerPhotos } from 'lib/api/register/registerPhotos'
-import { ToolType, registerTools } from 'lib/api/register/registerTools'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
-import { CoordinatesSchema } from 'lib/types/coordinates'
-import { getGeocodingData } from 'lib/components/map/GeocodingData'
 
 export type ProposedJobsAPIGetResponse = Awaited<
   ReturnType<typeof getProposedJobs>

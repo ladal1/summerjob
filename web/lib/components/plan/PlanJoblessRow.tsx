@@ -38,15 +38,11 @@ export function PlanJoblessRow({
   const [workerIds, setWorkerIds] = useState<string[]>([])
   const getSourceJobId = () => sourceJobId
 
-  const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
-    getSourceJobId,
-    planId,
-    {
-      onSuccess: () => {
-        reloadPlan()
-      },
-    }
-  )
+  const { trigger } = useAPIActiveJobUpdateDynamic(getSourceJobId, planId, {
+    onSuccess: () => {
+      reloadPlan()
+    },
+  })
 
   useEffect(() => {
     if (sourceJobId) {

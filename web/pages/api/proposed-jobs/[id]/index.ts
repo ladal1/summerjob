@@ -23,11 +23,7 @@ import {
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-async function get(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  session: ExtendedSession
-) {
+async function get(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
   const job = await getProposedJobById(id)
   if (!job) {

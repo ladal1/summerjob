@@ -8,13 +8,9 @@ import {
   ActiveJobCreateSchema,
 } from 'lib/types/active-job'
 import { ProposedJobComplete } from 'lib/types/proposed-job'
-import { CSSProperties, ReactNode, useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import Select, {
-  FormatOptionLabelMeta,
-  GroupBase,
-  StylesConfig,
-} from 'react-select'
+import Select, { FormatOptionLabelMeta, StylesConfig } from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
 import { Issue } from './Issue'
@@ -35,7 +31,7 @@ export default function AddJobToPlanForm({
   onComplete,
   workerId,
 }: AddJobToPlanFormProps) {
-  const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId)
+  const { data, error } = useAPIProposedJobsNotInPlan(planId)
   const { trigger, isMutating } = useAPIActiveJobCreateMultiple(planId, {
     onSuccess: () => {
       onComplete()

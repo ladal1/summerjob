@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { CarUpdateData } from 'lib/types/car'
 import type { CarsAPIGetResponse, CarsAPIPostData } from 'pages/api/cars'
 import {

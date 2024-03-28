@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import useSWR, { Key } from 'swr'
 import useSWRMutation from 'swr/mutation'
 import { resultResolver } from './fetcher-res-resolver'

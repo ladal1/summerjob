@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { PostsAPIGetResponse } from 'pages/api/posts'
 import {
   useData,

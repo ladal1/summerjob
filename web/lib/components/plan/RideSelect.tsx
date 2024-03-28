@@ -28,15 +28,12 @@ export default function RideSelect({
     undefined
   )
   const [requestPayload, setRequestPayload] = useState<RideUpdateData>({})
-  const { trigger, isMutating, error } = useAPIRideUpdateDynamic(
-    () => selectedRide,
-    {
-      onSuccess: () => {
-        setSelectedRide(undefined)
-        onRideChanged?.()
-      },
-    }
-  )
+  const { trigger } = useAPIRideUpdateDynamic(() => selectedRide, {
+    onSuccess: () => {
+      setSelectedRide(undefined)
+      onRideChanged?.()
+    },
+  })
 
   useEffect(() => {
     if (selectedRide === undefined) {
@@ -57,16 +54,18 @@ export default function RideSelect({
     const rideId = e.target.value
     if (rideId === NO_RIDE) {
       setRequestPayload({
-        passengerIds: [
-          ...ride!.passengers.map(p => p.id).filter(id => id !== worker.id),
-        ],
+        passengerIds: ride
+          ? [...ride.passengers.map(p => p.id).filter(id => id !== worker.id)]
+          : [],
       })
       setSelectedRide(ride)
       return
     }
     const newRide = rideFromRideId(rideId)
     setRequestPayload({
-      passengerIds: [...newRide!.passengers.map(p => p.id), worker.id],
+      passengerIds: newRide
+        ? [...newRide.passengers.map(p => p.id), worker.id]
+        : [],
     })
     setSelectedRide(newRide)
   }

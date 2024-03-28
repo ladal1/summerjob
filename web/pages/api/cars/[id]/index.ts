@@ -9,11 +9,7 @@ import { CarUpdateSchema } from 'lib/types/car'
 import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-async function get(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  session: ExtendedSession
-) {
+async function get(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
   const car = await getCarById(id)
   if (!car) {

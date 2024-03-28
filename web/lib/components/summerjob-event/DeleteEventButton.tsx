@@ -13,15 +13,12 @@ export default function DeleteEventButton({
   smjEvent,
   onSuccess,
 }: DeleteEventButtonProps) {
-  const { trigger, error, isMutating, reset } = useAPISummerJobEventDelete(
-    smjEvent.id,
-    {
-      onSuccess: () => {
-        setShowDeleteConfirmation(false)
-        onSuccess()
-      },
-    }
-  )
+  const { trigger, error, reset } = useAPISummerJobEventDelete(smjEvent.id, {
+    onSuccess: () => {
+      setShowDeleteConfirmation(false)
+      onSuccess()
+    },
+  })
 
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const hideError = () => {

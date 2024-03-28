@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function CreatePostPage() {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())

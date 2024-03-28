@@ -59,9 +59,11 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     postData.photoPath = ''
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   await logger.apiRequest(APILogEvent.POST_MODIFY, id, postData, session!)
 
-  const { photoFile, photoFileRemoved, ...rest } = postData
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { photoFileRemoved, ...rest } = postData
 
   await updatePost(id, rest)
 
@@ -81,6 +83,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
     deleteFile(post.photoPath) // delete original image if it exists
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   await logger.apiRequest(APILogEvent.POST_DELETE, id, {}, session!)
   await deletePost(id)
 

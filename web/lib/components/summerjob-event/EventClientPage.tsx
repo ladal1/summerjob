@@ -1,9 +1,6 @@
 'use client'
 import { Serialized } from 'lib/types/serialize'
-import {
-  deserializeSummerJobEvent,
-  SummerJobEventComplete,
-} from 'lib/types/summerjob-event'
+import { deserializeSummerJobEvent } from 'lib/types/summerjob-event'
 import { useRouter } from 'next/navigation'
 import AreaList from '../area/AreaList'
 import EditBox from '../forms/EditBox'

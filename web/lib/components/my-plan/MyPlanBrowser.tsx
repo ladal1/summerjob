@@ -1,25 +1,19 @@
 'use client'
-import {
-  compareDates,
-  compareTimes,
-  formatDateLong,
-  formateTime,
-} from 'lib/helpers/helpers'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { compareDates, compareTimes, formatDateLong } from 'lib/helpers/helpers'
+import { Allergy } from 'lib/prisma/client'
 import { MyPlan } from 'lib/types/my-plan'
+import { deserializePostsDates, PostComplete } from 'lib/types/post'
 import { useMemo, useState } from 'react'
 import SimpleDatePicker from '../date-picker/date-picker'
 import EditBox from '../forms/EditBox'
+import { FormHeader } from '../forms/FormHeader'
+import { IconAndLabel } from '../forms/IconAndLabel'
+import { Label } from '../forms/Label'
 import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 import Map from '../map/Map'
 import PageHeader from '../page-header/PageHeader'
-import { RowContent } from '../table/RowContent'
-import { deserializePostsDates, PostComplete } from 'lib/types/post'
 import { MyEvents } from './MyEvents'
-import { FormHeader } from '../forms/FormHeader'
-import { Label } from '../forms/Label'
-import { IconAndLabel } from '../forms/IconAndLabel'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { Allergy } from 'lib/prisma/client'
 
 interface MyPlanBrowserProps {
   plans: MyPlan[]

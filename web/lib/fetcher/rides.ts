@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RideComplete } from 'lib/types/ride'
 import { RidesAPIPostData } from 'pages/api/plans/[planId]/active-jobs/[jobId]/rides'

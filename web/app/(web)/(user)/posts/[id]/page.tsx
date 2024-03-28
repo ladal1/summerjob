@@ -22,6 +22,7 @@ export default async function EditPostPage({ params }: Params) {
   }
   const serializedPost = serializePost(post)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())

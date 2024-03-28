@@ -3,7 +3,7 @@ import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
 import { Worker } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { useState } from 'react'
-import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
+import { FilterSelect } from '../filter-select/FilterSelect'
 import { Modal, ModalSize } from '../modal/Modal'
 
 interface MoveWorkerModalProps {
@@ -25,7 +25,7 @@ export default function MoveWorkerModal({
     currentJob
   )
   const getNewJobId = () => selectedJob?.id
-  const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
+  const { trigger, isMutating } = useAPIActiveJobUpdateDynamic(
     getNewJobId,
     jobs[0] ? jobs[0].planId : '',
     {

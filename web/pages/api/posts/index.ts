@@ -20,7 +20,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 export type PostsAPIGetResponse = Awaited<ReturnType<typeof getPosts>>
 async function get(
-  req: NextApiRequest,
+  _req: NextApiRequest,
   res: NextApiResponse<PostsAPIGetResponse>
 ) {
   const posts = await getPosts()
@@ -57,8 +57,8 @@ async function post(
     }
   }
 
-  const { photoFile, ...rest } = postData
-  const post = await createPost(rest)
+  const post = await createPost(postData)
+
   /* Rename photo file and update post with new photo path to it. */
   if (files.photoFile) {
     const temporaryPhotoPath = getPhotoPath(files.photoFile) // update photoPath

@@ -23,6 +23,7 @@ function Cell({
   colspan,
   stickyRight = false,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contents: any
   tooltip?: string
   colspan?: number

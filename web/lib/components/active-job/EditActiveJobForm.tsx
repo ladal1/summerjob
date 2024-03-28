@@ -9,19 +9,18 @@ import {
 } from 'lib/types/active-job'
 import { Serialized } from 'lib/types/serialize'
 import { WorkerBasicInfo } from 'lib/types/worker'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
+import { Form } from '../forms/Form'
+import FormWarning from '../forms/FormWarning'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
-import { Form } from '../forms/Form'
-import RidesList from './RidesList'
-import FormWarning from '../forms/FormWarning'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
+import RidesList from './RidesList'
 
 interface EditActiveJobProps {
   serializedJob: Serialized

@@ -1,7 +1,7 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getLogs } from 'lib/data/logs'
-import { ExtendedSession, Permission } from 'lib/types/auth'
+import { Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
 
@@ -10,8 +10,7 @@ const MAX_RESULTS = 100
 export type LogsAPIGetResponse = Awaited<ReturnType<typeof getLogs>>
 async function get(
   req: NextApiRequest,
-  res: NextApiResponse<LogsAPIGetResponse>,
-  session: ExtendedSession
+  res: NextApiResponse<LogsAPIGetResponse>
 ) {
   const { search, eventType, offset, limit } = req.query
   const isEventTypeValid =

@@ -10,6 +10,7 @@ export default async function CreateProposedJobPage() {
   const areas = await getAreas()
   const serializedAreas = serializeAreas(areas)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())

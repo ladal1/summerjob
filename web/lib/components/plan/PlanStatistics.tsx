@@ -21,7 +21,7 @@ export const PlanStatistics = ({
   interface ToolsList {
     [key: string]: Tool
   }
-  console.log(data)
+
   const toolsToTakeWithList: ToolsList = useMemo(
     () =>
       data?.reduce((accumulator: ToolsList, job) => {
@@ -59,7 +59,7 @@ export const PlanStatistics = ({
           </li>
           <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
             <span className="me-2">Celkem míst v jobech</span>
-            <span>
+            <span className="text-nowrap">
               {(data ?? [])
                 .map(j => j.proposedJob.minWorkers)
                 .reduce((a, b) => a + b, 0)}{' '}

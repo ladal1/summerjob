@@ -72,6 +72,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     workerData.photoPath = ''
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, workerData, session!)
   await updateWorker(id, workerData)
 
@@ -91,6 +92,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
     deleteFile(worker.photoPath) // delete original image if it exists
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   await logger.apiRequest(APILogEvent.WORKER_DELETE, id, {}, session!)
   await deleteWorker(id)
 

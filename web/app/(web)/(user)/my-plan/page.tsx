@@ -15,7 +15,9 @@ export const dynamic = 'force-dynamic'
 
 export default async function MyPlanPage() {
   const session = await getSMJSession()
-  const worker = await getWorkerById(session!.userID)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const userId = session!.userID
+  const worker = await getWorkerById(userId)
   if (!worker || !worker.availability) {
     return <ErrorPage404 message="Pracant nenalezen." />
   }
@@ -23,13 +25,13 @@ export default async function MyPlanPage() {
   try {
     plans = await getMyPlans(worker.id)
   } catch (e) {}
-  const events = await getMyEvents(session!.userID)
+  const events = await getMyEvents(userId)
   const sEvents = serializePosts(events)
   return (
     <MyPlanClientPage
       sPlan={serializeMyPlans(plans)}
       sEvents={sEvents}
-      userId={session!.userID}
+      userId={userId}
     />
   )
 }
