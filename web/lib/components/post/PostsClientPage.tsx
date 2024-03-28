@@ -273,7 +273,7 @@ export default function PostsClientPage({
   ])
 
   const [pinnedPosts, otherPosts] = useMemo(() => {
-    const { pinned, other } = data!
+    const { pinned, other } = (data ?? [])
       .map(item => deserializePostsDates(item))
       .reduce(
         (acc, post) => {

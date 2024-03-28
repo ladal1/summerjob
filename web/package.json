@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node build//standalone/server.js",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "seed-mini": "ts-node --skip-project prisma/seed.ts mini",

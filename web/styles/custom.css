@@ -482,16 +482,16 @@ img.smj-nav-logo {
 
 .smj-checkbox:focus {
   border: #adadad;
-  box-shadow: 0 0 4px #fdc345;
+  box-shadow: 0 0 4px #fdc345 !important;
 }
 
 .smj-checkbox:not(:checked) {
-  background-color: white;
+  background-color: white !important;
 }
 
 .smj-checkbox:checked {
-  border-color: #fdc345;
-  background-color: #fdc345;
+  border-color: #fdc345 !important;
+  background-color: #fdc345 !important;
 }
 
 .smj-form-check-input:checked {

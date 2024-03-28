@@ -30,6 +30,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Filters } from '../filters/Filters'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { ToolName } from 'lib/prisma/client'
+import { PlanStatistics } from './PlanStatistics'
 
 interface PlanClientPageProps {
   id: string
@@ -259,34 +260,18 @@ export default function PlanClientPage({
     ]
   )
 
+  const filteredJobs = useMemo(() => {
+    if (!planData) return []
+    return planData.jobs.filter(job => {
+      return shouldShowJob(job)
+    })
+  }, [planData, shouldShowJob])
+
   //#endregion
 
   if (error && !planData) {
     return <ErrorPage error={error} />
   }
-
-  interface Tool {
-    name: ToolName
-    amount: number
-  }
-
-  interface ToolsList {
-    [key: string]: Tool
-  }
-
-  const toolsToTakeWithList: ToolsList =
-    planData?.jobs.reduce((accumulator: ToolsList, job) => {
-      const sortedTools = job.proposedJob.toolsToTakeWith.sort((a, b) =>
-        toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool])
-      )
-      sortedTools.forEach(({ tool: name, amount }) => {
-        accumulator[name] = {
-          name,
-          amount: (accumulator[name]?.amount || 0) + amount,
-        }
-      })
-      return accumulator
-    }, {}) || {}
 
   return (
     <>
@@ -377,63 +362,10 @@ export default function PlanClientPage({
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">
-                  <div className="vstack smj-search-stack smj-shadow rounded-3">
-                    <h5>Statistiky</h5>
-                    <hr />
-                    <ul className="list-group list-group-flush">
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        <span className="me-2">Nasazených pracantů</span>
-                        <span>
-                          {planData?.jobs.flatMap(x => x.workers).length}
-                        </span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        <span className="me-2">Bez práce</span>
-                        <span>
-                          {workersWithoutJob && workersWithoutJob.length}
-                        </span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        <span className="me-2">Naplánované joby</span>
-                        <span>{planData && planData.jobs.length}</span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        <span className="me-2">Celkem míst v jobech</span>
-                        <span>
-                          {planData &&
-                            planData.jobs
-                              .map(j => j.proposedJob.minWorkers)
-                              .reduce((a, b) => a + b, 0)}{' '}
-                          -{' '}
-                          {planData &&
-                            planData.jobs
-                              .map(j => j.proposedJob.maxWorkers)
-                              .reduce((a, b) => a + b, 0)}
-                        </span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 smj-gray">
-                        <span className="me-2">Potřebné nástroje</span>
-                        <table className="table">
-                          <tbody>
-                            {Object.entries(toolsToTakeWithList).map(
-                              ([key, tool]) => (
-                                <tr key={key} className="text-end">
-                                  <td>{toolNameMapping[tool.name]}</td>
-                                  <td>{tool.amount}</td>
-                                </tr>
-                              )
-                            )}
-                            {Object.entries(toolsToTakeWithList).length ===
-                              0 && (
-                              <tr key="none" className="text-end">
-                                <td>žádné</td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </li>
-                    </ul>
-                  </div>
+                  <PlanStatistics
+                    data={filteredJobs}
+                    workersWithoutJob={workersWithoutJob}
+                  />
                   <div className="smj-sticky-col-top" style={{ zIndex: '300' }}>
                     <div
                       className="smj-search-stack smj-shadow rounded-3"
