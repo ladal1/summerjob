@@ -1,3 +1,4 @@
+import type { Prisma } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import {
   ActiveJobComplete,
@@ -5,7 +6,6 @@ import {
   ActiveJobCreateMultipleData,
   ActiveJobUpdateData,
 } from 'lib/types/active-job'
-import type { Worker, Prisma } from 'lib/prisma/client'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { InvalidDataError, NoActiveEventError } from './internal-error'
 import { databaseWorkerToWorkerComplete } from './workers'
@@ -205,12 +205,7 @@ function getActiveJobDetailsById(
 }
 
 export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
-  const {
-    completed,
-    proposedJob,
-    responsibleWorkerId,
-    workerIds,
-  } = job
+  const { completed, proposedJob, responsibleWorkerId, workerIds } = job
   return await prisma.$transaction(async tx => {
     const existingActiveJob = await getActiveJobDetailsById(id, tx)
     if (!existingActiveJob) {
@@ -258,7 +253,7 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
       }
     }
 
-    // update proposed job 
+    // update proposed job
     await tx.proposedJob.update({
       where: {
         id: existingActiveJob.proposedJobId,
@@ -266,11 +261,11 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
       data: {
         name: proposedJob?.name,
         publicDescription: proposedJob?.publicDescription,
-        privateDescription: proposedJob?.privateDescription
-      }
+        privateDescription: proposedJob?.privateDescription,
+      },
     })
-  
-    // update active job 
+
+    // update active job
     const activeJob = await tx.activeJob.update({
       where: {
         id,

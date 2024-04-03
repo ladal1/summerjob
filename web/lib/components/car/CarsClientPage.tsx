@@ -5,9 +5,10 @@ import { CarComplete, deserializeCars } from 'lib/types/car'
 import { Serialized } from 'lib/types/serialize'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Filters } from '../filters/Filters'
 import PageHeader from '../page-header/PageHeader'
+import { CarsStatistics } from './CarsStatistics'
 import { CarsTable } from './CarsTable'
 
 interface CarsClientPageProps {
@@ -16,7 +17,7 @@ interface CarsClientPageProps {
 
 export default function CarsClientPage({ initialData }: CarsClientPageProps) {
   const initialCars = deserializeCars(initialData)
-  const { data, error, isLoading, mutate } = useAPICars({
+  const { data, mutate } = useAPICars({
     fallbackData: initialCars,
   })
 
@@ -39,16 +40,9 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
     )
   }, [filter, router])
 
-  const filterCars = (cars: CarComplete[]) => {
-    const filterString = normalizeString(filter).trimEnd()
-    return cars.filter(car => {
-      const name = normalizeString(car.name)
-      const owner =
-        normalizeString(car.owner.firstName) +
-        normalizeString(car.owner.lastName)
-      return name.includes(filterString) || owner.includes(filterString)
-    })
-  }
+  const filteredCars = useMemo(() => {
+    return filterCars(filter, data)
+  }, [data, filter])
 
   const requestReload = (expectedResult: CarComplete[]) => {
     mutate(expectedResult)
@@ -73,12 +67,26 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
             </div>
           </div>
           <div className="row gx-3">
-            <div className="col-sm-12 col-lg-12">
-              <CarsTable data={filterCars(data!)} reload={requestReload} />
+            <div className="col-sm-12 col-lg-10">
+              <CarsTable data={filteredCars} reload={requestReload} />
+            </div>
+            <div className="col-sm-12 col-lg-2">
+              <CarsStatistics data={filteredCars} />
             </div>
           </div>
         </div>
       </section>
     </>
   )
+}
+
+function filterCars(search: string, cars?: CarComplete[]) {
+  if (!cars) return []
+  const filterString = normalizeString(search).trimEnd()
+  return cars.filter(car => {
+    const name = normalizeString(car.name)
+    const owner =
+      normalizeString(car.owner.firstName) + normalizeString(car.owner.lastName)
+    return name.includes(filterString) || owner.includes(filterString)
+  })
 }

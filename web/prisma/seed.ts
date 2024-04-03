@@ -2,6 +2,7 @@ import {
   Allergy,
   Car,
   Plan,
+  PostTag,
   PrismaClient,
   ProposedJob,
   SummerJobEvent,
@@ -245,8 +246,6 @@ async function populatePlan(
 
   const activeJob = await prisma.activeJob.create({
     data: {
-      privateDescription: 'Popis úkolu, který vidí jen organizátor',
-      publicDescription: 'Popis úkolu, který vidí všichni',
       planId: plan.id,
       proposedJobId: job.id,
       workers: {
@@ -268,7 +267,53 @@ async function populatePlan(
   })
 }
 
+async function createPosts(eventId: string, days: Date[], count = 10) {
+  const POSTS_COUNT = count
+  const fakeTime = (): string => {
+    const hour = faker.datatype.number({ min: 0, max: 23 })
+    const minute = faker.datatype.number({ min: 0, max: 59 })
+    return `${hour}:${minute}`
+  }
+  const createPost = () => {
+    const tags = choose(Object.values(PostTag), between(1, 3))
+    return {
+      forEventId: eventId,
+      name: faker.lorem.words(3),
+      madeIn: choose(days, 1)[0],
+      availability: chooseWithProbability(days, 0.5),
+      timeFrom: fakeTime(),
+      timeTo: fakeTime(),
+      address: faker.address.streetAddress(),
+      coordinates: [+faker.address.longitude(), +faker.address.latitude()],
+      tags: tags,
+      shortDescription: faker.lorem.sentence(),
+      longDescription: faker.lorem.paragraph(),
+      isOpenForParticipants: Math.random() > 0.5,
+      isMandatory: Math.random() > 0.7,
+      isPinned: Math.random() > 0.8,
+    }
+  }
+
+  for (let i = 0; i < POSTS_COUNT; i++) {
+    await prisma.post.create({
+      data: createPost(),
+    })
+  }
+
+  return await prisma.post.findMany()
+}
+
+async function setEventAsInactive() {
+  await prisma.summerJobEvent.updateMany({
+    data: {
+      isActive: false,
+    },
+  })
+}
+
 async function main() {
+  console.log('Seting potential active event as inactive...')
+  await setEventAsInactive()
   const mini = process.argv[2] === 'mini'
   console.log('Creating yearly event...')
   const yearlyEvent = await createYearlyEvent()
@@ -296,6 +341,11 @@ async function main() {
   if (!mini) {
     await populatePlan(plan, proposedJobs, workers)
   }
+  console.log('Creating posts...')
+  await createPosts(
+    yearlyEvent.id,
+    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate)
+  )
 }
 
 main()

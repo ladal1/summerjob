@@ -9,9 +9,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import ErrorPage from '../error-page/ErrorPage'
 import { Filters } from '../filters/Filters'
-import ConfirmationModal from '../modal/ConfirmationModal'
-import { Modal, ModalSize } from '../modal/Modal'
-import EditUserForm from './EditUserForm'
 import UsersTable from './UsersTable'
 
 interface UsersClientPageProps {

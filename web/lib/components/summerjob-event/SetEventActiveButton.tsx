@@ -12,15 +12,12 @@ export default function SetEventActiveButton({
   smjEvent,
   onSuccess,
 }: SetEventActiveButtonProps) {
-  const { trigger, error, isMutating } = useAPISummerJobEventSetActive(
-    smjEvent.id,
-    {
-      onSuccess: () => {
-        setIsSetActiveEventModalOpen(false)
-        onSuccess()
-      },
-    }
-  )
+  const { trigger } = useAPISummerJobEventSetActive(smjEvent.id, {
+    onSuccess: () => {
+      setIsSetActiveEventModalOpen(false)
+      onSuccess()
+    },
+  })
   const triggerSetActive = () => {
     trigger({ isActive: true })
   }

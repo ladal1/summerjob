@@ -1,28 +1,23 @@
 'use client'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { WorkerCreateSchema } from 'lib/types/worker'
-import { useState } from 'react'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import {
-  formatNumber,
-  formatPhoneNumber,
-  removeRedundantSpace,
-} from 'lib/helpers/helpers'
-import { useRouter } from 'next/navigation'
+import { DateBool } from 'lib/data/dateSelectionType'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
-import { TextInput } from '../forms/input/TextInput'
+import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
+import { WorkerCreateSchema } from 'lib/types/worker'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Form } from '../forms/Form'
+import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
-import { DateBool } from 'lib/data/dateSelectionType'
-import { ImageUploader } from '../forms/ImageUploader'
-import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
-import FormWarning from '../forms/FormWarning'
+import { TextInput } from '../forms/input/TextInput'
+import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -56,6 +51,12 @@ export default function CreateWorker({
 
   const [saved, setSaved] = useState(false)
 
+  const [linkToOtherForm, setLinkToOtherForm] = useState<string | null>(null)
+
+  const handleSubmitFromLink = () => {
+    setLinkToOtherForm('/cars/new')
+  }
+
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true)
@@ -69,11 +70,18 @@ export default function CreateWorker({
 
   const onConfirmationClosed = () => {
     setSaved(false)
+    if (linkToOtherForm) {
+      router.push(linkToOtherForm)
+    } else {
+      router.back()
+    }
     router.back()
   }
 
+  //#region Photo
+
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, {
+    setValue('photoFile', null, {
       shouldDirty: true,
       shouldValidate: true,
     })
@@ -83,175 +91,158 @@ export default function CreateWorker({
     setValue('photoFile', fileList, { shouldDirty: true, shouldValidate: true })
   }
 
+  //#endregion
+
   return (
     <>
-      {true &&
-        Object.values(errors).map((error, index) => (
-          <div key={error.message?.toString()}>
-            <FormWarning
-              message={`${error.ref?.type} + ${error.message?.toString()}`}
-            />
-          </div>
-        ))}
-      <div className="row">
-        <div className="col">
-          <h3>Přidat pracanta</h3>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <TextInput
-              id="firstName"
-              label="Jméno"
-              placeholder="Jméno"
-              register={() =>
-                register('firstName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
-              errors={errors}
-            />
-            <TextInput
-              id="lastName"
-              label="Příjmení"
-              placeholder="Příjmení"
-              errors={errors}
-              register={() =>
-                register('lastName', {
-                  onChange: e =>
-                    (e.target.value = removeRedundantSpace(e.target.value)),
-                })
-              }
-            />
-            <TextInput
-              id="age"
-              label="Věk"
-              placeholder="Věk"
-              min={1}
-              register={() =>
-                register('age', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
-                })
-              }
-              errors={errors}
-            />
-            <TextInput
-              id="phone"
-              label="Telefonní číslo"
-              placeholder="(+420) 123 456 789"
-              errors={errors}
-              register={() =>
-                register('phone', {
-                  onChange: e =>
-                    (e.target.value = formatPhoneNumber(e.target.value)),
-                })
-              }
-            />
-            <TextInput
-              id="email"
-              label="Email"
-              placeholder="uzivatel@example.cz"
-              errors={errors}
-              register={() => register('email')}
-            />
-            <div className="d-flex flex-row flex-wrap">
-              <div className="me-5">
-                <DateSelectionInput
-                  id="availability.workDays"
-                  label="Pracovní dostupnost"
-                  register={() => register('availability.workDays')}
-                  days={allDates}
-                />
-              </div>
+      <Form
+        label="Vytvořit pracanta"
+        isInputDisabled={isMutating}
+        onConfirmationClosed={onConfirmationClosed}
+        resetForm={reset}
+        saved={saved}
+        error={error}
+        formId="create-worker"
+      >
+        <form id="create-worker" onSubmit={handleSubmit(onSubmit)}>
+          <TextInput
+            id="firstName"
+            label="Jméno"
+            placeholder="Jméno"
+            register={() =>
+              register('firstName', {
+                onChange: e =>
+                  (e.target.value = removeRedundantSpace(e.target.value)),
+              })
+            }
+            errors={errors}
+            mandatory
+            margin={false}
+          />
+          <TextInput
+            id="lastName"
+            label="Příjmení"
+            placeholder="Příjmení"
+            errors={errors}
+            register={() =>
+              register('lastName', {
+                onChange: e =>
+                  (e.target.value = removeRedundantSpace(e.target.value)),
+              })
+            }
+            mandatory
+          />
+          <TextInput
+            id="age"
+            label="Věk"
+            placeholder="Věk"
+            min={1}
+            register={() =>
+              register('age', {
+                valueAsNumber: true,
+                onChange: e =>
+                  (e.target.value = formatNumber(e.target.value)),
+              })
+            }
+            errors={errors}
+          />
+          <TextInput
+            id="phone"
+            label="Telefonní číslo"
+            placeholder="(+420) 123 456 789"
+            errors={errors}
+            register={() =>
+              register('phone', {
+                onChange: e =>
+                  (e.target.value = formatPhoneNumber(e.target.value)),
+              })
+            }
+            mandatory
+          />
+          <TextInput
+            id="email"
+            label="Email"
+            placeholder="uzivatel@example.cz"
+            errors={errors}
+            register={() => register('email')}
+            mandatory
+          />
+          <div className="d-flex flex-row flex-wrap">
+            <div className="me-5">
               <DateSelectionInput
-                id="availability.adorationDays"
-                label="Dny adorace"
-                register={() => register('availability.adorationDays')}
+                id="availability.workDays"
+                label="Pracovní dostupnost"
+                register={() => register('availability.workDays')}
                 days={allDates}
               />
             </div>
-            <GroupButtonsInput
-              label="Alergie"
-              mapping={allergyMapping}
-              register={() => register('allergyIds')}
+            <DateSelectionInput
+              id="availability.adorationDays"
+              label="Dny adorace"
+              register={() => register('availability.adorationDays')}
+              days={allDates}
             />
-            <GroupButtonsInput
-              label="Dovednosti"
-              mapping={skillMapping}
-              register={() => register('skills')}
-            />
-            <OtherAttributesInput
-              label="Další vlastnosti"
-              register={register}
-              objects={[
-                {
-                  id: 'strong',
-                  icon: 'fas fa-dumbbell',
-                  label: 'Silák',
-                },
-                {
-                  id: 'team',
-                  icon: 'fa-solid fa-people-group',
-                  label: 'Tým',
-                },
-              ]}
-            />
-            <ImageUploader
-              id="photoFile"
-              label="Fotografie"
-              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-              errors={errors}
-              registerPhoto={registerPhoto}
-              removeNewPhoto={removeNewPhoto}
-            />
+          </div>
+          <GroupButtonsInput
+            id="allergyIds"
+            label="Alergie"
+            mapping={allergyMapping}
+            register={() => register('allergyIds')}
+          />
+          <GroupButtonsInput
+            id="skills"
+            label="Dovednosti"
+            mapping={skillMapping}
+            register={() => register('skills')}
+          />
+          <OtherAttributesInput
+            label="Další vlastnosti"
+            register={register}
+            objects={[
+              {
+                id: 'strong',
+                icon: 'fas fa-dumbbell',
+                label: 'Silák',
+              },
+              {
+                id: 'team',
+                icon: 'fa-solid fa-people-group',
+                label: 'Tým',
+              },
+            ]}
+          />
+          <ImageUploader
+            id="photoFile"
+            label="Fotografie"
+            secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+            errors={errors}
+            registerPhoto={registerPhoto}
+            removeNewPhoto={removeNewPhoto}
+          />
 
-            {carAccess && (
-              <>
-                <label
-                  className="form-label d-block fw-bold mt-4"
-                  htmlFor="car"
-                >
-                  Auta
-                </label>
-                <p>
-                  <i>
-                    Auta je možné přiřadit v záložce Auta po vytvořeni pracanta.
-                  </i>
-                </p>
-              </>
-            )}
-            <TextAreaInput
-              id="note"
-              label="Poznámka"
-              placeholder="Poznámka"
-              rows={1}
-              register={() => register('note')}
-            />
-
-            <div className="d-flex justify-content-between gap-3">
-              <button
-                className="btn btn-secondary mt-4"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Zpět
-              </button>
-              <input
-                type={'submit'}
-                className="btn btn-primary mt-4"
-                value={'Uložit'}
-                disabled={isMutating}
+          {carAccess && (
+            <>
+              <label className="form-label d-block fw-bold mt-4" htmlFor="car">
+                Auta
+              </label>
+              <LinkToOtherForm
+                label="Auta je možné přiřadit v záložce Auta po vytvořeni pracanta."
+                handleEditedForm={handleSubmitFromLink}
+                labelBold={false}
+                margin={false}
               />
-            </div>
-            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
-            {error && <ErrorMessageModal onClose={reset} />}
-          </form>
-        </div>
-      </div>
+            </>
+          )}
+          <TextAreaInput
+            id="note"
+            label="Poznámka"
+            placeholder="Poznámka"
+            rows={1}
+            register={() => register('note')}
+            errors={errors}
+          />
+        </form>
+      </Form>
     </>
   )
 }

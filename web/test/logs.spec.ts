@@ -3,7 +3,7 @@ import chai from 'chai'
 
 chai.should()
 
-describe('Allergies', function () {
+describe('Logs', function () {
   it('returns logs', async function () {
     const resp = await api.get('/api/logs', Id.ADMIN)
     resp.status.should.equal(200)

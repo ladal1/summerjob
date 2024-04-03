@@ -45,6 +45,7 @@ export async function withPermissions(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSession()
   const allowed = isAccessAllowed(permissions, session)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -62,6 +63,7 @@ export async function withPermissionsAPI(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSessionAPI(req, res)
   const allowed = isAccessAllowed(permissions, session)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -87,9 +89,9 @@ export function isAccessAllowed(
  * @note We don't add the email address to avoid needing to escape it, if you do, remember to sanitize it!
  */
 export function emailHtml(params: { url: string; host: string }) {
-  const { url, host } = params
+  const { url } = params
 
-  const escapedHost = host.replace(/\./g, '&#8203;.')
+  //const escapedHost = host.replace(/\./g, '&#8203;.')
 
   const brandColor = '#f9da68'
   const color = {
@@ -134,6 +136,6 @@ export function emailHtml(params: { url: string; host: string }) {
 }
 
 /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
-export function emailText({ url, host }: { url: string; host: string }) {
+export function emailText({ url }: { url: string; host: string }) {
   return `Přihlášení do aplikace SummerJob\n${url}\n\n`
 }

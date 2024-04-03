@@ -17,6 +17,7 @@ interface TextInputProps<FormData extends FieldValues>
   register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   margin?: boolean
+  mandatory?: boolean
 }
 
 export const TextInput = <FormData extends FieldValues>({
@@ -25,17 +26,14 @@ export const TextInput = <FormData extends FieldValues>({
   register,
   errors,
   margin = true,
+  mandatory = false,
   ...rest
 }: TextInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
 
   return (
     <>
-      <Label
-        id={id}
-        label={label}
-        margin={margin}
-      />
+      <Label id={id} label={label} margin={margin} mandatory={mandatory} />
       <input
         className="form-control smj-input p-0 fs-5"
         {...register()}

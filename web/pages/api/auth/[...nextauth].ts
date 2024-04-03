@@ -18,12 +18,7 @@ export const authOptions: NextAuthOptions = {
           : process.env.EMAIL_SERVER,
       from: process.env.EMAIL_FROM,
       // maxAge: 24 * 60 * 60, // How long email links are valid for (default 24h)
-      async sendVerificationRequest({
-        identifier: email,
-        url,
-        token,
-        provider,
-      }) {
+      async sendVerificationRequest({ identifier: email, url, provider }) {
         // In dev, emails are not sent, user is automatically signed in
         if (process.env.NODE_ENV === 'development') {
           console.log(

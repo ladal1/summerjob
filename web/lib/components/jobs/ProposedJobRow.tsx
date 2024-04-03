@@ -12,11 +12,12 @@ import { ProposedJobComplete } from 'lib/types/proposed-job'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import DeleteIcon from '../forms/DeleteIcon'
+import { PinIcon } from '../forms/PinIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow } from '../table/ExpandableRow'
-import { RowContent, RowContentsInterface } from '../table/RowContent'
 import { RowCells } from '../table/RowCells'
+import { RowContent, RowContentsInterface } from '../table/RowContent'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -192,7 +193,10 @@ function formatJobRow(
           className="d-inline-flex flex-wrap align-items-center gap-3"
         >
           {markJobAsCompletedIcon(job, setCompleted)}
-          {pinJobIcon(job, workerId, setPinned)}
+          <PinIcon
+            isPinned={job.pinnedBy.some(worker => worker.workerId === workerId)}
+            setPinned={setPinned}
+          />
           {hideJobIcon(job, setHidden)}
           <Link
             href={`/jobs/${job.id}`}
@@ -225,27 +229,6 @@ function markJobAsCompletedIcon(
       onClick={e => {
         e.stopPropagation()
         setCompleted(!job.completed)
-      }}
-    ></i>
-  )
-}
-
-function pinJobIcon(
-  job: ProposedJobComplete,
-  workerId: string,
-  setPinned: (pinned: boolean) => void
-) {
-  const isPinned = job.pinnedBy.some(worker => worker.workerId === workerId)
-  const color = isPinned ? 'smj-action-pinned' : 'smj-action-pin'
-  const title = isPinned ? 'Odepnout' : 'Připnout'
-  const icon = isPinned ? 'fa-thumbtack' : 'fa-thumbtack'
-  return (
-    <i
-      className={`fas ${icon} ${color}`}
-      title={title}
-      onClick={e => {
-        e.stopPropagation()
-        setPinned(!isPinned)
       }}
     ></i>
   )

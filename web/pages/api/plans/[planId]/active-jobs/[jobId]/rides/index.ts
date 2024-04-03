@@ -1,14 +1,14 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { parseForm } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { WrappedError, ApiBadRequestError, ApiError } from 'lib/types/api-error'
 import { createRide } from 'lib/data/rides'
 import logger from 'lib/logger/logger'
+import { ApiError, WrappedError } from 'lib/types/api-error'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { RideCreateData, RideCreateSchema } from 'lib/types/ride'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { parseForm } from 'lib/api/parse-form'
 
 export type RidesAPIPostData = RideCreateData
 export type RidesAPIPostResponse = Awaited<ReturnType<typeof createRide>>
@@ -39,6 +39,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }

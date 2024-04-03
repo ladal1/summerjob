@@ -9,6 +9,7 @@ export default async function PlansPage() {
   const plans = await getPlans()
   const serialized = serializePlans(plans)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { startDate, endDate } = summerJobEvent!
   return (
     <PlansClientPage

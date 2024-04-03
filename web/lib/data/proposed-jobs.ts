@@ -49,17 +49,15 @@ export async function getProposedJobPhotoIdsById(
     select: {
       photos: {
         select: {
-          id: true
-        }
+          id: true,
+        },
       },
     },
   })
   return jobs
 }
 
-export async function hasProposedJobPhotos(
-  id: string
-): Promise<boolean> {
+export async function hasProposedJobPhotos(id: string): Promise<boolean> {
   const jobs = await getProposedJobPhotoIdsById(id)
   return jobs?.photos?.length !== 0
 }
@@ -156,32 +154,35 @@ export async function updateProposedJob(
   }
   const { allergens, pinnedByChange, ...rest } = proposedJobData
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
-  
-  if(pinnedByChange !== undefined && !pinnedByChange.pinned) {
-    await prisma.pinnedProposedJobByWorker.delete({
-      where: { workerId_jobId: { workerId: pinnedByChange.workerId, jobId: id } },
-    })
-  }
 
-  const proposedJob = await prisma.proposedJob.update({
-    where: {
-      id,
-    },
-    data: {
-      pinnedBy: {
-        ...(pinnedByChange?.pinned && {
-          create: {
-            worker: {
-              connect: {
-                id: pinnedByChange.workerId,
+  const proposedJob = await prisma.$transaction(async tx => {
+    if (pinnedByChange !== undefined && !pinnedByChange.pinned) {
+      await tx.pinnedProposedJobByWorker.delete({
+        where: {
+          workerId_jobId: { workerId: pinnedByChange.workerId, jobId: id },
+        },
+      })
+    }
+    return await tx.proposedJob.update({
+      where: {
+        id,
+      },
+      data: {
+        pinnedBy: {
+          ...(pinnedByChange?.pinned && {
+            create: {
+              worker: {
+                connect: {
+                  id: pinnedByChange.workerId,
+                },
               },
             },
-          }
-        }),
+          }),
+        },
+        ...rest,
+        ...allergyUpdate,
       },
-      ...rest,
-      ...allergyUpdate,
-    },
+    })
   })
   return proposedJob
 }
@@ -194,9 +195,16 @@ export async function createProposedJob(data: ProposedJobCreateData) {
 }
 
 export async function deleteProposedJob(id: string) {
-  await prisma.proposedJob.delete({
-    where: {
-      id,
-    },
+  await prisma.$transaction(async tx => {
+    await tx.pinnedProposedJobByWorker.deleteMany({
+      where: {
+        jobId: id,
+      },
+    })
+    await tx.proposedJob.delete({
+      where: {
+        id,
+      },
+    })
   })
 }

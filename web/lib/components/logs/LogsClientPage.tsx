@@ -131,7 +131,7 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
         </div>
         <div className="row gx-3">
           <div className="col-12 col-lg-12">
-            <LogsTable logs={data!.logs} />
+            <LogsTable logs={data ? data.logs : []} />
           </div>
         </div>
         <div className="row">

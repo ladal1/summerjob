@@ -1,23 +1,16 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import {
-  createDirectory,
-  deleteDirectory,
-  deleteFile,
-  getUploadDirForImages,
-} from 'lib/api/fileManager'
+import { getUploadDirForImages } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
 import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
-import { deletePhoto, getPhotoById } from 'lib/data/photo'
 import {
   deleteProposedJob,
   getProposedJobById,
   getProposedJobPhotoIdsById,
-  hasProposedJobPhotos,
   updateProposedJob,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
@@ -25,16 +18,12 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import {
-  ProposedJobUpdateSchema,
   ProposedJobUpdateDataInput,
+  ProposedJobUpdateSchema,
 } from 'lib/types/proposed-job'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-async function get(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  session: ExtendedSession
-) {
+async function get(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
   const job = await getProposedJobById(id)
   if (!job) {

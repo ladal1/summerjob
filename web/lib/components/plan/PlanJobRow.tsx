@@ -50,15 +50,12 @@ export function PlanJobRow({
   onWorkerHover,
 }: PlanJobRowProps) {
   //#region Update job
-  const {
-    trigger: triggerUpdate,
-    isMutating: isBeingUpdated,
-    error: updatingError,
-  } = useAPIActiveJobUpdate(job.id, job.planId, {
-    onSuccess: () => {
-      reloadPlan()
-    },
-  })
+  const { trigger: triggerUpdate, isMutating: isBeingUpdated } =
+    useAPIActiveJobUpdate(job.id, job.planId, {
+      onSuccess: () => {
+        reloadPlan()
+      },
+    })
 
   const [workerToMove, setWorkerToMove] = useState<WorkerComplete | undefined>(
     undefined

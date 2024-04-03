@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { UserComplete } from 'lib/types/user'
 import { UserAPIPatchData } from 'pages/api/users/[id]'
 import { useData, useDataPartialUpdate } from './fetcher'

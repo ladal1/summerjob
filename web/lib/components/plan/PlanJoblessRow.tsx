@@ -38,15 +38,11 @@ export function PlanJoblessRow({
   const [workerIds, setWorkerIds] = useState<string[]>([])
   const getSourceJobId = () => sourceJobId
 
-  const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
-    getSourceJobId,
-    planId,
-    {
-      onSuccess: () => {
-        reloadPlan()
-      },
-    }
-  )
+  const { trigger } = useAPIActiveJobUpdateDynamic(getSourceJobId, planId, {
+    onSuccess: () => {
+      reloadPlan()
+    },
+  })
 
   useEffect(() => {
     if (sourceJobId) {
@@ -89,7 +85,9 @@ export function PlanJoblessRow({
       <ExpandableRow
         data={[{ content: `Bez práce (${joblessWorkers.length})` }]}
         colspan={numColumns}
-        className={joblessWorkers.length > 0 ? 'smj-background-error' : ''}
+        className={
+          joblessWorkers.length > 0 ? 'smj-background-error bg-jobless' : ''
+        }
         onDrop={onWorkerDropped()}
       >
         <div className="smj-light-grey">

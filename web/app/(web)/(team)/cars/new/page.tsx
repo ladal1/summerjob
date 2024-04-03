@@ -1,5 +1,4 @@
 import CreateCar from 'lib/components/car/CreateCar'
-import EditBox from 'lib/components/forms/EditBox'
 import { getWorkers } from 'lib/data/workers'
 
 export const dynamic = 'force-dynamic'
@@ -13,9 +12,5 @@ export default async function CreateCarPage() {
       lastName: worker.lastName,
     }
   })
-  return (
-    <EditBox>
-      <CreateCar workers={names} />
-    </EditBox>
-  )
+  return <CreateCar workers={names} />
 }

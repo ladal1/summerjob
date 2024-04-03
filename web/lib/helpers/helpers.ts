@@ -129,6 +129,10 @@ export function pick<
   ) as { [key in K]: key extends keyof T ? T[key] : undefined }
 }
 
+export function formatNumberAfterThreeDigits(value: string) {
+  return value.replace(/(?=(\d{3})+(?!\d))/g, ' ')
+}
+
 export function formatPhoneNumber(value: string) {
   // Remove any existing spaces and non-numeric characters
   const phoneNumber = formatNumber(value)
@@ -166,4 +170,43 @@ export function normalizeString(str: string) {
   const withRemovedAccent = removeAccent(withoutRedundantSpace)
   const inLowerCase = withRemovedAccent.toLowerCase()
   return inLowerCase
+}
+
+export function validateTimeInput(str: string) {
+  return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(str)
+}
+
+export function getHourAndMinute(time: string) {
+  return time.split(':').map(part => parseInt(part))
+}
+
+export function formateTime(time: string) {
+  const [hours, minutes] = getHourAndMinute(time)
+
+  const formattedHours = hours < 10 ? '0' + hours : hours.toString()
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes.toString()
+
+  return `${formattedHours}:${formattedMinutes}`
+}
+
+export function compareDates(dateA: Date[], dateB: Date[]) {
+  if (!dateA && !dateB) return 0
+  if (!dateA) return 1
+  if (!dateB) return -1
+
+  const firstDateA = dateA[0]
+  const firstDateB = dateB[0]
+
+  if (!firstDateA && !firstDateB) return 0
+  if (!firstDateA) return 1
+  if (!firstDateB) return -1
+
+  return firstDateA.getTime() - firstDateB.getTime()
+}
+
+export function compareTimes(timeA: string | null, timeB: string | null) {
+  if (!timeA && !timeB) return 0
+  if (!timeA) return 1
+  if (!timeB) return -1
+  return formateTime(timeA).localeCompare(formateTime(timeB))
 }

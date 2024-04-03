@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Filters } from '../filters/Filters'
+import { WorkersStatistics } from './WorkersStatistics'
 import WorkersTable from './WorkersTable'
 
 interface WorkersClientPageProps {
@@ -82,7 +83,6 @@ export default function WorkersClientPage({
   if (error && !data) {
     return <ErrorPage error={error} />
   }
-
   return (
     <>
       <PageHeader title="Pracanti">
@@ -139,16 +139,8 @@ export default function WorkersClientPage({
               />
             </div>
             <div className="col-sm-12 col-lg-2">
-              <div className="vstack smj-search-stack smj-shadow rounded-3">
-                <h5>Statistiky</h5>
-                <hr />
-                <ul className="list-group list-group-flush ">
-                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Pracantů
-                    <span>{data?.length}</span>
-                  </li>
-                </ul>
-              </div>
+              <WorkersStatistics data={filteredData ?? []} />
+
               <div
                 className="smj-search-stack smj-shadow rounded-3"
                 style={{

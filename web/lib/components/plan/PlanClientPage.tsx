@@ -1,8 +1,8 @@
 'use client'
 import ErrorPage from 'lib/components/error-page/ErrorPage'
-import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
 import { Modal, ModalSize } from 'lib/components/modal/Modal'
 import PageHeader from 'lib/components/page-header/PageHeader'
+import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
 import { PlanTable } from 'lib/components/plan/PlanTable'
 import {
   useAPIPlan,
@@ -18,18 +18,17 @@ import {
 } from 'lib/helpers/helpers'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { deserializePlan, PlanComplete } from 'lib/types/plan'
-import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import ErrorPage404 from '../404/404'
-import ConfirmationModal from '../modal/ConfirmationModal'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { Serialized } from 'lib/types/serialize'
+import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ErrorPage404 from '../404/404'
 import { Filters } from '../filters/Filters'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
-import { ToolName } from 'lib/prisma/client'
+import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
+import { PlanStatistics } from './PlanStatistics'
 
 interface PlanClientPageProps {
   id: string
@@ -80,7 +79,7 @@ export default function PlanClientPage({
     useState(false)
 
   const generatePlan = () => {
-    triggerGenerate({ planId: planData!.id })
+    if (planData) triggerGenerate({ planId: planData.id })
   }
 
   const onGeneratingErrorMessageClose = () => {
@@ -97,7 +96,7 @@ export default function PlanClientPage({
     trigger: triggerDelete,
     error: deleteError,
     reset: resetDeleteError,
-  } = useAPIPlanDelete(planData!.id, {
+  } = useAPIPlanDelete(planData?.id ?? '', {
     onSuccess: () => window.history.back(),
   })
 
@@ -128,20 +127,15 @@ export default function PlanClientPage({
     },
   })
 
-  const {
-    trigger: triggerPublish,
-    error: publishError,
-    reset: resetPublishError,
-  } = useAPIPlanPublish(planData!.id, {})
+  const { trigger: triggerPublish, error: publishError } = useAPIPlanPublish(
+    planData?.id ?? '',
+    {}
+  )
 
   const switchPublish = () => {
     if (!planData) return
     planData.published = !planData.published
     triggerPublish({ published: planData.published })
-  }
-
-  const onPublishErrorMessageClose = () => {
-    resetPublishError()
   }
 
   //#endregion Publish plan
@@ -259,34 +253,18 @@ export default function PlanClientPage({
     ]
   )
 
+  const filteredJobs = useMemo(() => {
+    if (!planData) return []
+    return planData.jobs.filter(job => {
+      return shouldShowJob(job)
+    })
+  }, [planData, shouldShowJob])
+
   //#endregion
 
   if (error && !planData) {
     return <ErrorPage error={error} />
   }
-
-  interface Tool {
-    name: ToolName
-    amount: number
-  }
-
-  interface ToolsList {
-    [key: string]: Tool
-  }
-
-  const toolsToTakeWithList: ToolsList =
-    planData?.jobs.reduce((accumulator: ToolsList, job) => {
-      const sortedTools = job.proposedJob.toolsToTakeWith.sort((a, b) =>
-        toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool])
-      )
-      sortedTools.forEach(({ tool: name, amount }) => {
-        accumulator[name] = {
-          name,
-          amount: (accumulator[name]?.amount || 0) + amount,
-        }
-      })
-      return accumulator
-    }, {}) || {}
 
   return (
     <>
@@ -377,95 +355,49 @@ export default function PlanClientPage({
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">
-                  <div className="vstack smj-search-stack smj-shadow rounded-3">
-                    <h5>Statistiky</h5>
-                    <hr />
-                    <ul className="list-group list-group-flush">
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Nasazených pracantů
-                        <span>
-                          {planData?.jobs.flatMap(x => x.workers).length}
-                        </span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Bez práce
-                        <span>
-                          {workersWithoutJob && workersWithoutJob.length}
-                        </span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Naplánované joby
-                        <span>{planData && planData.jobs.length}</span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Celkem míst v jobech
-                        <span>
-                          {planData &&
-                            planData.jobs
-                              .map(j => j.proposedJob.minWorkers)
-                              .reduce((a, b) => a + b, 0)}{' '}
-                          -{' '}
-                          {planData &&
-                            planData.jobs
-                              .map(j => j.proposedJob.maxWorkers)
-                              .reduce((a, b) => a + b, 0)}
-                        </span>
-                      </li>
-                      <li className="list-group-item ps-0 pe-0 smj-gray">
-                        Potřebné nástroje
-                        <table className="table">
-                          <tbody>
-                            {Object.entries(toolsToTakeWithList).map(
-                              ([key, tool]) => (
-                                <tr key={key} className="text-end">
-                                  <td>{toolNameMapping[tool.name]}</td>
-                                  <td>{tool.amount}</td>
-                                </tr>
-                              )
-                            )}
-                          </tbody>
-                        </table>
-                      </li>
-                    </ul>
-                  </div>
-                  <div
-                    className="smj-search-stack smj-shadow rounded-3"
-                    style={{
-                      width: '100%',
-                      maxWidth: '100%',
-                      padding: '10px',
-                      top: '20px',
-                      position: 'sticky',
-                    }}
-                  >
-                    <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
-                      Foto
-                    </h5>
-                    <hr />
-                    {workerPhotoURL ? (
-                      <Image
-                        src={workerPhotoURL}
-                        alt="Pracant"
-                        style={{
-                          objectFit: 'cover',
-                          width: '100%',
-                          height: '100%',
-                        }}
-                        width={500}
-                        height={500}
-                      />
-                    ) : (
-                      <svg
-                        viewBox="0 0 64 64"
-                        xmlns="http://www.w3.org/2000/svg"
-                        strokeWidth="3"
-                        stroke="#000000"
-                        fill="none"
-                      >
-                        <circle cx="32" cy="18.14" r="11.14" />
-                        <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
-                      </svg>
-                    )}
+                  <PlanStatistics
+                    data={filteredJobs}
+                    workersWithoutJob={workersWithoutJob}
+                  />
+                  <div className="smj-sticky-col-top" style={{ zIndex: '300' }}>
+                    <div
+                      className="smj-search-stack smj-shadow rounded-3"
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%',
+                        padding: '10px',
+                        top: '20px',
+                      }}
+                    >
+                      <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
+                        Foto
+                      </h5>
+                      <hr />
+                      {workerPhotoURL ? (
+                        <Image
+                          src={workerPhotoURL}
+                          alt="Pracant"
+                          style={{
+                            objectFit: 'cover',
+                            width: '100%',
+                            height: '100%',
+                          }}
+                          width={500}
+                          height={500}
+                        />
+                      ) : (
+                        <svg
+                          viewBox="0 0 64 64"
+                          xmlns="http://www.w3.org/2000/svg"
+                          strokeWidth="3"
+                          stroke="#000000"
+                          fill="none"
+                        >
+                          <circle cx="32" cy="18.14" r="11.14" />
+                          <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -489,7 +421,7 @@ export default function PlanClientPage({
                 onReject={() => setShowDeleteConfirmation(false)}
               >
                 <p>Opravdu chcete smazat tento plán?</p>
-                {planData!.jobs.length > 0 && (
+                {planData && planData.jobs.length > 0 && (
                   <div className="alert alert-danger">
                     Tento plán obsahuje naplánované joby!
                     <br /> Jeho odstraněním zároveň odstraníte i odpovídající

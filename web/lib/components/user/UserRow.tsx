@@ -11,7 +11,7 @@ interface UserRowProps {
 }
 
 export default function UserRow({ user, onUpdate }: UserRowProps) {
-  const { trigger, error } = useAPIUserUpdate(user.id, {
+  const { trigger } = useAPIUserUpdate(user.id, {
     onSuccess: () => onUpdate(),
   })
   const toggleLocked = () => {

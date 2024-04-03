@@ -17,13 +17,13 @@ export const ToolCreateSchema = z
     tool: z.nativeEnum(ToolName),
     amount: z
       .number({ invalid_type_error: err.invalidTypeNumber })
+      .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveNumber })
       .default(1),
     proposedJobOnSiteId: z.string().nullable().optional(),
     proposedJobToTakeWithId: z.string().nullable().optional(),
   })
   .strict()
-
 
 export type ToolCreateDataInput = z.input<typeof ToolCreateSchema>
 export type ToolCreateData = z.infer<typeof ToolCreateSchema>
