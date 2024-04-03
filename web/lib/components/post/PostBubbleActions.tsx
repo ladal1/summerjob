@@ -61,7 +61,7 @@ export const PostBubbleActions = ({
           {error && (
             <ErrorMessageModal
               onClose={reset}
-              mainMessage={'Nepodařilo se odstranit pracanta.'}
+              mainMessage={'Nepodařilo se odstranit příspěvek.'}
             />
           )}
         </>

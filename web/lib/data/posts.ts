@@ -68,31 +68,33 @@ export async function getPostPhotoById(
 
 export async function updatePost(id: string, postData: PostUpdateData) {
   const { participateChange, ...rest } = postData
-  if (participateChange !== undefined && !participateChange.isEnrolled) {
-    await prisma.participant.delete({
+  const post = await prisma.$transaction(async tx => {
+    if (participateChange !== undefined && !participateChange.isEnrolled) {
+      await tx.participant.delete({
+        where: {
+          workerId_postId: { workerId: participateChange.workerId, postId: id },
+        },
+      })
+    }
+    return await tx.post.update({
       where: {
-        workerId_postId: { workerId: participateChange.workerId, postId: id },
+        id,
       },
-    })
-  }
-  const post = await prisma.post.update({
-    where: {
-      id,
-    },
-    data: {
-      participants: {
-        ...(participateChange?.isEnrolled && {
-          create: {
-            worker: {
-              connect: {
-                id: participateChange.workerId,
+      data: {
+        participants: {
+          ...(participateChange?.isEnrolled && {
+            create: {
+              worker: {
+                connect: {
+                  id: participateChange.workerId,
+                },
               },
             },
-          },
-        }),
+          }),
+        },
+        ...rest,
       },
-      ...rest,
-    },
+    })
   })
   return post
 }
@@ -109,9 +111,16 @@ export async function createPost(data: PostCreateData) {
 }
 
 export async function deletePost(id: string) {
-  await prisma.post.delete({
-    where: {
-      id,
-    },
+  await prisma.$transaction(async tx => {
+    await tx.participant.deleteMany({
+      where: {
+        postId: id,
+      },
+    })
+    await tx.post.delete({
+      where: {
+        id,
+      },
+    })
   })
 }

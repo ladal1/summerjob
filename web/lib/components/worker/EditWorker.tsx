@@ -308,6 +308,7 @@ export default function EditWorker({
               <LinkToOtherForm
                 label="Auta je možné přiřadit v záložce Auta"
                 handleEditedForm={handleSubmitFromLink}
+                margin={false}
               />
             </div>
           ) : (

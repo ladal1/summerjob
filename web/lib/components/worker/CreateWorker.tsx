@@ -17,6 +17,7 @@ import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
+import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -50,6 +51,12 @@ export default function CreateWorker({
 
   const [saved, setSaved] = useState(false)
 
+  const [linkToOtherForm, setLinkToOtherForm] = useState<string | null>(null)
+
+  const handleSubmitFromLink = () => {
+    setLinkToOtherForm('/cars/new')
+  }
+
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true)
@@ -63,6 +70,11 @@ export default function CreateWorker({
 
   const onConfirmationClosed = () => {
     setSaved(false)
+    if (linkToOtherForm) {
+      router.push(linkToOtherForm)
+    } else {
+      router.back()
+    }
     router.back()
   }
 
@@ -199,11 +211,12 @@ export default function CreateWorker({
               <label className="form-label d-block fw-bold mt-4" htmlFor="car">
                 Auta
               </label>
-              <p>
-                <i>
-                  Auta je možné přiřadit v záložce Auta po vytvořeni pracanta.
-                </i>
-              </p>
+              <LinkToOtherForm
+                label="Auta je možné přiřadit v záložce Auta po vytvořeni pracanta."
+                handleEditedForm={handleSubmitFromLink}
+                labelBold={false}
+                margin={false}
+              />
             </>
           )}
           <TextAreaInput

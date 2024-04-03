@@ -1,5 +1,5 @@
-import { Id, api, createAreaData, createProposedJobData } from './common'
 import chai from 'chai'
+import { Id, api, createAreaData } from './common'
 
 chai.should()
 
