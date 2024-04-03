@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import DeleteIcon from '../forms/DeleteIcon'
+import DeleteIcon from '../table/icons/DeleteIcon'
 import { PostComplete } from 'lib/types/post'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { useAPIPostDelete, useAPIPostUpdate } from 'lib/fetcher/post'

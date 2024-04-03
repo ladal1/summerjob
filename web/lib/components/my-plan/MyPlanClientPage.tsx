@@ -92,7 +92,7 @@ export default function MyPlanClientPage({
         </div>
       </PageHeader>
 
-      <div className="container">
+      <div className="container pb-4">
         {selectedPlan === undefined ? (
           <HeaderNoContent label="Tento den nemáte naplánovanou práci." />
         ) : (

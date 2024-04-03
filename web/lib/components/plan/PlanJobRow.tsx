@@ -24,6 +24,7 @@ import MoveWorkerModal from './MoveWorkerModal'
 import RideSelect from './RideSelect'
 import ToggleCompletedCheck from './ToggleCompletedCheck'
 import { RowCells } from '../table/RowCells'
+import MarkAsCompletedIcon from '../table/icons/MarkAsCompletedIcon'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan

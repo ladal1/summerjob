@@ -1,7 +1,7 @@
 import { useAPIWorkerDelete } from 'lib/fetcher/worker'
 import { WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
-import DeleteIcon from '../forms/DeleteIcon'
+import DeleteIcon from '../table/icons/DeleteIcon'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { SimpleRow } from '../table/SimpleRow'
 

@@ -2,7 +2,7 @@ import { useAPIAreaDelete } from 'lib/fetcher/area'
 import { AreaComplete } from 'lib/types/area'
 import Link from 'next/link'
 import { useState } from 'react'
-import DeleteIcon from '../forms/DeleteIcon'
+import DeleteIcon from '../table/icons/DeleteIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 

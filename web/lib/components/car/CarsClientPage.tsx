@@ -67,7 +67,7 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
             </div>
           </div>
           <div className="row gx-3">
-            <div className="col-sm-12 col-lg-10">
+            <div className="col-lg-10 pb-2">
               <CarsTable data={filteredCars} reload={requestReload} />
             </div>
             <div className="col-sm-12 col-lg-2">

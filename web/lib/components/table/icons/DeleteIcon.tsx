@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ConfirmationModal from '../modal/ConfirmationModal'
+import ConfirmationModal from '../../modal/ConfirmationModal'
 
 interface DeleteIconProps {
   onClick: () => void

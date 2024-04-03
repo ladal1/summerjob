@@ -11,13 +11,14 @@ import {
 import { ProposedJobComplete } from 'lib/types/proposed-job'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import DeleteIcon from '../forms/DeleteIcon'
+import DeleteIcon from '../table/icons/DeleteIcon'
 import { PinIcon } from '../forms/PinIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow } from '../table/ExpandableRow'
 import { RowCells } from '../table/RowCells'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
+import MarkAsCompletedIcon from '../table/icons/MarkAsCompletedIcon'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -192,7 +193,10 @@ function formatJobRow(
           key={job.id}
           className="d-inline-flex flex-wrap align-items-center gap-3"
         >
-          {markJobAsCompletedIcon(job, setCompleted)}
+          <MarkAsCompletedIcon
+            completed={job.completed}
+            setCompleted={setCompleted}
+          />
           <PinIcon
             isPinned={job.pinnedBy.some(worker => worker.workerId === workerId)}
             setPinned={setPinned}
@@ -211,27 +215,6 @@ function formatJobRow(
       stickyRight: true,
     },
   ]
-}
-
-function markJobAsCompletedIcon(
-  job: ProposedJobComplete,
-  setCompleted: (completed: boolean) => void
-) {
-  const color = job.completed ? 'smj-action-completed' : 'smj-action-complete'
-  const title = job.completed
-    ? 'Označit jako nedokončený'
-    : 'Označit jako dokončený'
-  const icon = job.completed ? 'fa-times' : 'fa-check'
-  return (
-    <i
-      className={`fas ${icon} ${color}`}
-      title={title}
-      onClick={e => {
-        e.stopPropagation()
-        setCompleted(!job.completed)
-      }}
-    ></i>
-  )
 }
 
 function hideJobIcon(
