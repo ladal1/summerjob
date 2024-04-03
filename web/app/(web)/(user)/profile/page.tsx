@@ -1,6 +1,5 @@
 import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
-import EditBox from 'lib/components/forms/EditBox'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
@@ -16,6 +15,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function MyProfilePage() {
   const session = await getSMJSession()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const worker = await getWorkerById(session!.userID)
 
   if (!worker || !worker.availability) {
@@ -23,6 +23,7 @@ export default async function MyProfilePage() {
   }
   const serializedWorker = serializeWorker(worker)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
@@ -31,16 +32,13 @@ export default async function MyProfilePage() {
 
   return (
     <>
-      <section className="mb-3">
-        <EditBox>
-          <EditWorker
-            serializedWorker={serializedWorker}
-            allDates={allDates}
-            isProfilePage={true}
-            carAccess={isCarAccessAllowed.success}
-          />
-        </EditBox>
-      </section>
+      <EditWorker
+        serializedWorker={serializedWorker}
+        allDates={allDates}
+        isProfilePage={true}
+        carAccess={isCarAccessAllowed.success}
+        label="Upravit profil"
+      />
     </>
   )
 }

@@ -129,17 +129,26 @@ export function pick<
   ) as { [key in K]: key extends keyof T ? T[key] : undefined }
 }
 
+export function formatNumberAfterThreeDigits(value: string) {
+  return value.replace(/(?=(\d{3})+(?!\d))/g, ' ')
+}
+
 export function formatPhoneNumber(value: string) {
   // Remove any existing spaces and non-numeric characters
-  const phoneNumber = value.replace(/\D/g, '')
+  const phoneNumber = formatNumber(value)
   // Start with +
   const startsWithPlus = value.startsWith('+')
   // Limitation
   const maxDigits = startsWithPlus ? 12 : 9
   const limitedPhoneNumber = phoneNumber.slice(0, maxDigits)
   // Add spaces after every third digit
-  const formattedPhoneNumber = limitedPhoneNumber.replace(/(\d{3})(?=\d)/g, '$1 ')
-  return startsWithPlus ? `+${formattedPhoneNumber}` : formattedPhoneNumber || ""
+  const formattedPhoneNumber = limitedPhoneNumber.replace(
+    /(\d{3})(?=\d)/g,
+    '$1 '
+  )
+  return startsWithPlus
+    ? `+${formattedPhoneNumber}`
+    : formattedPhoneNumber || ''
 }
 
 // Replace redundant spaces by one space and trim spaces from front.
@@ -147,15 +156,57 @@ export function removeRedundantSpace(value: string) {
   return value.replace(/\s+/g, ' ').trimStart()
 }
 
-// Get rid of anything that isn't positive number
+// Get rid of anything that isn't non negative number
 export function formatNumber(value: string) {
   return value.replace(/\D/g, '')
 }
 
-export function allowForNumber(e: React.KeyboardEvent<HTMLInputElement>) {
-  const allowedChars = "0123456789"
-  const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"]
-  if (!allowedChars.includes(e.key) && !allowedKeys.includes(e.key)) {
-    e.preventDefault();
-  }
+export function removeAccent(str: string) {
+  return str.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+}
+
+export function normalizeString(str: string) {
+  const withoutRedundantSpace = removeRedundantSpace(str)
+  const withRemovedAccent = removeAccent(withoutRedundantSpace)
+  const inLowerCase = withRemovedAccent.toLowerCase()
+  return inLowerCase
+}
+
+export function validateTimeInput(str: string) {
+  return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(str)
+}
+
+export function getHourAndMinute(time: string) {
+  return time.split(':').map(part => parseInt(part))
+}
+
+export function formateTime(time: string) {
+  const [hours, minutes] = getHourAndMinute(time)
+
+  const formattedHours = hours < 10 ? '0' + hours : hours.toString()
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes.toString()
+
+  return `${formattedHours}:${formattedMinutes}`
+}
+
+export function compareDates(dateA: Date[], dateB: Date[]) {
+  if (!dateA && !dateB) return 0
+  if (!dateA) return 1
+  if (!dateB) return -1
+
+  const firstDateA = dateA[0]
+  const firstDateB = dateB[0]
+
+  if (!firstDateA && !firstDateB) return 0
+  if (!firstDateA) return 1
+  if (!firstDateB) return -1
+
+  return firstDateA.getTime() - firstDateB.getTime()
+}
+
+export function compareTimes(timeA: string | null, timeB: string | null) {
+  if (!timeA && !timeB) return 0
+  if (!timeA) return 1
+  if (!timeB) return -1
+  return formateTime(timeA).localeCompare(formateTime(timeB))
 }

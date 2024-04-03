@@ -12,7 +12,9 @@ describe('Cars', function () {
 
   it('creates a car', async function () {
     const owner = await api.createWorker()
+    console.log(owner)
     const body = createCarData(owner.id)
+    console.log(body)
     const resp = await api.post('/api/cars', Id.CARS, body)
     resp.status.should.equal(201)
     resp.body.should.be.an('object')

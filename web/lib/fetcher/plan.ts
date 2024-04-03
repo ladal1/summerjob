@@ -1,8 +1,6 @@
-import {
-  deserializeWorker,
-  deserializeWorkerAvailability,
-  serializeWorker,
-} from 'lib/types/worker'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { deserializeWorkerAvailability } from 'lib/types/worker'
 import type { PlansAPIGetResponse, PlansAPIPostData } from 'pages/api/plans'
 import type { PlanAPIGetResponse } from 'pages/api/plans/[planId]'
 import {

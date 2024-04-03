@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { SummerJobEventsAPIPostData } from 'pages/api/summerjob-events'
 import { useDataCreate, useDataDelete, useDataPartialUpdate } from './fetcher'
 

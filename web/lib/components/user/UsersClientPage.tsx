@@ -1,12 +1,14 @@
 'use client'
 
 import { useAPIUsers } from 'lib/fetcher/user'
+import { normalizeString } from 'lib/helpers/helpers'
 import { Permission } from 'lib/types/auth'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeUsers, UserComplete } from 'lib/types/user'
-import { useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import ErrorPage from '../error-page/ErrorPage'
-import { UsersFilters, UsersFiltersPermission } from './UsersFilters'
+import { Filters } from '../filters/Filters'
 import UsersTable from './UsersTable'
 
 interface UsersClientPageProps {
@@ -15,6 +17,7 @@ interface UsersClientPageProps {
 
 export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   const inititalUsers = deserializeUsers(sUsers)
+
   const { data, error, mutate } = useAPIUsers({
     fallbackData: inititalUsers,
   })
@@ -28,15 +31,35 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   }, [data])
   const permissions = useMemo(() => getPermissions(), [])
 
-  const [filter, setFilter] = useState('')
-  const [filterPermission, setFilterPermission] =
-    useState<UsersFiltersPermission>(permissions[0])
+  // get query parameters
+  const searchParams = useSearchParams()
+  const permissionQ = searchParams?.get('permission')
+  const searchQ = searchParams?.get('search')
+
+  const [filter, setFilter] = useState(searchQ ?? '')
+  const [filterPermission, setFilterPermission] = useState(
+    permissions.find(a => a.id === permissionQ) || permissions[0]
+  )
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(
+      `?${new URLSearchParams({
+        permission: filterPermission.id,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
+  }, [filterPermission, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(
     () =>
       filterUsers(
-        filter,
+        normalizeString(filter).trimEnd(),
         fulltextData,
         Permission[filterPermission.id as keyof typeof Permission],
         sortedAlphabetically
@@ -54,20 +77,26 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
 
   return (
     <section>
-      <div className="container">
-        <div className="row">
+      <div className="container-fluid">
+        <div className="row gx-3">
           <div className="col">
-            <UsersFilters
+            <Filters
               search={filter}
               onSearchChanged={setFilter}
-              permissions={permissions}
-              selectedPermission={filterPermission}
-              onPermissionSelected={permissionSelectChanged}
+              selects={[
+                {
+                  id: 'permission',
+                  options: permissions,
+                  selected: filterPermission,
+                  onSelectChanged: permissionSelectChanged,
+                  defaultOptionId: 'all',
+                },
+              ]}
             />
           </div>
         </div>
-        <div className="row">
-          <div className="col-12">
+        <div className="row gx-3">
+          <div className="col-12 col-lg-12">
             <UsersTable users={filteredData || []} onWorkerUpdated={mutate} />
           </div>
         </div>
@@ -81,13 +110,13 @@ function getFulltextData(users?: UserComplete[]) {
   users?.forEach(user => {
     map.set(
       user.id,
-      (user.firstName + user.lastName + user.email).toLocaleLowerCase()
+      normalizeString(user.firstName + user.lastName + user.email)
     )
   })
   return map
 }
 
-function getPermissions(): UsersFiltersPermission[] {
+function getPermissions() {
   const perms = [{ id: 'all', name: 'Vyberte oprávnění' }]
   for (const perm of Object.values(Permission)) {
     perms.push({ id: perm, name: perm })

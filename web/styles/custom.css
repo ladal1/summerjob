@@ -1,3 +1,59 @@
+/* TODO: unify this file */
+:root {
+  --text: #291a00;
+  --background: #fff0d6;
+  --dark-background: #302f2f;
+  --primary: #fac505;
+  --secondary: #ffd97a;
+  --accent: #ff9500;
+  --pinned: #ffdb56;
+  --pinned-hover: #e0ba31;
+  --bubble: #ffea9c;
+  --bubble-hover: #e9d385;
+  --grey: #dbdbdb;
+  --shadow: rgba(0, 38, 255, 0.2);
+  --white: #ffffff;
+  --white-hover: #f5f5f5;
+}
+
+.smj-text {
+  color: #291a00;
+}
+
+.smj-text:hover {
+  color: #ff9500;
+}
+
+.smj-white-bubble {
+  background-color: var(--white);
+}
+.smj-white-bubble:hover {
+  background-color: var(--white-hover);
+}
+
+.smj-dark {
+  background-color: var(--dark-background);
+}
+
+.smj-grey {
+  background-color: var(--grey);
+}
+
+.smj-color-bubble-pinned {
+  background-color: var(--pinned);
+}
+.smj-color-bubble-pinned:hover {
+  background-color: var(--pinned-hover);
+}
+
+.smj-color-bubble {
+  background-color: var(--bubble);
+}
+
+.smj-color-bubble:hover {
+  background-color: var(--bubble-hover);
+}
+
 .nav-item .nav-link {
   padding-top: 0.2rem !important;
   padding-bottom: 0.2rem !important;
@@ -42,14 +98,6 @@
 .header-controlbar .btn {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-}
-
-.row-plan-job {
-  padding-top: 11px;
-  padding-bottom: 11px;
-  background: #f4f1b6;
-  padding-left: 12px;
-  padding-right: 12px;
 }
 
 .row-plan-no-assignment {
@@ -115,12 +163,24 @@ img.smj-nav-logo {
   background-color: #f5f5f5 !important;
 }
 
+.smj-white {
+  background: rgb(247, 247, 247) !important;
+}
+
 .smj-table-body {
-  background: rgb(247, 247, 247);
+  background: rgb(247, 247, 247) !important;
+}
+
+.smj-table-body:hover {
+  background: rgb(228, 228, 228) !important;
+}
+
+.btn {
+  box-shadow: 1px 1px 2px 2px var(--shadow);
 }
 
 .smj-shadow {
-  box-shadow: 1px 1px 6px;
+  box-shadow: 2px 2px 2px 3px var(--shadow);
 }
 
 .smj-expandable-row,
@@ -130,7 +190,11 @@ img.smj-nav-logo {
 }
 
 .smj-expandable-row {
-  background-color: #f4f1b6 !important;
+  background-color: #ececec !important;
+}
+
+.smj-expandable-row:hover {
+  background-color: #dddddd !important;
 }
 
 .smj-expandable-row > td:first-child > i,
@@ -152,16 +216,30 @@ img.smj-nav-logo {
   transition: all 0.2s ease-out;
 }
 
+.smj-sticky-col-bottom {
+  position: sticky;
+  z-index: 100;
+  bottom: 0;
+}
+
+.smj-sticky-col-top {
+  position: sticky;
+  z-index: 500;
+  top: 0;
+}
+
 .smj-sticky-col-right {
   position: sticky;
+  z-index: 0;
   right: 0;
-  box-shadow: -5px 0 5px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: -5px 0px 5px -3px var(--shadow) !important;
 }
 
 .smj-sticky-col-left {
   position: sticky;
+  z-index: 0;
   left: 0;
-  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 5px 0px 5px -3px var(--shadow) !important;
 }
 
 .smj-light-grey {
@@ -189,7 +267,7 @@ img.smj-nav-logo {
 }
 
 .smj-filter-select:focus {
-  box-shadow: inset 0 -2px 0 #fdc345; 
+  box-shadow: inset 0 -2px 0 #fdc345;
 }
 
 .smj-filter-select {
@@ -198,16 +276,16 @@ img.smj-nav-logo {
   padding: 0 30px 0 0px;
   -webkit-padding-end: 30px;
   -webkit-padding-start: 0px;
-  font-size: 20px; 
+  font-size: 20px;
 }
 
 .smj-filter-select option {
   width: 100%;
   color: white !important;
-  font-size: 16px; 
+  font-size: 16px;
   padding: 20px;
-  overflow-y: auto; 
-  overflow-x: auto; 
+  overflow-y: auto;
+  overflow-x: auto;
   max-height: 20px;
 }
 
@@ -229,7 +307,15 @@ img.smj-nav-logo {
 }
 
 .smj-dropdown:focus {
-  box-shadow: inset 0 -2px 0 #fdc345 !important; 
+  box-shadow: inset 0 -2px 0 #fdc345 !important;
+}
+
+.hiddenInput {
+  height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  overflow: hidden;
 }
 
 .smj-dropdown-menu {
@@ -257,6 +343,10 @@ img.smj-nav-logo {
 
 .smj-dropdown-item:active {
   background-color: #fdc345;
+}
+
+.smj-selected {
+  background-color: #facf81;
 }
 
 .smj-default-option {
@@ -300,6 +390,10 @@ img.smj-nav-logo {
 
 .smj-action-delete:hover {
   color: #e40000;
+}
+
+.smj-action-pinned-color {
+  color: #d76e13;
 }
 
 .smj-action-pinned {
@@ -367,13 +461,18 @@ img.smj-nav-logo {
   }
 }
 
-.btn-check:checked + .btn-day-select, .btn-check:checked + .btn-allergy-select {
+.btn-check:checked + .btn-day-select,
+.btn-check:checked + .btn-allergy-select {
   box-shadow: inset 2px 3px 1px 0px #d7c59d;
   background-color: #ffe9b8 !important;
 }
 
 .btn-disabled {
   background-color: #adadad;
+}
+
+.smj-range {
+  max-width: 250px;
 }
 
 .smj-checkbox {
@@ -383,16 +482,21 @@ img.smj-nav-logo {
 
 .smj-checkbox:focus {
   border: #adadad;
-  box-shadow: 0 0 4px #fdc345;
+  box-shadow: 0 0 4px #fdc345 !important;
 }
 
 .smj-checkbox:not(:checked) {
-  background-color: white;
+  background-color: white !important;
 }
 
 .smj-checkbox:checked {
-  border-color: #fdc345;
-  background-color: #fdc345;
+  border-color: #fdc345 !important;
+  background-color: #fdc345 !important;
+}
+
+.smj-form-check-input:checked {
+  background-color: #ffbc06 !important;
+  border-color: #ffbc06 !important;
 }
 
 .smj-textarea {
@@ -400,11 +504,15 @@ img.smj-nav-logo {
 }
 
 .smj-textarea:focus {
-  box-shadow: inset 0 -2px 0 #fdc345 !important; 
+  box-shadow: inset 0 -2px 0 #fdc345 !important;
 }
 
 .smj-input:focus {
-  box-shadow: inset 0 -2px 0 #fdc345 !important; 
+  box-shadow: inset 0 -2px 0 #fdc345 !important;
+}
+
+.smj-progress-bar {
+  background-color: #fdc345 !important;
 }
 
 .text-small {
@@ -416,12 +524,20 @@ img.smj-nav-logo {
 }
 
 .bg-category-done:hover {
-  background-color: #b4ceba;
+  background-color: #b4ceba !important;
+}
+
+.bg-jobless {
+  background-color: #f1a697 !important;
+}
+
+.bg-jobless:hover {
+  background-color: #da6f5a !important;
 }
 
 .smj-completed-job-row td:first-of-type::before {
   background-color: #d4edda !important;
-  content: "";
+  content: '';
   height: 2.5rem;
   width: 0.5rem;
   display: block;
@@ -435,16 +551,16 @@ img.smj-nav-logo {
 }
 
 .bg-category-hidden {
-  background-color: #dddddd;
+  background-color: #b6b6b6;
 }
 
 .bg-category-hidden:hover {
-  background-color: #b9b9b9;
+  background-color: #a3a3a3;
 }
 
 .smj-hidden-job-row td:first-of-type::before {
   background-color: #dddddd;
-  content: "";
+  content: '';
   height: 2.5rem;
   width: 0.5rem;
   display: block;
@@ -519,7 +635,7 @@ img.smj-nav-logo {
   display: none;
   background-color: #f9f9f9;
   color: #333;
-  margin-left: 5px
+  margin-left: 5px;
 }
 
 .btn:hover .hover-text {
@@ -556,12 +672,75 @@ img.smj-nav-logo {
 }
 
 .smj-map-container {
+  z-index: 1; /* Fix for too high z-index of zoom panel */
   height: 370px;
-  width: 100%; 
+  width: 100%;
 }
 
 @media (max-width: 768px) {
   .smj-map-container {
     height: 210px;
   }
+}
+
+.pill {
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  padding: 8px 16px;
+  margin: 4px 8px 4px 0px;
+  display: flex;
+  align-items: center;
+}
+
+.pill-static {
+  background-color: #e0e0e0;
+  border-radius: 16px;
+  padding: 4px 10px;
+  margin: 4px 8px 4px 0px;
+  display: flex;
+  align-items: center;
+}
+
+.pill:hover {
+  background-color: #b6b6b6;
+}
+
+.pill-close {
+  margin-left: 8px;
+  cursor: pointer;
+  color: #555;
+}
+
+.smj-post-section {
+  background-color: #ffffff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.smj-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background-color: #cccccc;
+  cursor: pointer;
+}
+
+.smj-section-header:hover {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background-color: #b6b6b6;
+  cursor: pointer;
+}
+
+.smj-sort-choice {
+  background-color: #e0e0e0;
+}
+
+.smj-sort-choice:hover {
+  background-color: #b6b6b6;
+}
+
+.smj-sort-choice.selected {
+  background-color: #fdc345;
 }

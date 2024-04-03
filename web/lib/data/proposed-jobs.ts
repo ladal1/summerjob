@@ -22,6 +22,14 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
+      photos: true,
+      pinnedBy: {
+        select: {
+          workerId: true,
+        },
+      },
     },
   })
   return job
@@ -34,16 +42,24 @@ export async function getProposedJobPhotoIdsById(
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const proposedJob = await prisma.proposedJob.findUnique({
+  const jobs = await prisma.proposedJob.findUnique({
     where: {
       id: id,
     },
     select: {
-      photoIds: true,
+      photos: {
+        select: {
+          id: true,
+        },
+      },
     },
   })
-  
-  return proposedJob
+  return jobs
+}
+
+export async function hasProposedJobPhotos(id: string): Promise<boolean> {
+  const jobs = await getProposedJobPhotoIdsById(id)
+  return jobs?.photos?.length !== 0
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
@@ -58,6 +74,14 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
+      photos: true,
+      pinnedBy: {
+        select: {
+          workerId: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -102,6 +126,14 @@ export async function getProposedJobsAssignableTo(
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
+      photos: true,
+      pinnedBy: {
+        select: {
+          workerId: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -120,17 +152,37 @@ export async function updateProposedJob(
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const { allergens, ...rest } = proposedJobData
+  const { allergens, pinnedByChange, ...rest } = proposedJobData
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
 
-  const proposedJob = await prisma.proposedJob.update({
-    where: {
-      id,
-    },
-    data: {
-      ...rest,
-      ...allergyUpdate,
-    },
+  const proposedJob = await prisma.$transaction(async tx => {
+    if (pinnedByChange !== undefined && !pinnedByChange.pinned) {
+      await tx.pinnedProposedJobByWorker.delete({
+        where: {
+          workerId_jobId: { workerId: pinnedByChange.workerId, jobId: id },
+        },
+      })
+    }
+    return await tx.proposedJob.update({
+      where: {
+        id,
+      },
+      data: {
+        pinnedBy: {
+          ...(pinnedByChange?.pinned && {
+            create: {
+              worker: {
+                connect: {
+                  id: pinnedByChange.workerId,
+                },
+              },
+            },
+          }),
+        },
+        ...rest,
+        ...allergyUpdate,
+      },
+    })
   })
   return proposedJob
 }
@@ -143,9 +195,16 @@ export async function createProposedJob(data: ProposedJobCreateData) {
 }
 
 export async function deleteProposedJob(id: string) {
-  await prisma.proposedJob.delete({
-    where: {
-      id,
-    },
+  await prisma.$transaction(async tx => {
+    await tx.pinnedProposedJobByWorker.deleteMany({
+      where: {
+        jobId: id,
+      },
+    })
+    await tx.proposedJob.delete({
+      where: {
+        id,
+      },
+    })
   })
 }

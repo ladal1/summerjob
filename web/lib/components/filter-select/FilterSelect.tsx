@@ -23,7 +23,7 @@ export function FilterSelect({
   defaultSelected,
 }: FilterSelectProps) {
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
-  const [selected, setSelected] = useState(defaultSelected?.name ?? '');
+  const [selected, setSelected] = useState(defaultSelected?.name ?? '')
   const [isOpen, setIsOpen] = useState(false)
 
   const dropdown = createRef<HTMLInputElement>()
@@ -40,7 +40,7 @@ export function FilterSelect({
       but also it will set selected item, that's the reason why we are exluding it from here
       */
       if (dropdown.current && !dropdown.current.contains(event.target as Node)) {
-        hideDropdown();
+        hideDropdown()
       }
     }
 
@@ -69,7 +69,7 @@ export function FilterSelect({
   }
 
   const shouldShowItem = (item: FilterSelectItem) => {
-    const isSearchEmpty = search.length === 0 || search === selected;
+    const isSearchEmpty = search.length === 0 || search === selected
     return (
       isSearchEmpty ||
       item.searchable.toLowerCase().includes(search.toLowerCase())

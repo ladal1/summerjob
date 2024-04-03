@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ActiveJobUpdateData } from 'lib/types/active-job'
 import {
   useData,

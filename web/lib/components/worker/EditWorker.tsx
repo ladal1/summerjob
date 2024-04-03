@@ -1,25 +1,32 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
-import { useState } from 'react'
-import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
-import ErrorMessageModal from '../modal/ErrorMessageModal'
-import SuccessProceedModalTest from '../modal/SuccessProceedModalTest'
-import { Serialized } from 'lib/types/serialize'
-import { formatPhoneNumber, pick, removeRedundantSpace } from 'lib/helpers/helpers'
-import { useRouter } from 'next/navigation'
-import { Allergy } from '../../prisma/client'
-import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { TextInput } from '../forms/input/TextInput'
-import { AlergyPillInput } from '../forms/input/AlergyPillInput'
-import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { Label } from '../forms/Label'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { DateBool } from 'lib/data/dateSelectionType'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
+import {
+  formatNumber,
+  formatPhoneNumber,
+  pick,
+  removeRedundantSpace,
+} from 'lib/helpers/helpers'
+import { Serialized } from 'lib/types/serialize'
+import { deserializeWorker, WorkerUpdateSchema } from 'lib/types/worker'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Allergy, Skill } from '../../prisma/client'
+import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
+import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
+import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
+import { TextAreaInput } from '../forms/input/TextAreaInput'
+import { TextInput } from '../forms/input/TextInput'
+import { Label } from '../forms/Label'
+import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -29,6 +36,7 @@ interface EditWorkerProps {
   allDates: DateBool[][]
   isProfilePage: boolean
   carAccess: boolean
+  label: string
 }
 
 export default function EditWorker({
@@ -36,6 +44,7 @@ export default function EditWorker({
   allDates,
   isProfilePage,
   carAccess,
+  label,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker)
 
@@ -53,8 +62,11 @@ export default function EditWorker({
       email: worker.email,
       phone: formatPhoneNumber(worker.phone),
       strong: worker.isStrong,
+      team: worker.isTeam,
       note: worker.note,
       allergyIds: worker.allergies as Allergy[],
+      age: worker.age,
+      skills: worker.skills as Skill[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
         adorationDays: worker.availability.adorationDays.map(day =>
@@ -81,37 +93,39 @@ export default function EditWorker({
 
   const onConfirmationClosed = () => {
     setSaved(false)
-    if (isHandlingCar) {
-      router.push(`/cars/${carRoute}`)
-    }
-    if (!isProfilePage) {
+    if (linkToOtherForm) {
+      router.push(linkToOtherForm)
+    } else if (!isProfilePage) {
       router.back()
     }
   }
   //#endregion
 
-  //#region Car
-  const [isHandlingCar, setIsHandlingCar] = useState(false);
-  const [carRoute, setCarRoute] = useState('new')
+  //#region Other form
 
-  const handleAddCar = () => {
-    setIsHandlingCar(true)
+  const [linkToOtherForm, setLinkToOtherForm] = useState<string | null>(null)
+  const handleEditCar = (id: string) => {
+    setLinkToOtherForm(`/cars/${id}`)
   }
-
-  const handleEditCar = (route: string) => {
-    setIsHandlingCar(true)
-    setCarRoute(route)
+  const handleSubmitFromLink = () => {
+    setLinkToOtherForm('/cars/new')
   }
   //#endregion
 
   //#region File
 
   const removeNewPhoto = () => {
-    setValue('photoFile', undefined, { shouldDirty: true, shouldValidate: true })
+    setValue('photoFile', null, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   const removeExistingPhoto = () => {
-    setValue('photoFileRemoved', true, { shouldDirty: true, shouldValidate: true })
+    setValue('photoFileRemoved', true, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   const registerPhoto = (fileList: FileList) => {
@@ -122,200 +136,219 @@ export default function EditWorker({
 
   return (
     <>
-      <div className="row">
-        <div className="col">
-          <h3>
-            {worker.firstName} {worker.lastName}
-          </h3>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)}>
+      <Form
+        label={label}
+        isInputDisabled={isMutating}
+        onConfirmationClosed={onConfirmationClosed}
+        resetForm={reset}
+        saved={saved}
+        error={error}
+        formId="edit-worker"
+        shouldShowBackButton={!isProfilePage}
+      >
+        <form id="edit-worker" onSubmit={handleSubmit(onSubmit)}>
+          <TextInput
+            id="firstName"
+            label="Jméno"
+            placeholder="Jméno"
+            register={() =>
+              register('firstName', {
+                onChange: e =>
+                  (e.target.value = removeRedundantSpace(e.target.value)),
+              })
+            }
+            errors={errors}
+            mandatory
+            margin={false}
+          />
+          <TextInput
+            id="lastName"
+            label="Příjmení"
+            placeholder="Příjmení"
+            errors={errors}
+            register={() =>
+              register('lastName', {
+                onChange: e =>
+                  (e.target.value = removeRedundantSpace(e.target.value)),
+              })
+            }
+            mandatory
+          />
+          {!isProfilePage && (
             <TextInput
-              id="firstName"
-              label="Jméno"
-              placeholder="Jméno"
-              register={() => register("firstName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
+              id="age"
+              label="Věk"
+              placeholder="Věk"
+              min={1}
+              register={() =>
+                register('age', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
               errors={errors}
             />
-            <TextInput
-              id="lastName"
-              label="Příjmení"
-              placeholder="Příjmení"
-              errors={errors}
-              register={() => register("lastName", {onChange: (e) => e.target.value = removeRedundantSpace(e.target.value)})}
-            />
-            <TextInput
-              id="phone"
-              label="Telefonní číslo"
-              placeholder="(+420) 123 456 789"
-              errors={errors}
-              register={() => register("phone", {onChange: (e) => e.target.value = formatPhoneNumber(e.target.value)})}
-            />
-            <TextInput
-              id="email"
-              label="Email"
-              placeholder="uzivatel@example.cz"
-              errors={errors}
-              register={() => register("email")}
-            />
-            <p className="text-muted mt-1">
-              {isProfilePage
-                ? 'Změnou e-mailu dojde k odhlášení z aplikace.'
-                : 'Změnou e-mailu dojde k odhlášení uživatele z aplikace.'}
-            </p>
-            <div className="d-flex flex-row flex-wrap">
-              <div className="me-5">
-                <DateSelectionInput
-                  id="availability.workDays"
-                  label="Pracovní dostupnost"
-                  register={() => register("availability.workDays")}
-                  days={allDates}
-                />
-              </div>
+          )}
+          <TextInput
+            id="phone"
+            label="Telefonní číslo"
+            placeholder="(+420) 123 456 789"
+            errors={errors}
+            register={() =>
+              register('phone', {
+                onChange: e =>
+                  (e.target.value = formatPhoneNumber(e.target.value)),
+              })
+            }
+            mandatory
+          />
+          <TextInput
+            id="email"
+            label="Email"
+            placeholder="uzivatel@example.cz"
+            errors={errors}
+            register={() => register('email')}
+            mandatory
+          />
+          <p className="text-muted mt-1">
+            {isProfilePage
+              ? 'Změnou e-mailu dojde k odhlášení z aplikace.'
+              : 'Změnou e-mailu dojde k odhlášení uživatele z aplikace.'}
+          </p>
+          <div className="d-flex flex-row flex-wrap">
+            <div className="me-5">
               <DateSelectionInput
-                id="availability.adorationDays"
-                label="Dny adorace"
-                register={() => register("availability.adorationDays")}
+                id="availability.workDays"
+                label="Pracovní dostupnost"
+                register={() => register('availability.workDays')}
                 days={allDates}
+                disableAfter={isProfilePage ? 18 : undefined}
               />
             </div>
-            <AlergyPillInput
-              label="Alergie"
-              register={() => register("allergyIds")}
+            <DateSelectionInput
+              id="availability.adorationDays"
+              label="Dny adorace"
+              register={() => register('availability.adorationDays')}
+              days={allDates}
+              disableAfter={isProfilePage ? 18 : undefined}
             />
-            {!isProfilePage && (
-              <OtherAttributesInput
-                label="Další vlastnosti"
-                register={register}
-                objects={[
-                  {
-                    id: "strong",
-                    icon: "fas fa-dumbbell",
-                    label: "Silák",
-                  }
-                ]}
-              />
-            )}
-            {!isProfilePage && (
-              <ImageUploader
-                id="photoFile"
-                label="Fotografie"
-                secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-                photoInit={worker.photoPath ? [{url: `/api/workers/${worker.id}/photo`, index: "0"}] : null}
-                errors={errors}
-                registerPhoto={registerPhoto}
-                removeNewPhoto={removeNewPhoto}
-                removeExistingPhoto={removeExistingPhoto}
-              />
-            )}
-            {(carAccess || isProfilePage) && (
-              <Label
-                id="car"
-                label="Auta"
-              />
-            )}
-          
-            {carAccess ? (
-              <>
-                {worker.cars.length === 0 && <p>Žádná auta</p>}
-                {worker.cars.length > 0 && (
-                  <div className="list-group mb-2">
-                    {worker.cars.map(car => (
-                      <input
-                        key={car.id}
-                        type={'submit'}
-                        className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
-                        value={car.name}
-                        disabled={isMutating}
-                        onClick={() => handleEditCar(car.id)}
+          </div>
+          <GroupButtonsInput
+            id="allergyIds"
+            label="Alergie"
+            mapping={allergyMapping}
+            register={() => register('allergyIds')}
+          />
+          {!isProfilePage && (
+            <GroupButtonsInput
+              id="skills"
+              label="Dovednosti"
+              mapping={skillMapping}
+              register={() => register('skills')}
+            />
+          )}
+          {!isProfilePage && (
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+              objects={[
+                {
+                  id: 'strong',
+                  icon: 'fas fa-dumbbell',
+                  label: 'Silák',
+                },
+                {
+                  id: 'team',
+                  icon: 'fa-solid fa-people-group',
+                  label: 'Tým',
+                },
+              ]}
+            />
+          )}
+          {!isProfilePage && (
+            <ImageUploader
+              id="photoFile"
+              label="Fotografie"
+              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+              photoInit={
+                worker.photoPath
+                  ? [{ url: `/api/workers/${worker.id}/photo`, index: '0' }]
+                  : null
+              }
+              errors={errors}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
+              removeExistingPhoto={removeExistingPhoto}
+            />
+          )}
+          {(carAccess || isProfilePage) && (
+            <>
+              <Label id="car" label="Auta" />
+              {worker.cars.length === 0 && <p>Žádná auta</p>}{' '}
+            </>
+          )}
+
+          {carAccess ? (
+            <>
+              {worker.cars.length > 0 && (
+                <div className="list-group mb-2">
+                  {worker.cars.map(car => (
+                    <div key={car.id} onClick={() => handleEditCar(car.id)}>
+                      <LinkToOtherForm
+                        label={car.name}
+                        labelBold={false}
+                        margin={false}
                       />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            isProfilePage && (
+              <div className="mb-2">
+                {worker.cars.length > 0 && (
+                  <div className="list-group">
+                    {worker.cars.map(car => (
+                      <div key={car.id} className="list-group-item ps-2 w-50">
+                        {car.name}
+                      </div>
                     ))}
                   </div>
                 )}
-              </>
-            ) : (
-              isProfilePage && (
-                <div className="mb-2">
-                  {worker.cars.length > 0 && (
-                    <div className="list-group">
-                      {worker.cars.map(car => (
-                        <div key={car.id} className="list-group-item ps-2 w-50">
-                          {car.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            )}
-          
-            {carAccess ? (
-                <div className="d-flex align-items-baseline flex-wrap">
-                  <div className="me-3">
-                    <i>Auta je možné přiřadit v záložce Auta: </i> 
-                  </div>
-                  <button
-                    type={'submit'}
-                    className="btn btn-light pt-2 pb-2"
-                    disabled={isMutating}
-                    onClick={handleAddCar}
-                  >
-                    <div className="d-flex align-items-center">
-                      <i className="fas fa-plus me-2" />
-                      Přidat auto
-                    </div>
-                  </button>
-                </div>
-            ) : (
-              isProfilePage && (
-                <p>
-                  <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
-                </p>
-              )
-            )}
+              </div>
+            )
+          )}
 
-            {!isProfilePage && (
-              <TextAreaInput
-                id="note"
-                label="Poznámka"
-                placeholder="Poznámka"
-                rows={1}
-                register={() => register("note")}
-              />
-            )}
-
-            <div className={`d-flex ${
-                isProfilePage ? 'justify-content-end' : 'justify-content-between gap-3'
-              }`}>
-              {!isProfilePage && (
-                <button
-                  className="btn btn-secondary mt-4"
-                  type="button"
-                  onClick={() => router.back()}
-                >
-                  Zpět
-                </button>
-              )}
-              <input
-                type={'submit'}
-                className="btn btn-primary mt-4"
-                value={'Uložit'}
-                disabled={isMutating}
+          {carAccess ? (
+            <div className="d-flex align-items-baseline flex-wrap">
+              <LinkToOtherForm
+                label="Auta je možné přiřadit v záložce Auta"
+                handleEditedForm={handleSubmitFromLink}
+                margin={false}
               />
             </div>
-            {saved && <SuccessProceedModalTest onConfirm={onConfirmationClosed} onClose={() => {setSaved(false)}} />}
-            {error && <ErrorMessageModal onClose={reset} />}
-          </form>
-        </div>
-      </div>
+          ) : (
+            isProfilePage && (
+              <p>
+                <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
+              </p>
+            )
+          )}
+
+          {!isProfilePage && (
+            <TextAreaInput
+              id="note"
+              label="Poznámka"
+              placeholder="Poznámka"
+              rows={1}
+              register={() => register('note')}
+              errors={errors}
+            />
+          )}
+        </form>
+      </Form>
     </>
   )
 }
-
-/*
-
-            
-
-*/

@@ -14,11 +14,7 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
   const { trigger, error, isMutating, reset } = useAPIUserUpdate(user.id, {
     onSuccess: () => onUpdate(),
   })
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<UserUpdateData>({
+  const { register, handleSubmit } = useForm<UserUpdateData>({
     resolver: zodResolver(UserUpdateSchema),
     defaultValues: {
       permissions: user.permissions,

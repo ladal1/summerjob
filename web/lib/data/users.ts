@@ -1,8 +1,4 @@
-import {
-  PrismaClient,
-  WorkerAvailability,
-  WorkerPermissions,
-} from 'lib/prisma/client'
+import { PrismaClient, WorkerPermissions } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import { Permission } from 'lib/types/auth'
 import { PrismaTransactionClient } from 'lib/types/prisma'
@@ -191,9 +187,24 @@ export async function addAdminsToEvent(
     select: {
       email: true,
       availability: true,
+      cars: true,
     },
   })
   for (const admin of admins) {
+    for (const car of admin.cars) {
+      const carAlreadyRegistered = car.forEventId === eventId
+      if (carAlreadyRegistered) {
+        continue
+      }
+      await transaction.car.update({
+        where: {
+          id: car.id,
+        },
+        data: {
+          forEventId: eventId,
+        },
+      })
+    }
     const alreadyRegistered = admin.availability
       .map(av => av.eventId)
       .includes(eventId)

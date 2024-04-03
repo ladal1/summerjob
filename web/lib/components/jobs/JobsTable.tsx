@@ -2,38 +2,57 @@ import { ProposedJobComplete } from 'lib/types/proposed-job'
 import { useMemo, useState } from 'react'
 import { MessageRow } from '../table/MessageRow'
 import RowCategory from '../table/RowCategory'
+import { sortData } from '../table/SortData'
 import {
+  SortOrder,
   SortableColumn,
   SortableTable,
-  SortOrder,
 } from '../table/SortableTable'
 import ProposedJobRow from './ProposedJobRow'
 
 const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Název', sortable: true, style: {minWidth: "180px"}},
-  { id: 'area', name: 'Lokalita', sortable: true, style: {minWidth: "180px"} },
-  { id: 'contact', name: 'Kontaktní osoba', sortable: false, style: {minWidth: "150px"} },
-  { id: 'address', name: 'Adresa', sortable: false, style: {minWidth: "170px"} },
-  { id: 'daysPlanned', name: 'Naplánované dny', sortable: true },
-  { id: 'daysLeft', name: 'Dostupné dny', sortable: true },
-  { id: 'workers', name: 'Pracantů', sortable: true },
-  { id: 'actions', name: 'Akce', sortable: false, className: "smj-sticky-col-right smj-table-header", style: {minWidth: "100px"} },
+  { id: 'name', name: 'Název', style: { minWidth: '180px' } },
+  {
+    id: 'area',
+    name: 'Lokalita',
+    style: { minWidth: '180px' },
+  },
+  {
+    id: 'contact',
+    name: 'Kontaktní osoba',
+    style: { minWidth: '150px' },
+  },
+  {
+    id: 'address',
+    name: 'Adresa',
+    style: { minWidth: '170px' },
+  },
+  { id: 'daysPlanned', name: 'Naplánované dny' },
+  { id: 'daysLeft', name: 'Dostupné dny' },
+  { id: 'workers', name: 'Pracantů' },
+  { id: 'priority', name: 'Priorita' },
+  {
+    id: 'actions',
+    name: 'Akce',
+    notSortable: true,
+    stickyRight: true,
+    style: { minWidth: '100px' },
+  },
 ]
 
 interface JobsTableProps {
   data: ProposedJobComplete[]
   shouldShowJob: (job: ProposedJobComplete) => boolean
   reload: () => void
+  workerId: string
 }
 
-export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
-  const [sortOrder, setSortOrder] = useState<SortOrder>({
-    columnId: undefined,
-    direction: 'desc',
-  })
-  const onSortRequested = (direction: SortOrder) => {
-    setSortOrder(direction)
-  }
+export function JobsTable({
+  data,
+  shouldShowJob,
+  reload,
+  workerId,
+}: JobsTableProps) {
   const [hiddenJobs, waitingJobs, completedJobs, pinnedJobs] = useMemo(() => {
     const { hidden, completed, pinned, regular } = data.reduce(
       (acc, job) => {
@@ -41,7 +60,10 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
           acc.hidden.push(job)
         } else if (job.completed) {
           acc.completed.push(job)
-        } else if (job.pinned) {
+        } else if (
+          job.pinnedBy &&
+          job.pinnedBy.some(worker => worker.workerId === workerId)
+        ) {
           acc.pinned.push(job)
         } else {
           acc.regular.push(job)
@@ -57,25 +79,51 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
     )
 
     return [hidden, regular, completed, pinned]
-  }, [data])
+  }, [data, workerId])
+
+  //#region Sort
+  const [sortOrder, setSortOrder] = useState<SortOrder>({
+    columnId: undefined,
+    direction: 'desc',
+  })
+  const onSortRequested = (direction: SortOrder) => {
+    setSortOrder(direction)
+  }
+
+  const getSortable = useMemo(
+    () => ({
+      name: (job: ProposedJobComplete) => job.name,
+      area: (job: ProposedJobComplete) => job.area?.name ?? -1,
+      contact: (job: ProposedJobComplete) => job.contact,
+      address: (job: ProposedJobComplete) => job.address,
+      daysPlanned: (job: ProposedJobComplete) =>
+        `${job.activeJobs.length}${job.requiredDays}`,
+      daysLeft: (job: ProposedJobComplete) => job.availability.length,
+      workers: (job: ProposedJobComplete) =>
+        `${job.minWorkers}${job.maxWorkers}`,
+      priority: (job: ProposedJobComplete) => job.priority,
+    }),
+    []
+  )
 
   const sortedData = useMemo(
     () => [
-      ...sortJobs(pinnedJobs, sortOrder),
-      ...sortJobs(waitingJobs, sortOrder),
+      ...sortData(pinnedJobs, getSortable, sortOrder),
+      ...sortData(waitingJobs, getSortable, sortOrder),
     ],
-    [sortOrder, waitingJobs, pinnedJobs]
+    [sortOrder, waitingJobs, pinnedJobs, getSortable]
   )
 
   const sortedCompleted = useMemo(
-    () => sortJobs(completedJobs, sortOrder),
-    [sortOrder, completedJobs]
+    () => sortData(completedJobs, getSortable, sortOrder),
+    [sortOrder, completedJobs, getSortable]
   )
 
   const sortedHidden = useMemo(
-    () => sortJobs(hiddenJobs, sortOrder),
-    [sortOrder, hiddenJobs]
+    () => sortData(hiddenJobs, getSortable, sortOrder),
+    [sortOrder, hiddenJobs, getSortable]
   )
+  //#endregion
 
   const reloadJobs = () => {
     reload()
@@ -94,7 +142,12 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
         sortedData.map(
           job =>
             shouldShowJob(job) && (
-              <ProposedJobRow key={job.id} job={job} reloadJobs={reloadJobs} />
+              <ProposedJobRow
+                key={job.id}
+                job={job}
+                workerId={workerId}
+                reloadJobs={reloadJobs}
+              />
             )
         )}
       <RowCategory
@@ -112,6 +165,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
                 <ProposedJobRow
                   key={job.id}
                   job={job}
+                  workerId={workerId}
                   reloadJobs={reloadJobs}
                 />
               )
@@ -132,6 +186,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
                 <ProposedJobRow
                   key={job.id}
                   job={job}
+                  workerId={workerId}
                   reloadJobs={reloadJobs}
                 />
               )
@@ -139,36 +194,4 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
       </RowCategory>
     </SortableTable>
   )
-}
-
-function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
-  if (sortOrder.columnId === undefined) {
-    return data
-  }
-  data = [...data]
-
-  const getSortable: {
-    [b: string]: (job: ProposedJobComplete) => string | number
-  } = {
-    name: job => job.name,
-    area: job => job.area?.name ?? -1,
-    address: job => job.address,
-    daysPlanned: job => job.activeJobs.length,
-    daysLeft: job => job.availability.length,
-    workers: job => job.minWorkers,
-  }
-
-  if (sortOrder.columnId in getSortable) {
-    const sortKey = getSortable[sortOrder.columnId]
-    return data.sort((a, b) => {
-      if (sortKey(a) < sortKey(b)) {
-        return sortOrder.direction === 'desc' ? 1 : -1
-      }
-      if (sortKey(a) > sortKey(b)) {
-        return sortOrder.direction === 'desc' ? -1 : 1
-      }
-      return 0
-    })
-  }
-  return data
 }

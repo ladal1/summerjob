@@ -3,7 +3,7 @@ import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
 import { Worker } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { useState } from 'react'
-import { FilterSelect, FilterSelectItem } from '../filter-select/FilterSelect'
+import { FilterSelect } from '../filter-select/FilterSelect'
 import { Modal, ModalSize } from '../modal/Modal'
 
 interface MoveWorkerModalProps {
@@ -25,9 +25,9 @@ export default function MoveWorkerModal({
     currentJob
   )
   const getNewJobId = () => selectedJob?.id
-  const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
+  const { trigger, isMutating } = useAPIActiveJobUpdateDynamic(
     getNewJobId,
-    jobs[0].planId,
+    jobs[0] ? jobs[0].planId : '',
     {
       onSuccess: () => {
         onSuccess()
@@ -66,15 +66,17 @@ export default function MoveWorkerModal({
       </b>{' '}
       na job:
       <div className="m-3 ms-0">
-        <FilterSelect
-          id="moveWorker"
-          items={items}
-          placeholder={'Vyberte job'}
-          onSelected={onItemSelected}
-          {...(defaultSelect && {
-            defaultSelected: defaultSelect,
-          })}
-        />
+        <div className="d-flex  flex-column ">
+          <FilterSelect
+            id="moveWorker"
+            items={items}
+            placeholder={'Vyberte job'}
+            onSelected={onItemSelected}
+            {...(defaultSelect && {
+              defaultSelected: defaultSelect,
+            })}
+          />
+        </div>
       </div>
       <div className="d-flex justify-content-between">
         <button

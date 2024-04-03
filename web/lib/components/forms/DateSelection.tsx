@@ -1,17 +1,20 @@
 import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { UseFormRegisterReturn } from 'react-hook-form'
+import CallSMJTeamModal from '../modal/CallSMJTeamModal'
 
 interface DateSelectionProps {
   name: string
   days: DateBool[][]
+  disableAfter?: number
   register: () => UseFormRegisterReturn
 }
 
 export default function DateSelection({
   name,
   days,
+  disableAfter = undefined,
   register,
 }: DateSelectionProps) {
   const firstDay = days[0][0].date
@@ -35,6 +38,39 @@ export default function DateSelection({
     return start.toJSON() + '-' + end.toJSON()
   }
 
+  //#region Disable date button
+
+  const [currentDate] = useState<Date>(() => new Date())
+  const [tomorrowDate] = useState<Date>(() => {
+    const tomorrow = new Date(currentDate.getTime())
+    tomorrow.setDate(currentDate.getDate() + 1)
+    return tomorrow
+  })
+
+  const isAfterHoursCalc = useCallback(() => {
+    if (!disableAfter) return false
+    const currentHour = currentDate.getHours()
+    return currentHour >= disableAfter
+  }, [currentDate, disableAfter])
+
+  const [isAfterHours, setIsAfterHours] = useState<boolean>(isAfterHoursCalc())
+
+  useEffect(() => {
+    setIsAfterHours(isAfterHoursCalc())
+  }, [disableAfter, isAfterHoursCalc])
+
+  const isDateRightAfterNow = (date: Date): boolean => {
+    return date.getDate() === tomorrowDate.getDate()
+  }
+
+  const isDateDisabledDueToAfterHours = (date: Date) => {
+    return isAfterHours && isDateRightAfterNow(date)
+  }
+
+  const [showCallModal, setShowCallModal] = useState(false)
+
+  //#endregion
+
   return (
     <div className="container p-0 m-0">
       <label className="form-label fw-normal fs-5">{label}</label>
@@ -50,7 +86,14 @@ export default function DateSelection({
           <div className="row gx-2">
             {week.map(day => (
               <React.Fragment key={day.date.toJSON()}>
-                <div className="col gy-2">
+                <div
+                  className="col gy-2"
+                  onClick={() => {
+                    if (isDateDisabledDueToAfterHours(day.date)) {
+                      setShowCallModal(true)
+                    }
+                  }}
+                >
                   <input
                     type="checkbox"
                     className="btn-check"
@@ -58,7 +101,9 @@ export default function DateSelection({
                     autoComplete="off"
                     {...register()}
                     value={day.date.toJSON()}
-                    disabled={day.isDisabled}
+                    disabled={
+                      day.isDisabled || isDateDisabledDueToAfterHours(day.date)
+                    }
                   />
                   <label
                     className={`btn btn-day-select btn-light ${
@@ -74,6 +119,12 @@ export default function DateSelection({
           </div>
         </React.Fragment>
       ))}
+      {showCallModal && (
+        <CallSMJTeamModal
+          onClose={() => setShowCallModal(false)}
+          additionalText={`Je po ${disableAfter}. hodině, zvolení časové dostupnosti je tudíž znepřístupněno.`}
+        />
+      )}
     </div>
   )
 }

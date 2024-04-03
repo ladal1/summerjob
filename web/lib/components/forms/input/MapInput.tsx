@@ -1,118 +1,144 @@
-import { DetailedHTMLProps, InputHTMLAttributes, useState } from "react"
-import { FieldErrors, FieldValues } from "react-hook-form"
-import Map from "../../map/Map"
-import { Label } from "../Label"
-import FormWarning from "../FormWarning"
-import { getGeocodingData, getReverseGeocodingData } from "lib/components/map/GeocodingData"
+import {
+  getGeocodingData,
+  getReverseGeocodingData,
+} from 'lib/components/map/GeocodingData'
+import { useState } from 'react'
+import { FieldErrors, Path } from 'react-hook-form'
+import Map from '../../map/Map'
+import FormWarning from '../FormWarning'
+import { Label } from '../Label'
+import { ProgressBar } from '../ProgressBar'
 
-interface MapInputProps<FormData extends FieldValues>
-extends DetailedHTMLProps<
-  InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
-> {
-  idAddress: string
-  idCoordinations: string
+interface AddressInput {
+  id: string
   label: string
-  registerAdress: (address: string) => void
-  registerCoordinations: (coords: [number, number]) => void 
-  errors: FieldErrors<FormData>
-  markerPosition?: [number, number] | null
-  addressInit?: string
+  placeholder: string
+  init?: string
+  register: (address: string) => void
+  mandatory?: boolean
 }
 
-export const MapInput = <FormData extends FieldValues> ({
-  idAddress,
-  idCoordinations,
-  label,
-  registerAdress,
-  registerCoordinations,
-  errors,
-  markerPosition = null,
-  addressInit = '',
-  ...rest
-}: MapInputProps<FormData>) => {
-  const errorAddress = errors?.[idAddress]?.message as string | undefined
-  const errorCoordinations = errors?.[idCoordinations]?.message as string | undefined
+interface CoordinatesInput {
+  id: string
+  label: string
+  placeholder: string
+  init?: [number, number] | null
+  register: (coords: [number, number]) => void
+}
 
-  const [address, setAddress] = useState(addressInit)
-  const [coordinates, setCoordinates] = useState(markerPosition)
+interface MapInputProps {
+  address: AddressInput
+  coordinates: CoordinatesInput
+  errors: FieldErrors<FormData>
+}
 
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-  const [canPickLocation, setCanPickLocation] = useState(true)
+export const MapInput = ({ address, coordinates, errors }: MapInputProps) => {
+  const errorAddress = errors?.[address.id as Path<FormData>]?.message as
+    | string
+    | undefined
+  const errorCoordinates = errors?.[coordinates.id as Path<FormData>]
+    ?.message as string | undefined
 
+  const [addressValue, setAddressValue] = useState(address.init ?? '')
+  const [addressForMap, setAddressForMap] = useState(address.init ?? '')
+  const [coordinatesValue, setCoordinatesValue] = useState(
+    coordinates.init ?? null
+  )
 
-  const geocodingDataSearch = async ()   => {
-    setIsButtonDisabled(true)
-    const fetchedCoords = await getGeocodingData(address)
-    if(fetchedCoords) {
-      setCoordinates(fetchedCoords)
-      registerCoordinations(fetchedCoords)
+  const timeOut = 3000
+  const [isInputDisabled, setIsInputDisabled] = useState(false)
+
+  const geocodingDataSearch = async () => {
+    setIsInputDisabled(true)
+    setAddressForMap(addressValue)
+    const fetchedCoords = await getGeocodingData(addressValue)
+    if (fetchedCoords) {
+      setCoordinatesValue(fetchedCoords)
+      coordinates.register(fetchedCoords)
     }
     setTimeout(() => {
-      setIsButtonDisabled(false)
-    }, 5000)
+      setIsInputDisabled(false)
+    }, timeOut)
   }
 
-  const reverseGeocodingDataSearch = async () => {
-    setCanPickLocation(false)
-    const fetchedAddress = await getReverseGeocodingData(coordinates?.at(0), coordinates?.at(1)) // has to be number, because coords are set in caller registerMarker
-    if(fetchedAddress) {
-      setAddress(fetchedAddress)
-      registerAdress(fetchedAddress)
+  const reverseGeocodingDataSearch = async (coords: [number, number]) => {
+    setIsInputDisabled(true)
+    const fetchedAddress = await getReverseGeocodingData(coords[0], coords[1])
+    if (fetchedAddress) {
+      setAddressValue(fetchedAddress)
+      setAddressForMap(fetchedAddress)
+      address.register(fetchedAddress)
     }
     setTimeout(() => {
-      setCanPickLocation(true)
-    }, 5000)
+      setIsInputDisabled(false)
+    }, timeOut)
   }
 
-  const registerMarker = (coords: [number, number]) => {
-    registerCoordinations(coords)
-    setCoordinates(coords)
-    reverseGeocodingDataSearch()
+  const registerMarker = async (coords: [number, number]) => {
+    coordinates.register(coords)
+    setCoordinatesValue(coords)
+    await reverseGeocodingDataSearch(coords)
   }
 
   return (
     <>
       <div className="container p-0 m-0">
         <div className="row align-items-end">
-            <div className="col">
-              <Label
-                id={idAddress}
-                label={label}
-              />
-              <input
-                className="form-control smj-input p-0 fs-5"
-                value={address}
-                onChange={(e) => {
-                  registerAdress(e.target.value)
-                  setAddress(e.target.value)
-                }}
-                {...rest}
-              />
-            </div>
-            <div className="col-auto">
-              <button 
-                className="btn btn-primary"
-                type="button"
-                onClick={geocodingDataSearch}
-                disabled={isButtonDisabled}
-              >
-                Najít adresu na mapě
-              </button>
+          <div className="col">
+            <Label
+              id={address.id}
+              label={address.label}
+              mandatory={address.mandatory}
+            />
+            <input
+              className="form-control smj-input p-0 fs-5"
+              value={addressValue}
+              placeholder={address.placeholder}
+              onChange={e => {
+                address.register(e.target.value)
+                setAddressValue(e.target.value)
+              }}
+            />
+          </div>
+          <div className="col-auto">
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={geocodingDataSearch}
+              disabled={isInputDisabled}
+            >
+              Najít adresu na mapě
+            </button>
+            {isInputDisabled && <ProgressBar time={timeOut} />}
           </div>
         </div>
       </div>
       <FormWarning message={errorAddress} />
+      {coordinatesValue?.[0] && coordinatesValue?.[1] && (
+        <>
+          <Label id={coordinates.id} label={coordinates.label} />
+          <input
+            className="form-control smj-input p-0 fs-5"
+            value={`[${coordinatesValue?.[0]}, ${coordinatesValue?.[1]}]`}
+            placeholder={coordinates.placeholder}
+            disabled={true}
+          />
+        </>
+      )}
+      <FormWarning message={errorCoordinates} />
       <div className="pt-3">
-        <Map
-          center={markerPosition ?? [49.8203, 15.4784]} // Czech republic
-          zoom={6}
-          canPickLocation={canPickLocation}
-          markerPosition={coordinates}
-          setMarkerPosition={registerMarker}
-        />
+        <div className="container p-0 m-0">
+          <Map
+            center={coordinates.init ?? [49.8203, 15.4784]} // Czech republic
+            zoom={6}
+            address={addressForMap}
+            canPickLocation={!isInputDisabled}
+            markerPosition={coordinatesValue}
+            setMarkerPosition={registerMarker}
+          />
+          {isInputDisabled && <ProgressBar time={timeOut} />}
+        </div>
       </div>
-      <FormWarning message={errorCoordinations} />
     </>
   )
 }

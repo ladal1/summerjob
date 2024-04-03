@@ -66,7 +66,7 @@ async function initDB() {
     data: {
       firstName: 'Admin',
       lastName: 'Account',
-      email: 'admin@localhost',
+      email: 'admin@localhost.cz',
       phone: '1234567890',
       permissions: {
         create: {
@@ -151,7 +151,7 @@ class Common {
 
   createWorker = async () => {
     const worker = await this.post(
-      '/api/workers',
+      '/api/workers/new',
       Id.WORKERS,
       createWorkerData()
     )
@@ -312,8 +312,7 @@ class Common {
     return request(this._url)
       .post(url)
       .set('Cookie', [this._session])
-      .set('Accept', 'application/json')
-      .send(body)
+      .field('jsonData', JSON.stringify(body))
   }
 
   patch = async (url: string, identity: string, body: any) => {
@@ -325,8 +324,7 @@ class Common {
     return request(this._url)
       .patch(url)
       .set('Cookie', [this._session])
-      .set('Accept', 'application/json')
-      .send(body)
+      .field('jsonData', JSON.stringify(body))
   }
 
   del = async (url: string, identity: string) => {

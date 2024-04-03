@@ -1,12 +1,8 @@
 import {
-  FieldErrors,
-  FieldValues,
-  UseFormRegisterReturn,
-} from 'react-hook-form'
-import {
   FilterSelect,
   FilterSelectItem,
 } from 'lib/components/filter-select/FilterSelect'
+import { FieldErrors, FieldValues } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 import { Label } from '../Label'
 
@@ -15,10 +11,11 @@ interface FilterSelectInputProps<FormData extends FieldValues> {
   label: string
   placeholder: string
   items: FilterSelectItem[]
-  register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   onSelected: (id: string) => void
-  defaultSelected?: FilterSelectItem
+  defaultSelected?: FilterSelectItem | undefined
+
+  mandatory?: boolean
 }
 
 export const FilterSelectInput = <FormData extends FieldValues>({
@@ -26,19 +23,17 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   label,
   placeholder,
   items,
-  register,
   errors,
   onSelected,
   defaultSelected,
+
+  mandatory = false,
 }: FilterSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
 
   return (
     <div className="d-flex flex-column m-0">
-      <Label
-        id={id}
-        label={label}
-      />
+      <Label id={id} label={label} mandatory={mandatory} />
       <FilterSelect
         id={id}
         placeholder={placeholder}
@@ -46,7 +41,6 @@ export const FilterSelectInput = <FormData extends FieldValues>({
         onSelected={onSelected}
         defaultSelected={defaultSelected}
       />
-      <input type={'hidden'} {...register()} />
       <FormWarning message={error} />
     </div>
   )

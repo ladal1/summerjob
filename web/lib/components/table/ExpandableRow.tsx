@@ -1,10 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-
-export interface RowCells {
-  content: any
-  stickyRight?: boolean
-}
+import { RowCells } from './RowCells'
 
 interface RowProps {
   data: RowCells[]
@@ -27,13 +23,21 @@ function Cell({
   colspan,
   stickyRight = false,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contents: any
   tooltip?: string
   colspan?: number
   stickyRight?: boolean
 }) {
   return (
-    <td className={"text-truncate text-wrap " + (stickyRight ? 'smj-sticky-col-right smj-expandable-row' : '')} title={tooltip} colSpan={colspan}>
+    <td
+      className={
+        'text-truncate text-wrap ' +
+        (stickyRight ? 'smj-sticky-col-right smj-expandable-row' : '')
+      }
+      title={tooltip}
+      colSpan={colspan}
+    >
       {contents}
     </td>
   )
@@ -88,16 +92,22 @@ export function ExpandableRow({
           <Cell
             key={index + 1}
             contents={field.content}
-            tooltip={typeof field.content === 'string' ? field.content : undefined}
+            tooltip={
+              typeof field.content === 'string' ? field.content : undefined
+            }
             stickyRight={field.stickyRight}
           />
         ))}
       </tr>
 
-      <tr className="smj-details-row no-hover" onDrop={onDrop} onDragOver={onDragOver}>
+      <tr
+        className="smj-details-row no-hover"
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+      >
         <td colSpan={colspan ?? data.length}>
           <div
-            className="smj-row-collapsible"
+            className="smj-row-collapsible smj-white"
             ref={collapsibleContentRef}
             style={{ maxHeight: expanded ? `${expandedHeight}px` : '0px' }}
           >

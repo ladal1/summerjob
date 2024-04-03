@@ -1,10 +1,8 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  useAPIActiveJobCreate,
-  useAPIActiveJobCreateMultiple,
-} from 'lib/fetcher/active-job'
+import { useAPIActiveJobCreateMultiple } from 'lib/fetcher/active-job'
 import { useAPIProposedJobsNotInPlan } from 'lib/fetcher/proposed-job'
+import { formatDateShort } from 'lib/helpers/helpers'
 import {
   ActiveJobCreateData,
   ActiveJobCreateSchema,
@@ -12,13 +10,15 @@ import {
 import { ProposedJobComplete } from 'lib/types/proposed-job'
 import { ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import Select, { FormatOptionLabelMeta } from 'react-select'
+import Select, { FormatOptionLabelMeta, StylesConfig } from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
+import { Issue } from './Issue'
 
 interface AddJobToPlanFormProps {
   planId: string
   onComplete: () => void
+  workerId: string
 }
 
 type ActiveJobCreateFormData = { jobs: Omit<ActiveJobCreateData, 'planId'>[] }
@@ -29,8 +29,9 @@ const ActiveJobCreateFormSchema = z.object({
 export default function AddJobToPlanForm({
   planId,
   onComplete,
+  workerId,
 }: AddJobToPlanFormProps) {
-  const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId)
+  const { data, error } = useAPIProposedJobsNotInPlan(planId)
   const { trigger, isMutating } = useAPIActiveJobCreateMultiple(planId, {
     onSuccess: () => {
       onComplete()
@@ -52,17 +53,20 @@ export default function AddJobToPlanForm({
     }
     const sorted = new Array(...data)
     sorted.sort((a, b) => {
-      if (a.pinned && !b.pinned) {
+      const isPinnedA = isPinned(a, workerId)
+      const isPinnedB = isPinned(b, workerId)
+
+      if (isPinnedA && !isPinnedB) {
         return -1
       }
-      if (!a.pinned && b.pinned) {
+      if (!isPinnedA && isPinnedB) {
         return 1
       }
       return a.name.localeCompare(b.name)
     })
 
-    return sorted.map<SelectItem>(jobToSelectItem)
-  }, [data])
+    return sorted.map<SelectItem>(job => jobToSelectItem(job, workerId))
+  }, [data, workerId])
 
   const itemToFormData = (item: SelectItem) => ({
     proposedJobId: item.id,
@@ -84,7 +88,7 @@ export default function AddJobToPlanForm({
         item: <></>,
       }
     }
-    return jobToSelectItem(job)
+    return jobToSelectItem(job, workerId)
   }
 
   const formatOptionLabel = (
@@ -103,6 +107,23 @@ export default function AddJobToPlanForm({
 
   if (error && !data) {
     return <ErrorPage error={error} />
+  }
+
+  const colourStyles: StylesConfig<SelectItem, true> = {
+    control: styles => ({
+      ...styles,
+      backgroundColor: 'white',
+      border: 0,
+      boxShadow: '1px 1px 2px 2px rgba(0, 38, 255, 0.2)',
+    }),
+    option: styles => ({
+      ...styles,
+      backgroundColor: 'white',
+      color: 'black',
+      '&:hover': {
+        backgroundColor: '#ffea9c',
+      },
+    }),
   }
 
   return (
@@ -124,6 +145,7 @@ export default function AddJobToPlanForm({
               formatOptionLabel={formatOptionLabel}
               isMulti
               getOptionValue={option => option.searchable}
+              styles={colourStyles}
             />
           )}
         />
@@ -143,23 +165,52 @@ export default function AddJobToPlanForm({
   )
 }
 
-function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
+function AddJobSelectItem({
+  job,
+  workerId,
+}: {
+  job: ProposedJobComplete
+  workerId: string
+}) {
   return (
     <>
       <div className="text-wrap">
         {job.name} ({job.area?.name})
-        {job.pinned && (
+        {isPinned(job, workerId) && (
           <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
+        )}
+        {job.requiredDays - job.activeJobs.length >=
+          job.availability.length && (
+          <>
+            <i className="ms-2 fas fa-triangle-exclamation smj-action-pinned" />
+            <Issue>
+              <span>
+                Job musí být naplánován
+                <i className="text-muted">{' - poslední dostupné dny'}</i>
+              </span>
+            </Issue>
+          </>
         )}
       </div>
       <div className="text-muted text-wrap text-small">
         Naplánováno: {job.activeJobs.length}/{job.requiredDays}
+        <br />
+        Dostupné dny:
+        {job.availability.map((day, index) => (
+          <span key={index}>
+            {index === 0 ? ' ' : ', '}
+            {formatDateShort(new Date(day))}
+          </span>
+        ))}
       </div>
     </>
   )
 }
 
-function jobToSelectItem(job: ProposedJobComplete): SelectItem {
+function jobToSelectItem(
+  job: ProposedJobComplete,
+  workerId: string
+): SelectItem {
   return {
     id: job.id,
     name: job.name,
@@ -171,7 +222,7 @@ function jobToSelectItem(job: ProposedJobComplete): SelectItem {
     ).toLocaleLowerCase(),
     publicDescription: job.publicDescription,
     privateDescription: job.privateDescription,
-    item: <AddJobSelectItem job={job} />,
+    item: <AddJobSelectItem job={job} workerId={workerId} />,
   }
 }
 
@@ -182,4 +233,8 @@ type SelectItem = {
   item: ReactNode
   publicDescription: string
   privateDescription: string
+}
+
+function isPinned(job: ProposedJobComplete, workerId: string) {
+  return job.pinnedBy.some(worker => worker.workerId === workerId)
 }

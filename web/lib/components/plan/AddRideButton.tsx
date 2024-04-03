@@ -13,7 +13,7 @@ interface AddRideButtonProps {
 }
 
 export default function AddRideButton({ job }: AddRideButtonProps) {
-  const { data: cars, isLoading: isLoadingCars } = useAPICars()
+  const { data: cars } = useAPICars()
   const carsOfWorkers = cars?.filter(car =>
     job.workers.map(w => w.id).includes(car.ownerId)
   )
@@ -23,7 +23,7 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
 
   const selectRef = useRef<HTMLSelectElement>(null)
 
-  const { trigger, isMutating, error, reset } = useAPIRideCreate(job, {
+  const { trigger, isMutating } = useAPIRideCreate(job, {
     onSuccess: () => {
       setShowAddRideModal(false)
     },

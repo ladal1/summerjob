@@ -10,7 +10,7 @@ import {
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
 import { deleteUserSessions } from './users'
-import { PhotoPathData } from 'lib/types/photo'
+import { PhotoCreateData } from 'lib/types/photo'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -69,7 +69,7 @@ export async function getWorkers(
 
 export async function getWorkerPhotoById(
   id: string
-): Promise<PhotoPathData | null> {
+): Promise<PhotoCreateData | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
@@ -168,6 +168,9 @@ export async function deleteWorker(id: string) {
         allergies: {
           set: [],
         },
+        skills: {
+          set: [],
+        },
         availability: {
           updateMany: {
             where: {},
@@ -255,6 +258,10 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      age: data.age,
+      skills: {
+        set: data.skills,
+      },
       blocked: false,
       availability: {
         create: {
@@ -274,9 +281,14 @@ export async function createWorker(
       email: data.email.toLowerCase(),
       phone: data.phone,
       isStrong: data.strong,
+      isTeam: data.team,
       note: data.note,
       allergies: {
         set: data.allergyIds,
+      },
+      age: data.age,
+      skills: {
+        set: data.skills,
       },
       availability: {
         create: {
@@ -328,6 +340,8 @@ export async function internal_updateWorker(
     ? { allergies: { set: data.allergyIds } }
     : {}
 
+  const skillsUpdate = data.skills ? { skills: { set: data.skills } } : {}
+
   return await prismaClient.worker.update({
     where: {
       id,
@@ -338,9 +352,12 @@ export async function internal_updateWorker(
       email: data.email,
       phone: data.phone,
       isStrong: data.strong,
+      isTeam: data.team,
       photoPath: data.photoPath,
       note: data.note,
       ...allergyUpdate,
+      age: data.age,
+      ...skillsUpdate,
       availability: {
         update: {
           where: {

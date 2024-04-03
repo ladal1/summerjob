@@ -9,7 +9,7 @@ import {
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
-import { Allergy } from '../../lib/prisma/client'
+import { Allergy, Skill } from '../../lib/prisma/client'
 import { phoneRegex } from 'lib/helpers/regex'
 
 useZodOpenApi
@@ -17,20 +17,15 @@ useZodOpenApi
 export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
+  skills: z.array(z.nativeEnum(Skill)),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 
 export const WorkerCreateSchema = z
   .object({
-    firstName: z
-      .string()
-      .min(1, { message: err.emptyFirstName })
-      .trim(),
-    lastName: z
-      .string()
-      .min(1, { message: err.emptyLastName })
-      .trim(),
+    firstName: z.string().min(1, { message: err.emptyFirstName }).trim(),
+    lastName: z.string().min(1, { message: err.emptyLastName }).trim(),
     email: z
       .string()
       .min(1, { message: err.emptyEmail })
@@ -38,17 +33,36 @@ export const WorkerCreateSchema = z
     phone: z
       .string()
       .min(1, { message: err.emptyPhone })
-      .refine((phone) => phoneRegex.test(phone), { message: err.invalidRegexPhone }),
+      .refine(phone => phoneRegex.test(phone), {
+        message: err.invalidRegexPhone,
+      }),
     strong: z.boolean(),
+    team: z.boolean(),
+    skills: z.array(z.nativeEnum(Skill)),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
+    age: z
+      .number({ invalid_type_error: err.invalidTypeNumber })
+      .int({ message: err.nonInt })
+      .positive({ message: err.nonPositiveNumber })
+      .nullable(),
     photoFile: z
       .any()
-      .refine((fileList) => fileList instanceof FileList, err.invalidTypeFile)
-      .transform((fileList) => (fileList && fileList.length > 0) && fileList[0] || undefined)
-      .refine((file) => !file || (!!file && file.size <= 1024*1024*10), err.maxCapacityImage + ' - 10 MB')
-      .refine((file) => !file || (!!file && file.type?.startsWith("image")), err.unsuportedTypeImage) // any image
-      .openapi({ type: 'array', items: { type: 'string', format: 'binary' }})
+      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
+      .transform(
+        fileList =>
+          (fileList && fileList.length > 0 && fileList[0]) || null || undefined
+      )
+      .refine(
+        file => !file || (!!file && file.size <= 1024 * 1024 * 10),
+        err.maxCapacityImage + ' - 10 MB'
+      )
+      .refine(
+        file => !file || (!!file && file.type?.startsWith('image')),
+        err.unsuportedTypeImage
+      ) // any image
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
+      .nullable()
       .optional(),
     photoFileRemoved: z.boolean().optional(),
     photoPath: z.string().optional(),

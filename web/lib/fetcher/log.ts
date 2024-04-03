@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useMemo } from 'react'
 import { useData } from './fetcher'
 import { LogsAPIGetResponse } from 'pages/api/logs'

@@ -28,6 +28,7 @@ export const MyPlanSchema = z.object({
     }),
   job: z
     .object({
+      seqNum: z.string().optional(),
       name: z.string().min(1),
       description: z.string().min(1),
       responsibleWorkerName: z.string().min(1),
@@ -37,7 +38,7 @@ export const MyPlanSchema = z.object({
       location: z.object({
         name: z.string().min(1),
         address: z.string().min(1),
-        coordinations: z.tuple([z.number(), z.number()]).nullable(),
+        coordinates: z.tuple([z.number(), z.number()]).nullable(),
       }),
       hasFood: z.boolean(),
       hasShower: z.boolean(),

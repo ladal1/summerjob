@@ -1,5 +1,8 @@
 import { ActiveJob, Plan } from 'lib/prisma/client'
-import { ProposedJobWithArea } from './proposed-job'
+import {
+  ProposedJobForActiveJobSchema,
+  ProposedJobWithArea,
+} from './proposed-job'
 import type { Worker } from 'lib/prisma/client'
 import { z } from 'zod'
 import { WorkerComplete } from './worker'
@@ -37,6 +40,8 @@ export type ActiveJobCreateData = z.infer<typeof ActiveJobCreateSchema>
 
 export const ActiveJobUpdateSchema = z
   .object({
+    completed: z.boolean(),
+    proposedJob: ProposedJobForActiveJobSchema.strict(),
     privateDescription: z.string(),
     publicDescription: z.string(),
     workerIds: z.array(z.string()),

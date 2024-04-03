@@ -1,11 +1,12 @@
-import { CSSProperties } from "react"
+import { CSSProperties } from 'react'
 
 export interface SortableColumn {
   id: string
   name: string
-  sortable: boolean
+  notSortable?: boolean
   className?: string
   style?: CSSProperties
+  stickyRight?: boolean
 }
 
 export interface SortOrder {
@@ -16,8 +17,8 @@ export interface SortOrder {
 interface SortableTableProps {
   columns: SortableColumn[]
   children: React.ReactNode
-  currentSort: SortOrder
-  onRequestedSort: (direction: SortOrder) => void
+  currentSort?: SortOrder
+  onRequestedSort?: (direction: SortOrder) => void
 }
 
 export function SortableTable({
@@ -27,7 +28,9 @@ export function SortableTable({
   onRequestedSort,
 }: SortableTableProps) {
   const onSortClicked = (columnId: string) => {
-    if (currentSort.columnId === columnId) {
+    if (currentSort === undefined || onRequestedSort === undefined) {
+      return
+    } else if (currentSort.columnId === columnId) {
       onRequestedSort(
         currentSort.direction === 'asc'
           ? { columnId: columnId, direction: 'desc' }
@@ -39,6 +42,9 @@ export function SortableTable({
   }
 
   const sortIcon = (columnId: string) => {
+    if (currentSort === undefined) {
+      return <></>
+    }
     let direction
     if (currentSort.columnId === columnId) {
       direction =
@@ -52,23 +58,29 @@ export function SortableTable({
 
   return (
     <div className="table-responsive mb-2 smj-shadow rounded-3">
-      <table className="table mb-0">
+      <table className="table  mb-0">
         <thead className="smj-table-header text-nowrap">
           <tr>
             {columns.map(column => (
               <th
                 key={column.id}
                 onClick={() => onSortClicked(column.id)}
-                className={column.sortable ? 'cursor-pointer ' : '' + column.className}
+                className={`
+                  ${column.notSortable ? '' : 'cursor-pointer'} ${
+                  column.stickyRight
+                    ? 'smj-sticky-col-right smj-table-header'
+                    : ''
+                } ${column.className ? column.className : ''}
+                `}
                 style={column.style}
               >
                 {column.name}
-                {column.sortable && sortIcon(column.id)}
+                {!column.notSortable && sortIcon(column.id)}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="smj-table-body mb-0">{children}</tbody>
+        <tbody className="mb-0">{children}</tbody>
       </table>
     </div>
   )

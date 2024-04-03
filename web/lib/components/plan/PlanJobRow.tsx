@@ -1,23 +1,29 @@
-import { ActiveJobNoPlan } from 'lib/types/active-job'
-import { RideComplete, RidesForJob } from 'lib/types/ride'
-import { WorkerComplete } from 'lib/types/worker'
-import Link from 'next/link'
-import { ExpandableRow, RowCells } from '../table/ExpandableRow'
-import { SimpleRow } from '../table/SimpleRow'
-import type { Worker } from 'lib/prisma/client'
+import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import {
   useAPIActiveJobDelete,
   useAPIActiveJobUpdate,
 } from 'lib/fetcher/active-job'
+import type { Worker } from 'lib/prisma/client'
+import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { RidesForJob } from 'lib/types/ride'
+import { ToolCompleteData } from 'lib/types/tool'
+import { WorkerComplete } from 'lib/types/worker'
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import AddRideButton from './AddRideButton'
-import RideSelect from './RideSelect'
-import MoveWorkerModal from './MoveWorkerModal'
-import JobRideList from './JobRideList'
-import { ActiveJobIssueBanner, ActiveJobIssueIcon } from './ActiveJobIssue'
+import { ExpandableRow } from '../table/ExpandableRow'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
+import { SimpleRow } from '../table/SimpleRow'
+import { ActiveJobIssueBanner, ActiveJobIssueIcon } from './ActiveJobIssue'
+import AddRideButton from './AddRideButton'
+import JobRideList from './JobRideList'
+import MoveWorkerModal from './MoveWorkerModal'
+import RideSelect from './RideSelect'
+import ToggleCompletedCheck from './ToggleCompletedCheck'
+import { RowCells } from '../table/RowCells'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -44,15 +50,12 @@ export function PlanJobRow({
   onWorkerHover,
 }: PlanJobRowProps) {
   //#region Update job
-  const {
-    trigger: triggerUpdate,
-    isMutating: isBeingUpdated,
-    error: updatingError,
-  } = useAPIActiveJobUpdate(job.id, job.planId, {
-    onSuccess: () => {
-      reloadPlan()
-    },
-  })
+  const { trigger: triggerUpdate, isMutating: isBeingUpdated } =
+    useAPIActiveJobUpdate(job.id, job.planId, {
+      onSuccess: () => {
+        reloadPlan()
+      },
+    })
 
   const [workerToMove, setWorkerToMove] = useState<WorkerComplete | undefined>(
     undefined
@@ -121,49 +124,61 @@ export function PlanJobRow({
 
   const expandedContent: RowContentsInterface[] = [
     {
-      label: "Popis",
-      content: `${job.publicDescription}`, 
+      label: 'Popis',
+      content: `${job.proposedJob.publicDescription}`,
     },
     {
-      label: "Poznámka pro organizátory",
-      content: `${job.privateDescription}`, 
+      label: 'Poznámka pro organizátory',
+      content: `${job.proposedJob.privateDescription}`,
     },
     {
-      label: <div className="d-flex gap-1">
-                <strong>Doprava</strong>
-                <AddRideButton job={job} />
-            </div>,
-      content: <>
-                <JobRideList
-                  job={job}
-                  otherJobs={plannedJobs.filter(j => j.id !== job.id)}
-                  reloadPlan={reloadPlan}
-                />
-                <br />
-              </>, 
+      label: (
+        <div className="d-flex gap-1">
+          <strong>Doprava</strong>
+          <AddRideButton job={job} />
+        </div>
+      ),
+      content: (
+        <>
+          <JobRideList
+            job={job}
+            otherJobs={plannedJobs.filter(j => j.id !== job.id)}
+            reloadPlan={reloadPlan}
+          />
+          <br />
+        </>
+      ),
     },
     {
-      label: "Adorace v oblasti",
-      content: `${job.proposedJob.area?.supportsAdoration ? 'Ano' : 'Ne'}`, 
+      label: 'Adorace v oblasti',
+      content: `${job.proposedJob.area?.supportsAdoration ? 'Ano' : 'Ne'}`,
     },
     {
-      label: "Alergeny",
-      content: `${formatAllergens(job)}`, 
+      label: 'Alergeny',
+      content: `${formatAllergens(job)}`,
     },
     {
-      label: "Pracantů (min/max/silných)",
+      label: 'Nářadí na místě',
+      content: `${formatTools(job.proposedJob.toolsOnSite)}`,
+    },
+    {
+      label: 'Nářadí s sebou',
+      content: `${formatTools(job.proposedJob.toolsToTakeWith)}`,
+    },
+    {
+      label: 'Pracantů (min/max/silných)',
       content: `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers}/
-      ${job.proposedJob.strongWorkers}`, 
+      ${job.proposedJob.strongWorkers}`,
     },
     {
-      label: "Zodpovědná osoba",
-      content: `${responsibleWorkerName(job)}`, 
+      label: 'Zodpovědná osoba',
+      content: `${responsibleWorkerName(job)}`,
     },
     {
-      label: "",
-      content: ``, 
+      label: '',
+      content: ``,
     },
-  ] 
+  ]
 
   return (
     <>
@@ -185,9 +200,7 @@ export function PlanJobRow({
               day={day}
               ridesForOtherJobs={ridesForOtherJobs}
             />
-            <RowContent
-              data={expandedContent}
-            />
+            <RowContent data={expandedContent} />
             <div className="table-responsive text-nowrap">
               <table className="table table-hover">
                 <thead>
@@ -298,7 +311,20 @@ function formatAmenities(job: ActiveJobNoPlan) {
 
 function formatAllergens(job: ActiveJobNoPlan) {
   if (job.proposedJob.allergens.length == 0) return 'Žádné'
-  return job.proposedJob.allergens.join(', ')
+  return job.proposedJob.allergens
+    .map(allergen => allergyMapping[allergen])
+    .join(', ')
+}
+
+function formatTools(tools: ToolCompleteData[]) {
+  if (tools.length == 0) return 'Žádné'
+  return tools
+    .map(
+      tool =>
+        toolNameMapping[tool.tool] +
+        (tool.amount > 1 ? ' - ' + tool.amount : '')
+    )
+    .join(', ')
 }
 
 function formatRowData(
@@ -309,34 +335,55 @@ function formatRowData(
   isBeingDeleted: boolean
 ): RowCells[] {
   return [
-    {content: <span
-      className="d-inline-flex gap-1 align-items-center"
-      key={`name-${job.id}`}
-    >
-      {job.proposedJob.name}
-      <ActiveJobIssueIcon
-        job={job}
-        day={day}
-        ridesForOtherJobs={ridesForOtherJobs}
-      />
-    </span>},
-    {content: `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`},
-    {content: job.proposedJob.contact},
-    {content: job.proposedJob.area?.name},
-    {content: job.proposedJob.address},
-    {content: formatAmenities(job)},
-    {content: <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
-      <Link
-        href={`/plans/${job.planId}/${job.id}`}
-        onClick={e => e.stopPropagation()}
-        className="smj-action-edit"
-      >
-        <i className="fas fa-edit" title="Upravit"></i>
-      </Link>
+    {
+      content: (
+        <span key={`completed-${job.id}`} onClick={e => e.stopPropagation()}>
+          <ToggleCompletedCheck job={job} />
+        </span>
+      ),
+    },
+    {
+      content: (
+        <span
+          className="d-inline-flex gap-1 align-items-center"
+          key={`name-${job.id}`}
+        >
+          {job.proposedJob.name}
+          <ActiveJobIssueIcon
+            job={job}
+            day={day}
+            ridesForOtherJobs={ridesForOtherJobs}
+          />
+        </span>
+      ),
+    },
+    {
+      content: `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`,
+    },
+    { content: job.proposedJob.contact },
+    { content: job.proposedJob.area?.name },
+    { content: job.proposedJob.address },
+    { content: formatAmenities(job) },
+    { content: job.proposedJob.priority },
+    {
+      content: (
+        <span
+          key={`actions-${job.id}`}
+          className="d-flex align-items-center gap-3"
+        >
+          <Link
+            href={`/plans/${job.planId}/${job.id}`}
+            onClick={e => e.stopPropagation()}
+            className="smj-action-edit"
+          >
+            <i className="fas fa-edit" title="Upravit"></i>
+          </Link>
 
-      {deleteJobIcon(deleteJob, isBeingDeleted)}
-      <span style={{ width: '0px' }}></span>
-    </span>, stickyRight: true},
+          {deleteJobIcon(deleteJob, isBeingDeleted)}
+        </span>
+      ),
+      stickyRight: true,
+    },
   ]
 }
 
@@ -375,7 +422,9 @@ function formatWorkerData(
   requestMoveWorker: (worker: WorkerComplete) => void,
   reloadPlan: () => void
 ) {
-  const name = `${worker.firstName} ${worker.lastName}`
+  const name = `${worker.firstName} ${worker.lastName}${
+    worker.age ? `, ${worker.age}` : ''
+  }`
   const abilities = []
   const isDriver = job?.rides.map(r => r.driverId).includes(worker.id) || false
   const wantsAdoration = worker.availability.adorationDays
@@ -384,32 +433,49 @@ function formatWorkerData(
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')
+  if (worker.skills) {
+    worker.skills.map(skill => {
+      abilities.push(skillMapping[skill])
+    })
+  }
   const allergies = worker.allergies
 
   return [
-    <>
-      {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
-      {wantsAdoration && (
-        <i className="fas fa-church ms-2" title="Chce adorovat"></i>
-      )}
-    </>,
-    worker.phone,
-    abilities.join(', '),
-    allergies.join(', '),
-    <RideSelect
-      key={`rideselect-${worker.id}`}
-      worker={worker}
-      job={job}
-      otherRides={rides}
-      onRideChanged={reloadPlan}
-    />,
-    <span
-      key={`actions-${worker.id}`}
-      className="d-flex align-items-center gap-3"
-    >
-      {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
-      {removeWorkerIcon(() => removeWorker(worker.id))}
-    </span>,
+    {
+      content: (
+        <>
+          {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
+          {wantsAdoration && (
+            <i className="fas fa-church ms-2" title="Chce adorovat"></i>
+          )}
+        </>
+      ),
+    },
+    { content: worker.phone },
+    { content: abilities.join(', ') },
+    { content: allergies.map(key => allergyMapping[key]) },
+    {
+      content: (
+        <RideSelect
+          key={`rideselect-${worker.id}`}
+          worker={worker}
+          job={job}
+          otherRides={rides}
+          onRideChanged={reloadPlan}
+        />
+      ),
+    },
+    {
+      content: (
+        <span
+          key={`actions-${worker.id}`}
+          className="d-flex align-items-center gap-3"
+        >
+          {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
+          {removeWorkerIcon(() => removeWorker(worker.id))}
+        </span>
+      ),
+    },
   ]
 }
 
