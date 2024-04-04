@@ -21,16 +21,28 @@ export default async function PrintWorkersPage() {
             priority={true}
           />
         </div>
-        <div className="d-flex w-100">
+        <div className="d-flex">
           <table className="table-print">
             <thead className="workers-thead">
               <tr>
-                <th className="w-15">Jméno</th>
-                <th className="w-18">Příjmení</th>
-                <th className="w-12">Telefonní číslo</th>
-                <th>E-mail</th>
-                <th className="w-7">Vlastnosti</th>
-                <th>Poznámka</th>
+                <th scope="col" style={{ width: '12%' }}>
+                  Jméno
+                </th>
+                <th scope="col" style={{ width: '14%' }}>
+                  Příjmení
+                </th>
+                <th scope="col" style={{ width: '10%' }}>
+                  Telefonní číslo
+                </th>
+                <th scope="col" style={{ width: '20%' }}>
+                  E-mail
+                </th>
+                <th scope="col" style={{ width: '7%' }}>
+                  Vlastnosti
+                </th>
+                <th scope="col" style={{ width: '18%' }}>
+                  Poznámka
+                </th>
               </tr>
             </thead>
             <tbody className="">
