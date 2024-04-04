@@ -20,7 +20,6 @@ import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { deserializePlan, PlanComplete } from 'lib/types/plan'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -28,8 +27,8 @@ import ErrorPage404 from '../404/404'
 import { Filters } from '../filters/Filters'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
-import { PlanStatistics } from './PlanStatistics'
 import { PhotoViewer } from '../photo/PhotoViewer'
+import { PlanStatistics } from './PlanStatistics'
 
 interface PlanClientPageProps {
   id: string

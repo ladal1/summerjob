@@ -112,5 +112,3 @@ describe('Proposed Jobs', function () {
 
   this.afterAll(api.afterTestBlock)
 })
-
-export default {}

@@ -5,14 +5,13 @@ import { useAPIWorkers } from 'lib/fetcher/worker'
 import { normalizeString } from 'lib/helpers/helpers'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Filters } from '../filters/Filters'
+import { PhotoViewer } from '../photo/PhotoViewer'
 import { WorkersStatistics } from './WorkersStatistics'
 import WorkersTable from './WorkersTable'
-import { PhotoViewer } from '../photo/PhotoViewer'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized

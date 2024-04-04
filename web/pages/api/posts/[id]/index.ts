@@ -24,7 +24,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
   const activeEventId = await cache_getActiveSummerJobEventId()
   const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/posts'
-  const { files, json } = await parseFormWithImages(req, id, uploadDir, 1)
+  const { files, json } = await parseFormWithImages(req, res, id, uploadDir, 1)
 
   /* Validate simple data from json. */
   const postData = validateOrSendError(PostUpdateSchema, json, res)

@@ -27,35 +27,33 @@ async function post(
   const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/workers'
   const { files, json } = await parseFormWithImages(
     req,
+    res,
     temporaryName,
     uploadDir,
     1
   )
-
   const singleWorker = validateOrSendError(WorkerCreateSchema, json, res)
   if (!singleWorker) {
     return
   }
-  const worker = await createWorker(singleWorker)
+  let worker = await createWorker(singleWorker)
   /* Rename photo file and update worker with new photo path to it. */
-  if (files.photoFile) {
-    const temporaryPhotoPath = getPhotoPath(files.photoFile) // update photoPath
+  const fileFieldNames = Object.keys(files)
+  if (fileFieldNames.length !== 0) {
+    const file = files[fileFieldNames[0]]
+    const temporaryPhotoPath = getPhotoPath(file) // update photoPath
     singleWorker.photoPath =
       updatePhotoPathByNewFilename(temporaryPhotoPath, worker.id) ?? ''
     renameFile(temporaryPhotoPath, singleWorker.photoPath)
-    await updateWorker(worker.id, singleWorker)
+    const updatedWorker = await updateWorker(worker.id, singleWorker)
+    if (updatedWorker) worker = updatedWorker
   }
-  await logger.apiRequest(
-    APILogEvent.WORKER_CREATE,
-    'workers',
-    singleWorker,
-    session
-  )
+  await logger.apiRequest(APILogEvent.WORKER_CREATE, 'workers', worker, session)
   res.status(201).json(worker)
 }
 
 export default APIAccessController(
-  [Permission.WORKERS, Permission.PLANS],
+  [Permission.WORKERS],
   APIMethodHandler({ post })
 )
 

@@ -30,8 +30,6 @@ export type ActiveJobWithProposed = z.infer<typeof ActiveJobWithProposedSchema>
 export const ActiveJobCreateSchema = z
   .object({
     proposedJobId: z.string().min(1),
-    privateDescription: z.string(),
-    publicDescription: z.string(),
     planId: z.string(),
   })
   .strict()
@@ -41,9 +39,7 @@ export type ActiveJobCreateData = z.infer<typeof ActiveJobCreateSchema>
 export const ActiveJobUpdateSchema = z
   .object({
     completed: z.boolean(),
-    proposedJob: ProposedJobForActiveJobSchema.strict(),
-    privateDescription: z.string(),
-    publicDescription: z.string(),
+    proposedJob: ProposedJobForActiveJobSchema.strict().partial(),
     workerIds: z.array(z.string()),
     responsibleWorkerId: z.string(),
     rideIds: z.array(z.string()),

@@ -108,5 +108,3 @@ describe('Areas', function () {
 
   this.afterAll(api.afterTestBlock)
 })
-
-export default {}

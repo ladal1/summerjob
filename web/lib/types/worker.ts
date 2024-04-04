@@ -24,14 +24,20 @@ export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 
 export const WorkerCreateSchema = z
   .object({
-    firstName: z.string().min(1, { message: err.emptyFirstName }).trim(),
-    lastName: z.string().min(1, { message: err.emptyLastName }).trim(),
+    firstName: z
+      .string({ required_error: err.emptyFirstName })
+      .min(1, { message: err.emptyFirstName })
+      .trim(),
+    lastName: z
+      .string({ required_error: err.emptyLastName })
+      .min(1, { message: err.emptyLastName })
+      .trim(),
     email: z
-      .string()
+      .string({ required_error: err.emptyEmail })
       .min(1, { message: err.emptyEmail })
       .email({ message: err.invalidEmail }),
     phone: z
-      .string()
+      .string({ required_error: err.emptyPhone })
       .min(1, { message: err.emptyPhone })
       .refine(phone => phoneRegex.test(phone), {
         message: err.invalidRegexPhone,
@@ -45,7 +51,8 @@ export const WorkerCreateSchema = z
       .number({ invalid_type_error: err.invalidTypeNumber })
       .int({ message: err.nonInt })
       .positive({ message: err.nonPositiveNumber })
-      .nullable(),
+      .nullable()
+      .optional(),
     photoFile: z
       .any()
       .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)

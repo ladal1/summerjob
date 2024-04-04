@@ -50,6 +50,7 @@ async function patch(
 
   const { files, json } = await parseFormWithImages(
     req,
+    res,
     id,
     uploadDirectory,
     10 - currentPhotoCnt

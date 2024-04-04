@@ -47,7 +47,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
   const activeEventId = await cache_getActiveSummerJobEventId()
   const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/workers'
-  const { files, json } = await parseFormWithImages(req, id, uploadDir, 1)
+  const { files, json } = await parseFormWithImages(req, res, id, uploadDir, 1)
 
   /* Validate simple data from json. */
   const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
@@ -55,8 +55,10 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
   /* Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted. */
-  if (files.photoFile) {
-    const photoPath = getPhotoPath(files.photoFile) // update photoPath
+  const fileFieldNames = Object.keys(files)
+  if (fileFieldNames.length !== 0) {
+    const file = files[fileFieldNames[0]] // take the first one
+    const photoPath = getPhotoPath(file) // update photoPath
     const worker = await getWorkerPhotoById(id)
     if (worker?.photoPath && worker?.photoPath !== photoPath) {
       // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it

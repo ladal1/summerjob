@@ -3,6 +3,11 @@ import { PrismaClient } from '../lib/prisma/client'
 import request from 'supertest'
 import { faker } from '@faker-js/faker/locale/cz'
 
+export type File = {
+  fieldName: string
+  file: string
+}
+
 const prisma = new PrismaClient()
 
 /**
@@ -188,11 +193,10 @@ class Common {
   }
 
   createProposedJob = async (areaId: string) => {
-    const area = await this.createArea()
     const job = await this.post(
       `/api/proposed-jobs`,
       Id.ADMIN,
-      createProposedJobData(area.id)
+      createProposedJobData(areaId)
     )
     return job.body
   }
@@ -211,8 +215,7 @@ class Common {
     const job = await api.createProposedJob(area.id)
     const payload = {
       proposedJobId: job.id,
-      privateDescription: faker.lorem.paragraph(),
-      publicDescription: faker.lorem.paragraph(),
+      planId: plan.body.id,
     }
     const activeJob = await api.post(
       `/api/plans/${plan.body.id}/active-jobs`,
@@ -303,28 +306,50 @@ class Common {
       .send()
   }
 
-  post = async (url: string, identity: string, body: any) => {
+  post = async (
+    url: string,
+    identity: string,
+    body: any,
+    files: File[] = []
+  ) => {
     if (!this._session) await this.setup()
     if (identity !== this._lastIdentity) {
       await changePermissions(this._email, identity)
       this._lastIdentity = identity
     }
-    return request(this._url)
+    const requestPromise = request(this._url)
       .post(url)
       .set('Cookie', [this._session])
       .field('jsonData', JSON.stringify(body))
+    if (files.length > 0) {
+      files.forEach(file => {
+        requestPromise.attach(file.fieldName, file.file)
+      })
+    }
+    return requestPromise
   }
 
-  patch = async (url: string, identity: string, body: any) => {
+  patch = async (
+    url: string,
+    identity: string,
+    body: any,
+    files: File[] = []
+  ) => {
     if (!this._session) await this.setup()
     if (identity !== this._lastIdentity) {
       await changePermissions(this._email, identity)
       this._lastIdentity = identity
     }
-    return request(this._url)
+    const requestPromise = request(this._url)
       .patch(url)
       .set('Cookie', [this._session])
       .field('jsonData', JSON.stringify(body))
+    if (files.length > 0) {
+      files.forEach(file => {
+        requestPromise.attach(file.fieldName, file.file)
+      })
+    }
+    return requestPromise
   }
 
   del = async (url: string, identity: string) => {
@@ -378,10 +403,13 @@ export function createWorkerData() {
   return {
     firstName: faker.name.firstName(),
     lastName: faker.name.lastName(),
+    age: +faker.random.numeric(2, { allowLeadingZeros: false }),
     email: faker.internet.email(),
     phone: faker.phone.number('### ### ###'),
+    team: Math.random() > 0.5,
     strong: Math.random() > 0.5,
     allergyIds: [],
+    skills: [],
     availability: {
       workDays: [],
       adorationDays: [],
@@ -428,6 +456,9 @@ export function createProposedJobData(areaId: string) {
     hasFood: true,
     hasShower: true,
     availability: ['2023-04-24T00:00:00.000Z'],
+    jobType: 'OTHER',
+    coordinates: [0, 0],
+    priority: 1,
   }
 }
 
@@ -451,6 +482,7 @@ export const Id = {
   WORKERS: 'WORKERS',
   CARS: 'CARS',
   PLANS: 'PLANS',
+  POSTS: 'POSTS',
 }
 
 export const api = new Common()

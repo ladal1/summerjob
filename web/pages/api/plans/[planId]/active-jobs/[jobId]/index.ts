@@ -20,6 +20,7 @@ async function patch(
 ) {
   const id = req.query.jobId as string
   const { json } = await parseForm(req)
+
   const data = validateOrSendError(ActiveJobUpdateSchema, json, res)
   if (!data) {
     return
@@ -63,6 +64,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }

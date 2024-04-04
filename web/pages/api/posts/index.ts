@@ -38,6 +38,7 @@ async function post(
   const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/posts'
   const { files, json } = await parseFormWithImages(
     req,
+    res,
     temporaryName,
     uploadDir,
     1

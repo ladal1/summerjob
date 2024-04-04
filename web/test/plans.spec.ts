@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { Id, api, createPlanData } from './common'
 import chai from 'chai'
 
-let should = chai.should()
+const should = chai.should()
 
 describe('Plans', function () {
   it('should show empty list of plans', async function () {
@@ -88,8 +88,7 @@ describe('Plans', function () {
     const job = await api.createProposedJob(area.id)
     const payload = {
       proposedJobId: job.id,
-      privateDescription: faker.lorem.paragraph(),
-      publicDescription: faker.lorem.paragraph(),
+      planId: plan.body.id,
     }
     const addToPlan = await api.post(
       `/api/plans/${plan.body.id}/active-jobs`,
@@ -117,8 +116,6 @@ describe('Plans', function () {
     activeJob.body.should.have.property('id')
     activeJob.body.should.have.property('planId')
     activeJob.body.should.have.property('proposedJobId')
-    activeJob.body.should.have.property('privateDescription')
-    activeJob.body.should.have.property('publicDescription')
     activeJob.body.id.should.equal(job.id)
     activeJob.body.planId.should.equal(plan.id)
 
@@ -135,8 +132,7 @@ describe('Plans', function () {
     const job = await api.createProposedJob(area.id)
     const payload = {
       proposedJobId: job.id,
-      privateDescription: faker.lorem.paragraph(),
-      publicDescription: faker.lorem.paragraph(),
+      planId: plan.body.id,
     }
     const activeJob = await api.post(
       `/api/plans/${plan.body.id}/active-jobs`,
@@ -159,7 +155,9 @@ describe('Plans', function () {
     const { plan, job } = await api.createPlanWithJob()
     const worker = await api.createWorker()
     const payload = {
-      privateDescription: faker.lorem.paragraph(),
+      proposedJob: {
+        privateDescription: faker.lorem.paragraph(),
+      },
       workerIds: [worker.id],
       responsibleWorkerId: worker.id,
     }
@@ -173,7 +171,9 @@ describe('Plans', function () {
     const updatedActiveJob = (updatedPlan.body.jobs as any[]).find(
       j => j.id === job.id
     )
-    updatedActiveJob.privateDescription.should.equal(payload.privateDescription)
+    updatedActiveJob.proposedJob.privateDescription.should.equal(
+      payload.proposedJob.privateDescription
+    )
     updatedActiveJob.workers.map(w => w.id).should.include(worker.id)
     updatedActiveJob.responsibleWorkerId.should.equal(
       payload.responsibleWorkerId
@@ -187,8 +187,7 @@ describe('Plans', function () {
     const proposedJob = await api.createProposedJob(area.id)
     const job2 = await api.post(`/api/plans/${plan.id}/active-jobs`, Id.PLANS, {
       proposedJobId: proposedJob.id,
-      privateDescription: faker.lorem.paragraph(),
-      publicDescription: faker.lorem.paragraph(),
+      planId: plan.id,
     })
     // Add worker to job 1
     const worker = await api.createWorker()

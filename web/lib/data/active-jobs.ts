@@ -209,7 +209,7 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   return await prisma.$transaction(async tx => {
     const existingActiveJob = await getActiveJobDetailsById(id, tx)
     if (!existingActiveJob) {
-      throw new Error('Active job not found')
+      throw new Error(`Active job of id ${id} not found`)
     }
     let workersCommand = {}
 

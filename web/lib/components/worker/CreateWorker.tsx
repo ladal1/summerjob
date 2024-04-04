@@ -4,7 +4,11 @@ import { DateBool } from 'lib/data/dateSelectionType'
 import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 import { skillMapping } from 'lib/data/enumMapping/skillMapping'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
-import { formatPhoneNumber, removeRedundantSpace } from 'lib/helpers/helpers'
+import {
+  formatNumber,
+  formatPhoneNumber,
+  removeRedundantSpace,
+} from 'lib/helpers/helpers'
 import { WorkerCreateSchema } from 'lib/types/worker'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -140,8 +144,7 @@ export default function CreateWorker({
             register={() =>
               register('age', {
                 valueAsNumber: true,
-                onChange: e =>
-                  (e.target.value = formatNumber(e.target.value)),
+                onChange: e => (e.target.value = formatNumber(e.target.value)),
               })
             }
             errors={errors}

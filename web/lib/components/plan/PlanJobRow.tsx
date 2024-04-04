@@ -15,6 +15,7 @@ import { useMemo, useState } from 'react'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow } from '../table/ExpandableRow'
+import { RowCells } from '../table/RowCells'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
 import { SimpleRow } from '../table/SimpleRow'
 import { ActiveJobIssueBanner, ActiveJobIssueIcon } from './ActiveJobIssue'
@@ -23,8 +24,6 @@ import JobRideList from './JobRideList'
 import MoveWorkerModal from './MoveWorkerModal'
 import RideSelect from './RideSelect'
 import ToggleCompletedCheck from './ToggleCompletedCheck'
-import { RowCells } from '../table/RowCells'
-import MarkAsCompletedIcon from '../table/icons/MarkAsCompletedIcon'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan

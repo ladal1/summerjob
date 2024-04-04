@@ -33,6 +33,12 @@ async function post(
   })
   if (createSingle.success) {
     const job = await createActiveJob(createSingle.data)
+    await logger.apiRequest(
+      APILogEvent.PLAN_JOB_ADD,
+      `plans/${req.query.planId}/active-jobs`,
+      json,
+      session
+    )
     res.status(201).json(job)
     return
   }
@@ -46,7 +52,7 @@ async function post(
     return
   }
   await logger.apiRequest(
-    APILogEvent.PLAN_JOB_ADD,
+    APILogEvent.PLAN_JOBS_ADD,
     `plans/${req.query.planId}/active-jobs`,
     json,
     session
@@ -62,6 +68,6 @@ export default APIAccessController(
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }

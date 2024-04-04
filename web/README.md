@@ -6,7 +6,7 @@ Instrukce pro spuštění aplikace v produkčním režimu se nachází v kořeno
 
 ### Adresářová struktura
 
-Použitý framework [Next.js](https://nextjs.org/) ve verzi 13, beta, využívá routing podle adresářů. Stránky zodpovědné za routing se nachází v adresáři `app`. Složky s názvem v kulatých závorkách - `(user)` - se v URL neprojeví a slouží pouze pro organizaci souborů. Složky s názvem v hranatých závorkách - `[id]` - slouží pro předání dynamických parametrů.
+Použitý framework [Next.js](https://nextjs.org/) ve verzi 13, využívá routing podle adresářů. Stránky zodpovědné za routing se nachází v adresáři `app`. Složky s názvem v kulatých závorkách - `(user)` - se v URL neprojeví a slouží pouze pro organizaci souborů. Složky s názvem v hranatých závorkách - `[id]` - slouží pro předání dynamických parametrů.
 
 Složka `app` využívá Server-side rendering (SSR), takže je možné v těchto stránkách např. získat data z databáze bez nutnosti volání API. Interaktivní stránky, které je potřeba vyrenderovat na klientovi, se nacházejí v adresáři `lib/components` a jsou do serverových stránek importovány.
 
@@ -93,8 +93,11 @@ Session cookies se nastavují jako Http Only a není je tedy možné odstranit a
 
 ## Testování
 
-Pro spuštění API testů je nutné připravit testovací databázi. Tato databáze musí mít stejné schéma jako produkční, ale nesmí obsahovat data.
-Nastavte v souboru `.env` v adresáři `web` proměnnou `DATABASE_URL` na adresu testovací databáze.
+Pro spuštění API testů je nutné připravit testovací databázi. Nastavte v souboru `.env` v adresáři `web` proměnnou `DATABASE_URL` na adresu testovací databáze. Tato databáze musí mít stejné schéma jako produkční, ale nesmí obsahovat data. Před každým spuštěním pro smazání dat z testovací databáze lze napsat:
+
+```console
+[web]$ npx prisma db push --force-reset
+```
 
 Testování probíhá na produkční verzi aplikace.
 
@@ -104,8 +107,17 @@ Testování probíhá na produkční verzi aplikace.
 Application is running on http://localhost:3000
 ```
 
+A nebo lze i na vývojvé verzi aplikace.
+
+```console
+[web]$ npm run dev
+Application is running on http://localhost:3000
+```
+
+V dalším okně terminálu pak můžete spustit testy.
+
 ```
 [web]$ npm run test
 ```
 
-Pokud chcete testy opakovat, restartujte aplikaci a spusťte testy znovu.
+Pokud chcete testy opakovat, restartujte aplikaci (kdy před spuštěním smažte data z databáze) a spusťte testy znovu.

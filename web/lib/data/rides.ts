@@ -16,6 +16,7 @@ export async function createRide(data: RideCreateData, jobId: string) {
       },
     })
     await removeWorkersFromRides(tx, [...passengerIds, data.driverId], ride.id)
+    return ride
   })
   return ride
 }
