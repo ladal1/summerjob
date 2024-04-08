@@ -11,6 +11,10 @@ export function validateOrSendError<T extends z.ZodTypeAny>(
 ): z.infer<T> | undefined {
   const parsed = schema.safeParse(data)
   if (!parsed.success) {
+    parsed.error.issues.map(issue => {
+      console.log(issue.code)
+      console.log(issue.message)
+    })
     res.status(400).json({
       error: new ApiBadRequestError(
         'Incorrect input values.',

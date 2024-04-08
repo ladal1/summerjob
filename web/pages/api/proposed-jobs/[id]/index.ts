@@ -61,9 +61,11 @@ async function patch(
     json,
     res
   )
+  console.log(json)
   if (!proposedJobData) {
     return
   }
+  console.log(proposedJobData)
 
   // Set coordinates if they are missing
   if (proposedJobData.coordinates === undefined) {

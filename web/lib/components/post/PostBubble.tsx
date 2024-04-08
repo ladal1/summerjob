@@ -28,20 +28,12 @@ export const PostBubble = ({
   }
   return (
     <>
-      {isOpenedInfoModal && (
-        <PostModal
-          item={item}
-          onClose={onCloseModal}
-          onUpdated={onUpdated}
-          userId={userId}
-        />
-      )}
       <div
         className={`${
           onUpdated && item.isPinned
             ? 'smj-color-bubble-pinned'
             : 'smj-color-bubble'
-        } rounded mt-2 mb-2 cursor-pointer`}
+        } rounded mt-2 mb-2 cursor-pointer smj-shadow`}
         onClick={() => setIsOpenedInfoModal(true)}
       >
         <div className="p-3">
@@ -89,6 +81,14 @@ export const PostBubble = ({
           )}
         </div>
       </div>
+      {isOpenedInfoModal && (
+        <PostModal
+          item={item}
+          onClose={onCloseModal}
+          onUpdated={onUpdated}
+          userId={userId}
+        />
+      )}
     </>
   )
 }

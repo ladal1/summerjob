@@ -25,7 +25,7 @@ export const MyEvents = ({ date, events, userId }: MyEventsProps) => {
         <EditBox>
           <FormHeader label="Moje události" />
           {filteredEvents.map(event => (
-            <div key={event.id}>
+            <div className="pt-1" key={event.id}>
               <PostBubble item={event} userId={userId} />
             </div>
           ))}

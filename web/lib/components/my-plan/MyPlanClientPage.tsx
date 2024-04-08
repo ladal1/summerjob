@@ -44,7 +44,7 @@ export default function MyPlanClientPage({
 
   const [currentDate] = useState<Date>(() => {
     const date = new Date()
-    date.setHours(0, 0, 0, 0)
+    date.setHours(firstDay.getHours())
     return date
   })
 
@@ -70,9 +70,7 @@ export default function MyPlanClientPage({
   }
   const selectedPlan = useMemo(() => {
     return sortedPlans.find(plan => {
-      const planDate = new Date(plan.day)
-      planDate.setHours(0, 0, 0, 0)
-      return planDate.getTime() === date.getTime()
+      return plan.day.getTime() === date.getTime()
     })
   }, [date, sortedPlans])
 
@@ -93,7 +91,7 @@ export default function MyPlanClientPage({
       </PageHeader>
 
       <div className="container pb-4">
-        {selectedPlan === undefined ? (
+        {selectedPlan === undefined || selectedPlan.job === undefined ? (
           <HeaderNoContent label="Tento den nemáte naplánovanou práci." />
         ) : (
           <MyJob selectedPlan={selectedPlan} />

@@ -89,6 +89,8 @@ export default function EditProposedJobForm({
 
   const onSubmit = (data: ProposedJobForm) => {
     const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
+    modified.availability = data.availability
+    modified.requiredDays = data.requiredDays
     trigger(modified, {
       onSuccess: () => {
         setSaved(true)

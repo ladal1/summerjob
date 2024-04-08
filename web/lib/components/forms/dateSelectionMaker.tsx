@@ -24,7 +24,7 @@ export default function dateSelectionMaker(
 
   const days = datesBetween(start, end)
 
-  const evnetStart = new Date(eventStartDate)
+  const eventStart = new Date(eventStartDate)
   const eventEnd = new Date(eventEndDate)
 
   const splitIntoWeeks = (days: Date[]): DateBool[][] => {
@@ -38,7 +38,8 @@ export default function dateSelectionMaker(
         weeks.push(currentWeek) // Start new week
         currentWeek = []
       }
-      const isDisabled = !isBetweenDates(evnetStart, eventEnd, day)
+      const isDisabled = !isBetweenDates(eventStart, eventEnd, day)
+
       currentWeek.push({ date: day, isDisabled: isDisabled })
     })
 

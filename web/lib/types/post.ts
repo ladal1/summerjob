@@ -185,7 +185,6 @@ export function deserializePostsDates(post: PostComplete) {
   post.madeIn = new Date(post.madeIn)
   post.availability = post.availability.map(date => {
     const newDate = new Date(date)
-    newDate.setHours(0, 0, 0, 0)
     return newDate
   })
   return post

@@ -133,20 +133,31 @@ export default function PostsClientPage({
   //#region Days
 
   const selectedDaysQ = searchParams?.get('days')
+
   const today = () => {
     const todayDate = new Date()
-    const todayDay = { id: todayDate.toJSON(), day: new Date(todayDate) }
+    const todayDay = {
+      id: todayDate.toJSON(),
+      day: new Date(todayDate.setHours(firstDay.getHours())),
+    }
     if (days.includes(todayDay)) {
       return [todayDay]
     }
-    return []
+    return days
   }
 
   const getSelectedDaysFromQuery = () => {
-    const result = days.filter(day =>
-      (selectedDaysQ ? selectedDaysQ.split(';') : ['']).includes(day.id)
-    )
-    return result.length === 0 ? today() : result
+    if (selectedDaysQ) {
+      const daysQ = selectedDaysQ.split(';') ?? ['']
+      const daysInDateQ = daysQ.map(
+        dayQ => new Date(new Date(dayQ).setHours(firstDay.getHours()))
+      )
+      const result = days.filter(day =>
+        daysInDateQ.some(dQ => dQ.toJSON() === day.id)
+      )
+      return result.length === 0 ? today() : result
+    }
+    return today()
   }
 
   const [selectedDays, setSelectedDays] = useState(getSelectedDaysFromQuery())
@@ -210,7 +221,7 @@ export default function PostsClientPage({
   //#region Filters
 
   const [filters, setFilters] = useState<PostFilterDataInput>({
-    availability: selectedDays.map(day => new Date(day.day)),
+    availability: selectedDays.map(day => day.day),
     timeFrom: timeFrom,
     timeTo: timeTo,
     tags: tags,
@@ -219,10 +230,13 @@ export default function PostsClientPage({
 
   useMemo(() => {
     setSelectedDays(
-      filters.availability.map(date => ({
-        id: typeof date === 'string' ? date : date.toJSON(),
-        day: new Date(date),
-      }))
+      filters.availability.map(date => {
+        const day = new Date(date)
+        return {
+          id: typeof date === 'string' ? date : date.toJSON(),
+          day: day,
+        }
+      })
     )
   }, [filters.availability])
 
@@ -250,7 +264,7 @@ export default function PostsClientPage({
     router.replace(
       `?${new URLSearchParams({
         search: search,
-        day: selectedDays.map(d => d.id).join(';') ?? '',
+        days: selectedDays.map(d => d.id).join(';') ?? '',
         sort: selectedSort.id,
         participate: `${participate}`,
         timeFrom: timeFrom === null ? '' : timeFrom,
@@ -398,13 +412,14 @@ export default function PostsClientPage({
           <div className="col-md-3">
             <PostType title="Obecné">
               {regularPosts.map((item, index) => (
-                <PostBubble
-                  key={index}
-                  item={item}
-                  advancedAccess={advancedAccess}
-                  onUpdated={mutate}
-                  userId={userId}
-                />
+                <div key={index} className="pb-1">
+                  <PostBubble
+                    item={item}
+                    advancedAccess={advancedAccess}
+                    onUpdated={mutate}
+                    userId={userId}
+                  />
+                </div>
               ))}
             </PostType>
           </div>
@@ -477,15 +492,13 @@ function filterPosts(
     })
     .filter(post => {
       if (selectedDays.length === 0) {
-        return true
+        return post.availability === undefined || post.availability.length === 0
       } else {
         return selectedDays.some(selected => {
           return (
             post.availability &&
             post.availability.some(availDay => {
-              return (
-                selected.day && availDay.getTime() === selected.day.getTime()
-              )
+              return selected.day.getTime() === availDay.getTime()
             })
           )
         })
@@ -580,7 +593,7 @@ export interface Day {
 function getDays(firstDay: Date, lastDay: Date) {
   const days: Day[] = datesBetween(firstDay, lastDay).map(date => ({
     id: date.toJSON(),
-    day: new Date(date),
+    day: date,
   }))
   return days
 }
