@@ -73,12 +73,20 @@ export const PlanStatistics = ({
             <span className="me-2">Potřebné nástroje</span>
             <table className="table">
               <tbody>
-                {Object.entries(toolsToTakeWithList).map(([key, tool]) => (
-                  <tr key={key} className="text-end">
-                    <td>{toolNameMapping[tool.name]}</td>
-                    <td>{tool.amount}</td>
-                  </tr>
-                ))}
+                {Object.entries(toolsToTakeWithList)
+                  .sort(([keyA, areanameA], [keyB, areanameB]) => {
+                    if (areanameA.amount === areanameB.amount)
+                      return areanameA.name.localeCompare(areanameB.name)
+                    if (areanameA.amount < areanameB.amount) return -1
+                    if (areanameA.amount > areanameB.amount) return 1
+                    return 0
+                  })
+                  .map(([key, tool]) => (
+                    <tr key={key} className="text-end">
+                      <td>{toolNameMapping[tool.name]}</td>
+                      <td>{tool.amount}</td>
+                    </tr>
+                  ))}
                 {Object.entries(toolsToTakeWithList).length === 0 && (
                   <tr key="none" className="text-end">
                     <td>žádné</td>

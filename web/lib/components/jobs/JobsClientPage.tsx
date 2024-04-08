@@ -6,7 +6,7 @@ import {
   deserializeProposedJobs,
   ProposedJobComplete,
 } from 'lib/types/proposed-job'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAPIProposedJobs } from 'lib/fetcher/proposed-job'
 import {
   datesBetween,
@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { Serialized } from 'lib/types/serialize'
 import { Filters } from '../filters/Filters'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { JobsStatistics } from './JobsStatistics'
 
 interface ProposedJobsClientPage {
   initialData: Serialized
@@ -86,17 +87,37 @@ export default function ProposedJobsClientPage({
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
 
-  function shouldShowJob(job: ProposedJobComplete) {
-    const area =
-      selectedArea.id === areas[0].id || job.area?.id === selectedArea.id
-    const fulltext =
-      fulltextData.get(job.id)?.includes(normalizeString(filter).trimEnd()) ??
-      false
-    const day =
-      selectedDay.id === days[0].id ||
-      job.availability.map(d => d.getTime()).includes(selectedDay.day.getTime())
-    return area && fulltext && day
-  }
+  const shouldShowJob = useCallback(
+    (job: ProposedJobComplete) => {
+      const area =
+        selectedArea.id === areas[0].id || job.area?.id === selectedArea.id
+      const fulltext =
+        fulltextData.get(job.id)?.includes(normalizeString(filter).trimEnd()) ??
+        false
+      const day =
+        selectedDay.id === days[0].id ||
+        job.availability
+          .map(d => d.getTime())
+          .includes(selectedDay.day.getTime())
+      return area && fulltext && day
+    },
+    [
+      areas,
+      days,
+      filter,
+      fulltextData,
+      selectedArea.id,
+      selectedDay.day,
+      selectedDay.id,
+    ]
+  )
+
+  const filteredJobs = useMemo(() => {
+    if (!data) return []
+    return data.filter(job => {
+      return shouldShowJob(job)
+    })
+  }, [data, shouldShowJob])
 
   if (error && !data) {
     return <ErrorPage error={error} />
@@ -142,13 +163,16 @@ export default function ProposedJobsClientPage({
             </div>
           </div>
           <div className="row gx-3">
-            <div className="col-12">
+            <div className="col-lg-10 pb-2">
               <JobsTable
                 data={data || []}
                 shouldShowJob={shouldShowJob}
                 reload={reload}
                 workerId={workerId}
               />
+            </div>
+            <div className="col-sm-12 col-lg-2">
+              <JobsStatistics data={filteredJobs} />
             </div>
           </div>
         </div>
