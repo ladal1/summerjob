@@ -40,9 +40,6 @@ export const ImageUploader = <FormData extends FieldValues>({
   maxFileSize = 1024 * 1024 * 10, // 10 MB
 }: ImageUploaderProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
-  const [errorBeforeSave, setErrorBeforeSave] = useState<string | undefined>(
-    undefined
-  )
 
   const [photoInitCount, setphotoInitCount] = useState(photoInit?.length ?? 0)
   const [previewUrls, setPreviewUrls] = useState<(PreviewUrl | null)[]>(
@@ -52,26 +49,27 @@ export const ImageUploader = <FormData extends FieldValues>({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setErrorBeforeSave(undefined)
     const fileInput = e.target
 
     if (!fileInput.files || fileInput.files.length === 0) {
       return
     }
-    if (previewUrls.length + fileInput.files.length > maxPhotos) {
-      setErrorBeforeSave(err.maxCountImage + ` ${maxPhotos}`)
-      return
-    }
 
-    const newPreviewUrls = Array.from(fileInput.files).map(file => {
-      if (!file.type.startsWith('image') || file.size > maxFileSize) {
-        return null
-      }
+    // Filter out files
+    const newFiles: File[] = Array.from(fileInput.files)
+      .filter(file => file.type.startsWith('image') && file.size <= maxFileSize)
+      .slice(0, maxPhotos - previewUrls.length)
 
+    // Create new url previews
+    const newPreviewUrls = newFiles.map(file => {
       return { url: URL.createObjectURL(file) }
     })
 
-    registerPhoto(fileInput.files)
+    // Transfer those photos back to FileList
+    const dt = new DataTransfer()
+    newFiles.forEach((file: File) => dt.items.add(file))
+
+    registerPhoto(dt.files)
     setPreviewUrls(prevPreviewUrls => [...prevPreviewUrls, ...newPreviewUrls])
   }
 
@@ -184,7 +182,7 @@ export const ImageUploader = <FormData extends FieldValues>({
             onClose={() => setShowPhotoModal(false)}
           />
         )}
-      <FormWarning message={error || errorBeforeSave} />
+      <FormWarning message={error} />
     </>
   )
 }
