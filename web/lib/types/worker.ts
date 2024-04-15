@@ -10,7 +10,6 @@ import {
   WorkerSchema,
 } from 'lib/prisma/zod'
 import { Allergy, Skill } from '../../lib/prisma/client'
-import { phoneRegex } from 'lib/helpers/regex'
 
 useZodOpenApi
 

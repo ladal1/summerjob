@@ -123,7 +123,7 @@ const ProposedJobBasicSchema = z
     toolsOnSiteIdsDeleted: z.array(z.string()).optional(),
     toolsToTakeWithCreate: ToolsCreateSchema.optional(),
     toolsToTakeWithIdsDeleted: z.array(z.string()).optional(),
-    priority: z.number().optional(),
+    priority: z.number().default(1).optional(),
   })
   .strict()
 

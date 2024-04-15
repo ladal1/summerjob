@@ -32,6 +32,7 @@ import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { Form } from '../forms/Form'
 import { z } from 'zod'
+import { ScaleInput } from '../forms/input/ScaleInput'
 
 const schema = ProposedJobCreateSchema
 type PostForm = z.input<typeof schema>
@@ -230,6 +231,15 @@ export default function CreateProposedJobForm({
   }
 
   //#endregion
+
+  //#region Priority
+
+  const registerPriority = (num: number) => {
+    setValue('priority', num, { shouldDirty: true, shouldValidate: true })
+  }
+
+  //#endregion
+
   return (
     <>
       <Form
@@ -450,6 +460,14 @@ export default function CreateProposedJobForm({
                 label: 'Sprcha na místě',
               },
             ]}
+          />
+          <ScaleInput
+            id="priority"
+            label="Priorita jobu"
+            min={1}
+            max={5}
+            registerPriority={registerPriority}
+            errors={errors}
           />
         </form>
       </Form>

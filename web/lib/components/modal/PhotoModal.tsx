@@ -42,7 +42,6 @@ export default function PhotoModal({ onClose, photo }: PhotoModalProps) {
           }}
         >
           <Image
-            className="responsive"
             style={{ objectFit: 'contain' }}
             alt="Fotografie"
             src={photo}

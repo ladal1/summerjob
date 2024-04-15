@@ -1,28 +1,34 @@
 import { FieldErrors, Path, UseFormRegisterReturn } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 import { Label } from '../Label'
+import { useState } from 'react'
+import { priorityMapping } from 'lib/data/enumMapping/priorityMapping'
 
 interface ScaleInputProps {
   id: string
   label: string
-  secondaryLabel: string
   min: number
   max: number
-  register: () => UseFormRegisterReturn
+  init?: number
+  registerPriority: (num: number) => void
   errors: FieldErrors<FormData>
 }
 
 export const ScaleInput = ({
   id,
   label,
-  secondaryLabel,
   min,
   max,
-  register,
+  init = 1,
+  registerPriority,
   errors,
 }: ScaleInputProps) => {
   const error = errors?.[id as Path<FormData>]?.message as string | undefined
-
+  const [val, setVal] = useState(init)
+  const setValue = (num: number) => {
+    setVal(num)
+    registerPriority(num)
+  }
   return (
     <>
       <Label id={id} label={label} />
@@ -34,11 +40,15 @@ export const ScaleInput = ({
           className="form-range smj-range"
           min={min}
           max={max}
-          {...register()}
+          value={val}
+          onChange={e => {
+            setValue(+e.target.value)
+          }}
         />
         {max}
       </div>
-      <div className="text-muted">{secondaryLabel}</div>
+
+      <div className="text-muted">{priorityMapping[val]}</div>
       <FormWarning message={error} />
     </>
   )

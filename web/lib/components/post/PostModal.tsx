@@ -78,7 +78,6 @@ export const PostModal = ({
               }}
             >
               <Image
-                className="responsive"
                 style={{ objectFit: 'contain' }}
                 alt="Fotografie"
                 src={`/api/posts/${item.id}/photo`}

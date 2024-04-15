@@ -301,6 +301,14 @@ export default function EditProposedJobForm({
 
   //#endregion
 
+  //#region Priority
+
+  const registerPriority = (num: number) => {
+    setValue('priority', num, { shouldDirty: true, shouldValidate: true })
+  }
+
+  //#endregion
+
   return (
     <>
       <Form
@@ -528,10 +536,10 @@ export default function EditProposedJobForm({
           <ScaleInput
             id="priority"
             label="Priorita jobu"
-            secondaryLabel="1 značí nejmenší a 5 největší"
             min={1}
             max={5}
-            register={() => register('priority', { valueAsNumber: true })}
+            init={job.priority}
+            registerPriority={registerPriority}
             errors={errors}
           />
         </form>

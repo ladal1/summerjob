@@ -19,6 +19,7 @@ import { ExpandableRow } from '../table/ExpandableRow'
 import { RowCells } from '../table/RowCells'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
 import MarkAsCompletedIcon from '../table/icons/MarkAsCompletedIcon'
+import { priorityMapping } from 'lib/data/enumMapping/priorityMapping'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -186,7 +187,7 @@ function formatJobRow(
     { content: `${job.activeJobs.length} / ${job.requiredDays}` },
     { content: datesAfterDate(job.availability, now).length },
     { content: `${job.minWorkers} - ${job.maxWorkers}` },
-    { content: job.priority },
+    { content: priorityMapping[job.priority] },
     {
       content: (
         <span

@@ -1,11 +1,9 @@
-import { ChangeEvent, useState } from 'react'
-import { FieldErrors, FieldValues, Path } from 'react-hook-form'
-import { Label } from './Label'
-import Image from 'next/image'
-import React from 'react'
-import FormWarning from './FormWarning'
 import PhotoModal from 'lib/components/modal/PhotoModal'
-import { customErrorMessages as err } from 'lib/lang/error-messages'
+import Image from 'next/image'
+import React, { ChangeEvent, useState } from 'react'
+import { FieldErrors, FieldValues, Path } from 'react-hook-form'
+import FormWarning from './FormWarning'
+import { Label } from './Label'
 
 interface PreviewUrl {
   url: string
@@ -48,15 +46,13 @@ export const ImageUploader = <FormData extends FieldValues>({
   const [showPhotoModal, setShowPhotoModal] = useState(false)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
-  const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const fileInput = e.target
-
-    if (!fileInput.files || fileInput.files.length === 0) {
+  const onFileUploadChange = (fileInput: FileList | null) => {
+    if (!fileInput || fileInput.length === 0) {
       return
     }
 
     // Filter out files
-    const newFiles: File[] = Array.from(fileInput.files)
+    const newFiles: File[] = Array.from(fileInput)
       .filter(file => file.type.startsWith('image') && file.size <= maxFileSize)
       .slice(0, maxPhotos - previewUrls.length)
 
@@ -101,7 +97,7 @@ export const ImageUploader = <FormData extends FieldValues>({
           disabled={previewUrls.length >= maxPhotos}
           multiple={multiple}
           id="upload-photo"
-          onChange={e => onFileUploadChange(e)}
+          onChange={e => onFileUploadChange(e.target.files)}
         />
       </div>
       <div className="d-inline-flex gap-2 flex-wrap align-items-center">
@@ -131,7 +127,6 @@ export const ImageUploader = <FormData extends FieldValues>({
                       }}
                     >
                       <Image
-                        className="responsive"
                         style={{ objectFit: 'contain' }}
                         alt={`Fotografie ${index + 1}`}
                         src={url.url}
