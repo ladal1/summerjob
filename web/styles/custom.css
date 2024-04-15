@@ -463,6 +463,10 @@ img.smj-nav-logo {
     padding: 0.25rem 0.45rem;
     width: 30px;
   }
+  .btn-responsive {
+    padding: 0.5rem 0.7rem !important;
+    font-size: 0.8rem !important;
+  }
 }
 
 .btn-check:checked + .btn-day-select,
@@ -661,11 +665,11 @@ img.smj-nav-logo {
 
 @media (max-width: 768px) {
   .smj-photo-size {
-    height: 100px;
-    width: 100px;
+    height: 150px;
+    width: 150px;
   }
   .smj-photo-icon-delete {
-    font-size: 16px;
+    font-size: 20px;
   }
 }
 

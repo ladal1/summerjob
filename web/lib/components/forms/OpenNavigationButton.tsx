@@ -26,7 +26,7 @@ export const OpenNavigationButton = ({
 
   return (
     <button
-      className="btn btn-primary btn-with-icon"
+      className="btn btn-primary btn-with-icon btn-responsive"
       type="button"
       onClick={openNavigation}
     >

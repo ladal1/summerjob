@@ -27,11 +27,11 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
     }
 
     // if it register mouse click anywhere on the window it will call handleCLickOutside
-    document.addEventListener('mousedown', handleClickOutside) // alternatively use window. instead of document.
+    document.addEventListener('click', handleClickOutside) // alternatively use window. instead of document.
 
     // clean up
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('click', handleClickOutside)
     }
   }, [modalRef, onClose])
 

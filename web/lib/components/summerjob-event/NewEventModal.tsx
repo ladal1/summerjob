@@ -7,9 +7,9 @@ import {
 } from 'pages/api/summerjob-events'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Modal, ModalSize } from '../modal/Modal'
 import { TextInput } from '../forms/input/TextInput'
-import { DateInput } from '../forms/input/DateInput'
+import { Label } from '../forms/Label'
+import { Modal, ModalSize } from '../modal/Modal'
 
 const schema = SummerJobEventCreateSchema
 
@@ -52,33 +52,38 @@ export default function NewEventModal({
           label="Název ročníku"
           placeholder="Název ročníku"
           errors={errors}
-          register={() => register("name")}
+          register={() => register('name')}
+          mandatory
           margin={false}
         />
-        <label
-          className="form-label fw-bold mt-4 d-none d-md-block"
-          htmlFor="startDate"
-        >
-          Začátek a konec
-        </label>
+        <Label
+          id="startDate"
+          label="Začátek a konec"
+          className="d-none d-md-block mt-4"
+          mandatory
+        />
         <div className="d-flex flex-column flex-md-row">
           <div className="d-flex flex-column flex-fill">
-            <DateInput
+            <TextInput
               id="startDate"
               label="Začátek"
               type="date"
+              labelClassName="d-md-none"
+              mandatory
               errors={errors}
-              register={() => register("startDate")}
+              register={() => register('startDate')}
             />
           </div>
           <div className="fs-3 mx-3 me-3 d-none d-md-block">-</div>
           <div className="d-flex flex-column flex-fill">
-            <DateInput
+            <TextInput
               id="endDate"
               label="Konec"
               type="date"
+              labelClassName="d-md-none"
+              mandatory
               errors={errors}
-              register={() => register("endDate")}
+              register={() => register('endDate')}
             />
           </div>
         </div>

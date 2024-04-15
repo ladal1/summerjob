@@ -25,7 +25,7 @@ export const TextAreaInput = ({
   mandatory = false,
   ...rest
 }: TextAreaProps) => {
-  const error = errors?.[id as Path<FormData>]?.message as string | undefined
+  const error = errors?.[id as Path<FormData>]?.message
 
   return (
     <>

@@ -8,6 +8,8 @@ import Map from '../../map/Map'
 import FormWarning from '../FormWarning'
 import { Label } from '../Label'
 import { ProgressBar } from '../ProgressBar'
+import { removeRedundantSpace } from 'lib/helpers/helpers'
+import { IconAndLabel } from '../IconAndLabel'
 
 interface AddressInput {
   id: string
@@ -84,7 +86,7 @@ export const MapInput = ({ address, coordinates, errors }: MapInputProps) => {
     <>
       <div className="container p-0 m-0">
         <div className="row align-items-end">
-          <div className="col">
+          <div className="col-md">
             <Label
               id={address.id}
               label={address.label}
@@ -95,19 +97,23 @@ export const MapInput = ({ address, coordinates, errors }: MapInputProps) => {
               value={addressValue}
               placeholder={address.placeholder}
               onChange={e => {
+                e.target.value = removeRedundantSpace(e.target.value)
                 address.register(e.target.value)
                 setAddressValue(e.target.value)
               }}
             />
           </div>
-          <div className="col-auto">
+          <div className="col-md-auto">
             <button
-              className="btn btn-primary"
+              className="btn btn-primary btn-with-icon btn-responsive mt-md-0 mt-2"
               type="button"
               onClick={geocodingDataSearch}
               disabled={isInputDisabled}
             >
-              Najít adresu na mapě
+              <IconAndLabel
+                icon="fas fa-magnifying-glass"
+                label="Najít adresu na mapě"
+              />
             </button>
             {isInputDisabled && <ProgressBar time={timeOut} />}
           </div>

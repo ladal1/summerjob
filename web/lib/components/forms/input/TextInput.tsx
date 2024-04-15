@@ -1,13 +1,9 @@
 import { type DetailedHTMLProps, type InputHTMLAttributes } from 'react'
-import {
-  FieldErrors,
-  FieldValues,
-  UseFormRegisterReturn,
-} from 'react-hook-form'
+import { FieldErrors, Path, UseFormRegisterReturn } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 import { Label } from '../Label'
 
-interface TextInputProps<FormData extends FieldValues>
+interface TextInputProps
   extends DetailedHTMLProps<
     InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
@@ -16,24 +12,32 @@ interface TextInputProps<FormData extends FieldValues>
   label: string
   register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
+  labelClassName?: string
   margin?: boolean
   mandatory?: boolean
 }
 
-export const TextInput = <FormData extends FieldValues>({
+export const TextInput = ({
   id,
   label,
   register,
   errors,
+  labelClassName = '',
   margin = true,
   mandatory = false,
   ...rest
-}: TextInputProps<FormData>) => {
-  const error = errors?.[id]?.message as string | undefined
+}: TextInputProps) => {
+  const error = errors?.[id as Path<FormData>]?.message
 
   return (
     <>
-      <Label id={id} label={label} margin={margin} mandatory={mandatory} />
+      <Label
+        id={id}
+        label={label}
+        className={labelClassName}
+        margin={margin}
+        mandatory={mandatory}
+      />
       <input
         className="form-control smj-input p-0 fs-5"
         {...register()}

@@ -27,7 +27,9 @@ export default function ToggleCompletedCheck({
     resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
       completed: job.completed,
-      privateDescription: job.proposedJob.privateDescription,
+      proposedJob: {
+        privateDescription: job.proposedJob.privateDescription,
+      },
     },
   })
 
@@ -43,6 +45,7 @@ export default function ToggleCompletedCheck({
     ) as ActiveJobUpdateData
     trigger(modified, {
       onSuccess: () => {
+        setChecked(!checked)
         setShowNoteModal(false)
       },
     })
@@ -57,7 +60,6 @@ export default function ToggleCompletedCheck({
         checked={checked}
         {...register('completed', {
           onChange: () => {
-            setChecked(!checked)
             setShowNoteModal(true)
           },
         })}
@@ -70,9 +72,9 @@ export default function ToggleCompletedCheck({
         >
           <form onSubmit={handleSubmit(onSubmit)}>
             <TextAreaInput
-              id={'privateDescription'}
+              id={'proposedJob.privateDescription'}
               label={'Poznámka pro organizátory'}
-              register={() => register('privateDescription')}
+              register={() => register('proposedJob.privateDescription')}
               rows={4}
               margin={false}
               errors={errors}

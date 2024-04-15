@@ -110,15 +110,16 @@ export const ImageUploader = <FormData extends FieldValues>({
             {url && (
               <div className="d-flex shadow bg-white rounded border p-3 pt-2 mb-2">
                 <div className="container p-0 m-0">
-                  <div className="pb-2">
+                  <div className="pb-2 pt-1">
                     <div className="d-flex justify-content-end">
-                      <button
-                        type="button"
-                        className="btn btn-light p-2 pb-1 pt-1"
-                        onClick={() => onRemoveImage(index)}
-                      >
-                        <i className="fa-solid fa-circle-xmark smj-action-delete smj-photo-icon-delete" />
-                      </button>
+                      <i
+                        className="fa-solid fa-circle-xmark smj-action-delete smj-photo-icon-delete cursor-pointer"
+                        title="Odstranit"
+                        onClick={e => {
+                          e.stopPropagation()
+                          onRemoveImage(index)
+                        }}
+                      ></i>
                     </div>
                   </div>
                   <div className="d-inline-flex gap-2 flex-wrap align-items-center">

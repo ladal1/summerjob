@@ -118,7 +118,7 @@ model Post {
   forEventId            String
 }
 
-model Photo {
+model JobPhoto {
   id            String       @id @default(uuid())
   photoPath     String 
   proposedJob   ProposedJob? @relation("PhotoProposedJob", fields: [proposedJobId], references: [id])
@@ -212,7 +212,7 @@ model ProposedJob {
   jobType            JobType                     @default(OTHER)
   toolsOnSite        Tool[]                      @relation("ToolOnSite")  
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
-  photos             Photo[]                     @relation("PhotoProposedJob")
+  photos             JobPhoto[]                  @relation("PhotoProposedJob")
   priority           Int                         @default(1)
 }
 

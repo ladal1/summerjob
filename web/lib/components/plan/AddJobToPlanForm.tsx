@@ -14,6 +14,7 @@ import Select, { FormatOptionLabelMeta, StylesConfig } from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
 import { Issue } from './Issue'
+import FormWarning from '../forms/FormWarning'
 
 interface AddJobToPlanFormProps {
   planId: string
@@ -70,8 +71,6 @@ export default function AddJobToPlanForm({
 
   const itemToFormData = (item: SelectItem) => ({
     proposedJobId: item.id,
-    publicDescription: item.publicDescription,
-    privateDescription: item.privateDescription,
   })
 
   const formDataToItem = (
@@ -146,12 +145,13 @@ export default function AddJobToPlanForm({
               isMulti
               getOptionValue={option => option.searchable}
               styles={colourStyles}
+              closeMenuOnSelect={false}
             />
           )}
         />
 
         <input type="hidden" {...register('jobs')} />
-        {errors.jobs && <div className="text-danger">Vyberte job!</div>}
+        {errors.jobs && <FormWarning message={errors.jobs.message} />}
 
         <button
           className="btn btn-primary mt-4 float-end"

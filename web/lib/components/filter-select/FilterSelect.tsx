@@ -8,7 +8,7 @@ export interface FilterSelectItem {
 }
 
 interface FilterSelectProps {
-  id: string,
+  id: string
   items: FilterSelectItem[]
   placeholder: string
   onSelected: (id: string) => void
@@ -31,28 +31,30 @@ export function FilterSelect({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // if dropdown-menu isn't even open do nothing
-      if(!isOpen) 
-        return
-      
+      if (!isOpen) return
+
       /* 
       if we click anywhere outside of dropdown-menu it will close it
       even though when you click inside of dropdown-menu it will close it, 
       but also it will set selected item, that's the reason why we are exluding it from here
       */
-      if (dropdown.current && !dropdown.current.contains(event.target as Node)) {
+      if (
+        dropdown.current &&
+        !dropdown.current.contains(event.target as Node)
+      ) {
         hideDropdown()
       }
     }
 
     // if it register mouse click anywhere on the window it will call handleCLickOutside
-    document.addEventListener('mousedown', handleClickOutside) // alternatively use window. instead of document.
+    document.addEventListener('click', handleClickOutside) // alternatively use window. instead of document.
 
     // clean up
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('click', handleClickOutside)
     }
   }, [dropdown, isOpen]) // dependencies
-  
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen)
   }
@@ -94,7 +96,8 @@ export function FilterSelect({
           className={`dropdown-menu ${isOpen ? 'show' : ''} smj-dropdown-menu`}
         >
           {items.map(item => {
-            return ( shouldShowItem(item) && ( 
+            return (
+              shouldShowItem(item) && (
                 <li key={item.id}>
                   <button
                     className="dropdown-item smj-dropdown-item fs-5"
@@ -104,7 +107,8 @@ export function FilterSelect({
                     {item.name}
                   </button>
                 </li>
-              ))
+              )
+            )
           })}
         </ul>
       </div>
