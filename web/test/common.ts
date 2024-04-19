@@ -401,6 +401,18 @@ class Common {
       )
     }
   }
+
+  getFileNameAndType = (photoPath: string) => {
+    const lastSlashIndex = photoPath.lastIndexOf('/')
+    const lastDotIndex = photoPath.lastIndexOf('.')
+    // there should be some / and . in name of photoPath
+    lastSlashIndex.should.not.equal(-1)
+    lastDotIndex.should.not.equal(-1)
+    // newly created photo should be named as {id}.{type}
+    const fileName = photoPath.slice(lastSlashIndex + 1, lastDotIndex)
+    const fileType = photoPath.slice(lastDotIndex)
+    return { fileName, fileType }
+  }
 }
 
 export function createWorkerData() {

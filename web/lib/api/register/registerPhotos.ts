@@ -76,7 +76,7 @@ const deleteFlaggedPhotos = async (
     ).then(result =>
       result.filter(photoId => photoId !== undefined)
     )) as string[]
-    if (photoIdsDeletedFinal.length !== 0) {
+    if (photoIdsDeletedFinal && photoIdsDeletedFinal.length !== 0) {
       await logger.apiRequest(
         APILogEvent.PHOTO_DELETE,
         'photos',

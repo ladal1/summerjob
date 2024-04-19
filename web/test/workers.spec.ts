@@ -144,7 +144,7 @@ describe('Workers', function () {
     resp.body.photoPath.should.not.be.empty
   })
 
-  it('creates worker with non-photo file', async function () {
+  it('creates worker with invalid photo file', async function () {
     const body = createWorkerData()
     const file = {
       fieldName: 'file0',
@@ -173,15 +173,7 @@ describe('Workers', function () {
     resp.body.should.have.property('id')
     resp.body.should.have.property('photoPath')
     resp.body.photoPath.should.not.be.empty
-
-    const lastSlashIndex = resp.body.photoPath.lastIndexOf('/')
-    const lastDotIndex = resp.body.photoPath.lastIndexOf('.')
-    // there should be some / and . in name of photoPath
-    lastSlashIndex.should.not.equal(-1)
-    lastDotIndex.should.not.equal(-1)
-    // newly created photo should be named as {worker.id}.{type}
-    const fileName = resp.body.photoPath.slice(lastSlashIndex + 1, lastDotIndex)
-    const fileType = resp.body.photoPath.slice(lastDotIndex)
+    const { fileName, fileType } = api.getFileNameAndType(resp.body.photoPath)
     fileName.should.equal(resp.body.id)
     fileName.should.equal(selectedWorker.id)
     fileType.should.equal('.png')

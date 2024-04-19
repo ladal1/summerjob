@@ -111,7 +111,7 @@ export default function CreateProposedJobForm({
       amount: item.amount ?? 1,
     }))
     setValue(
-      'toolsOnSiteCreate',
+      'toolsOnSite',
       { tools: tools },
       { shouldDirty: true, shouldValidate: true }
     )
@@ -124,7 +124,7 @@ export default function CreateProposedJobForm({
       amount: item.amount ?? 1,
     }))
     setValue(
-      'toolsToTakeWithCreate',
+      'toolsToTakeWith',
       { tools: tools },
       { shouldDirty: true, shouldValidate: true }
     )
@@ -148,23 +148,6 @@ export default function CreateProposedJobForm({
       .filter(tool => !sortedToolsByCurrentJobType.some(t => t.id === tool.id))
       .sort((a, b) => a.name.localeCompare(b.name))
     return [sortedToolsByCurrentJobType, sortedToolsOthers]
-  }
-
-  // Remove existing tools from backend.
-  const removeExistingToolOnSite = (id: string) => {
-    const prevToolIdsDeleted = getValues('toolsOnSiteIdsDeleted') || []
-    setValue('toolsOnSiteIdsDeleted', [...prevToolIdsDeleted, id], {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
-  }
-
-  const removeExistingToolToTakeWith = (id: string) => {
-    const prevToolIdsDeleted = getValues('toolsToTakeWithIdsDeleted') || []
-    setValue('toolsToTakeWithIdsDeleted', [...prevToolIdsDeleted, id], {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
   }
 
   //#endregion
@@ -420,21 +403,19 @@ export default function CreateProposedJobForm({
             errors={errors}
           />
           <PillSelectInput
-            id="toolsOnSiteCreate"
+            id="toolsOnSite"
             label="Nářadí na místě"
             placeholder={'Vyberte nástroje'}
             items={manageToolSelectItems()}
-            removeExisting={removeExistingToolOnSite}
             withNumberSelect={true}
             register={selectToolsOnSite}
             errors={errors}
           />
           <PillSelectInput
-            id="toolsToTakeWithCreate"
+            id="toolsToTakeWith"
             label="Nářadí s sebou"
             placeholder={'Vyberte nástroje'}
             items={manageToolSelectItems()}
-            removeExisting={removeExistingToolToTakeWith}
             withNumberSelect={true}
             register={selectToolsToTakeWith}
             errors={errors}

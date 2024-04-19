@@ -1,4 +1,6 @@
+import { Tool } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
+import { PhotoIdsData } from 'lib/types/photo'
 import {
   ProposedJobCreateData,
   type ProposedJobComplete,
@@ -6,7 +8,7 @@ import {
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
-import { PhotoIdsData } from 'lib/types/photo'
+import { createTools, deleteTools, updateTools } from './tools'
 
 export async function getProposedJobById(
   id: string
@@ -152,10 +154,21 @@ export async function updateProposedJob(
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const { allergens, pinnedByChange, ...rest } = proposedJobData
+  const {
+    allergens,
+    pinnedByChange,
+    toolsOnSite,
+    toolsOnSiteIdsDeleted,
+    toolsOnSiteUpdated,
+    toolsToTakeWith,
+    toolsToTakeWithIdsDeleted,
+    toolsToTakeWithUpdated,
+    ...rest
+  } = proposedJobData
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
 
-  const proposedJob = await prisma.$transaction(async tx => {
+  const updated = await prisma.$transaction(async tx => {
+    // Update pinned
     if (pinnedByChange !== undefined && !pinnedByChange.pinned) {
       await tx.pinnedProposedJobByWorker.delete({
         where: {
@@ -163,7 +176,8 @@ export async function updateProposedJob(
         },
       })
     }
-    return await tx.proposedJob.update({
+    // Update job
+    const proposedJob = await tx.proposedJob.update({
       where: {
         id,
       },
@@ -183,15 +197,104 @@ export async function updateProposedJob(
         ...allergyUpdate,
       },
     })
+    // Delete job's tools
+    if (toolsOnSiteIdsDeleted !== undefined) {
+      await deleteTools(toolsOnSiteIdsDeleted, tx)
+    }
+    if (toolsToTakeWithIdsDeleted !== undefined) {
+      await deleteTools(toolsToTakeWithIdsDeleted, tx)
+    }
+    // Create job's tools
+    let onSite: Tool[] = []
+    let takeWith: Tool[] = []
+    if (toolsOnSite && toolsOnSite.tools) {
+      const tools = {
+        tools: toolsOnSite.tools.map(toolItem => ({
+          ...toolItem,
+          proposedJobOnSiteId: proposedJob.id,
+        })),
+      }
+      onSite = await createTools(tools, tx)
+    }
+    if (toolsToTakeWith && toolsToTakeWith.tools) {
+      const tools = {
+        tools: toolsToTakeWith.tools.map(toolItem => ({
+          ...toolItem,
+          proposedJobToTakeWithId: proposedJob.id,
+        })),
+      }
+      takeWith = await createTools(tools, tx)
+    }
+    // Update job's tools
+    let onSiteUpdated: Tool[] = []
+    let toTakeWithUpdated: Tool[] = []
+    if (toolsOnSiteUpdated && toolsOnSiteUpdated.tools) {
+      const tools = toolsOnSiteUpdated.tools
+        .filter(
+          toolItem =>
+            toolItem.id && !toolsOnSiteIdsDeleted?.includes(toolItem.id)
+        )
+        .map(toolItem => ({
+          ...toolItem,
+          proposedJobOnSiteId: proposedJob.id,
+        }))
+      onSiteUpdated = await updateTools({ tools }, tx)
+    }
+    if (toolsToTakeWithUpdated && toolsToTakeWithUpdated.tools) {
+      const tools = toolsToTakeWithUpdated.tools
+        .filter(
+          toolItem =>
+            toolItem.id && !toolsOnSiteIdsDeleted?.includes(toolItem.id)
+        )
+        .map(toolItem => ({
+          ...toolItem,
+          proposedJobToTakeWithId: proposedJob.id,
+        }))
+      toTakeWithUpdated = await updateTools({ tools }, tx)
+    }
+    return {
+      ...proposedJob,
+      toolsOnSite: onSite,
+      toolsToTakeWith: takeWith,
+      toolsOnSiteUpdated: onSiteUpdated,
+      toolsToTakeWithUpdated: toTakeWithUpdated,
+    }
   })
-  return proposedJob
+  return updated
 }
 
 export async function createProposedJob(data: ProposedJobCreateData) {
-  const proposedJob = await prisma.proposedJob.create({
-    data: data,
+  const { toolsOnSite, toolsToTakeWith, ...rest } = data
+
+  const created = await prisma.$transaction(async tx => {
+    // Create job
+    const proposedJob = await tx.proposedJob.create({
+      data: rest,
+    })
+    // Create job's tools
+    let onSite: Tool[] = []
+    let takeWith: Tool[] = []
+    if (toolsOnSite && toolsOnSite.tools) {
+      const tools = {
+        tools: toolsOnSite.tools.map(toolItem => ({
+          ...toolItem,
+          proposedJobOnSiteId: proposedJob.id,
+        })),
+      }
+      onSite = await createTools(tools, tx)
+    }
+    if (toolsToTakeWith && toolsToTakeWith.tools) {
+      const tools = {
+        tools: toolsToTakeWith.tools.map(toolItem => ({
+          ...toolItem,
+          proposedJobToTakeWithId: proposedJob.id,
+        })),
+      }
+      takeWith = await createTools(tools, tx)
+    }
+    return { ...proposedJob, toolsOnSite: onSite, toolsToTakeWith: takeWith }
   })
-  return proposedJob
+  return created
 }
 
 export async function deleteProposedJob(id: string) {

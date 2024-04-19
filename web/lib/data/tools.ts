@@ -1,16 +1,21 @@
 import { Tool, PrismaClient } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import { PrismaTransactionClient } from 'lib/types/prisma'
-import { ToolCreateData, ToolUpdateData, ToolsCreateData, ToolsUpdateData } from 'lib/types/tool'
+import {
+  ToolCreateData,
+  ToolUpdateData,
+  ToolsCreateData,
+  ToolsUpdateData,
+} from 'lib/types/tool'
 
-export async function createTools(data: ToolsCreateData) {
-  const tools = await prisma.$transaction(async tx => {
-    const tools: Tool[] = []
-    for (const tool of data.tools) {
-      tools.push(await createTool(tool, tx))
-    }
-    return tools
-  })
+export async function createTools(
+  data: ToolsCreateData,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  const tools: Tool[] = []
+  for (const tool of data.tools) {
+    tools.push(await createTool(tool, prismaClient))
+  }
   return tools
 }
 
@@ -24,16 +29,16 @@ export async function createTool(
   return tool
 }
 
-export async function updateTools(data: ToolsUpdateData) {
-  const tools = await prisma.$transaction(async tx => {
-    const tools: Tool[] = []
-    if(data.tools) {
-      for (const tool of data.tools) {
-        tools.push(await updateTool(tool, tx))
-      }
+export async function updateTools(
+  data: ToolsUpdateData,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  const tools: Tool[] = []
+  if (data.tools) {
+    for (const tool of data.tools) {
+      tools.push(await updateTool(tool, prismaClient))
     }
-    return tools
-  })
+  }
   return tools
 }
 
@@ -41,7 +46,7 @@ export async function updateTool(
   data: ToolUpdateData,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) {
-  const {id, ...rest} = data
+  const { id, ...rest } = data
   const tools = await prismaClient.tool.update({
     where: {
       id,
@@ -52,13 +57,12 @@ export async function updateTool(
 }
 
 export async function deleteTools(
-  ids: string[]
+  ids: string[],
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) {
-  await prisma.$transaction(async tx => {
-    for (const id of ids) {
-      await deleteTool(id, tx)
-    }
-  })
+  for (const id of ids) {
+    await deleteTool(id, prismaClient)
+  }
 }
 
 export async function deleteTool(

@@ -3,7 +3,6 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getUploadDirForImages } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
-import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
 import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
@@ -61,11 +60,10 @@ async function patch(
     json,
     res
   )
-  console.log(json)
+
   if (!proposedJobData) {
     return
   }
-  console.log(proposedJobData)
 
   // Set coordinates if they are missing
   if (proposedJobData.coordinates === undefined) {
@@ -76,33 +74,11 @@ async function patch(
     }
   }
 
-  const {
-    photoIdsDeleted,
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    ...rest
-  } = proposedJobData
+  const { photoIdsDeleted, ...rest } = proposedJobData
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   await updateProposedJob(id, rest)
 
   await registerPhotos(files, photoIdsDeleted, uploadDirectory, id, session)
-  await registerTools(
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    id,
-    ToolType.ON_SITE,
-    session
-  )
-  await registerTools(
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    id,
-    ToolType.TO_TAKE_WITH,
-    session
-  )
-
   res.status(204).end()
 }
 

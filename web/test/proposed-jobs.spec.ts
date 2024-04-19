@@ -1,5 +1,5 @@
 import { Id, api, createProposedJobData } from './common'
-import chai from 'chai'
+import chai, { expect } from 'chai'
 
 chai.should()
 
@@ -128,7 +128,7 @@ describe('Proposed Jobs', function () {
   })
 
   it('should not be accessible without permission', async function () {
-    const perms = [Id.CARS, Id.WORKERS, '']
+    const perms = [Id.CARS, Id.WORKERS, Id.POSTS, '']
     for (const perm of perms) {
       const resp = await api.get('/api/proposed-jobs', perm)
       resp.status.should.equal(403)
@@ -136,15 +136,130 @@ describe('Proposed Jobs', function () {
     }
   })
 
-  /* it('creates proposed-job with valid photo', async function () {})
+  it('creates proposed-job with valid photo', async function () {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    const file = {
+      fieldName: 'file0',
+      file: `${__dirname}/../public/favicon.ico`,
+    }
+    const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
+    resp.status.should.equal(201)
+    resp.body.should.be.an('object')
+    resp.body.should.have.property('id')
+    const proposedJob = await api.get(
+      `/api/proposed-jobs/${resp.body.id}`,
+      Id.JOBS
+    )
+    proposedJob.body.photos.should.be.an('array')
+    proposedJob.body.photos.should.have.lengthOf(1)
+    const { fileName, fileType } = api.getFileNameAndType(
+      proposedJob.body.photos.at(0).photoPath
+    )
+    fileName.should.equal(proposedJob.body.photos.at(0).id)
+    fileType.should.equal('.ico')
+  })
 
-  it('creates proposed-job with multiple valid photos', async function () {})
+  it('creates proposed-job with multiple valid photos', async function () {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    const file0 = {
+      fieldName: 'file0',
+      file: `${__dirname}/../public/logo-smj-yellow.png`,
+    }
+    const file1 = {
+      fieldName: 'file1',
+      file: `${__dirname}/../public/favicon.ico`,
+    }
+    const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [
+      file0,
+      file1,
+    ])
+    resp.status.should.equal(201)
+    resp.body.should.be.an('object')
+    resp.body.should.have.property('id')
+    const proposedJob = await api.get(
+      `/api/proposed-jobs/${resp.body.id}`,
+      Id.JOBS
+    )
+    proposedJob.body.photos.should.be.an('array')
+    proposedJob.body.photos.should.have.lengthOf(2)
+    proposedJob.body.photos.at(0).should.have.property('photoPath')
+    // Uploaded photos should hold its order and should be named as {photoId}.{formerType}
+    const { fileName: fileName0, fileType: fileType0 } = api.getFileNameAndType(
+      proposedJob.body.photos.at(0).photoPath
+    )
+    fileName0.should.equal(proposedJob.body.photos.at(0).id)
+    fileType0.should.equal('.png')
 
-  it('creates proposed-job with invalid photo', async function () {})
+    const { fileName: fileName1, fileType: fileType1 } = api.getFileNameAndType(
+      proposedJob.body.photos.at(1).photoPath
+    )
+    fileName1.should.equal(proposedJob.body.photos.at(1).id)
+    fileType1.should.equal('.ico')
+  })
 
-  it('creates proposed-job with valid and one invalid photos', async function () {})
+  it('creates proposed-job with invalid photo', async function () {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    const file = {
+      fieldName: 'file0',
+      file: `${__dirname}/workers.spec.ts`,
+    }
+    const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
+    resp.status.should.equal(400)
+  })
 
-  it("delete proposed-job's photo", async function () {})
+  it('creates proposed-job with valid and one invalid photos', async function () {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    const file0 = {
+      fieldName: 'file0',
+      file: `${__dirname}/../public/logo-smj-yellow.png`,
+    }
+    const file1 = {
+      fieldName: 'file1',
+      file: `${__dirname}/workers.spec.ts`,
+    }
+    const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [
+      file0,
+      file1,
+    ])
+    resp.status.should.equal(400)
+  })
+
+  /*it("delete proposed-job's photo", async function () {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    const file = {
+      fieldName: 'file0',
+      file: `${__dirname}/../public/favicon.ico`,
+    }
+    const created = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
+    created.status.should.equal(201)
+    const createdProposedJob = await api.get(
+      `/api/proposed-jobs/${created.body.id}`,
+      Id.JOBS
+    )
+    createdProposedJob.body.photos.should.be.an('array')
+    createdProposedJob.body.photos.should.have.lengthOf(1)
+    const photoId = createdProposedJob.body.photos.at(0).id
+    const payload = {
+      photoIdsDeleted: [photoId],
+    }
+    const resp = await api.patch(
+      `/api/proposed-jobs/${created.body.id}`,
+      Id.JOBS,
+      payload
+    )
+    resp.body.should.be.an('object')
+    const proposedJob = await api.get(
+      `/api/proposed-jobs/${created.body.id}`,
+      Id.JOBS
+    )
+    proposedJob.body.photos.should.be.an('array')
+    proposedJob.body.photos.should.have.lengthOf(0)
+  })
 
   it("delete proposed-job's every photo", async function () {})
 

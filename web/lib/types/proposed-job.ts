@@ -4,7 +4,11 @@ import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { Allergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
-import { ToolCompleteSchema, ToolsCreateSchema } from 'lib/types/tool'
+import {
+  ToolCompleteSchema,
+  ToolsCreateSchema,
+  ToolsUpdateSchema,
+} from 'lib/types/tool'
 import { PhotoCompleteSchema } from './photo'
 import { coordinatesZod } from './coordinates'
 
@@ -119,10 +123,8 @@ const ProposedJobBasicSchema = z
         },
       }),
     jobType: z.nativeEnum(JobType, { required_error: err.emptyJobType }),
-    toolsOnSiteCreate: ToolsCreateSchema.optional(),
-    toolsOnSiteIdsDeleted: z.array(z.string()).optional(),
-    toolsToTakeWithCreate: ToolsCreateSchema.optional(),
-    toolsToTakeWithIdsDeleted: z.array(z.string()).optional(),
+    toolsOnSite: ToolsCreateSchema.optional(),
+    toolsToTakeWith: ToolsCreateSchema.optional(),
     priority: z.number().default(1).optional(),
   })
   .strict()
@@ -170,6 +172,10 @@ export const ProposedJobUpdateSchema = ProposedJobBasicSchema.merge(
       workerId: z.string(),
       pinned: z.boolean(),
     }),
+    toolsOnSiteUpdated: ToolsUpdateSchema.optional(),
+    toolsToTakeWithUpdated: ToolsUpdateSchema.optional(),
+    toolsOnSiteIdsDeleted: z.array(z.string()).optional(),
+    toolsToTakeWithIdsDeleted: z.array(z.string()).optional(),
   })
 )
   .strict()

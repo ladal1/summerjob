@@ -78,8 +78,8 @@ export default function EditProposedJobForm({
       hasShower: job.hasShower,
       availability: job.availability.map(day => day.toJSON()),
       jobType: job.jobType,
-      toolsOnSiteCreate: { tools: job.toolsOnSite },
-      toolsToTakeWithCreate: { tools: job.toolsToTakeWith },
+      toolsOnSite: { tools: job.toolsOnSite },
+      toolsToTakeWith: { tools: job.toolsToTakeWith },
       areaId: job.areaId,
       priority: job.priority,
     },
@@ -140,7 +140,7 @@ export default function EditProposedJobForm({
       amount: item.amount ?? 1,
     }))
     setValue(
-      'toolsOnSiteCreate',
+      'toolsOnSite',
       { tools: tools },
       { shouldDirty: true, shouldValidate: true }
     )
@@ -153,7 +153,33 @@ export default function EditProposedJobForm({
       amount: item.amount ?? 1,
     }))
     setValue(
-      'toolsToTakeWithCreate',
+      'toolsToTakeWith',
+      { tools: tools },
+      { shouldDirty: true, shouldValidate: true }
+    )
+  }
+
+  const selectToolsOnSiteUpdated = (items: PillSelectItem[]) => {
+    const tools = items.map(item => ({
+      id: item.databaseId,
+      tool: item.id as ToolName,
+      amount: item.amount ?? 1,
+    }))
+    setValue(
+      'toolsOnSiteUpdated',
+      { tools: tools },
+      { shouldDirty: true, shouldValidate: true }
+    )
+  }
+
+  const selectToolsToTakeWithUpdated = (items: PillSelectItem[]) => {
+    const tools = items.map(item => ({
+      id: item.databaseId,
+      tool: item.id as ToolName,
+      amount: item.amount ?? 1,
+    }))
+    setValue(
+      'toolsToTakeWithUpdated',
       { tools: tools },
       { shouldDirty: true, shouldValidate: true }
     )
@@ -490,7 +516,7 @@ export default function EditProposedJobForm({
             errors={errors}
           />
           <PillSelectInput
-            id="toolsOnSiteCreate"
+            id="toolsOnSite"
             label="Nářadí na místě"
             placeholder={'Vyberte nástroje'}
             items={manageToolSelectItems()}
@@ -498,10 +524,11 @@ export default function EditProposedJobForm({
             removeExisting={removeExistingToolOnSite}
             withNumberSelect={true}
             register={selectToolsOnSite}
+            registerUpdated={selectToolsOnSiteUpdated}
             errors={errors}
           />
           <PillSelectInput
-            id="toolsToTakeWithCreate"
+            id="toolsToTakeWith"
             label="Nářadí s sebou"
             placeholder={'Vyberte nástroje'}
             items={manageToolSelectItems()}
@@ -509,6 +536,7 @@ export default function EditProposedJobForm({
             removeExisting={removeExistingToolToTakeWith}
             withNumberSelect={true}
             register={selectToolsToTakeWith}
+            registerUpdated={selectToolsToTakeWithUpdated}
             errors={errors}
           />
           <GroupButtonsInput

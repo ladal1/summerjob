@@ -3,7 +3,6 @@ import { generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { registerPhotos } from 'lib/api/register/registerPhotos'
-import { ToolType, registerTools } from 'lib/api/register/registerTools'
 import { validateOrSendError } from 'lib/api/validator'
 import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
@@ -75,36 +74,15 @@ async function post(
     }
   }
 
-  const {
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    ...rest
-  } = result
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
     result,
     session
   )
-  const job = await createProposedJob(rest)
+  const job = await createProposedJob(result)
 
   await registerPhotos(files, undefined, uploadDirectory, job.id, session)
-  await registerTools(
-    toolsOnSiteCreate,
-    toolsOnSiteIdsDeleted,
-    job.id,
-    ToolType.ON_SITE,
-    session
-  )
-  await registerTools(
-    toolsToTakeWithCreate,
-    toolsToTakeWithIdsDeleted,
-    job.id,
-    ToolType.TO_TAKE_WITH,
-    session
-  )
 
   res.status(201).json(job)
 }

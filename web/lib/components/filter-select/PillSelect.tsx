@@ -17,7 +17,7 @@ interface PillSelectProps {
   placeholder: string
   onSelected: (selectedItems: PillSelectItem[]) => void
   defaultSelected?: PillSelectItem[]
-  removeExisting: (id: string) => void
+  removeExisting?: (id: string) => void
   withNumberSelect?: boolean
   multiple?: boolean
 }
@@ -53,7 +53,7 @@ export function PillSelect({
       )
       // Update the state and notify the parent component
       setSelectedItems(updatedSelectedItems)
-      if (item.databaseId !== undefined) {
+      if (item.databaseId !== undefined && removeExisting) {
         removeExisting(item.databaseId)
       } else {
         onSelected(updatedSelectedItems)
