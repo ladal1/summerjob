@@ -52,6 +52,14 @@ export const getWeekdayName = (date: Date, capitalize = true) => {
   return capitalize ? capitalizeFirstLetter(formatted) : formatted
 }
 
+export const convertToISOFormat = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const isoFormat = `${year}/${month}/${day}`
+  return isoFormat
+}
+
 export const getWeekdayNames = (capitalize = true) => {
   const weekdayNames: string[] = []
 

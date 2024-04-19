@@ -36,6 +36,7 @@ async function post(
   if (!singleWorker) {
     return
   }
+
   let worker = await createWorker(singleWorker)
   /* Rename photo file and update worker with new photo path to it. */
   const fileFieldNames = Object.keys(files)

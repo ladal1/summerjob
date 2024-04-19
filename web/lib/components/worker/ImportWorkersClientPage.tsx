@@ -1,6 +1,7 @@
 'use client'
 import {
   capitalizeFirstLetter,
+  convertToISOFormat,
   formatDateNumeric,
   formatDateShort,
   formatPhoneNumber,
@@ -61,6 +62,20 @@ export default function ImportWorkersClientPage({
     setSaved(false)
     router.back()
   }
+
+  const datesExample = () => {
+    const start = new Date(eventStartDate)
+    const end = new Date(eventEndDate)
+    const startISO = convertToISOFormat(start)
+    let endISO = ''
+    if (start.getTime() < end.getTime()) {
+      endISO = convertToISOFormat(end)
+    }
+    const workDaysExample = startISO + (endISO ? `,${endISO}` : '')
+    const adorationDaysExample = startISO
+    return workDaysExample + ';' + adorationDaysExample
+  }
+
   return (
     <>
       <PageHeader title="Hromadný import pracantů" isFluid={false}>
@@ -81,11 +96,12 @@ export default function ImportWorkersClientPage({
             <div>
               Import akceptuje data oddělená středníkem v následujícím formátu:
               <pre>
-                Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny práce;Dny adorace
+                Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny
+                práce;Dny adorace
               </pre>
               Příklad:
               <pre>
-                Jan;Novák;19;jan.novak@gmail.com;+420123456789;DUST,ANIMALS;2022/07/01,2022/07/02,2022/07/04;2022/07/02,2022/07/04
+                {`Jan;Novák;19;jan.novak@gmail.com;+420123456789;DUST,ANIMALS;LUMBERJACK;${datesExample()}`}
               </pre>
             </div>
             <p>
@@ -244,6 +260,7 @@ function getWorkerInfo(
     email,
     phone: formatedPhone,
     strong: false,
+    team: false,
     allergyIds: allergies,
     skills,
     availability: {

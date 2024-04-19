@@ -6,7 +6,7 @@ import {
   useAPIActiveJobUpdate,
 } from 'lib/fetcher/active-job'
 import type { Worker } from 'lib/prisma/client'
-import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { ActiveJobComplete, ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { ToolCompleteData } from 'lib/types/tool'
 import { WorkerComplete } from 'lib/types/worker'
@@ -24,6 +24,8 @@ import JobRideList from './JobRideList'
 import MoveWorkerModal from './MoveWorkerModal'
 import RideSelect from './RideSelect'
 import ToggleCompletedCheck from './ToggleCompletedCheck'
+import { SameCoworkerIssue, WorkerIssue } from './WorkerIssue'
+import { formatDateShort } from 'lib/helpers/helpers'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -203,7 +205,7 @@ export function PlanJobRow({
             <RowContent data={expandedContent} />
             <div className="table-responsive text-nowrap">
               <table className="table table-hover">
-                <thead>
+                <thead className="smj-light-grey">
                   <tr>
                     <th>
                       <strong>Pracant</strong>
@@ -439,11 +441,28 @@ function formatWorkerData(
     })
   }
   const allergies = worker.allergies
+  const workerSameWork = [new Date()] //sameWork(worker.id, job)
+  const workerSameCoworker = [
+    {
+      name: 'daniel vlad',
+      jobName: 'nějaké jméno',
+      planDay: 'datum',
+    },
+    {
+      name: 'danielaaaa vlad',
+      jobName: 'as jméno',
+      planDay: 'datum 2',
+    },
+  ] //sameCoworker(worker.id, job)
 
   return [
     {
       content: (
         <>
+          <WorkerIssue
+            sameWork={workerSameWork}
+            sameCoworker={workerSameCoworker}
+          />
           {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
           {wantsAdoration && (
             <i className="fas fa-church ms-2" title="Chce adorovat"></i>
@@ -507,4 +526,46 @@ function removeWorkerIcon(remove: () => void) {
       ></i>
     </>
   )
+}
+
+function sameWork(
+  currentWorkerId: string,
+  currentJob: ActiveJobNoPlan,
+  plannedJobs: ActiveJobComplete[]
+) {
+  const issues: Date[] = []
+  for (const job of plannedJobs) {
+    if (job.id === currentJob.id && job.planId !== currentJob.planId) {
+      for (const worker of job.workers) {
+        if (worker.id === currentWorkerId) {
+          issues.push(new Date(job.plan.day))
+        }
+      }
+    }
+  }
+  return false
+}
+
+function sameCoworker(
+  currentWorkerId: string,
+  currentJob: ActiveJobNoPlan,
+  plannedJobs: ActiveJobComplete[]
+) {
+  const issues: SameCoworkerIssue[] = []
+  for (const job of plannedJobs) {
+    if (job.planId !== currentJob.planId) {
+      for (const worker of job.workers) {
+        for (const curWorker of currentJob.workers) {
+          if (curWorker.id !== currentWorkerId && worker.id === curWorker.id) {
+            issues.push({
+              name: worker.firstName + ' ' + worker.lastName,
+              jobName: job.proposedJob.name,
+              planDay: formatDateShort(job.plan.day),
+            })
+          }
+        }
+      }
+    }
+  }
+  return issues
 }

@@ -240,7 +240,7 @@ export default function CreateWorker({
             id="note"
             label="Poznámka"
             placeholder="Poznámka"
-            rows={1}
+            rows={2}
             register={() => register('note')}
             errors={errors}
           />

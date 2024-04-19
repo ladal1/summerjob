@@ -7,7 +7,11 @@ import type { Worker } from 'lib/prisma/client'
 import { z } from 'zod'
 import { WorkerComplete } from './worker'
 import { Serialized } from './serialize'
-import { ActiveJobSchema, ProposedJobSchema } from 'lib/prisma/zod'
+import {
+  ActiveJobSchema,
+  ProposedJobSchema,
+  WorkerSchema,
+} from 'lib/prisma/zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
 import { RideComplete } from './ride'
 

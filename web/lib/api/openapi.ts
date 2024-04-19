@@ -8,6 +8,7 @@ import {
   CarSchema,
   LoggingSchema,
   PlanSchema,
+  PostSchema,
   ProposedJobSchema,
   RideSchema,
   SummerJobEventSchema,
@@ -35,6 +36,7 @@ import { APILogEvent } from 'lib/types/logger'
 import { MyPlanSchema } from 'lib/types/my-plan'
 import { PlanCompleteSchema, PlanCreateSchema } from 'lib/types/plan'
 import { PlannerSubmitSchema } from 'lib/types/planner'
+import { PostCreateSchema, PostUpdateSchema } from 'lib/types/post'
 import {
   ProposedJobCompleteSchema,
   ProposedJobCreateSchema,
@@ -54,36 +56,11 @@ import {
   WorkersCreateSchema,
 } from 'lib/types/worker'
 import { z } from 'zod'
-import { Allergy } from '../prisma/client'
 
 const registry = new OpenAPIRegistry()
 
 const _ApiErrorSchema = registry.register('ApiError', WrappedApiErrorSchema)
 const _Permissions = registry.register('Permissions', z.nativeEnum(Permission))
-
-//#region Allergies
-
-const _AllergySchema = registry.register('Allergy', z.nativeEnum(Allergy))
-
-registry.registerPath({
-  path: '/api/allergies',
-  method: 'get',
-  description: 'Gets a list of supported allergies.',
-  summary: 'List all supported allergies',
-  tags: ['Allergies'],
-  responses: {
-    200: {
-      description: 'List of supported allergies',
-      content: {
-        'application/json': {
-          schema: z.array(_AllergySchema),
-        },
-      },
-    },
-  },
-})
-
-//#endregion
 
 //#region Cars
 
@@ -1029,6 +1006,50 @@ registry.registerPath({
   },
 })
 
+registry.registerPath({
+  path: '/api/proposed-jobs/{proposedJobId}/photos/{photoId}',
+  method: 'get',
+  description:
+    "Get specific proposed job's photo. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Get proposed job's photo",
+  tags: ['Proposed jobs'],
+  parameters: [
+    {
+      name: 'proposedJobId',
+      in: 'path',
+      required: true,
+      description: 'ID of the proposed job.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+    {
+      name: 'photoId',
+      in: 'path',
+      required: true,
+      description: "ID of the proposed job's photo.",
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Proposed jobs's photo retrieved successfully.",
+      content: {
+        'image/*': {
+          schema: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  },
+})
+
 //#endregion
 
 //#region SummerJob events
@@ -1439,28 +1460,58 @@ const _WorkersCreateSchema = registry.register(
 const _WorkerSchema = registry.register('Worker', WorkerSchema)
 
 registry.registerPath({
-  path: '/api/workers',
+  path: '/api/workers/new',
   method: 'post',
   description:
     'Creates a new worker in the currently active event. If a worker with the same e-mail address is already registered in previous events, the worker will be automatically added to the current event. The worker will be able to sign in immediately. Permissions required (at least one): ADMIN, WORKERS, PLANS.',
-  summary: 'Create one or multiple new workers',
+  summary: 'Create one new worker',
   tags: ['Workers'],
   request: {
     body: {
       content: {
         'application/json': {
-          schema: _WorkerCreateSchema.or(_WorkersCreateSchema),
+          schema: _WorkerCreateSchema,
         },
       },
     },
   },
   responses: {
     201: {
-      description:
-        'Worker(s) created successfully. Returns the created worker(s).',
+      description: 'Worker created successfully. Returns the created worker.',
       content: {
         'application/json': {
-          schema: _WorkerSchema.or(z.array(_WorkerSchema)),
+          schema: _WorkerSchema,
+        },
+      },
+    },
+    409: {
+      description: 'No active SummerJob event is set.',
+    },
+  },
+})
+
+registry.registerPath({
+  path: '/api/workers',
+  method: 'post',
+  description:
+    'Creates new workers in the currently active event. If a worker with the same e-mail address is already registered in previous events, the worker will be automatically added to the current event. The worker will be able to sign in immediately. Permissions required (at least one): ADMIN, WORKERS, PLANS.',
+  summary: 'Create multiple new workers',
+  tags: ['Workers'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: _WorkersCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Workers created successfully. Returns the created workers.',
+      content: {
+        'application/json': {
+          schema: z.array(_WorkerSchema),
         },
       },
     },
@@ -1589,6 +1640,192 @@ registry.registerPath({
   responses: {
     200: {
       description: "Worker's photo retrieved successfully.",
+      content: {
+        'image/*': {
+          schema: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  },
+})
+
+registry.registerPath({
+  path: '/api/workers/{workerId}/photo',
+  method: 'get',
+  description:
+    "Get worker's photo. Permissions required (at least one): ADMIN, WORKERS, PLANS.",
+  summary: "Get worker's photo",
+  tags: ['Workers'],
+  parameters: [
+    {
+      name: 'workerId',
+      in: 'path',
+      required: true,
+      description: 'ID of the worker.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Worker's photo retrieved successfully.",
+      content: {
+        'image/*': {
+          schema: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  },
+})
+
+//#endregion
+
+//#region Posts
+
+const _PostSchema = registry.register('Post', PostSchema)
+
+registry.registerPath({
+  path: '/api/posts',
+  method: 'get',
+  description:
+    'Gets all posts for a SummerJob event. Special permissions are not required.',
+  summary: 'Get all posts',
+  tags: ['Posts'],
+  responses: {
+    200: {
+      description: 'Posts retrieved successfully.',
+      content: {
+        'application/json': {
+          schema: z.array(_PostSchema),
+        },
+      },
+    },
+  },
+})
+
+const _PostCreateSchema = registry.register('PostCreate', PostCreateSchema)
+
+registry.registerPath({
+  path: '/api/posts',
+  method: 'post',
+  description:
+    'Creates a new post for a SummerJob event. Permissions required (at least one): ADMIN, POSTS.',
+  summary: 'Creates a new post for a SummerJob event',
+  tags: ['Posts'],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: _PostCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: 'Post created successfully.',
+      content: {
+        'application/json': {
+          schema: _PostSchema,
+        },
+      },
+    },
+  },
+})
+
+const _PostUpdateSchema = registry.register('PostUpdate', PostUpdateSchema)
+
+registry.registerPath({
+  path: '/api/posts/{postId}',
+  method: 'patch',
+  description:
+    'Updates an post for a SummerJob event by ID. Permissions required (at least one): ADMIN, POSTS.',
+  summary: 'Updates an post for a SummerJob event by ID',
+  tags: ['Posts'],
+  parameters: [
+    {
+      name: 'postId',
+      in: 'path',
+      required: true,
+      description: 'ID of the post to update.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: _PostUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: 'Post updated successfully.',
+    },
+  },
+})
+
+registry.registerPath({
+  path: '/api/posts/{postId}',
+  method: 'delete',
+  description:
+    'Deletes an post for a SummerJob event by ID. Permissions required (at least one): ADMIN, POSTS.',
+  summary: 'Deletes an post for a SummerJob event by ID',
+  tags: ['Posts'],
+  parameters: [
+    {
+      name: 'postId',
+      in: 'path',
+      required: true,
+      description: 'ID of the post to delete.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: 'Post deleted successfully.',
+    },
+  },
+})
+
+registry.registerPath({
+  path: '/api/posts/{postId}/photo',
+  method: 'get',
+  description:
+    "Get post's photo.  Permissions required (at least one): ADMIN, POSTS.",
+  summary: "Get post's photo",
+  tags: ['Posts'],
+  parameters: [
+    {
+      name: 'postId',
+      in: 'path',
+      required: true,
+      description: 'ID of the post.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Post's photo retrieved successfully.",
       content: {
         'image/*': {
           schema: {

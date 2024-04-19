@@ -365,6 +365,10 @@ class Common {
       .send()
   }
 
+  beforeTestBlock = async () => {
+    await this.setup()
+  }
+
   afterTestBlock = async () => {
     // Set the active event
     await this.patch(

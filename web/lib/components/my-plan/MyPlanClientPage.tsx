@@ -66,7 +66,7 @@ export default function MyPlanClientPage({
   }, [plans])
 
   const onDateChanged = (newDate: Date) => {
-    setDate(newDate)
+    setDate(determineDate(newDate))
   }
   const selectedPlan = useMemo(() => {
     return sortedPlans.find(plan => {

@@ -57,6 +57,26 @@ describe('Cars', function () {
     resp.body.seats.should.equal(2)
   })
 
+  it("update car's odometer end", async function () {
+    const cars = await api.get('/api/cars', Id.CARS)
+    const selectedCar = cars.body[0]
+
+    const payload = {
+      odometerEnd: 30000,
+    }
+    const patch = await api.patch(
+      `/api/cars/${selectedCar.id}`,
+      Id.CARS,
+      payload
+    )
+    patch.status.should.equal(204)
+    const resp = await api.get(`/api/cars/${selectedCar.id}`, Id.CARS)
+    resp.body.should.be.an('object')
+    resp.body.should.have.property('id')
+    resp.body.should.have.property('odometerEnd')
+    resp.body.odometerEnd.should.equal(payload.odometerEnd)
+  })
+
   it('deletes a car', async function () {
     // Add a new car
     const carsBeforeAdding = await api.get('/api/cars', Id.CARS)

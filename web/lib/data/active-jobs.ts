@@ -281,6 +281,17 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   })
 }
 
+/*export async function getActiveJobs(): Promise<ActiveJobWorkersAndJobs[]> {
+  const jobs = await prisma.activeJob.findMany({
+    include: {
+      workers: true,
+      proposedJob: true,
+      plan: true,
+    },
+  })
+  return jobs
+}*/
+
 export async function createActiveJob(job: ActiveJobCreateData) {
   const { proposedJobId, planId } = job
   const activeJob = await prisma.$transaction(async tx => {

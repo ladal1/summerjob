@@ -66,6 +66,24 @@ describe('Proposed Jobs', function () {
     await api.deleteArea(area.id)
   })
 
+  it("can't update a proposed-job - wrong parameter", async function () {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    const job = await api.post('/api/proposed-jobs', Id.JOBS, body)
+    const selectedProposedJob = job.body
+
+    const payload = {
+      wrongParameter: 'New job name',
+    }
+    const patch = await api.patch(
+      `/api/proposed-jobs/${selectedProposedJob.id}`,
+      Id.JOBS,
+      payload
+    )
+    patch.status.should.equal(400)
+    await api.deleteArea(area.id)
+  })
+
   it('deletes a proposed job', async function () {
     const area = await api.createArea()
     // Add a new proposedJob
@@ -101,6 +119,14 @@ describe('Proposed Jobs', function () {
     await api.deleteArea(area.id)
   })
 
+  it('should be accessible with permission', async function () {
+    const perms = [Id.JOBS, Id.ADMIN]
+    for (const perm of perms) {
+      const resp = await api.get('/api/proposed-jobs', perm)
+      resp.status.should.equal(200)
+    }
+  })
+
   it('should not be accessible without permission', async function () {
     const perms = [Id.CARS, Id.WORKERS, '']
     for (const perm of perms) {
@@ -109,6 +135,34 @@ describe('Proposed Jobs', function () {
       resp.body.should.be.empty
     }
   })
+
+  /* it('creates proposed-job with valid photo', async function () {})
+
+  it('creates proposed-job with multiple valid photos', async function () {})
+
+  it('creates proposed-job with invalid photo', async function () {})
+
+  it('creates proposed-job with valid and one invalid photos', async function () {})
+
+  it("delete proposed-job's photo", async function () {})
+
+  it("delete proposed-job's every photo", async function () {})
+
+  it("delete proposed-job's every photo", async function () {})
+
+  it("get proposed-job' first photo", async function () {})
+
+  it("returns 404 when proposed job' specific photo does not exist", async function () {})
+
+  it('create proposed-job with tools to take with', async function () {})
+
+  it('create proposed-job with invalid tool to take with', async function () {})
+
+  it('update proposed-job tools to take with', async function () {})
+
+  it('update proposed-job with invalid tool to take with', async function () {})
+
+  it('delete proposed-job tools to take with', async function () {})*/
 
   this.afterAll(api.afterTestBlock)
 })

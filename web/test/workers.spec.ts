@@ -1,6 +1,7 @@
 import { Id, api, createWorkerData } from './common'
 import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
+import { statSync } from 'fs'
 
 chai.use(chaiExclude)
 chai.should()
@@ -86,6 +87,21 @@ describe('Workers', function () {
     expect(resp.body)
       .excluding(['firstName', 'phone'])
       .to.deep.equal(selectedWorker)
+  })
+
+  it("can't update a worker - wrong parameter", async function () {
+    const workers = await api.get('/api/workers', Id.WORKERS)
+    const selectedWorker = workers.body[0]
+
+    const body = {
+      wrongParameter: 'Jane',
+    }
+    const patch = await api.patch(
+      `/api/workers/${selectedWorker.id}`,
+      Id.WORKERS,
+      body
+    )
+    patch.status.should.equal(400)
   })
 
   it('deletes a worker', async function () {
@@ -201,6 +217,51 @@ describe('Workers', function () {
     resp.body.should.have.property('id')
     resp.body.should.have.property('photoPath')
     resp.body.photoPath.should.be.empty
+  })
+
+  it("get worker's photo", async function () {
+    const body = createWorkerData()
+    const file = {
+      fieldName: 'photoPath',
+      file: `${__dirname}/../public/favicon.ico`,
+    }
+    const createdWorker = await api.post('/api/workers/new', Id.WORKERS, body, [
+      file,
+    ])
+    const resp = await api.get(
+      `/api/workers/${createdWorker.body.id}/photo`,
+      Id.WORKERS
+    )
+    // Verify status code
+    resp.status.should.equal(200)
+
+    // Verify content type
+    resp.headers['content-type'].should.include('image')
+
+    // Verify content length
+    resp.headers['content-length'].should.exist
+
+    // Verify cache control headers
+    resp.headers['cache-control'].should.include('public')
+    resp.headers['cache-control'].should.include('max-age=5')
+    resp.headers['cache-control'].should.include('must-revalidate')
+
+    // Verify content by reading the image file
+    const fileStat = statSync(`${__dirname}/../public/favicon.ico`)
+    const expectedSize = fileStat.size
+
+    // Ensure content length matches expected size
+    parseInt(resp.headers['content-length']).should.equal(expectedSize)
+  })
+
+  it("return 404 if worker doesn't have photo", async function () {
+    const body = createWorkerData()
+    const createdWorker = await api.post('/api/workers/new', Id.WORKERS, body)
+    const resp = await api.get(
+      `/api/workers/${createdWorker.body.id}/photo`,
+      Id.WORKERS
+    )
+    resp.status.should.equal(404)
   })
 
   this.afterAll(api.afterTestBlock)

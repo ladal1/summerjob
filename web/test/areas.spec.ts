@@ -4,6 +4,8 @@ import { Id, api, createAreaData } from './common'
 chai.should()
 
 describe('Areas', function () {
+  this.beforeAll(api.beforeTestBlock)
+
   it('creates a area', async function () {
     const eventId = api.getSummerJobEventId()
     const resp = await api.post(

@@ -47,8 +47,8 @@ export const WorkerCreateSchema = z
           message: err.invalidRegexPhone,
         }
       ),
-    strong: z.boolean(),
-    team: z.boolean(),
+    strong: z.boolean().default(false),
+    team: z.boolean().default(false),
     skills: z.array(z.nativeEnum(Skill)),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
