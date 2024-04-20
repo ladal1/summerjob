@@ -75,3 +75,55 @@ export async function deleteTool(
     },
   })
 }
+
+//#region Tool register
+
+export enum ToolType {
+  ON_SITE = 'ON_SITE',
+  TO_TAKE_WITH = 'TO_TAKE_WITH',
+}
+
+export const registerTools = async (
+  toolsCreate: ToolsCreateData | undefined,
+  toolsUpdate: ToolsUpdateData | undefined,
+  toolsIdsDeleted: string[] | undefined,
+  jobId: string,
+  toolType: ToolType,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) => {
+  if (toolsIdsDeleted !== undefined) {
+    await deleteTools(toolsIdsDeleted, prismaClient)
+  }
+  if (toolsCreate) {
+    const tools: ToolsCreateData = {
+      tools: toolsCreate.tools.map(toolItem => ({
+        ...toolItem,
+        proposedJobOnSiteId: toolType === ToolType.ON_SITE ? jobId : null,
+        proposedJobToTakeWithId:
+          toolType === ToolType.TO_TAKE_WITH ? jobId : null,
+      })),
+    }
+    if (tools.tools.length !== 0) {
+      await createTools(tools, prismaClient)
+    }
+  }
+  if (toolsUpdate && toolsUpdate.tools) {
+    const tools: ToolsUpdateData = {
+      tools: toolsUpdate.tools
+        .filter(
+          toolItem => toolItem.id && !toolsIdsDeleted?.includes(toolItem.id)
+        )
+        .map(toolItem => ({
+          ...toolItem,
+          proposedJobOnSiteId: toolType === ToolType.ON_SITE ? jobId : null,
+          proposedJobToTakeWithId:
+            toolType === ToolType.TO_TAKE_WITH ? jobId : null,
+        })),
+    }
+    if (tools.tools && tools.tools.length !== 0) {
+      await updateTools(tools, prismaClient)
+    }
+  }
+}
+
+//#endregion

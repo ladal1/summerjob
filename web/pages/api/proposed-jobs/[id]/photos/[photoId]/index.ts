@@ -5,7 +5,7 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { WrappedError } from 'lib/types/api-error'
 import { ApiError } from 'next/dist/server/api-utils'
-import { getPhotoById } from 'lib/data/photo'
+import { getPhotoPathById } from 'lib/data/jobPhoto'
 
 const get = async (
   req: NextApiRequest,
@@ -17,20 +17,20 @@ const get = async (
   if (!allowed) {
     return
   }
-  
-  const photo = await getPhotoById(photoId)
-  if (!photo || !photo.photoPath) {
+
+  const photoPath = await getPhotoPathById(photoId)
+  if (!photoPath) {
     res.status(404).end()
     return
   }
-  
-  const fileStat = statSync(photo.photoPath)
+
+  const fileStat = statSync(photoPath)
   res.writeHead(200, {
-    'Content-Type': `image/${photo?.photoPath?.split('.').pop()}`,
+    'Content-Type': `image/${photoPath.split('.').pop()}`,
     'Content-Length': fileStat.size,
     'Cache-Control': 'public, max-age=5, must-revalidate',
   })
-  const readStream = createReadStream(photo.photoPath)
+  const readStream = createReadStream(photoPath)
   readStream.pipe(res)
 }
 
@@ -46,7 +46,7 @@ async function isAllowedToAccessProposedJobsPhoto(
   if (regularAccess) {
     return true
   }
-  
+
   res.status(403).end()
   return false
 }
@@ -58,4 +58,3 @@ export const config = {
     bodyParser: false,
   },
 }
-

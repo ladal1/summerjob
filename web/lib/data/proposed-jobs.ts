@@ -8,7 +8,17 @@ import {
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
-import { createTools, deleteTools, updateTools } from './tools'
+import {
+  createTools,
+  deleteTools,
+  registerTools,
+  ToolType,
+  updateTools,
+} from './tools'
+import formidable from 'formidable'
+import { PrismaClient } from '@prisma/client'
+import { PrismaTransactionClient } from 'lib/types/prisma'
+import { deleteAllPhotos, registerPhotos } from './jobPhoto'
 
 export async function getProposedJobById(
   id: string
@@ -38,13 +48,14 @@ export async function getProposedJobById(
 }
 
 export async function getProposedJobPhotoIdsById(
-  id: string
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ): Promise<PhotoIdsData | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const jobs = await prisma.proposedJob.findUnique({
+  const photos = await prismaClient.proposedJob.findUnique({
     where: {
       id: id,
     },
@@ -56,12 +67,15 @@ export async function getProposedJobPhotoIdsById(
       },
     },
   })
-  return jobs
+  return photos
 }
 
-export async function hasProposedJobPhotos(id: string): Promise<boolean> {
-  const jobs = await getProposedJobPhotoIdsById(id)
-  return jobs?.photos?.length !== 0
+export async function hasProposedJobPhotos(
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+): Promise<boolean> {
+  const photoIds = await getProposedJobPhotoIdsById(id, prismaClient)
+  return photoIds?.photos.length !== 0
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
@@ -148,7 +162,8 @@ export async function getProposedJobsAssignableTo(
 
 export async function updateProposedJob(
   id: string,
-  proposedJobData: ProposedJobUpdateData
+  proposedJobData: ProposedJobUpdateData,
+  files: formidable.Files
 ) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
@@ -163,6 +178,7 @@ export async function updateProposedJob(
     toolsToTakeWith,
     toolsToTakeWithIdsDeleted,
     toolsToTakeWithUpdated,
+    photoIdsDeleted,
     ...rest
   } = proposedJobData
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
@@ -197,73 +213,34 @@ export async function updateProposedJob(
         ...allergyUpdate,
       },
     })
-    // Delete job's tools
-    if (toolsOnSiteIdsDeleted !== undefined) {
-      await deleteTools(toolsOnSiteIdsDeleted, tx)
-    }
-    if (toolsToTakeWithIdsDeleted !== undefined) {
-      await deleteTools(toolsToTakeWithIdsDeleted, tx)
-    }
-    // Create job's tools
-    let onSite: Tool[] = []
-    let takeWith: Tool[] = []
-    if (toolsOnSite && toolsOnSite.tools) {
-      const tools = {
-        tools: toolsOnSite.tools.map(toolItem => ({
-          ...toolItem,
-          proposedJobOnSiteId: proposedJob.id,
-        })),
-      }
-      onSite = await createTools(tools, tx)
-    }
-    if (toolsToTakeWith && toolsToTakeWith.tools) {
-      const tools = {
-        tools: toolsToTakeWith.tools.map(toolItem => ({
-          ...toolItem,
-          proposedJobToTakeWithId: proposedJob.id,
-        })),
-      }
-      takeWith = await createTools(tools, tx)
-    }
     // Update job's tools
-    let onSiteUpdated: Tool[] = []
-    let toTakeWithUpdated: Tool[] = []
-    if (toolsOnSiteUpdated && toolsOnSiteUpdated.tools) {
-      const tools = toolsOnSiteUpdated.tools
-        .filter(
-          toolItem =>
-            toolItem.id && !toolsOnSiteIdsDeleted?.includes(toolItem.id)
-        )
-        .map(toolItem => ({
-          ...toolItem,
-          proposedJobOnSiteId: proposedJob.id,
-        }))
-      onSiteUpdated = await updateTools({ tools }, tx)
-    }
-    if (toolsToTakeWithUpdated && toolsToTakeWithUpdated.tools) {
-      const tools = toolsToTakeWithUpdated.tools
-        .filter(
-          toolItem =>
-            toolItem.id && !toolsOnSiteIdsDeleted?.includes(toolItem.id)
-        )
-        .map(toolItem => ({
-          ...toolItem,
-          proposedJobToTakeWithId: proposedJob.id,
-        }))
-      toTakeWithUpdated = await updateTools({ tools }, tx)
-    }
-    return {
-      ...proposedJob,
-      toolsOnSite: onSite,
-      toolsToTakeWith: takeWith,
-      toolsOnSiteUpdated: onSiteUpdated,
-      toolsToTakeWithUpdated: toTakeWithUpdated,
-    }
+    await registerTools(
+      toolsOnSite,
+      toolsOnSiteUpdated,
+      toolsOnSiteIdsDeleted,
+      proposedJob.id,
+      ToolType.ON_SITE,
+      tx
+    )
+    await registerTools(
+      toolsToTakeWith,
+      toolsToTakeWithUpdated,
+      toolsToTakeWithIdsDeleted,
+      proposedJob.id,
+      ToolType.TO_TAKE_WITH,
+      tx
+    )
+    // Update job's photos
+    await registerPhotos(files, photoIdsDeleted, proposedJob.id, tx)
+    return proposedJob
   })
   return updated
 }
 
-export async function createProposedJob(data: ProposedJobCreateData) {
+export async function createProposedJob(
+  data: ProposedJobCreateData,
+  files: formidable.Files
+) {
   const { toolsOnSite, toolsToTakeWith, ...rest } = data
 
   const created = await prisma.$transaction(async tx => {
@@ -272,27 +249,25 @@ export async function createProposedJob(data: ProposedJobCreateData) {
       data: { ...rest },
     })
     // Create job's tools
-    let onSite: Tool[] = []
-    let takeWith: Tool[] = []
-    if (toolsOnSite && toolsOnSite.tools) {
-      const tools = {
-        tools: toolsOnSite.tools.map(toolItem => ({
-          ...toolItem,
-          proposedJobOnSiteId: proposedJob.id,
-        })),
-      }
-      onSite = await createTools(tools, tx)
-    }
-    if (toolsToTakeWith && toolsToTakeWith.tools) {
-      const tools = {
-        tools: toolsToTakeWith.tools.map(toolItem => ({
-          ...toolItem,
-          proposedJobToTakeWithId: proposedJob.id,
-        })),
-      }
-      takeWith = await createTools(tools, tx)
-    }
-    return { ...proposedJob, toolsOnSite: onSite, toolsToTakeWith: takeWith }
+    await registerTools(
+      toolsOnSite,
+      undefined,
+      undefined,
+      proposedJob.id,
+      ToolType.ON_SITE,
+      tx
+    )
+    await registerTools(
+      toolsToTakeWith,
+      undefined,
+      undefined,
+      proposedJob.id,
+      ToolType.TO_TAKE_WITH,
+      tx
+    )
+    // Create job's photos
+    await registerPhotos(files, undefined, proposedJob.id, tx)
+    return proposedJob
   })
   return created
 }
@@ -309,5 +284,6 @@ export async function deleteProposedJob(id: string) {
         id,
       },
     })
+    await deleteAllPhotos(id, tx)
   })
 }

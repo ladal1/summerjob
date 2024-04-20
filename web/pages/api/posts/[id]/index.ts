@@ -32,15 +32,6 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  // Set coordinates if they are missing
-  if (postData.coordinates === undefined || postData.coordinates.length !== 2) {
-    const fetchedCoords = await getGeocodingData(postData.address ?? undefined)
-    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
-    if (fetchedCoords && parsed.success) {
-      postData.coordinates = parsed.data.coordinates
-    }
-  }
-
   // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
   if (files.photoFile) {
     const photoPath = getPhotoPath(files.photoFile) // update photoPath

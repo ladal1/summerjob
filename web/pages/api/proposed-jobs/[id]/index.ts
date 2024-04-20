@@ -1,10 +1,11 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getUploadDirForImages } from 'lib/api/fileManager'
+import {
+  getUploadDirForImages,
+  getUploadDirForImagesForCurrentEvent,
+} from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
-import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { validateOrSendError } from 'lib/api/validator'
-import { getGeocodingData } from 'lib/components/map/GeocodingData'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import {
   deleteProposedJob,
@@ -14,7 +15,6 @@ import {
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
-import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import {
   ProposedJobUpdateDataInput,
@@ -43,9 +43,8 @@ async function patch(
   // Get current photoIds
   const currentPhotoIds = await getProposedJobPhotoIdsById(id)
   const currentPhotoCnt = currentPhotoIds?.photos.length ?? 0
-  const activeEventId = await cache_getActiveSummerJobEventId()
   const uploadDirectory =
-    getUploadDirForImages() + '/' + activeEventId + '/proposed-job'
+    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-job'
 
   const { files, json } = await parseFormWithImages(
     req,
@@ -65,20 +64,8 @@ async function patch(
     return
   }
 
-  // Set coordinates if they are missing
-  if (proposedJobData.coordinates === undefined) {
-    const fetchedCoords = await getGeocodingData(proposedJobData.address)
-    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
-    if (fetchedCoords && parsed.success) {
-      proposedJobData.coordinates = parsed.data.coordinates
-    }
-  }
-
-  const { photoIdsDeleted, ...rest } = proposedJobData
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
-  await updateProposedJob(id, rest)
-  console.log(photoIdsDeleted)
-  await registerPhotos(files, photoIdsDeleted, uploadDirectory, id, session)
+  await updateProposedJob(id, proposedJobData, files)
   res.status(204).end()
 }
 

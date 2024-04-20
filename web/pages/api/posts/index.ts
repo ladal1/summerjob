@@ -49,15 +49,6 @@ async function post(
     return
   }
 
-  // Set coordinates if they are missing
-  if (postData.coordinates === undefined) {
-    const fetchedCoords = await getGeocodingData(postData.address ?? undefined)
-    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
-    if (fetchedCoords && parsed.success) {
-      postData.coordinates = parsed.data.coordinates
-    }
-  }
-
   const post = await createPost(postData)
 
   /* Rename photo file and update post with new photo path to it. */

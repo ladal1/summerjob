@@ -93,9 +93,8 @@ export async function getWorkerPhotoPathById(
   if (!worker || !worker.photoPath) {
     return null
   }
-  // Save only relative part of photoPath
   const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-  return uploadDirAbsolutePath + worker?.photoPath
+  return uploadDirAbsolutePath + worker.photoPath
 }
 
 export async function getWorkerById(

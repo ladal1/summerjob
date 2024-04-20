@@ -1,11 +1,11 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import { generateFileName, getUploadDirForImages } from 'lib/api/fileManager'
+import {
+  generateFileName,
+  getUploadDirForImagesForCurrentEvent,
+} from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
-import { registerPhotos } from 'lib/api/register/registerPhotos'
 import { validateOrSendError } from 'lib/api/validator'
-import { getGeocodingData } from 'lib/components/map/GeocodingData'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import {
   createProposedJob,
   getProposedJobs,
@@ -14,7 +14,6 @@ import {
 import logger from 'lib/logger/logger'
 import { ApiError, WrappedError } from 'lib/types/api-error'
 import { ExtendedSession, Permission } from 'lib/types/auth'
-import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import {
   ProposedJobCreateData,
@@ -48,10 +47,9 @@ async function post(
   res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId()
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDirectory =
-    getUploadDirForImages() + '/' + activeEventId + '/proposed-job'
+    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-job'
   const { files, json } = await parseFormWithImages(
     req,
     res,
@@ -65,24 +63,13 @@ async function post(
     return
   }
 
-  // Set coordinates if they are missing
-  if (result.coordinates === undefined) {
-    const fetchedCoords = await getGeocodingData(result.address)
-    const parsed = CoordinatesSchema.safeParse({ coordinates: fetchedCoords })
-    if (fetchedCoords && parsed.success) {
-      result.coordinates = parsed.data.coordinates
-    }
-  }
-
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
     result,
     session
   )
-  const job = await createProposedJob(result)
-
-  await registerPhotos(files, undefined, uploadDirectory, job.id, session)
+  const job = await createProposedJob(result, files)
 
   res.status(201).json(job)
 }
