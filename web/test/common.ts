@@ -2,6 +2,8 @@ import { randomBytes } from 'crypto'
 import { PrismaClient } from '../lib/prisma/client'
 import request from 'supertest'
 import { faker } from '@faker-js/faker/locale/cz'
+import path from 'path'
+import fs, { promises } from 'fs'
 
 export type File = {
   fieldName: string
@@ -124,6 +126,7 @@ async function changePermissions(email: string, permission: string) {
   })
 }
 
+//#region Common
 class Common {
   private _adminId: string
   private _email: string
@@ -153,6 +156,63 @@ class Common {
   getSummerJobEventStart = () => this._event.start
 
   getSummerJobEventEnd = () => this._event.end
+
+  //#region Files managment
+  getUploadDirForImagesForCurrentEvent = () => {
+    const activeEventId = this.getSummerJobEventId()
+    return this.getUploadDirForImages() + '/' + activeEventId
+  }
+
+  private getUploadDirForImages = (): string => {
+    return (
+      path.resolve(process.cwd() + '/../') +
+      (process.env.UPLOAD_DIR || '/web-storage')
+    )
+  }
+
+  private deleteFile = async (oldPhotoPath: string) => {
+    await promises.unlink(oldPhotoPath)
+  }
+
+  private deleteDirectory = async (dir: string) => {
+    try {
+      await promises.rm(dir, { recursive: true, force: true })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  fileExists = (path: string) => {
+    return fs.existsSync(path)
+  }
+
+  numberOfFilesInsideDirectory = async (dir: string) => {
+    try {
+      const files = await fs.promises.readdir(dir)
+      return files.length
+    } catch (error) {
+      console.error('Error reading directory:', error)
+      return -1
+    }
+  }
+
+  getAbsolutePath = (relativePath: string) => {
+    return this.getUploadDirForImagesForCurrentEvent() + relativePath
+  }
+
+  deleteWorkersPhoto = async (workerId: string) => {
+    const resp = await this.get(`/api/workers/${workerId}`, Id.WORKERS)
+    const relativePath = resp.body.photoPath
+    const absolutePath =
+      this.getUploadDirForImagesForCurrentEvent() + relativePath
+    this.deleteFile(absolutePath)
+  }
+  //#endregion
+
+  //region Basic API usage
+  deletePlan = async (planId: string) => {
+    await this.del(`/api/plans/${planId}`, Id.ADMIN)
+  }
 
   createWorker = async () => {
     const worker = await this.post(
@@ -204,7 +264,9 @@ class Common {
   deleteProposedJob = async (jobId: string) => {
     await this.del(`/api/proposed-jobs/${jobId}`, Id.ADMIN)
   }
+  // #endregion
 
+  // #region Complicated API usage
   createPlanWithJob = async () => {
     const plan = await api.post(
       '/api/plans',
@@ -288,11 +350,9 @@ class Common {
       ],
     }
   }
+  //#endregion
 
-  deletePlan = async (planId: string) => {
-    await this.del(`/api/plans/${planId}`, Id.ADMIN)
-  }
-
+  //#region API methods
   get = async (url: string, identity: string) => {
     if (!this._session) await this.setup()
     if (identity !== this._lastIdentity) {
@@ -321,10 +381,8 @@ class Common {
       .post(url)
       .set('Cookie', [this._session])
       .field('jsonData', JSON.stringify(body))
-    if (files.length > 0) {
-      files.forEach(file => {
-        requestPromise.attach(file.fieldName, file.file)
-      })
+    for (const file of files) {
+      requestPromise.attach(file.fieldName, file.file)
     }
     return requestPromise
   }
@@ -364,7 +422,9 @@ class Common {
       .set('Accept', 'application/json')
       .send()
   }
+  //#endregion
 
+  //#region Setup
   beforeTestBlock = async () => {
     await this.setup()
   }
@@ -382,12 +442,12 @@ class Common {
     const workers = await this.get('/api/workers', Id.WORKERS)
     for (const worker of workers.body) {
       if (worker.id === this._adminId) continue
-      await api.del(`/api/workers/${worker.id}`, Id.WORKERS)
+      await api.deleteWorker(worker.id)
     }
     // Delete all cars
     const cars = await this.get('/api/cars', Id.CARS)
     for (const car of cars.body) {
-      await api.del(`/api/cars/${car.id}`, Id.CARS)
+      await api.deleteCar(car.id)
     }
     // Delete all areas - this also deletes all proposed and active jobs
     const areas = await this.get(
@@ -400,21 +460,13 @@ class Common {
         Id.ADMIN
       )
     }
+    // Delete all photos
+    this.deleteDirectory(this.getUploadDirForImagesForCurrentEvent())
   }
-
-  getFileNameAndType = (photoPath: string) => {
-    const lastSlashIndex = photoPath.lastIndexOf('/')
-    const lastDotIndex = photoPath.lastIndexOf('.')
-    // there should be some / and . in name of photoPath
-    lastSlashIndex.should.not.equal(-1)
-    lastDotIndex.should.not.equal(-1)
-    // newly created photo should be named as {id}.{type}
-    const fileName = photoPath.slice(lastSlashIndex + 1, lastDotIndex)
-    const fileType = photoPath.slice(lastDotIndex)
-    return { fileName, fileType }
-  }
+  //#endregion
 }
 
+//#region Generate data
 export function createWorkerData() {
   return {
     firstName: faker.name.firstName(),
@@ -500,5 +552,20 @@ export const Id = {
   PLANS: 'PLANS',
   POSTS: 'POSTS',
 }
+//#endregion
+
+//#region Helpers
+export const getFileNameAndType = (photoPath: string) => {
+  const lastSlashIndex = photoPath.lastIndexOf('/')
+  const lastDotIndex = photoPath.lastIndexOf('.')
+  // there should be some / and . in name of photoPath
+  lastSlashIndex.should.not.equal(-1)
+  lastDotIndex.should.not.equal(-1)
+  // newly created photo should be named as {id}.{type}
+  const fileName = photoPath.slice(lastSlashIndex + 1, lastDotIndex)
+  const fileType = photoPath.slice(lastDotIndex)
+  return { fileName, fileType }
+}
+//#endregion
 
 export const api = new Common()
