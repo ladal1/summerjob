@@ -3,7 +3,6 @@ import mime from 'mime'
 import formidable from 'formidable'
 import { createDirectory } from './fileManager'
 import { ApiBadRequestError } from 'lib/types/api-error'
-export const FormidableError = formidable.errors.FormidableError
 
 /* Get simple data from string jsonData containing json data. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

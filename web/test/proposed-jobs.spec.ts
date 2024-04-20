@@ -228,7 +228,7 @@ describe('Proposed Jobs', function () {
     resp.status.should.equal(400)
   })
 
-  /*it("delete proposed-job's photo", async function () {
+  it("delete proposed-job's photo", async function () {
     const area = await api.createArea()
     const body = createProposedJobData(area.id)
     const file = {
@@ -261,7 +261,7 @@ describe('Proposed Jobs', function () {
     proposedJob.body.photos.should.have.lengthOf(0)
   })
 
-  it("delete proposed-job's every photo", async function () {})
+  /*it("delete proposed-job's every photo", async function () {})
 
   it("delete proposed-job's every photo", async function () {})
 

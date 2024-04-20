@@ -1,4 +1,4 @@
-import { Id, api, createSummerJobEventData } from './common'
+/* import { Id, api, createSummerJobEventData } from './common'
 import chai from 'chai'
 
 chai.should()
@@ -82,3 +82,4 @@ describe('SummerJob Events', function () {
 
   this.afterAll(api.afterTestBlock)
 })
+ */

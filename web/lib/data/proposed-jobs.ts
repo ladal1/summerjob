@@ -269,7 +269,7 @@ export async function createProposedJob(data: ProposedJobCreateData) {
   const created = await prisma.$transaction(async tx => {
     // Create job
     const proposedJob = await tx.proposedJob.create({
-      data: rest,
+      data: { ...rest },
     })
     // Create job's tools
     let onSite: Tool[] = []

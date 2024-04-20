@@ -55,7 +55,7 @@ export async function deletePhoto(
   id: string,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) {
-  await prismaClient.photo.delete({
+  await prismaClient.jobPhoto.delete({
     where: {
       id,
     },

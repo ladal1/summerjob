@@ -77,7 +77,7 @@ async function patch(
   const { photoIdsDeleted, ...rest } = proposedJobData
   await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
   await updateProposedJob(id, rest)
-
+  console.log(photoIdsDeleted)
   await registerPhotos(files, photoIdsDeleted, uploadDirectory, id, session)
   res.status(204).end()
 }

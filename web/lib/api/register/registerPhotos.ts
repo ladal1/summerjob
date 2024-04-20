@@ -42,7 +42,7 @@ const savePhotos = async (
       // rename photo to its id instead of temporary name which was proposedJob.id-number given in parseFormWithImages
       const newPhotoPath =
         updatePhotoPathByNewFilename(photoPath, newPhoto.id, `/${jobId}`) ?? ''
-      renameFile(photoPath, newPhotoPath)
+      await renameFile(photoPath, newPhotoPath)
       const renamedPhoto = await updatePhoto(newPhoto.id, {
         photoPath: newPhotoPath,
       })
@@ -69,7 +69,7 @@ const deleteFlaggedPhotos = async (
       photoIdsDeleted.map(async photoId => {
         const photo = await getPhotoById(photoId)
         if (photo) {
-          deleteFile(photo.photoPath)
+          await deleteFile(photo.photoPath)
           return photoId
         }
       })

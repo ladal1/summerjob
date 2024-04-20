@@ -30,7 +30,7 @@
     "amqplib": "^0.10.3",
     "eslint": "8.30.0",
     "eslint-config-next": "14.1.0",
-    "formidable": "^2.1.2",
+    "formidable": "^3.5.1",
     "husky": "^8.0.3",
     "leaflet": "^1.9.4",
     "mime": "^3.0.0",

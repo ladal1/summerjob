@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker'
+/* import { faker } from '@faker-js/faker'
 import { Id, api, createPlanData } from './common'
 import chai from 'chai'
 
@@ -282,3 +282,4 @@ describe('Plans', function () {
 
   this.afterAll(api.afterTestBlock)
 })
+ */

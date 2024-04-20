@@ -1,4 +1,11 @@
-import { WorkerAvailability, Worker, PrismaClient } from 'lib/prisma/client'
+import {
+  deleteFile,
+  getUploadDirForImagesForCurrentEvent,
+  renameFile,
+  updatePhotoPathByNewFilename,
+} from 'lib/api/fileManager'
+import { getPhotoPath } from 'lib/api/parse-form'
+import { PrismaClient, Worker, WorkerAvailability } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 import {
@@ -10,7 +17,7 @@ import {
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
 import { deleteUserSessions } from './users'
-import { PhotoCreateData } from 'lib/types/photo'
+import formidable from 'formidable'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -67,14 +74,15 @@ export async function getWorkers(
   return res
 }
 
-export async function getWorkerPhotoById(
-  id: string
-): Promise<PhotoCreateData | null> {
+export async function getWorkerPhotoPathById(
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+): Promise<string | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const worker = await prisma.worker.findUnique({
+  const worker = await prismaClient.worker.findUnique({
     where: {
       id: id,
     },
@@ -82,7 +90,12 @@ export async function getWorkerPhotoById(
       photoPath: true,
     },
   })
-  return worker
+  if (!worker || !worker.photoPath) {
+    return null
+  }
+  // Save only relative part of photoPath
+  const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+  return uploadDirAbsolutePath + worker?.photoPath
 }
 
 export async function getWorkerById(
@@ -154,6 +167,11 @@ export async function deleteWorker(id: string) {
       })
       return
     }
+    // Delete file from disk if there is path to it
+    const workerPhotoPath = await getWorkerPhotoPathById(id)
+    if (workerPhotoPath) {
+      await deleteFile(workerPhotoPath) // delete original image if it exists
+    }
     // If the worker has been assigned to a job, we cannot delete them from the database as it would break the job history
     // Instead, we anonymize them
     await prisma.worker.update({
@@ -190,6 +208,7 @@ export async function deleteWorker(id: string) {
             },
           },
         },
+        photoPath: null,
         deleted: true,
         blocked: true,
         permissions: {
@@ -210,44 +229,20 @@ export async function createWorkers(data: WorkersCreateData) {
   const workers = await prisma.$transaction(async tx => {
     const workers: Worker[] = []
     for (const worker of data.workers) {
-      workers.push(await createWorker(worker, tx))
+      workers.push(await createWorker(worker, undefined, tx))
     }
     return workers
   })
   return workers
 }
 
-/**
- * Creates a new worker in the currently active event or updates an existing worker from previous events, assigning them to the currently active event
- * @param data Worker data
- * @param prismaClient If this is called from a transaction, the transaction client should be passed here
- * @returns New or updated worker
- */
-export async function createWorker(
+async function internal_createWorker(
+  activeEventId: string | undefined,
   data: WorkerCreateData,
-  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+  file: formidable.File | formidable.File[] | undefined = undefined,
+  prismaClient: PrismaTransactionClient = prisma
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
-
-  const existingUser = await prismaClient.worker.findFirst({
-    where: {
-      email: data.email.toLowerCase(),
-      availability: {
-        some: {
-          eventId: activeEventId,
-        },
-      },
-    },
-  })
-
-  if (existingUser) {
-    throw new WorkerAlreadyExistsError(existingUser.email)
-  }
-
-  return await prismaClient.worker.upsert({
+  const worker = await prismaClient.worker.upsert({
     where: {
       email: data.email.toLowerCase(),
     },
@@ -306,18 +301,75 @@ export async function createWorker(
           permissions: [],
         },
       },
-      photoPath: data.photoPath ?? '',
     },
   })
+  // Rename photo file and update worker with new photo path to it.
+  if (file) {
+    const temporaryPhotoPath = getPhotoPath(file) // update photoPath
+    const photoPath =
+      updatePhotoPathByNewFilename(temporaryPhotoPath, worker.id) ?? ''
+    await renameFile(temporaryPhotoPath, photoPath)
+    // Save only relative part of photoPath
+    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+    const updatedWorker = await internal_updateWorker(worker.id, {
+      photoPath: relativePath,
+    })
+    return { ...worker, ...updatedWorker }
+  }
+  return worker
 }
 
-export async function updateWorker(id: string, data: WorkerUpdateData) {
+/**
+ * Creates a new worker in the currently active event or updates an existing worker from previous events, assigning them to the currently active event
+ * @param data Worker data
+ * @param prismaClient If this is called from a transaction, the transaction client should be passed here
+ * @returns New or updated worker
+ */
+export async function createWorker(
+  data: WorkerCreateData,
+  file: formidable.File | formidable.File[] | undefined = undefined,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+
+  const existingUser = await prismaClient.worker.findFirst({
+    where: {
+      email: data.email.toLowerCase(),
+      availability: {
+        some: {
+          eventId: activeEventId,
+        },
+      },
+    },
+  })
+
+  if (existingUser) {
+    throw new WorkerAlreadyExistsError(existingUser.email)
+  }
+
+  if (prismaClient instanceof PrismaClient) {
+    return await prismaClient.$transaction(
+      async tx => await internal_createWorker(activeEventId, data, file, tx)
+    )
+  }
+  return await internal_createWorker(activeEventId, data, file, prismaClient)
+}
+
+export async function updateWorker(
+  id: string,
+  data: WorkerUpdateData,
+  file: formidable.File | formidable.File[] | undefined = undefined
+) {
   if (!data.email) {
-    return await internal_updateWorker(id, data)
+    return await internal_updateWorker(id, data, file)
   }
   data.email = data.email.toLowerCase()
   return await prisma.$transaction(async tx => {
-    const user = await internal_updateWorker(id, data, tx)
+    const user = await internal_updateWorker(id, data, file, tx)
     if (!user) return null
     await deleteUserSessions(user.email, tx)
     return user
@@ -327,7 +379,8 @@ export async function updateWorker(id: string, data: WorkerUpdateData) {
 export async function internal_updateWorker(
   id: string,
   data: WorkerUpdateData,
-  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+  file: formidable.File | formidable.File[] | undefined = undefined,
+  prismaClient: PrismaTransactionClient = prisma
 ) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (data.availability) {
@@ -341,6 +394,28 @@ export async function internal_updateWorker(
     : {}
 
   const skillsUpdate = data.skills ? { skills: { set: data.skills } } : {}
+
+  // Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted.
+  if (file) {
+    const photoPath = getPhotoPath(file) // update photoPath
+    const workerPhotoPath = await getWorkerPhotoPathById(id, prismaClient)
+    if (workerPhotoPath && workerPhotoPath !== photoPath) {
+      // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
+      await deleteFile(workerPhotoPath) // delete original image if necessary
+    }
+    // Save only relative part of photoPath
+    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+    data.photoPath = relativePath
+  } else if (data.photoFileRemoved) {
+    // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
+    const workerPhotoPath = await getWorkerPhotoPathById(id, prismaClient)
+    console.log(workerPhotoPath)
+    if (workerPhotoPath) {
+      await deleteFile(workerPhotoPath) // delete original image
+    }
+    data.photoPath = ''
+  }
 
   return await prismaClient.worker.update({
     where: {

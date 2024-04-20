@@ -3,7 +3,7 @@ import { createReadStream, statSync } from 'fs'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getWorkerPhotoById } from 'lib/data/workers'
+import { getWorkerPhotoPathById } from 'lib/data/workers'
 import { WrappedError } from 'lib/types/api-error'
 import { ApiError } from 'next/dist/server/api-utils'
 
@@ -18,19 +18,19 @@ const get = async (
     return
   }
 
-  const worker = await getWorkerPhotoById(id)
-  if (!worker || !worker.photoPath) {
+  const workerPhotoPath = await getWorkerPhotoPathById(id)
+  if (!workerPhotoPath) {
     res.status(404).end()
     return
   }
-  
-  const fileStat = statSync(worker.photoPath)
+
+  const fileStat = statSync(workerPhotoPath)
   res.writeHead(200, {
-    'Content-Type': `image/${worker?.photoPath?.split('.').pop()}`,
+    'Content-Type': `image/${workerPhotoPath?.split('.').pop()}`,
     'Content-Length': fileStat.size,
     'Cache-Control': 'public, max-age=5, must-revalidate',
   })
-  const readStream = createReadStream(worker.photoPath)
+  const readStream = createReadStream(workerPhotoPath)
   readStream.pipe(res)
 }
 
@@ -46,7 +46,7 @@ async function isAllowedToAccessWorkerPhoto(
   if (regularAccess) {
     return true
   }
-  
+
   res.status(403).end()
   return false
 }
@@ -58,4 +58,3 @@ export const config = {
     bodyParser: false,
   },
 }
-

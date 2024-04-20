@@ -65,7 +65,7 @@ async function post(
     const temporaryPhotoPath = getPhotoPath(files.photoFile) // update photoPath
     postData.photoPath =
       updatePhotoPathByNewFilename(temporaryPhotoPath, post.id) ?? ''
-    renameFile(temporaryPhotoPath, postData.photoPath)
+    await renameFile(temporaryPhotoPath, postData.photoPath)
     await updatePost(post.id, postData)
   }
   await logger.apiRequest(APILogEvent.POST_CREATE, 'posts', postData, session)

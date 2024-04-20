@@ -47,14 +47,14 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     const post = await getPostPhotoById(id)
     if (post?.photoPath && post?.photoPath !== photoPath) {
       // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
-      deleteFile(post.photoPath) // delete original image if necessary
+      await deleteFile(post.photoPath) // delete original image if necessary
     }
     postData.photoPath = photoPath
   } else if (postData.photoFileRemoved) {
     // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
     const post = await getPostPhotoById(id)
     if (post?.photoPath) {
-      deleteFile(post.photoPath) // delete original image if necessary
+      await deleteFile(post.photoPath) // delete original image if necessary
     }
     postData.photoPath = ''
   }
@@ -80,7 +80,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
 
   const post = await getPostPhotoById(id)
   if (post && post.photoPath) {
-    deleteFile(post.photoPath) // delete original image if it exists
+    await deleteFile(post.photoPath) // delete original image if it exists
   }
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

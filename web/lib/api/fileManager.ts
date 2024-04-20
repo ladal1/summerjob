@@ -1,6 +1,12 @@
 import { promises } from 'fs'
 import crypto from 'crypto'
 import path from 'path'
+import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
+
+export const getUploadDirForImagesForCurrentEvent = async () => {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  return getUploadDirForImages() + '/' + activeEventId
+}
 
 export const getUploadDirForImages = (): string => {
   return (
