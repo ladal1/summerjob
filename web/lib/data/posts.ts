@@ -1,8 +1,17 @@
+import { PrismaClient } from '@prisma/client'
+import formidable from 'formidable'
+import {
+  deleteFile,
+  getUploadDirForImagesForCurrentEvent,
+  renameFile,
+  updatePhotoPathByNewFilename,
+} from 'lib/api/fileManager'
+import { getPhotoPath } from 'lib/api/parse-form'
 import prisma from 'lib/prisma/connection'
 import { PostComplete, PostCreateData, PostUpdateData } from 'lib/types/post'
+import { PrismaTransactionClient } from 'lib/types/prisma'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
-import { PhotoCreateData } from 'lib/types/photo'
 
 export async function getPosts(): Promise<PostComplete[]> {
   const posts = await prisma.post.findMany({
@@ -49,13 +58,14 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
 }
 
 export async function getPostPhotoById(
-  id: string
-): Promise<PhotoCreateData | null> {
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+): Promise<string | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const post = await prisma.post.findUnique({
+  const post = await prismaClient.post.findUnique({
     where: {
       id: id,
     },
@@ -63,11 +73,19 @@ export async function getPostPhotoById(
       photoPath: true,
     },
   })
-  return post
+  if (!post || !post.photoPath) {
+    return null
+  }
+  const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+  return uploadDirAbsolutePath + post.photoPath
 }
 
-export async function updatePost(id: string, postData: PostUpdateData) {
-  const { participateChange, ...rest } = postData
+export async function updatePost(
+  id: string,
+  postData: PostUpdateData,
+  file: formidable.File | formidable.File[] | undefined = undefined
+) {
+  const { participateChange, photoFileRemoved, ...rest } = postData
   const post = await prisma.$transaction(async tx => {
     if (participateChange !== undefined && !participateChange.isEnrolled) {
       await tx.participant.delete({
@@ -76,6 +94,28 @@ export async function updatePost(id: string, postData: PostUpdateData) {
         },
       })
     }
+
+    // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
+    if (file) {
+      const photoPath = getPhotoPath(file) // update photoPath
+      const postPhotoPath = await getPostPhotoById(id, tx)
+      if (postPhotoPath && postPhotoPath !== photoPath) {
+        // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
+        await deleteFile(postPhotoPath) // delete original image if necessary
+      }
+      // Save only relative part of photoPath
+      const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+      const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+      postData.photoPath = relativePath
+    } else if (photoFileRemoved) {
+      // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
+      const postPhotoPath = await getPostPhotoById(id, tx)
+      if (postPhotoPath) {
+        await deleteFile(postPhotoPath) // delete original image if necessary
+      }
+      postData.photoPath = ''
+    }
+
     return await tx.post.update({
       where: {
         id,
@@ -93,25 +133,52 @@ export async function updatePost(id: string, postData: PostUpdateData) {
           }),
         },
         ...rest,
+        photoPath: postData.photoPath,
       },
     })
   })
   return post
 }
 
-export async function createPost(data: PostCreateData) {
+export async function createPost(
+  data: PostCreateData,
+  file: formidable.File | formidable.File[] | undefined = undefined
+) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const post = await prisma.post.create({
-    data: { ...data, forEventId: activeEventId },
+
+  const post = await prisma.$transaction(async tx => {
+    const post = await tx.post.create({
+      data: { ...data, forEventId: activeEventId },
+    })
+    // Rename photo file and update post with new photo path to it.
+    if (file) {
+      const temporaryPhotoPath = getPhotoPath(file) // update photoPath
+      const photoPath =
+        updatePhotoPathByNewFilename(temporaryPhotoPath, post.id) ?? ''
+      await renameFile(temporaryPhotoPath, photoPath)
+      // Save only relative part of photoPath
+      const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+      const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+      const updatedPost = await updatePost(post.id, {
+        photoPath: relativePath,
+      })
+      return { ...post, ...updatedPost }
+    }
+    return post
   })
+
   return post
 }
 
 export async function deletePost(id: string) {
   await prisma.$transaction(async tx => {
+    const postPhotoPath = await getPostPhotoById(id, tx)
+    if (postPhotoPath) {
+      await deleteFile(postPhotoPath) // delete original image if it exists
+    }
     await tx.participant.deleteMany({
       where: {
         postId: id,

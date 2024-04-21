@@ -140,6 +140,11 @@ export function databaseWorkerToWorkerComplete(
 
 export async function deleteWorker(id: string) {
   await prisma.$transaction(async tx => {
+    // Delete file from disk if there is path to it
+    const workerPhotoPath = await getWorkerPhotoPathById(id)
+    if (workerPhotoPath) {
+      await deleteFile(workerPhotoPath) // delete original image if it exists
+    }
     // Check if the worker has ever been assigned to a job
     // If not, we can just delete them
     const worker = await tx.worker.findUnique({
@@ -165,11 +170,6 @@ export async function deleteWorker(id: string) {
         },
       })
       return
-    }
-    // Delete file from disk if there is path to it
-    const workerPhotoPath = await getWorkerPhotoPathById(id)
-    if (workerPhotoPath) {
-      await deleteFile(workerPhotoPath) // delete original image if it exists
     }
     // If the worker has been assigned to a job, we cannot delete them from the database as it would break the job history
     // Instead, we anonymize them

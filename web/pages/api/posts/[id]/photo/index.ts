@@ -19,19 +19,19 @@ const get = async (
     return
   }
 
-  const post = await getPostPhotoById(id)
-  if (!post || !post.photoPath) {
+  const postPhotoPath = await getPostPhotoById(id)
+  if (!postPhotoPath) {
     res.status(404).end()
     return
   }
 
-  const fileStat = statSync(post.photoPath)
+  const fileStat = statSync(postPhotoPath)
   res.writeHead(200, {
-    'Content-Type': `image/${post?.photoPath?.split('.').pop()}`,
+    'Content-Type': `image/${postPhotoPath.split('.').pop()}`,
     'Content-Length': fileStat.size,
     'Cache-Control': 'public, max-age=5, must-revalidate',
   })
-  const readStream = createReadStream(post.photoPath)
+  const readStream = createReadStream(postPhotoPath)
   readStream.pipe(res)
 }
 

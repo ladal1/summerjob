@@ -106,15 +106,6 @@ export default function CreatePost({ allDates }: CreatePostProps) {
     return [allTags]
   }
 
-  const removeExistingTag = (id: string) => {
-    const prevTags = getValues('tags') || []
-    const newTags = prevTags.filter(item => item !== (id as PostTag))
-    setValue('tags', newTags, {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
-  }
-
   const selectTags = (items: PillSelectItem[]) => {
     const tags = items.map(item => item.id as PostTag)
     setValue('tags', tags, { shouldDirty: true, shouldValidate: true })
@@ -226,7 +217,6 @@ export default function CreatePost({ allDates }: CreatePostProps) {
             label="Tagy"
             placeholder={'Vyberte tagy'}
             items={manageTagSelectItems()}
-            removeExisting={removeExistingTag}
             register={selectTags}
             errors={errors}
           />

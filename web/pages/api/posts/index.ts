@@ -1,19 +1,14 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import {
   generateFileName,
-  getUploadDirForImages,
-  renameFile,
-  updatePhotoPathByNewFilename,
+  getUploadDirForImagesForCurrentEvent,
 } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getPhotoPath, parseFormWithImages } from 'lib/api/parse-form'
+import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { getGeocodingData } from 'lib/components/map/GeocodingData'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
-import { createPost, getPosts, updatePost } from 'lib/data/posts'
+import { createPost, getPosts } from 'lib/data/posts'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
-import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import { PostCreateSchema } from 'lib/types/post'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -33,9 +28,8 @@ async function post(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId()
   const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/posts'
+  const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/posts'
   const { files, json } = await parseFormWithImages(
     req,
     res,
@@ -49,16 +43,12 @@ async function post(
     return
   }
 
-  const post = await createPost(postData)
+  const fileFieldNames = Object.keys(files)
+  const post = await createPost(
+    postData,
+    fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
+  )
 
-  /* Rename photo file and update post with new photo path to it. */
-  if (files.photoFile) {
-    const temporaryPhotoPath = getPhotoPath(files.photoFile) // update photoPath
-    postData.photoPath =
-      updatePhotoPathByNewFilename(temporaryPhotoPath, post.id) ?? ''
-    await renameFile(temporaryPhotoPath, postData.photoPath)
-    await updatePost(post.id, postData)
-  }
   await logger.apiRequest(APILogEvent.POST_CREATE, 'posts', postData, session)
   res.status(201).json(post)
 }

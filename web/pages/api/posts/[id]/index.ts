@@ -1,15 +1,12 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import { deleteFile, getUploadDirForImages } from 'lib/api/fileManager'
+import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getPhotoPath, parseFormWithImages } from 'lib/api/parse-form'
+import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
-import { getGeocodingData } from 'lib/components/map/GeocodingData'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
-import { deletePost, getPostPhotoById, updatePost } from 'lib/data/posts'
+import { deletePost, updatePost } from 'lib/data/posts'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
-import { CoordinatesSchema } from 'lib/types/coordinates'
 import { APILogEvent } from 'lib/types/logger'
 import { PostUpdateSchema } from 'lib/types/post'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -22,8 +19,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  const uploadDir = getUploadDirForImages() + '/' + activeEventId + '/posts'
+  const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/posts'
   const { files, json } = await parseFormWithImages(req, res, id, uploadDir, 1)
 
   /* Validate simple data from json. */
@@ -32,31 +28,15 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
-  if (files.photoFile) {
-    const photoPath = getPhotoPath(files.photoFile) // update photoPath
-    const post = await getPostPhotoById(id)
-    if (post?.photoPath && post?.photoPath !== photoPath) {
-      // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
-      await deleteFile(post.photoPath) // delete original image if necessary
-    }
-    postData.photoPath = photoPath
-  } else if (postData.photoFileRemoved) {
-    // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
-    const post = await getPostPhotoById(id)
-    if (post?.photoPath) {
-      await deleteFile(post.photoPath) // delete original image if necessary
-    }
-    postData.photoPath = ''
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   await logger.apiRequest(APILogEvent.POST_MODIFY, id, postData, session!)
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { photoFileRemoved, ...rest } = postData
-
-  await updatePost(id, rest)
+  const fileFieldNames = Object.keys(files)
+  await updatePost(
+    id,
+    postData,
+    fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
+  )
 
   res.status(204).end()
 }
@@ -67,11 +47,6 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   const allowed = await isAllowedToAccessPost(session, res)
   if (!allowed) {
     return
-  }
-
-  const post = await getPostPhotoById(id)
-  if (post && post.photoPath) {
-    await deleteFile(post.photoPath) // delete original image if it exists
   }
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
