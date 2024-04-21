@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import mime from 'mime'
 import formidable from 'formidable'
-import { createDirectory } from './fileManager'
+import { createDirectory, deleteFile } from './fileManager'
 import { ApiBadRequestError } from 'lib/types/api-error'
 
 /* Get simple data from string jsonData containing json data. */
@@ -63,6 +63,7 @@ export const parseFormWithImages = async (
 }> => {
   await createDirectory(uploadDir)
   let count = 0
+  const uploadedFiles: string[] = []
   const form = formidable({
     maxFiles: maxFiles,
     maxFileSize: 1024 * 1024 * 10,
@@ -80,6 +81,7 @@ export const parseFormWithImages = async (
           mime.getExtension(part.mimetype || '') || 'unknown'
         }`
       }
+      uploadedFiles.push(filename)
       return filename
     },
     filter: part => {
@@ -94,13 +96,20 @@ export const parseFormWithImages = async (
       return true
     },
   })
-
-  return await new Promise(async resolve => {
-    form.parse(req, function (err, fields, files) {
+  return await new Promise(async (resolve, reject) => {
+    form.parse(req, async function (err, fields, files) {
       if (err) {
-        res.status(400).json({
-          error: new ApiBadRequestError(err),
+        for (const file of uploadedFiles) {
+          try {
+            await deleteFile(uploadDir + '/' + file)
+          } catch (error) {}
+        }
+        res.status(err.httpCode).json({
+          error: new ApiBadRequestError(
+            'Type: ' + err.type + '\nMessage: ' + err.message
+          ),
         })
+        reject(err)
         return
       }
       const json = getJson(fields.jsonData)

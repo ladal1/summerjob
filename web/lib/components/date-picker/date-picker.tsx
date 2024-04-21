@@ -12,7 +12,6 @@ export default function SimpleDatePicker({
   const changeDate = (days: number) => {
     const newDate = new Date(initialDate)
     newDate.setDate(newDate.getDate() + days)
-    console.log(newDate)
     onDateChanged(newDate)
   }
 

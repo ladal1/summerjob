@@ -1,6 +1,8 @@
-import { Tool } from 'lib/prisma/client'
+import { PrismaClient } from '@prisma/client'
+import formidable from 'formidable'
 import prisma from 'lib/prisma/connection'
 import { PhotoIdsData } from 'lib/types/photo'
+import { PrismaTransactionClient } from 'lib/types/prisma'
 import {
   ProposedJobCreateData,
   type ProposedJobComplete,
@@ -8,17 +10,8 @@ import {
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
-import {
-  createTools,
-  deleteTools,
-  registerTools,
-  ToolType,
-  updateTools,
-} from './tools'
-import formidable from 'formidable'
-import { PrismaClient } from '@prisma/client'
-import { PrismaTransactionClient } from 'lib/types/prisma'
 import { deleteAllPhotos, registerPhotos } from './jobPhoto'
+import { registerTools, ToolType } from './tools'
 
 export async function getProposedJobById(
   id: string
@@ -51,10 +44,6 @@ export async function getProposedJobPhotoIdsById(
   id: string,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ): Promise<PhotoIdsData | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
   const photos = await prismaClient.proposedJob.findUnique({
     where: {
       id: id,
@@ -274,6 +263,7 @@ export async function createProposedJob(
 
 export async function deleteProposedJob(id: string) {
   await prisma.$transaction(async tx => {
+    await deleteAllPhotos(id, tx)
     await tx.pinnedProposedJobByWorker.deleteMany({
       where: {
         jobId: id,
@@ -284,6 +274,5 @@ export async function deleteProposedJob(id: string) {
         id,
       },
     })
-    await deleteAllPhotos(id, tx)
   })
 }

@@ -5,11 +5,6 @@ import { faker } from '@faker-js/faker/locale/cz'
 import path from 'path'
 import fs, { promises } from 'fs'
 
-export type File = {
-  fieldName: string
-  file: string
-}
-
 const prisma = new PrismaClient()
 
 /**
@@ -182,7 +177,7 @@ class Common {
     }
   }
 
-  fileExists = (path: string) => {
+  pathExists = (path: string) => {
     return fs.existsSync(path)
   }
 
@@ -267,6 +262,12 @@ class Common {
   // #endregion
 
   // #region Complicated API usage
+  createProposedJobWithPhotos = async (filePaths: string[]) => {
+    const area = await api.createArea()
+    const body = createProposedJobData(area.id)
+    return await api.post('/api/proposed-jobs', Id.JOBS, body, filePaths)
+  }
+
   createPlanWithJob = async () => {
     const plan = await api.post(
       '/api/plans',
@@ -370,7 +371,7 @@ class Common {
     url: string,
     identity: string,
     body: any,
-    files: File[] = []
+    files: string[] = []
   ) => {
     if (!this._session) await this.setup()
     if (identity !== this._lastIdentity) {
@@ -381,8 +382,8 @@ class Common {
       .post(url)
       .set('Cookie', [this._session])
       .field('jsonData', JSON.stringify(body))
-    for (const file of files) {
-      requestPromise.attach(file.fieldName, file.file)
+    for (let i = 0; i < files.length; i++) {
+      requestPromise.attach(`file${i}`, files[i])
     }
     return requestPromise
   }
@@ -391,7 +392,7 @@ class Common {
     url: string,
     identity: string,
     body: any,
-    files: File[] = []
+    files: string[] = []
   ) => {
     if (!this._session) await this.setup()
     if (identity !== this._lastIdentity) {
@@ -402,10 +403,8 @@ class Common {
       .patch(url)
       .set('Cookie', [this._session])
       .field('jsonData', JSON.stringify(body))
-    if (files.length > 0) {
-      files.forEach(file => {
-        requestPromise.attach(file.fieldName, file.file)
-      })
+    for (let i = 0; i < files.length; i++) {
+      requestPromise.attach(`file${i}`, files[i])
     }
     return requestPromise
   }
@@ -551,6 +550,14 @@ export const Id = {
   CARS: 'CARS',
   PLANS: 'PLANS',
   POSTS: 'POSTS',
+}
+
+export const Tools = {
+  AXE: 'AXE',
+  BOW_SAW: 'BOW_SAW',
+  LADDER: 'LADDER',
+  PAINT: 'PAINT',
+  PAINT_ROLLER: 'PAINT_ROLLER',
 }
 //#endregion
 

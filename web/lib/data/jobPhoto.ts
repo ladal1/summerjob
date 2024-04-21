@@ -104,7 +104,7 @@ const savePhotos = async (
   const fileFieldNames = Object.keys(files)
   if (fileFieldNames.length !== 0) {
     // Create directory for photos
-    await createDirectory(uploadDirectory + `/proposed-job/${jobId}`)
+    await createDirectory(uploadDirectory + `/proposed-jobs/${jobId}`)
     for (const fieldName of fileFieldNames) {
       const file = files[fieldName]
       const photoPath = getPhotoPath(file)
@@ -175,7 +175,7 @@ export const registerPhotos = async (
   await savePhotos(files, uploadDirectory, jobId, prismaClient)
   const hasAnyPhotos = await hasProposedJobPhotos(jobId, prismaClient)
   if (!hasAnyPhotos) {
-    await deleteDirectory(uploadDirectory + '/proposed-job/' + jobId)
+    await deleteDirectory(uploadDirectory + '/proposed-jobs/' + jobId)
   }
 }
 
@@ -190,7 +190,7 @@ export const deleteAllPhotos = async (
     await deletePhotos(photoIds, prismaClient)
   }
   const uploadDirectory = await getUploadDirForImagesForCurrentEvent()
-  await deleteDirectory(uploadDirectory + '/proposed-job/' + jobId)
+  await deleteDirectory(uploadDirectory + '/proposed-jobs/' + jobId)
 }
 
 //#endregion

@@ -49,7 +49,7 @@ async function post(
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
   const uploadDirectory =
-    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-job'
+    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-jobs'
   const { files, json } = await parseFormWithImages(
     req,
     res,

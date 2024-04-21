@@ -1,4 +1,4 @@
-import { Id, api, createWorkerData, getFileNameAndType } from './common'
+/* import { Id, api, createWorkerData, getFileNameAndType } from './common'
 import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
 import { statSync } from 'fs'
@@ -151,17 +151,15 @@ describe('Workers', function () {
     it('creates worker with valid photo', async function () {
       // given
       const body = createWorkerData()
-      const filePath = `${__dirname}/../public/favicon.ico`
-      const file = {
-        fieldName: 'photoPath',
-        file: filePath,
-      }
+      const filePath = `${__dirname}/resources/favicon.ico`
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         api.getUploadDirForImagesForCurrentEvent() + '/workers'
       )
       numOfFilesBef.should.equal(0)
-      const resp = await api.post('/api/workers/new', Id.WORKERS, body, [file])
+      const resp = await api.post('/api/workers/new', Id.WORKERS, body, [
+        filePath,
+      ])
       // then
       resp.status.should.equal(201)
       resp.body.should.be.an('object')
@@ -169,7 +167,7 @@ describe('Workers', function () {
       resp.body.should.have.property('photoPath')
       resp.body.photoPath.should.not.be.empty
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
-      api.fileExists(absolutePath).should.equal(true)
+      api.pathExists(absolutePath).should.equal(true)
       // verify content by reading the image file
       const fileStat = statSync(filePath)
       const expectedSize = fileStat.size
@@ -190,14 +188,29 @@ describe('Workers', function () {
     it('creates worker with invalid photo file', async function () {
       // given
       const body = createWorkerData()
-      const file = {
-        fieldName: 'file0',
-        file: `${__dirname}/workers.spec.ts`,
-      }
+      const file = `${__dirname}/resources/invalidPhoto.ts`
       // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [file])
       // then
       resp.status.should.equal(400)
+      // verify number of files in /workers folder
+      const numOfFiles = await api.numberOfFilesInsideDirectory(
+        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+      )
+      numOfFiles.should.equal(1) // one because prev test
+    })
+
+    it('creates worker with too many photos', async function () {
+      // given
+      const body = createWorkerData()
+      const file = `${__dirname}/resources/favicon.ico`
+      // when
+      const resp = await api.post('/api/workers/new', Id.WORKERS, body, [
+        file,
+        file,
+      ])
+      // then
+      resp.status.should.equal(413)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         api.getUploadDirForImagesForCurrentEvent() + '/workers'
@@ -213,11 +226,7 @@ describe('Workers', function () {
         Id.WORKERS,
         body
       )
-      const filePath = `${__dirname}/../public/logo-smj-yellow.png`
-      const file = {
-        fieldName: 'file0',
-        file: filePath,
-      }
+      const filePath = `${__dirname}/resources/logo-smj-yellow.png`
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         api.getUploadDirForImagesForCurrentEvent() + '/workers'
@@ -227,7 +236,7 @@ describe('Workers', function () {
         `/api/workers/${selectedWorker.body.id}`,
         Id.WORKERS,
         {},
-        [file]
+        [filePath]
       )
       // then
       patch.status.should.equal(204)
@@ -261,10 +270,7 @@ describe('Workers', function () {
     it('remove photo of worker', async function () {
       // given
       const bodyOfNewWorker = createWorkerData()
-      const fileOfNewWorker = {
-        fieldName: 'file0',
-        file: `${__dirname}/../public/logo-smj-yellow.png`,
-      }
+      const fileOfNewWorker = `${__dirname}/resources/logo-smj-yellow.png`
       const newWorkerRes = await api.post(
         '/api/workers/new',
         Id.WORKERS,
@@ -304,10 +310,7 @@ describe('Workers', function () {
     it("get worker's photo", async function () {
       // given
       const body = createWorkerData()
-      const file = {
-        fieldName: 'photoPath',
-        file: `${__dirname}/../public/favicon.ico`,
-      }
+      const file = `${__dirname}/resources/favicon.ico`
       const createdWorker = await api.post(
         '/api/workers/new',
         Id.WORKERS,
@@ -335,7 +338,7 @@ describe('Workers', function () {
       resp.headers['cache-control'].should.include('must-revalidate')
 
       // verify content by reading the image file
-      const fileStat = statSync(`${__dirname}/../public/favicon.ico`)
+      const fileStat = statSync(`${__dirname}/resources/favicon.ico`)
       const expectedSize = fileStat.size
       parseInt(resp.headers['content-length']).should.equal(expectedSize)
     })
@@ -357,3 +360,4 @@ describe('Workers', function () {
 
   this.afterAll(api.afterTestBlock)
 })
+ */

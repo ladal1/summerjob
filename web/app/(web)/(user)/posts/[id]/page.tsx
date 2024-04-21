@@ -17,7 +17,6 @@ type Params = {
 export default async function EditPostPage({ params }: Params) {
   const post = await getPostById(params.id)
   if (!post) {
-    console.log('problem')
     return <ErrorPage404 message="Příspěvek nenalezen." />
   }
   const serializedPost = serializePost(post)

@@ -409,7 +409,6 @@ export async function internal_updateWorker(
   } else if (data.photoFileRemoved) {
     // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
     const workerPhotoPath = await getWorkerPhotoPathById(id, prismaClient)
-    console.log(workerPhotoPath)
     if (workerPhotoPath) {
       await deleteFile(workerPhotoPath) // delete original image
     }

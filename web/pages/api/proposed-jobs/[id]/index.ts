@@ -44,7 +44,7 @@ async function patch(
   const currentPhotoIds = await getProposedJobPhotoIdsById(id)
   const currentPhotoCnt = currentPhotoIds?.photos.length ?? 0
   const uploadDirectory =
-    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-job'
+    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-jobs'
 
   const { files, json } = await parseFormWithImages(
     req,
