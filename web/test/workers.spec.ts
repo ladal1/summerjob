@@ -94,8 +94,8 @@ describe('Workers', function () {
       )
       resp.body.should.be.an('object')
       resp.body.should.have.property('id')
-      resp.body.firstName.should.equal('Jane')
-      resp.body.phone.should.equal('000111222')
+      resp.body.firstName.should.equal(body.firstName)
+      resp.body.phone.should.equal(body.phone)
       expect(resp.body)
         .excluding(['firstName', 'phone'])
         .to.deep.equal(selectedWorker)
@@ -354,6 +354,39 @@ describe('Workers', function () {
       )
       // then
       resp.status.should.equal(404)
+    })
+
+    it('deletation of worker will delete his photo', async function () {
+      // given
+      const body = createWorkerData()
+      const fileOfNewWorker = `${__dirname}/resources/logo-smj-yellow.png`
+      const newWorkerRes = await api.post(
+        '/api/workers/new',
+        Id.WORKERS,
+        body,
+        [fileOfNewWorker]
+      )
+      const numOfFilesBef = await api.numberOfFilesInsideDirectory(
+        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+      )
+      numOfFilesBef.should.equal(4)
+      // when
+      const del = await api.del(
+        `/api/workers/${newWorkerRes.body.id}`,
+        Id.WORKERS
+      )
+      // then
+      del.status.should.equal(204)
+      const resp = await api.get(
+        `/api/workers/${newWorkerRes.body.id}`,
+        Id.WORKERS
+      )
+      resp.status.should.equal(404)
+      // verify number of files in /workers folder
+      const numOfFiles = await api.numberOfFilesInsideDirectory(
+        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+      )
+      numOfFiles.should.equal(3)
     })
   })
   //#endregion

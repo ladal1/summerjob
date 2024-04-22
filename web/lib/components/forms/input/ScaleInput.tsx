@@ -1,8 +1,8 @@
-import { FieldErrors, Path, UseFormRegisterReturn } from 'react-hook-form'
+import { priorityMapping } from 'lib/data/enumMapping/priorityMapping'
+import { useState } from 'react'
+import { FieldErrors, Path } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 import { Label } from '../Label'
-import { useState } from 'react'
-import { priorityMapping } from 'lib/data/enumMapping/priorityMapping'
 
 interface ScaleInputProps {
   id: string

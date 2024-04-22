@@ -5,6 +5,7 @@ import {
   useAPIActiveJobDelete,
   useAPIActiveJobUpdate,
 } from 'lib/fetcher/active-job'
+import { formatDateShort } from 'lib/helpers/helpers'
 import type { Worker } from 'lib/prisma/client'
 import { ActiveJobComplete, ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
@@ -25,7 +26,6 @@ import MoveWorkerModal from './MoveWorkerModal'
 import RideSelect from './RideSelect'
 import ToggleCompletedCheck from './ToggleCompletedCheck'
 import { SameCoworkerIssue, WorkerIssue } from './WorkerIssue'
-import { formatDateShort } from 'lib/helpers/helpers'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan

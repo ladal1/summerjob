@@ -70,7 +70,7 @@ export const PostModal = ({
         <p>{item.shortDescription}</p>
         {item.longDescription.length > 0 && <p>{item.longDescription}</p>}
         {item.photoPath && (
-          <div className="d-inline-block shadow bg-white rounded border p-3 pt-2 mb-2">
+          <div className="d-inline-block smj-shadow-small bg-white rounded border p-3 mb-2">
             <div
               className="smj-photo-size cursor-pointer"
               style={{

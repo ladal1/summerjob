@@ -529,6 +529,22 @@ export function createProposedJobData(areaId: string) {
   }
 }
 
+export function createPostData() {
+  return {
+    name: 'name',
+    availability: ['2023-04-24T00:00:00.000Z'],
+    timeFrom: '12:00',
+    timeTo: '13:00',
+    address: faker.address.streetAddress(),
+    coordinates: [],
+    shortDescription: 'string',
+    longDescription: 'string',
+    tags: ['EATING'],
+    isMandatory: false,
+    isOpenForParticipants: false,
+  }
+}
+
 export function createSummerJobEventData() {
   return {
     name: 'Test Summer Job Event',

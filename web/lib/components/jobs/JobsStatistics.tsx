@@ -128,7 +128,7 @@ export const JobsStatistics = ({ data }: JobsStatisticsProps) => {
             <table className="table">
               <tbody>
                 {Object.entries(toolsToTakeWithList)
-                  .sort(([keyA, areanameA], [keyB, areanameB]) => {
+                  .sort(([, areanameA], [, areanameB]) => {
                     if (areanameA.amount === areanameB.amount)
                       return areanameA.name.localeCompare(areanameB.name)
                     if (areanameA.amount < areanameB.amount) return -1
@@ -154,7 +154,7 @@ export const JobsStatistics = ({ data }: JobsStatisticsProps) => {
             <table className="table">
               <tbody>
                 {Object.entries(areanameList)
-                  .sort(([keyA, areanameA], [keyB, areanameB]) => {
+                  .sort(([, areanameA], [, areanameB]) => {
                     if (areanameA.amount === areanameB.amount)
                       return areanameA.name.localeCompare(areanameB.name)
                     if (areanameA.amount < areanameB.amount) return -1

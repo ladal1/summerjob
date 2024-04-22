@@ -2,12 +2,10 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import {
   generateFileName,
-  getUploadDirForImages,
   getUploadDirForImagesForCurrentEvent,
 } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import { createWorker } from 'lib/data/workers'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'

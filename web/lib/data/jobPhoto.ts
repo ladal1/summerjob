@@ -159,7 +159,10 @@ const deleteFlaggedPhotos = async (
     // go through photos ids and see which are being deleted
     const photoIdsDeletedFinal = await deleteManyPhotos(photoIdsDeleted)
     if (photoIdsDeletedFinal && photoIdsDeletedFinal.length !== 0) {
-      await deletePhotos(photoIdsDeletedFinal, prismaClient)
+      const photoIdsDel = photoIdsDeletedFinal.filter(
+        id => id !== undefined
+      ) as string[]
+      await deletePhotos(photoIdsDel, prismaClient)
     }
   }
 }

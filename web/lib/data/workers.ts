@@ -311,9 +311,14 @@ async function internal_createWorker(
     // Save only relative part of photoPath
     const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
     const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
-    const updatedWorker = await internal_updateWorker(worker.id, {
-      photoPath: relativePath,
-    })
+    const updatedWorker = await internal_updateWorker(
+      worker.id,
+      {
+        photoPath: relativePath,
+      },
+      undefined,
+      prismaClient
+    )
     return { ...worker, ...updatedWorker }
   }
   return worker

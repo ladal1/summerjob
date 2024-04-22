@@ -1745,6 +1745,46 @@ const _PostUpdateSchema = registry.register('PostUpdate', PostUpdateSchema)
 
 registry.registerPath({
   path: '/api/posts/{postId}',
+  method: 'get',
+  description:
+    'Get an post for a SummerJob event by ID. Permissions required (at least one): ADMIN, POSTS.',
+  summary: 'Get an post for a SummerJob event by ID',
+  tags: ['Posts'],
+  parameters: [
+    {
+      name: 'postId',
+      in: 'path',
+      required: true,
+      description: 'ID of the post to get.',
+      schema: {
+        type: 'string',
+        format: 'uuid',
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: _PostUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: 'Post retrieved successfully.',
+      content: {
+        'application/json': {
+          schema: _PostSchema,
+        },
+      },
+    },
+  },
+})
+
+registry.registerPath({
+  path: '/api/posts/{postId}',
   method: 'patch',
   description:
     'Updates an post for a SummerJob event by ID. Permissions required (at least one): ADMIN, POSTS.',

@@ -1,12 +1,8 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import {
-  getUploadDirForImages,
-  getUploadDirForImagesForCurrentEvent,
-} from 'lib/api/fileManager'
+import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import {
   deleteProposedJob,
   getProposedJobById,

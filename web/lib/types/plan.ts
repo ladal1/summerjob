@@ -4,7 +4,7 @@ import { ActiveJobSchema, PlanSchema } from 'lib/prisma/zod'
 import { z } from 'zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
 import { Serialized } from './serialize'
-import { deserializeWorkerAvailability, WorkerCompleteSchema } from './worker'
+import { deserializeWorkerAvailability } from './worker'
 
 useZodOpenApi
 

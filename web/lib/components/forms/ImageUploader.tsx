@@ -1,6 +1,6 @@
 import PhotoModal from 'lib/components/modal/PhotoModal'
 import Image from 'next/image'
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 import { FieldErrors, FieldValues, Path } from 'react-hook-form'
 import FormWarning from './FormWarning'
 import { Label } from './Label'
@@ -104,7 +104,7 @@ export const ImageUploader = <FormData extends FieldValues>({
         {previewUrls.map((url, index) => (
           <React.Fragment key={index}>
             {url && (
-              <div className="d-flex shadow bg-white rounded border p-3 pt-2 mb-2">
+              <div className="d-flex smj-shadow-small bg-white rounded border p-3 pt-2 mb-2">
                 <div className="container p-0 m-0">
                   <div className="pb-2 pt-1">
                     <div className="d-flex justify-content-end">
@@ -150,7 +150,7 @@ export const ImageUploader = <FormData extends FieldValues>({
           </React.Fragment>
         ))}
         {previewUrls.length < maxPhotos && (
-          <div className="smj-add-photo-icon border rounded shadow">
+          <div className="smj-add-photo-icon border rounded smj-shadow-small">
             <label
               className="cursor-pointer smj-photo-size"
               htmlFor="upload-photo"

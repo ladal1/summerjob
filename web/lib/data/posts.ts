@@ -85,59 +85,66 @@ export async function updatePost(
   postData: PostUpdateData,
   file: formidable.File | formidable.File[] | undefined = undefined
 ) {
+  return await prisma.$transaction(async tx => {
+    return await internal_updatePost(id, postData, file, tx)
+  })
+}
+
+export async function internal_updatePost(
+  id: string,
+  postData: PostUpdateData,
+  file: formidable.File | formidable.File[] | undefined = undefined,
+  prismaClient: PrismaTransactionClient = prisma
+) {
   const { participateChange, photoFileRemoved, ...rest } = postData
-  const post = await prisma.$transaction(async tx => {
-    if (participateChange !== undefined && !participateChange.isEnrolled) {
-      await tx.participant.delete({
-        where: {
-          workerId_postId: { workerId: participateChange.workerId, postId: id },
-        },
-      })
-    }
-
-    // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
-    if (file) {
-      const photoPath = getPhotoPath(file) // update photoPath
-      const postPhotoPath = await getPostPhotoById(id, tx)
-      if (postPhotoPath && postPhotoPath !== photoPath) {
-        // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
-        await deleteFile(postPhotoPath) // delete original image if necessary
-      }
-      // Save only relative part of photoPath
-      const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-      const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
-      postData.photoPath = relativePath
-    } else if (photoFileRemoved) {
-      // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
-      const postPhotoPath = await getPostPhotoById(id, tx)
-      if (postPhotoPath) {
-        await deleteFile(postPhotoPath) // delete original image if necessary
-      }
-      postData.photoPath = ''
-    }
-
-    return await tx.post.update({
+  if (participateChange !== undefined && !participateChange.isEnrolled) {
+    await prismaClient.participant.delete({
       where: {
-        id,
-      },
-      data: {
-        participants: {
-          ...(participateChange?.isEnrolled && {
-            create: {
-              worker: {
-                connect: {
-                  id: participateChange.workerId,
-                },
-              },
-            },
-          }),
-        },
-        ...rest,
-        photoPath: postData.photoPath,
+        workerId_postId: { workerId: participateChange.workerId, postId: id },
       },
     })
+  }
+
+  // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
+  if (file) {
+    const photoPath = getPhotoPath(file) // update photoPath
+    const postPhotoPath = await getPostPhotoById(id, prismaClient)
+    if (postPhotoPath && postPhotoPath !== photoPath) {
+      // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
+      await deleteFile(postPhotoPath) // delete original image if necessary
+    }
+    // Save only relative part of photoPath
+    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+    rest.photoPath = relativePath
+  } else if (photoFileRemoved) {
+    // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
+    const postPhotoPath = await getPostPhotoById(id, prismaClient)
+    if (postPhotoPath) {
+      await deleteFile(postPhotoPath) // delete original image if necessary
+    }
+    rest.photoPath = ''
+  }
+
+  return await prismaClient.post.update({
+    where: {
+      id,
+    },
+    data: {
+      participants: {
+        ...(participateChange?.isEnrolled && {
+          create: {
+            worker: {
+              connect: {
+                id: participateChange.workerId,
+              },
+            },
+          },
+        }),
+      },
+      ...rest,
+    },
   })
-  return post
 }
 
 export async function createPost(
@@ -162,9 +169,14 @@ export async function createPost(
       // Save only relative part of photoPath
       const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
       const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
-      const updatedPost = await updatePost(post.id, {
-        photoPath: relativePath,
-      })
+      const updatedPost = await internal_updatePost(
+        post.id,
+        {
+          photoPath: relativePath,
+        },
+        undefined,
+        tx
+      )
       return { ...post, ...updatedPost }
     }
     return post

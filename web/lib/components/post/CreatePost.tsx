@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
+import { Form } from '../forms/Form'
 import FormWarning from '../forms/FormWarning'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
@@ -21,7 +22,6 @@ import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
-import { Form } from '../forms/Form'
 
 const schema = PostCreateSchema
 type PostForm = z.input<typeof schema>
@@ -34,7 +34,6 @@ export default function CreatePost({ allDates }: CreatePostProps) {
     register,
     handleSubmit,
     setValue,
-    getValues,
     formState: { errors },
   } = useForm<PostForm>({
     resolver: zodResolver(schema),
