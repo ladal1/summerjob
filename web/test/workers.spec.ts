@@ -1,4 +1,4 @@
-/* import { Id, api, createWorkerData, getFileNameAndType } from './common'
+import { Id, api, createWorkerData, getFileNameAndType } from './common'
 import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
 import { statSync } from 'fs'
@@ -393,4 +393,3 @@ describe('Workers', function () {
 
   this.afterAll(api.afterTestBlock)
 })
- */

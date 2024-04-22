@@ -355,11 +355,6 @@ export async function createWorker(
     throw new WorkerAlreadyExistsError(existingUser.email)
   }
 
-  if (prismaClient instanceof PrismaClient) {
-    return await prismaClient.$transaction(
-      async tx => await internal_createWorker(activeEventId, data, file, tx)
-    )
-  }
   return await internal_createWorker(activeEventId, data, file, prismaClient)
 }
 
@@ -368,11 +363,11 @@ export async function updateWorker(
   data: WorkerUpdateData,
   file: formidable.File | formidable.File[] | undefined = undefined
 ) {
-  if (!data.email) {
-    return await internal_updateWorker(id, data, file)
-  }
-  data.email = data.email.toLowerCase()
   return await prisma.$transaction(async tx => {
+    if (!data.email) {
+      return await internal_updateWorker(id, data, file, tx)
+    }
+    data.email = data.email.toLowerCase()
     const user = await internal_updateWorker(id, data, file, tx)
     if (!user) return null
     await deleteUserSessions(user.email, tx)

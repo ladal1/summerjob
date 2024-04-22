@@ -1,4 +1,4 @@
-/* import { faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 import { Id, api, createPlanData } from './common'
 import chai from 'chai'
 
@@ -279,7 +279,5 @@ describe('Plans', function () {
 
     await api.deletePlan(data.plan.id)
   })
-
   this.afterAll(api.afterTestBlock)
 })
- */

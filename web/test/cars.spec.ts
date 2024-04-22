@@ -1,4 +1,4 @@
-/* import { Id, api, createCarData } from './common'
+import { Id, api, createCarData } from './common'
 import chai from 'chai'
 import { faker } from '@faker-js/faker/locale/cz'
 
@@ -120,4 +120,3 @@ describe('Cars', function () {
 
   this.afterAll(api.afterTestBlock)
 })
- */

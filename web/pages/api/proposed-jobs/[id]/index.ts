@@ -1,6 +1,9 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
+import {
+  getUploadDirForImagesForCurrentEvent,
+  isValidId,
+} from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import {
@@ -35,6 +38,10 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
+  if (!isValidId(id)) {
+    res.status(403).end()
+    return
+  }
 
   // Get current photoIds
   const currentPhotoIds = await getProposedJobPhotoIdsById(id)
@@ -71,6 +78,10 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
+  if (!isValidId(id)) {
+    res.status(403).end()
+    return
+  }
   await logger.apiRequest(APILogEvent.JOB_DELETE, id, {}, session)
   await deleteProposedJob(id)
   res.status(204).end()

@@ -41,7 +41,7 @@ export function Modal({
     return () => {
       document.removeEventListener('click', handleClickOutside)
     }
-  }, [modalRef, onClose])
+  }, [closeOnClickOutside, modalRef, onClose])
 
   return (
     <>

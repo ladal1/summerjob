@@ -1,4 +1,4 @@
-/* import { Id, api } from './common'
+import { Id, api } from './common'
 import chai from 'chai'
 
 chai.should()
@@ -23,4 +23,3 @@ describe('Logs', function () {
     }
   })
 })
- */

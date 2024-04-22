@@ -1,4 +1,7 @@
-import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
+import {
+  getUploadDirForImagesForCurrentEvent,
+  isValidId,
+} from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
@@ -33,6 +36,10 @@ async function get(
 export type WorkerAPIPatchData = WorkerUpdateDataInput
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
+  if (!isValidId(id)) {
+    res.status(403).end()
+    return
+  }
   const session = await getSMJSessionAPI(req, res)
   const allowed = await isAllowedToAccessWorker(session, id, res)
   if (!allowed) {

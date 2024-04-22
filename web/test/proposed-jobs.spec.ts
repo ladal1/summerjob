@@ -1,4 +1,4 @@
-/* import chai from 'chai'
+import chai from 'chai'
 import {
   Id,
   Tools,
@@ -807,4 +807,3 @@ describe('Proposed Jobs', function () {
 })
 
 //#endregion
- */
