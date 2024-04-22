@@ -5,6 +5,7 @@ import {
   ActiveJobCreateData,
   ActiveJobCreateMultipleData,
   ActiveJobUpdateData,
+  ActiveJobWorkersAndJobs,
 } from 'lib/types/active-job'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { InvalidDataError, NoActiveEventError } from './internal-error'
@@ -281,16 +282,25 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   })
 }
 
-/*export async function getActiveJobs(): Promise<ActiveJobWorkersAndJobs[]> {
+export async function getActiveJobs(): Promise<ActiveJobWorkersAndJobs[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
   const jobs = await prisma.activeJob.findMany({
+    where: {
+      plan: {
+        summerJobEventId: activeEventId,
+      },
+    },
     include: {
       workers: true,
       proposedJob: true,
       plan: true,
     },
   })
-  return jobs
-}*/
+  return jobs as unknown as ActiveJobWorkersAndJobs[]
+}
 
 export async function createActiveJob(job: ActiveJobCreateData) {
   const { proposedJobId, planId } = job

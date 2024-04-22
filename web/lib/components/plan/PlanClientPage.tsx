@@ -367,6 +367,7 @@ export default function PlanClientPage({
               <Modal
                 title={'Přidat joby do plánu'}
                 size={ModalSize.LARGE}
+                closeOnClickOutside={false}
                 onClose={closeModal}
               >
                 <AddJobToPlanForm

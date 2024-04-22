@@ -9,18 +9,23 @@ interface ActiveJobIssueProps {
   job: ActiveJobNoPlan
   day: Date
   ridesForOtherJobs: RidesForJob[]
+  sameWorkIssue?: boolean
+  sameCoworkerIssue?: boolean
 }
 
 export function ActiveJobIssueBanner({
   job,
   day,
   ridesForOtherJobs,
+  sameWorkIssue = false,
+  sameCoworkerIssue = false,
 }: ActiveJobIssueProps) {
   const issues = useMemo(
     () => getIssues(job, ridesForOtherJobs, day),
     [job, ridesForOtherJobs, day]
   )
-  const hasIssues = Object.values(issues).some(i => i)
+  const hasIssues =
+    Object.values(issues).some(i => i) || sameWorkIssue || sameCoworkerIssue
   return (
     <>
       {hasIssues && (
@@ -80,7 +85,25 @@ export function ActiveJobIssueBanner({
               )}
               {issues.lowSkilledWorkers && (
                 <div className="row">
-                  <div className="col">Na jobu nejsou dostatečně zruční pracanti.</div>
+                  <div className="col">
+                    Na jobu nejsou dostatečně zruční pracanti.
+                  </div>
+                </div>
+              )}
+              {sameWorkIssue && (
+                <div className="row">
+                  <div className="col">
+                    Na jobu se vyskytují pracanti, kteří již na práci dříve
+                    byli.
+                  </div>
+                </div>
+              )}
+              {sameCoworkerIssue && (
+                <div className="row">
+                  <div className="col">
+                    Na jobu se vyskytují pracanti, kteří s některými kolegy
+                    dříve pracovali.
+                  </div>
                 </div>
               )}
             </div>
@@ -95,12 +118,15 @@ export function ActiveJobIssueIcon({
   job,
   day,
   ridesForOtherJobs,
+  sameWorkIssue = false,
+  sameCoworkerIssue = false,
 }: ActiveJobIssueProps) {
   const issues = useMemo(
     () => getIssues(job, ridesForOtherJobs, day),
     [job, ridesForOtherJobs, day]
   )
-  const hasIssues = Object.values(issues).some(i => i)
+  const hasIssues =
+    Object.values(issues).some(i => i) || sameWorkIssue || sameCoworkerIssue
   return <>{hasIssues && <div className="fas fa-triangle-exclamation"></div>}</>
 }
 
@@ -118,7 +144,7 @@ function getIssues(
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
     adorations: adorations(job, day),
-    lowSkilledWorkers: lowSkilledWorkers(job)
+    lowSkilledWorkers: lowSkilledWorkers(job),
   }
 }
 
@@ -197,14 +223,13 @@ function lowSkilledWorkers(job: ActiveJobNoPlan) {
   // Sum all workers skills
   job.workers.forEach(worker => {
     worker.skills.forEach(skill => workersSkills.add(skill))
-  }) 
+  })
 
   // Check if needs for skills are met
   let allRequiredSkillsPresent = true
   requiredSkills.forEach(skill => {
-    if(!workersSkills.has(skill)) 
-      allRequiredSkillsPresent = false
-      return
+    if (!workersSkills.has(skill)) allRequiredSkillsPresent = false
+    return
   })
 
   return !allRequiredSkillsPresent

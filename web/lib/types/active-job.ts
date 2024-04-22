@@ -21,6 +21,12 @@ export type ActiveJobComplete = ActiveJob & {
   plan: Plan
 }
 
+export type ActiveJobWorkersAndJobs = ActiveJob & {
+  workers: WorkerComplete[]
+  proposedJob: ProposedJobWithArea
+  plan: Plan
+}
+
 export const ActiveJobWithProposedSchema = ActiveJobSchema.extend({
   proposedJob: ProposedJobSchema,
 })

@@ -15,15 +15,6 @@ import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-/*export type ActiveJobsAPIGetResponse = Awaited<ReturnType<typeof getActiveJobs>>
-async function get(
-  req: NextApiRequest,
-  res: NextApiResponse<ActiveJobsAPIGetResponse>
-) {
-  const jobs = await getActiveJobs()
-  res.status(200).json(jobs)
-}*/
-
 export type ActiveJobsAPIPostData =
   | Omit<ActiveJobCreateData, 'planId'>
   | Omit<ActiveJobCreateMultipleData, 'planId'>

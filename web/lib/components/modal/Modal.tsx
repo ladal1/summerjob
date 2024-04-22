@@ -4,6 +4,7 @@ interface ModalProps {
   children: React.ReactNode
   title?: string
   size: ModalSize
+  closeOnClickOutside?: boolean
   onClose: () => void
 }
 
@@ -12,13 +13,20 @@ export enum ModalSize {
   LARGE = 'modal-lg',
 }
 
-export function Modal({ children, title, size, onClose }: ModalProps) {
+export function Modal({
+  children,
+  title,
+  size,
+  closeOnClickOutside = true,
+  onClose,
+}: ModalProps) {
   const modalRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       //if we click anywhere outside of modalRef it will close it
       if (
+        closeOnClickOutside &&
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
