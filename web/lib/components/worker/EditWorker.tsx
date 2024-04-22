@@ -153,7 +153,6 @@ export default function EditWorker({
                 />
               </>
             )}
-
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>
