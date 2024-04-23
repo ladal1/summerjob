@@ -1,8 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import {
-  getUploadDirForImagesForCurrentEvent,
-  isValidId,
-} from 'lib/api/fileManager'
+import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
@@ -26,8 +23,9 @@ async function get(req: NextApiRequest, res: NextApiResponse) {
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
-  if (!isValidId(id)) {
-    res.status(403).end()
+  const post = await getPostById(id)
+  if (!post) {
+    res.status(404).end()
     return
   }
   const session = await getSMJSessionAPI(req, res)
@@ -37,7 +35,13 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/posts'
-  const { files, json } = await parseFormWithImages(req, res, id, uploadDir, 1)
+  const { files, json } = await parseFormWithImages(
+    req,
+    res,
+    post.id,
+    uploadDir,
+    1
+  )
 
   /* Validate simple data from json. */
   const postData = validateOrSendError(PostUpdateSchema, json, res)
@@ -46,11 +50,11 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  await logger.apiRequest(APILogEvent.POST_MODIFY, id, postData, session!)
+  await logger.apiRequest(APILogEvent.POST_MODIFY, post.id, postData, session!)
 
   const fileFieldNames = Object.keys(files)
   await updatePost(
-    id,
+    post.id,
     postData,
     fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
   )
@@ -60,6 +64,11 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
+  const post = await getPostById(id)
+  if (!post) {
+    res.status(404).end()
+    return
+  }
   const session = await getSMJSessionAPI(req, res)
   const allowed = await isAllowedToAccessPost(session, res)
   if (!allowed) {
@@ -67,8 +76,8 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  await logger.apiRequest(APILogEvent.POST_DELETE, id, {}, session!)
-  await deletePost(id)
+  await logger.apiRequest(APILogEvent.POST_DELETE, post.id, {}, session!)
+  await deletePost(post.id)
 
   res.status(204).end()
 }

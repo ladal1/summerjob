@@ -1,9 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import {
-  getUploadDirForImagesForCurrentEvent,
-  isValidId,
-} from 'lib/api/fileManager'
+import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import {
@@ -38,13 +35,14 @@ async function patch(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  if (!isValidId(id)) {
-    res.status(403).end()
+  const job = await getProposedJobById(id)
+  if (!job) {
+    res.status(404).end()
     return
   }
 
   // Get current photoIds
-  const currentPhotoIds = await getProposedJobPhotoIdsById(id)
+  const currentPhotoIds = await getProposedJobPhotoIdsById(job.id)
   const currentPhotoCnt = currentPhotoIds?.photos.length ?? 0
   const uploadDirectory =
     (await getUploadDirForImagesForCurrentEvent()) + '/proposed-jobs'
@@ -52,7 +50,7 @@ async function patch(
   const { files, json } = await parseFormWithImages(
     req,
     res,
-    id,
+    job.id,
     uploadDirectory,
     10 - currentPhotoCnt
   )
@@ -67,8 +65,13 @@ async function patch(
     return
   }
 
-  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, proposedJobData, session)
-  await updateProposedJob(id, proposedJobData, files)
+  await logger.apiRequest(
+    APILogEvent.JOB_MODIFY,
+    job.id,
+    proposedJobData,
+    session
+  )
+  await updateProposedJob(job.id, proposedJobData, files)
   res.status(204).end()
 }
 
@@ -78,12 +81,13 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.id as string
-  if (!isValidId(id)) {
-    res.status(403).end()
+  const job = await getProposedJobById(id)
+  if (!job) {
+    res.status(404).end()
     return
   }
-  await logger.apiRequest(APILogEvent.JOB_DELETE, id, {}, session)
-  await deleteProposedJob(id)
+  await logger.apiRequest(APILogEvent.JOB_DELETE, job.id, {}, session)
+  await deleteProposedJob(job.id)
   res.status(204).end()
 }
 

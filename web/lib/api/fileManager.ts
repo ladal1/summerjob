@@ -65,8 +65,3 @@ export const deleteDirectory = async (dirName: string) => {
     await promises.rmdir(dirName)
   } catch (error) {}
 }
-
-export const isValidId = (str: string) => {
-  const pattern = /^[a-z0-9-]+$/
-  return pattern.test(str)
-}
