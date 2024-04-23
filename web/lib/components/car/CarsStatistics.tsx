@@ -7,7 +7,7 @@ interface CarsStatisticsProps {
 }
 
 export const CarsStatistics = ({ data }: CarsStatisticsProps) => {
-  const calculateKilomatrage = () => {
+  const calculateKilometrage = () => {
     const count = data?.reduce((accumulator, current) => {
       return accumulator + (current.odometerEnd - current.odometerStart)
     }, 0)
@@ -62,7 +62,7 @@ export const CarsStatistics = ({ data }: CarsStatisticsProps) => {
           <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
             <span className="me-2">Najeto kilometrů</span>
             <span className="text-nowrap">
-              {formatNumberAfterThreeDigits('' + calculateKilomatrage())}
+              {formatNumberAfterThreeDigits('' + calculateKilometrage())}
             </span>
           </li>
           <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
