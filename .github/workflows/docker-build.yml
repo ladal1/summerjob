@@ -41,30 +41,35 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-  download-to-server:
-    name: Download and run Docker image on server
-    runs-on: ubuntu-latest
-    needs: [build-and-push-web]
-    permissions:
-      contents: read
 
-    steps:
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/smj.key
-          chmod 600 ~/.ssh/smj.key
-          cat >>~/.ssh/config <<END
-          Host server
-            HostName $SSH_HOST
-            User $SSH_USER
-            IdentityFile ~/.ssh/smj.key
-            StrictHostKeyChecking no
-          END
-        env:
-          SSH_USER: ${{ secrets.SERVER_SSH_USER }}
-          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
+  # build-and-push-planner:
+  #   name: Build and push Planner Docker image
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #       contents: read
+  #       packages: write
 
-      - name: Run new deployment
-        run: ssh server './deploy.sh'
+  #   steps:
+  #       - name: Checkout repository
+  #         uses: actions/checkout@v3
+
+  #       - name: Log in to the Container registry
+  #         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+  #         with:
+  #           registry: ${{ env.REGISTRY }}
+  #           username: ${{ github.actor }}
+  #           password: ${{ secrets.GITHUB_TOKEN }}
+
+  #       - name: Extract metadata (tags, labels) for Docker
+  #         id: meta
+  #         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+  #         with:
+  #           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-planner
+
+  #       - name: Build and push Docker image
+  #         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+  #         with:
+  #           context: ./planner
+  #           push: true
+  #           tags: ${{ steps.meta.outputs.tags }}
+  #           labels: ${{ steps.meta.outputs.labels }}

@@ -144,19 +144,15 @@ export default function PlanClientPage({
     planData?.jobs.forEach(job => {
       const workerNames = job.workers
         .map(w => `${w.firstName} ${w.lastName}`)
-        .join(';')
+        .join(' ')
       map.set(
         job.id,
         (
-          job.proposedJob.name +
-          ';' +
-          (job.proposedJob.area?.name ?? 'Nezadaná oblast') +
-          ';' +
-          job.proposedJob.address +
-          ';' +
-          job.proposedJob.contact +
-          ';' +
-          workerNames
+          job.proposedJob.name + job.proposedJob.area?.name ??
+          'Nezadaná oblast' +
+            job.proposedJob.address +
+            job.proposedJob.contact +
+            workerNames
         ).toLocaleLowerCase()
       )
     })
@@ -182,18 +178,9 @@ export default function PlanClientPage({
       const isInArea =
         selectedArea.id === areas[0].id ||
         job.proposedJob.area?.id === selectedArea.id
-      const searchableTokens = searchableJobs.get(job.id)?.split(';')
-      if (searchableTokens) {
-        return (
-          isInArea &&
-          filter
-            .split(';')
-            .every(filterToken =>
-              searchableTokens.find(x =>
-                x.includes(filterToken.toLocaleLowerCase())
-              )
-            )
-        )
+      const text = searchableJobs.get(job.id)
+      if (text) {
+        return isInArea && text.includes(filter.toLowerCase())
       }
       return isInArea
     },
