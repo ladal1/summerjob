@@ -25,6 +25,12 @@ function between(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+function startWithZeros(num: number, numOfDigits = 2) {
+  const numString = num.toString()
+  const numZerosToAdd = numOfDigits - numString.length
+  return '0'.repeat(numZerosToAdd) + numString
+}
+
 function chooseWithProbability<T>(array: T[], probability: number): T[] {
   return array.filter((_, i) => Math.random() < probability)
 }
@@ -119,12 +125,22 @@ async function createWorkers(
 }
 
 async function createYearlyEvent() {
-  const year = new Date().getFullYear() + 1
+  const eventLastYear = await prisma.summerJobEvent.findFirst({
+    orderBy: {
+      startDate: 'desc',
+    },
+  })
+  const year = eventLastYear
+    ? eventLastYear.endDate.getFullYear() + 1
+    : new Date().getFullYear() + 1
+  const month = startWithZeros(between(1, 12))
+  const dayStart = between(1, 25)
+  const dayEnd = between(dayStart, 28)
   const event = await prisma.summerJobEvent.create({
     data: {
-      name: `Krkonoše ${year}`,
-      startDate: new Date(`${year}-07-03`),
-      endDate: new Date(`${year}-07-09`),
+      name: `${faker.address.cityName()} ${year}`,
+      startDate: new Date(`${year}-${month}-${startWithZeros(dayStart)}`),
+      endDate: new Date(`${year}-${month}-${startWithZeros(dayEnd)}`),
       isActive: true,
     },
   })
@@ -269,20 +285,22 @@ async function populatePlan(
 
 async function createPosts(eventId: string, days: Date[], count = 10) {
   const POSTS_COUNT = count
-  const fakeTime = (): string => {
-    const hour = faker.datatype.number({ min: 0, max: 23 })
-    const minute = faker.datatype.number({ min: 0, max: 59 })
-    return `${hour}:${minute}`
-  }
   const createPost = () => {
+    const printTime = Math.random() > 0.5
+    const hourStart = faker.datatype.number({ min: 0, max: 21 })
+    const hourEnd = faker.datatype.number({ min: hourStart, max: 23 })
     const tags = choose(Object.values(PostTag), between(1, 3))
     return {
       forEventId: eventId,
       name: faker.lorem.words(3),
       madeIn: choose(days, 1)[0],
       availability: chooseWithProbability(days, 0.5),
-      timeFrom: fakeTime(),
-      timeTo: fakeTime(),
+      timeFrom: printTime
+        ? `${startWithZeros(hourStart)}:${startWithZeros(between(0, 59))}`
+        : undefined,
+      timeTo: printTime
+        ? `${startWithZeros(hourEnd)}:${startWithZeros(between(0, 59))}`
+        : undefined,
       address: faker.address.streetAddress(),
       coordinates: [+faker.address.longitude(), +faker.address.latitude()],
       tags: tags,
@@ -344,7 +362,8 @@ async function main() {
   console.log('Creating posts...')
   await createPosts(
     yearlyEvent.id,
-    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate)
+    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
+    mini ? 5 : 30
   )
 }
 

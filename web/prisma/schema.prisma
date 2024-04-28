@@ -91,7 +91,7 @@ model Tool {
 model Participant {
   worker   Worker @relation(fields: [workerId], references: [id])
   workerId String 
-  post     Post   @relation(fields: [postId], references: [id])
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId   String  
 
   @@id([workerId, postId])
@@ -121,7 +121,7 @@ model Post {
 model JobPhoto {
   id            String       @id @default(uuid())
   photoPath     String 
-  proposedJob   ProposedJob? @relation("PhotoProposedJob", fields: [proposedJobId], references: [id])
+  proposedJob   ProposedJob? @relation("PhotoProposedJob", fields: [proposedJobId], references: [id], onDelete: Cascade)
   proposedJobId String?
 }
 
@@ -219,7 +219,7 @@ model ProposedJob {
 model PinnedProposedJobByWorker {
   worker      Worker      @relation(fields: [workerId], references: [id])
   workerId    String
-  proposedJob ProposedJob @relation(fields: [jobId], references: [id])
+  proposedJob ProposedJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId       String
 
   @@id([workerId, jobId])
