@@ -21,7 +21,7 @@ services:
       - QUEUE_NAME=${QUEUE_NAME}
       - UPLOAD_DIR=/web-storage
     ports:
-      - 3000:3000
+      - 127.0.0.1:3000:3000
     build:
       context: web
       dockerfile: Dockerfile

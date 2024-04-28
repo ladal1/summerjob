@@ -147,7 +147,7 @@ export default function PlanClientPage({
     planData?.jobs.forEach(job => {
       const workerNames = job.workers
         .map(w => `${w.firstName} ${w.lastName}`)
-        .join(';')
+        .join(' ')
       map.set(
         job.id,
         normalizeString(
