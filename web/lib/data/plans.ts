@@ -28,9 +28,7 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
   }
   const plans = await prisma.plan.findMany({
     where: {
-      summerJobEvent: {
-        isActive: true,
-      },
+      summerJobEventId: activeEventId,
     },
     include: {
       jobs: {

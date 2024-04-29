@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   summerjob-web:
     container_name: summerjob-web
