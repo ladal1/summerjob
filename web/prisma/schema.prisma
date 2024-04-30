@@ -89,7 +89,7 @@ model Tool {
 
 
 model Participant {
-  worker   Worker @relation(fields: [workerId], references: [id])
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
   workerId String 
   post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId   String  
@@ -217,7 +217,7 @@ model ProposedJob {
 }
 
 model PinnedProposedJobByWorker {
-  worker      Worker      @relation(fields: [workerId], references: [id])
+  worker      Worker      @relation(fields: [workerId], references: [id], onDelete: Cascade)
   workerId    String
   proposedJob ProposedJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   jobId       String

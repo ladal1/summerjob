@@ -1,8 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import {
-  generateFileName,
-  getUploadDirForImagesForCurrentEvent,
-} from 'lib/api/fileManager'
+import { generateFileName, getProposedJobsUploadDir } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
@@ -48,8 +45,7 @@ async function post(
   session: ExtendedSession
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDirectory =
-    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-jobs'
+  const uploadDirectory = await getProposedJobsUploadDir()
   const { files, json } = await parseFormWithImages(
     req,
     res,
@@ -63,13 +59,13 @@ async function post(
     return
   }
 
+  const job = await createProposedJob(result, files)
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
     result,
     session
   )
-  const job = await createProposedJob(result, files)
 
   res.status(201).json(job)
 }

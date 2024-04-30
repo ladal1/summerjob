@@ -3,6 +3,7 @@ import mime from 'mime'
 import formidable from 'formidable'
 import { createDirectory, deleteFile } from './fileManager'
 import { ApiBadRequestError } from 'lib/types/api-error'
+import path from 'path'
 
 /* Get simple data from string jsonData containing json data. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,12 +97,12 @@ export const parseFormWithImages = async (
       return true
     },
   })
-  return await new Promise(async (resolve, reject) => {
+  return await new Promise(async resolve => {
     form.parse(req, async function (err, fields, files) {
       if (err) {
         for (const file of uploadedFiles) {
           try {
-            await deleteFile(uploadDir + '/' + file)
+            await deleteFile(path.resolve(uploadDir, file))
           } catch (error) {}
         }
         res.status(err.httpCode).json({
@@ -109,7 +110,6 @@ export const parseFormWithImages = async (
             'Type: ' + err.type + '\nMessage: ' + err.message
           ),
         })
-        reject(err)
         return
       }
       const json = getJson(fields.jsonData)

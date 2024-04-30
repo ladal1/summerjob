@@ -51,6 +51,9 @@ export async function getCars(
         },
       },
     },
+    orderBy: {
+      name: 'asc',
+    },
   })
   return cars
 }

@@ -1,5 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
+import { getPostsUploadDir } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
@@ -34,7 +34,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/posts'
+  const uploadDir = await getPostsUploadDir()
   const { files, json } = await parseFormWithImages(
     req,
     res,
@@ -49,15 +49,14 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  await logger.apiRequest(APILogEvent.POST_MODIFY, post.id, postData, session!)
-
   const fileFieldNames = Object.keys(files)
   await updatePost(
     post.id,
     postData,
     fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
   )
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  await logger.apiRequest(APILogEvent.POST_MODIFY, post.id, postData, session!)
 
   res.status(204).end()
 }
@@ -75,9 +74,9 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
+  await deletePost(post.id)
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   await logger.apiRequest(APILogEvent.POST_DELETE, post.id, {}, session!)
-  await deletePost(post.id)
 
   res.status(204).end()
 }

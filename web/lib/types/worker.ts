@@ -53,9 +53,13 @@ export const WorkerCreateSchema = z
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
     age: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
-      .int({ message: err.nonInt })
-      .positive({ message: err.nonPositiveNumber })
+      .union([
+        z
+          .number({ invalid_type_error: err.invalidTypeNumber })
+          .int({ message: err.nonInt })
+          .positive({ message: err.nonPositiveNumber }),
+        z.nan(),
+      ])
       .nullable()
       .optional(),
     photoFile: z

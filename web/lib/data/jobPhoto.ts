@@ -18,6 +18,7 @@ import {
   getProposedJobPhotoIdsById,
   hasProposedJobPhotos,
 } from './proposed-jobs'
+import path from 'path'
 
 export async function getPhotoPathById(
   id: string,
@@ -40,7 +41,7 @@ export async function getPhotoPathById(
   }
   // Save only relative part of photoPath
   const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-  return uploadDirAbsolutePath + photo.photoPath
+  return path.join(uploadDirAbsolutePath, photo.photoPath)
 }
 
 export async function createPhoto(
@@ -104,11 +105,13 @@ const savePhotos = async (
   const fileFieldNames = Object.keys(files)
   if (fileFieldNames.length !== 0) {
     // Create directory for photos
-    await createDirectory(uploadDirectory + `/proposed-jobs/${jobId}`)
+    await createDirectory(path.join(uploadDirectory, `/proposed-jobs/${jobId}`))
     for (const fieldName of fileFieldNames) {
       const file = files[fieldName]
       const photoPath = getPhotoPath(file)
-      const relativePath = photoPath.substring(uploadDirectory.length)
+      const relativePath = path.normalize(
+        photoPath.substring(uploadDirectory.length)
+      )
       // create new photo
       const newPhoto = await createPhoto(
         {
@@ -122,7 +125,9 @@ const savePhotos = async (
         updatePhotoPathByNewFilename(photoPath, newPhoto.id, `/${jobId}`) ?? ''
       await renameFile(photoPath, newPhotoPath)
       // Save only relative part of photoPath
-      const newRelativePath = newPhotoPath.substring(uploadDirectory.length)
+      const newRelativePath = path.normalize(
+        newPhotoPath.substring(uploadDirectory.length)
+      )
       const renamedPhoto = await updatePhoto(
         newPhoto.id,
         {
@@ -136,7 +141,7 @@ const savePhotos = async (
   }
 }
 
-const deleteManyPhotos = async (
+const deleteManyPhotosFromDisk = async (
   photoIdsDeleted: string[] | undefined,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ) => {
@@ -157,7 +162,7 @@ const deleteFlaggedPhotos = async (
 ) => {
   if (photoIdsDeleted) {
     // go through photos ids and see which are being deleted
-    const photoIdsDeletedFinal = await deleteManyPhotos(photoIdsDeleted)
+    const photoIdsDeletedFinal = await deleteManyPhotosFromDisk(photoIdsDeleted)
     if (photoIdsDeletedFinal && photoIdsDeletedFinal.length !== 0) {
       const photoIdsDel = photoIdsDeletedFinal.filter(
         id => id !== undefined
@@ -178,7 +183,7 @@ export const registerPhotos = async (
   await savePhotos(files, uploadDirectory, jobId, prismaClient)
   const hasAnyPhotos = await hasProposedJobPhotos(jobId, prismaClient)
   if (!hasAnyPhotos) {
-    await deleteDirectory(uploadDirectory + '/proposed-jobs/' + jobId)
+    await deleteDirectory(path.join(uploadDirectory, '/proposed-jobs/', jobId))
   }
 }
 
@@ -189,11 +194,11 @@ export const deleteAllPhotos = async (
   const photos = await getProposedJobPhotoIdsById(jobId, prismaClient)
   if (photos) {
     const photoIds = photos.photos.map(photo => photo.id)
-    await deleteManyPhotos(photoIds, prismaClient)
+    await deleteManyPhotosFromDisk(photoIds, prismaClient)
     await deletePhotos(photoIds, prismaClient)
   }
   const uploadDirectory = await getUploadDirForImagesForCurrentEvent()
-  await deleteDirectory(uploadDirectory + '/proposed-jobs/' + jobId)
+  await deleteDirectory(path.join(uploadDirectory, '/proposed-jobs/', jobId))
 }
 
 //#endregion

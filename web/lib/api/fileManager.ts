@@ -2,17 +2,33 @@ import { promises } from 'fs'
 import crypto from 'crypto'
 import path from 'path'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
+import { NoActiveEventError } from 'lib/data/internal-error'
+
+export const getWorkersUploadDir = async () => {
+  const uploadDir = await getUploadDirForImagesForCurrentEvent()
+  return path.join(uploadDir, '/workers')
+}
+
+export const getProposedJobsUploadDir = async () => {
+  const uploadDir = await getUploadDirForImagesForCurrentEvent()
+  return path.join(uploadDir, '/proposed-jobs')
+}
+
+export const getPostsUploadDir = async () => {
+  const uploadDir = await getUploadDirForImagesForCurrentEvent()
+  return path.join(uploadDir, '/posts')
+}
 
 export const getUploadDirForImagesForCurrentEvent = async () => {
   const activeEventId = await cache_getActiveSummerJobEventId()
-  return getUploadDirForImages() + '/' + activeEventId
+  if (activeEventId === undefined) {
+    throw new NoActiveEventError()
+  }
+  return path.join(getUploadDirForImages(), activeEventId)
 }
 
 export const getUploadDirForImages = (): string => {
-  return (
-    path.resolve(process.cwd() + '/../') +
-    (process.env.UPLOAD_DIR || '/web-storage')
-  )
+  return path.resolve(`../${process.env.UPLOAD_DIR || '/web-storage'}`)
 }
 
 export const generateFileName = (length: number): string => {
@@ -34,21 +50,10 @@ export const updatePhotoPathByNewFilename = (
   originalPath: string,
   newFilename: string,
   lastDirectory?: string
-): string | undefined => {
-  const lastSlashIndex = originalPath.lastIndexOf('/')
-  const lastDotIndex = originalPath.lastIndexOf('.')
-
-  // check if both chars / . were found
-  if (lastSlashIndex === -1 || lastDotIndex === -1) {
-    return ''
-  }
-
-  // get part before and after replaced part
-  const directory = originalPath.slice(0, lastSlashIndex) // directory part
-  const fileType = originalPath.slice(lastDotIndex) // type part
-
-  // create new path
-  return `${directory}${lastDirectory ?? ''}/${newFilename}${fileType}`
+): string => {
+  const type = path.extname(originalPath)
+  const directories = path.dirname(originalPath)
+  return path.join(directories, lastDirectory ?? '', newFilename + type)
 }
 
 export const createDirectory = async (dirName: string) => {

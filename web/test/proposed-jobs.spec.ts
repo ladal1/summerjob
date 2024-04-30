@@ -7,6 +7,7 @@ import {
   getFileNameAndType,
 } from './common'
 import { statSync } from 'fs'
+import path from 'path'
 
 chai.should()
 
@@ -192,7 +193,7 @@ describe('Proposed Jobs', function () {
         // given
         const area = await api.createArea()
         const body = createProposedJobData(area.id)
-        const file = `${__dirname}/resources/favicon.ico`
+        const file = path.normalize(`${__dirname}/resources/favicon.ico`)
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
         // then
@@ -214,8 +215,10 @@ describe('Proposed Jobs', function () {
         fileType.should.equal('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${resp.body.id}`
+          )
         )
         numOfFiles.should.equal(1)
       })
@@ -224,8 +227,10 @@ describe('Proposed Jobs', function () {
         // given
         const area = await api.createArea()
         const body = createProposedJobData(area.id)
-        const file0 = `${__dirname}/resources/logo-smj-yellow.png`
-        const file1 = `${__dirname}/resources/favicon.ico`
+        const file0 = path.normalize(
+          `${__dirname}/resources/logo-smj-yellow.png`
+        )
+        const file1 = path.normalize(`${__dirname}/resources/favicon.ico`)
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [
           file0,
@@ -257,8 +262,10 @@ describe('Proposed Jobs', function () {
         fileType1.should.equal('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${resp.body.id}`
+          )
         )
         numOfFiles.should.equal(2)
       })
@@ -267,7 +274,7 @@ describe('Proposed Jobs', function () {
         // given
         const area = await api.createArea()
         const body = createProposedJobData(area.id)
-        const file = `${__dirname}/resources/invalidPhoto.ts`
+        const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
         // then
@@ -275,8 +282,10 @@ describe('Proposed Jobs', function () {
         // verify non-existence of /proposed-jobs/{id} folder
         api
           .pathExists(
-            api.getUploadDirForImagesForCurrentEvent() +
+            path.join(
+              api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${resp.body.id}`
+            )
           )
           .should.equal(false)
       })
@@ -285,8 +294,10 @@ describe('Proposed Jobs', function () {
         // given
         const area = await api.createArea()
         const body = createProposedJobData(area.id)
-        const file0 = `${__dirname}/resources/logo-smj-yellow.png`
-        const file1 = `${__dirname}/resources/invalidPhoto.ts`
+        const file0 = path.normalize(
+          `${__dirname}/resources/logo-smj-yellow.png`
+        )
+        const file1 = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [
           file0,
@@ -297,8 +308,10 @@ describe('Proposed Jobs', function () {
         // verify non-existence of /proposed-jobs/{id} folder
         api
           .pathExists(
-            api.getUploadDirForImagesForCurrentEvent() +
+            path.join(
+              api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${resp.body.id}`
+            )
           )
           .should.equal(false)
       })
@@ -306,7 +319,7 @@ describe('Proposed Jobs', function () {
 
     it('create proposed-job with too many photos', async function () {
       // given
-      const file = `${__dirname}/resources/favicon.ico`
+      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       const files: string[] = Array(11).fill(file)
       // when
       const created = await api.createProposedJobWithPhotos(files)
@@ -322,7 +335,7 @@ describe('Proposed Jobs', function () {
         // given
         const created = await api.createProposedJobWithPhotos([])
         created.status.should.equal(201)
-        const file = `${__dirname}/resources/favicon.ico`
+        const file = path.normalize(`${__dirname}/resources/favicon.ico`)
         // when
         const patch = await api.patch(
           `/api/proposed-jobs/${created.body.id}`,
@@ -346,8 +359,10 @@ describe('Proposed Jobs', function () {
         fileType.should.equal('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
+          )
         )
         numOfFiles.should.equal(1)
       })
@@ -355,11 +370,11 @@ describe('Proposed Jobs', function () {
       it('updates proposed-job with existing photos with valid photo', async function () {
         // given
         const created = await api.createProposedJobWithPhotos([
-          `${__dirname}/resources/logo-smj-yellow.png`,
-          `${__dirname}/resources/logo-smj-yellow.png`,
+          path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
+          path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
         ])
         created.status.should.equal(201)
-        const file = `${__dirname}/resources/favicon.ico`
+        const file = path.normalize(`${__dirname}/resources/favicon.ico`)
         // when
         const patch = await api.patch(
           `/api/proposed-jobs/${created.body.id}`,
@@ -383,8 +398,10 @@ describe('Proposed Jobs', function () {
         fileType.should.equal('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
+          )
         )
         numOfFiles.should.equal(3)
       })
@@ -394,8 +411,8 @@ describe('Proposed Jobs', function () {
       // given
       const created = await api.createProposedJobWithPhotos([])
       created.status.should.equal(201)
-      const file0 = `${__dirname}/resources/logo-smj-yellow.png`
-      const file1 = `${__dirname}/resources/favicon.ico`
+      const file0 = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
+      const file1 = path.normalize(`${__dirname}/resources/favicon.ico`)
       // when
       const patch = await api.patch(
         `/api/proposed-jobs/${created.body.id}`,
@@ -426,8 +443,10 @@ describe('Proposed Jobs', function () {
 
       // verify number of files in /proposed-jobs/{id} folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() +
+        path.join(
+          api.getUploadDirForImagesForCurrentEvent(),
           `/proposed-jobs/${created.body.id}`
+        )
       )
       numOfFiles.should.equal(2)
     })
@@ -436,7 +455,7 @@ describe('Proposed Jobs', function () {
       // given
       const created = await api.createProposedJobWithPhotos([])
       created.status.should.equal(201)
-      const file = `${__dirname}/resources/invalidPhoto.ts`
+      const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
       // when
       const patch = await api.patch(
         `/api/proposed-jobs/${created.body.id}`,
@@ -449,18 +468,22 @@ describe('Proposed Jobs', function () {
       // verify non-existence of /proposed-jobs/{id} folder
       api
         .pathExists(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
+          )
         )
         .should.equal(false)
     })
 
     it('updates proposed-job including photo with invalid photo', async function () {
       // given
-      const createdFile = `${__dirname}/resources/logo-smj-yellow.png`
+      const createdFile = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       const created = await api.createProposedJobWithPhotos([createdFile])
       created.status.should.equal(201)
-      const file = `${__dirname}/resources/invalidPhoto.ts`
+      const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
       // when
       const patch = await api.patch(
         `/api/proposed-jobs/${created.body.id}`,
@@ -473,14 +496,18 @@ describe('Proposed Jobs', function () {
       // verify existence of /proposed-jobs/{id} folder
       api
         .pathExists(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
+          )
         )
         .should.equal(true)
 
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() +
+        path.join(
+          api.getUploadDirForImagesForCurrentEvent(),
           `/proposed-jobs/${created.body.id}`
+        )
       )
       numOfFiles.should.equal(1)
     })
@@ -491,7 +518,7 @@ describe('Proposed Jobs', function () {
       it("delete proposed-job's only photo", async function () {
         // given
         const created = await api.createProposedJobWithPhotos([
-          `${__dirname}/resources/favicon.ico`,
+          path.normalize(`${__dirname}/resources/favicon.ico`),
         ])
         created.status.should.equal(201)
         const createdProposedJob = await api.get(
@@ -522,8 +549,10 @@ describe('Proposed Jobs', function () {
         // verify non-existence of /proposed-jobs/{id} folder
         api
           .pathExists(
-            api.getUploadDirForImagesForCurrentEvent() +
+            path.join(
+              api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${resp.body.id}`
+            )
           )
           .should.equal(false)
       })
@@ -531,8 +560,8 @@ describe('Proposed Jobs', function () {
       it("delete proposed-job's non-only photo", async function () {
         // given
         const created = await api.createProposedJobWithPhotos([
-          `${__dirname}/resources/favicon.ico`,
-          `${__dirname}/resources/logo-smj-yellow.png`,
+          path.normalize(`${__dirname}/resources/favicon.ico`),
+          path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
         ])
         created.status.should.equal(201)
         const createdProposedJob = await api.get(
@@ -569,14 +598,18 @@ describe('Proposed Jobs', function () {
         // verify existence of /proposed-jobs/{id} folder
         api
           .pathExists(
-            api.getUploadDirForImagesForCurrentEvent() +
+            path.join(
+              api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${created.body.id}`
+            )
           )
           .should.equal(true)
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
-          api.getUploadDirForImagesForCurrentEvent() +
+          path.join(
+            api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
+          )
         )
         numOfFiles.should.equal(1)
       })
@@ -587,8 +620,8 @@ describe('Proposed Jobs', function () {
   it('deletation of proposed-job will delete all his photos and upload directory', async function () {
     // given
     const created = await api.createProposedJobWithPhotos([
-      `${__dirname}/resources/favicon.ico`,
-      `${__dirname}/resources/logo-smj-yellow.png`,
+      path.normalize(`${__dirname}/resources/favicon.ico`),
+      path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
     ])
     created.status.should.equal(201)
     const createdProposedJob = await api.get(
@@ -616,7 +649,7 @@ describe('Proposed Jobs', function () {
   describe('##get', function () {
     it("get proposed-job's photo", async function () {
       //given
-      const file = `${__dirname}/resources/favicon.ico`
+      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       const created = await api.createProposedJobWithPhotos([file])
       created.status.should.equal(201)
       const createdProposedJob = await api.get(

@@ -12,6 +12,7 @@ import { PostComplete, PostCreateData, PostUpdateData } from 'lib/types/post'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
+import path from 'path'
 
 export async function getPosts(): Promise<PostComplete[]> {
   const posts = await prisma.post.findMany({
@@ -27,7 +28,10 @@ export async function getPosts(): Promise<PostComplete[]> {
     },
     orderBy: [
       {
-        madeIn: 'asc',
+        availability: 'asc',
+      },
+      {
+        timeFrom: 'asc',
       },
     ],
   })
@@ -77,7 +81,7 @@ export async function getPostPhotoById(
     return null
   }
   const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-  return uploadDirAbsolutePath + post.photoPath
+  return path.join(uploadDirAbsolutePath, post.photoPath)
 }
 
 export async function updatePost(
@@ -115,7 +119,9 @@ export async function internal_updatePost(
     }
     // Save only relative part of photoPath
     const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-    const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+    const relativePath = path.normalize(
+      photoPath.substring(uploadDirAbsolutePath.length)
+    )
     rest.photoPath = relativePath
   } else if (photoFileRemoved) {
     // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.
@@ -168,7 +174,9 @@ export async function createPost(
       await renameFile(temporaryPhotoPath, photoPath)
       // Save only relative part of photoPath
       const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-      const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+      const relativePath = path.normalize(
+        photoPath.substring(uploadDirAbsolutePath.length)
+      )
       const updatedPost = await internal_updatePost(
         post.id,
         {

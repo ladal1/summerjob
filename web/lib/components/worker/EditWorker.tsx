@@ -177,6 +177,7 @@ export default function EditWorker({
           {!isProfilePage && (
             <TextInput
               id="age"
+              type="number"
               label="Věk"
               placeholder="Věk"
               min={1}

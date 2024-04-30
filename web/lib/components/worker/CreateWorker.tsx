@@ -138,13 +138,16 @@ export default function CreateWorker({
           />
           <TextInput
             id="age"
+            type="number"
             label="Věk"
             placeholder="Věk"
             min={1}
             register={() =>
               register('age', {
                 valueAsNumber: true,
-                onChange: e => (e.target.value = formatNumber(e.target.value)),
+                onChange: e => {
+                  e.target.value = formatNumber(e.target.value)
+                },
               })
             }
             errors={errors}

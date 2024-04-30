@@ -2,6 +2,7 @@ import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
 import { api, createPostData, getFileNameAndType, Id } from './common'
 import { statSync } from 'fs'
+import path from 'path'
 
 chai.use(chaiExclude)
 chai.should()
@@ -154,10 +155,10 @@ describe('Posts', function () {
     it('creates post with valid photo', async function () {
       // given
       const body = createPostData()
-      const filePath = `${__dirname}/resources/favicon.ico`
+      const filePath = path.normalize(`${__dirname}/resources/favicon.ico`)
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFilesBef.should.equal(0)
       const resp = await api.post('/api/posts', Id.POSTS, body, [filePath])
@@ -181,7 +182,7 @@ describe('Posts', function () {
       fileType.should.equal('.ico')
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFiles.should.equal(1)
     })
@@ -189,14 +190,14 @@ describe('Posts', function () {
     it('creates post with invalid photo file', async function () {
       // given
       const body = createPostData()
-      const file = `${__dirname}/resources/invalidPhoto.ts`
+      const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
       // when
       const resp = await api.post('/api/posts', Id.POSTS, body, [file])
       // then
       resp.status.should.equal(400)
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFiles.should.equal(1) // one because prev test
     })
@@ -204,14 +205,14 @@ describe('Posts', function () {
     it('creates post with too many photos', async function () {
       // given
       const body = createPostData()
-      const file = `${__dirname}/resources/favicon.ico`
+      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       // when
       const resp = await api.post('/api/posts', Id.POSTS, body, [file, file])
       // then
       resp.status.should.equal(413)
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFiles.should.equal(1) // one because prev test
     })
@@ -220,10 +221,12 @@ describe('Posts', function () {
       // given
       const body = createPostData()
       const selectedPost = await api.post('/api/posts', Id.POSTS, body)
-      const filePath = `${__dirname}/resources/logo-smj-yellow.png`
+      const filePath = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFilesBef.should.equal(1)
       const patch = await api.patch(
@@ -253,7 +256,7 @@ describe('Posts', function () {
       fileType.should.equal('.png')
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFiles.should.equal(2) // this and other test before
     })
@@ -261,7 +264,9 @@ describe('Posts', function () {
     it('remove photo of post', async function () {
       // given
       const bodyOfNewPost = createPostData()
-      const fileOfNewPost = `${__dirname}/resources/logo-smj-yellow.png`
+      const fileOfNewPost = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       const newPostRes = await api.post('/api/posts', Id.POSTS, bodyOfNewPost, [
         fileOfNewPost,
       ])
@@ -269,7 +274,7 @@ describe('Posts', function () {
         photoFileRemoved: true,
       }
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFilesBef.should.equal(3)
       // when
@@ -287,7 +292,7 @@ describe('Posts', function () {
       resp.body.photoPath.should.be.empty
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFiles.should.equal(2)
     })
@@ -295,7 +300,7 @@ describe('Posts', function () {
     it("get post's photo", async function () {
       // given
       const body = createPostData()
-      const file = `${__dirname}/resources/favicon.ico`
+      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       const createdPost = await api.post('/api/posts', Id.POSTS, body, [file])
       // when
       const resp = await api.get(
@@ -318,7 +323,7 @@ describe('Posts', function () {
       resp.headers['cache-control'].should.include('must-revalidate')
 
       // verify content by reading the image file
-      const fileStat = statSync(`${__dirname}/resources/favicon.ico`)
+      const fileStat = statSync(file)
       const expectedSize = fileStat.size
       parseInt(resp.headers['content-length']).should.equal(expectedSize)
     })
@@ -339,12 +344,14 @@ describe('Posts', function () {
     it('deletation of post will delete his photo', async function () {
       // given
       const bodyOfNewPost = createPostData()
-      const fileOfNewPost = `${__dirname}/resources/logo-smj-yellow.png`
+      const fileOfNewPost = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       const newPostRes = await api.post('/api/posts', Id.POSTS, bodyOfNewPost, [
         fileOfNewPost,
       ])
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFilesBef.should.equal(4)
       // when
@@ -355,7 +362,7 @@ describe('Posts', function () {
       resp.status.should.equal(404)
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/posts'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
       numOfFiles.should.equal(3)
     })

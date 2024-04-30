@@ -1,8 +1,5 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import {
-  generateFileName,
-  getUploadDirForImagesForCurrentEvent,
-} from 'lib/api/fileManager'
+import { generateFileName, getPostsUploadDir } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
@@ -29,7 +26,7 @@ async function post(
   session: ExtendedSession
 ) {
   const temporaryName = generateFileName(30) // temporary name for the file
-  const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/posts'
+  const uploadDir = await getPostsUploadDir()
   const { files, json } = await parseFormWithImages(
     req,
     res,

@@ -1,6 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
-import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
+import { getProposedJobsUploadDir } from 'lib/api/fileManager'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import {
@@ -44,8 +44,7 @@ async function patch(
   // Get current photoIds
   const currentPhotoIds = await getProposedJobPhotoIdsById(job.id)
   const currentPhotoCnt = currentPhotoIds?.photos.length ?? 0
-  const uploadDirectory =
-    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-jobs'
+  const uploadDirectory = await getProposedJobsUploadDir()
 
   const { files, json } = await parseFormWithImages(
     req,
@@ -65,13 +64,14 @@ async function patch(
     return
   }
 
+  await updateProposedJob(job.id, proposedJobData, files)
   await logger.apiRequest(
     APILogEvent.JOB_MODIFY,
     job.id,
     proposedJobData,
     session
   )
-  await updateProposedJob(job.id, proposedJobData, files)
+
   res.status(204).end()
 }
 
@@ -86,8 +86,8 @@ async function del(
     res.status(404).end()
     return
   }
-  await logger.apiRequest(APILogEvent.JOB_DELETE, job.id, {}, session)
   await deleteProposedJob(job.id)
+  await logger.apiRequest(APILogEvent.JOB_DELETE, job.id, {}, session)
   res.status(204).end()
 }
 

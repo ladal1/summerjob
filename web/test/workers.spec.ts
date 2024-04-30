@@ -2,6 +2,7 @@ import { Id, api, createWorkerData, getFileNameAndType } from './common'
 import chai, { expect } from 'chai'
 import chaiExclude from 'chai-exclude'
 import { statSync } from 'fs'
+import path from 'path'
 
 chai.use(chaiExclude)
 chai.should()
@@ -151,12 +152,12 @@ describe('Workers', function () {
     it('creates worker with valid photo', async function () {
       // given
       const body = createWorkerData()
-      const filePath = `${__dirname}/resources/favicon.ico`
-      // when
+      const filePath = path.normalize(`${__dirname}/resources/favicon.ico`)
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent() + '/workers')
       )
       numOfFilesBef.should.equal(0)
+      // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [
         filePath,
       ])
@@ -180,7 +181,7 @@ describe('Workers', function () {
       fileType.should.equal('.ico')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFiles.should.equal(1)
     })
@@ -188,14 +189,14 @@ describe('Workers', function () {
     it('creates worker with invalid photo file', async function () {
       // given
       const body = createWorkerData()
-      const file = `${__dirname}/resources/invalidPhoto.ts`
+      const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
       // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [file])
       // then
       resp.status.should.equal(400)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFiles.should.equal(1) // one because prev test
     })
@@ -203,7 +204,7 @@ describe('Workers', function () {
     it('creates worker with too many photos', async function () {
       // given
       const body = createWorkerData()
-      const file = `${__dirname}/resources/favicon.ico`
+      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [
         file,
@@ -213,7 +214,7 @@ describe('Workers', function () {
       resp.status.should.equal(413)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFiles.should.equal(1) // one because prev test
     })
@@ -226,10 +227,12 @@ describe('Workers', function () {
         Id.WORKERS,
         body
       )
-      const filePath = `${__dirname}/resources/logo-smj-yellow.png`
+      const filePath = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFilesBef.should.equal(1)
       const patch = await api.patch(
@@ -262,7 +265,7 @@ describe('Workers', function () {
       fileType.should.equal('.png')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFiles.should.equal(2) // this and other test before
     })
@@ -270,7 +273,9 @@ describe('Workers', function () {
     it('remove photo of worker', async function () {
       // given
       const bodyOfNewWorker = createWorkerData()
-      const fileOfNewWorker = `${__dirname}/resources/logo-smj-yellow.png`
+      const fileOfNewWorker = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       const newWorkerRes = await api.post(
         '/api/workers/new',
         Id.WORKERS,
@@ -282,7 +287,7 @@ describe('Workers', function () {
       }
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFilesBef.should.equal(3)
       const patch = await api.patch(
@@ -302,7 +307,7 @@ describe('Workers', function () {
       resp.body.photoPath.should.be.empty
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFiles.should.equal(2)
     })
@@ -310,7 +315,7 @@ describe('Workers', function () {
     it("get worker's photo", async function () {
       // given
       const body = createWorkerData()
-      const file = `${__dirname}/resources/favicon.ico`
+      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       const createdWorker = await api.post(
         '/api/workers/new',
         Id.WORKERS,
@@ -338,7 +343,7 @@ describe('Workers', function () {
       resp.headers['cache-control'].should.include('must-revalidate')
 
       // verify content by reading the image file
-      const fileStat = statSync(`${__dirname}/resources/favicon.ico`)
+      const fileStat = statSync(file)
       const expectedSize = fileStat.size
       parseInt(resp.headers['content-length']).should.equal(expectedSize)
     })
@@ -359,7 +364,9 @@ describe('Workers', function () {
     it('deletation of worker will delete his photo', async function () {
       // given
       const body = createWorkerData()
-      const fileOfNewWorker = `${__dirname}/resources/logo-smj-yellow.png`
+      const fileOfNewWorker = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       const newWorkerRes = await api.post(
         '/api/workers/new',
         Id.WORKERS,
@@ -367,7 +374,7 @@ describe('Workers', function () {
         [fileOfNewWorker]
       )
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFilesBef.should.equal(4)
       // when
@@ -384,7 +391,7 @@ describe('Workers', function () {
       resp.status.should.equal(404)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        api.getUploadDirForImagesForCurrentEvent() + '/workers'
+        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
       numOfFiles.should.equal(3)
     })

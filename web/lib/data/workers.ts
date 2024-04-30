@@ -18,6 +18,7 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError, WorkerAlreadyExistsError } from './internal-error'
 import { deleteUserSessions } from './users'
 import formidable from 'formidable'
+import path from 'path'
 
 export async function getWorkers(
   withoutJobInPlanId: string | undefined = undefined
@@ -94,7 +95,7 @@ export async function getWorkerPhotoPathById(
     return null
   }
   const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-  return uploadDirAbsolutePath + worker.photoPath
+  return path.join(uploadDirAbsolutePath, worker.photoPath)
 }
 
 export async function getWorkerById(
@@ -310,7 +311,9 @@ async function internal_createWorker(
     await renameFile(temporaryPhotoPath, photoPath)
     // Save only relative part of photoPath
     const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-    const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+    const relativePath = path.normalize(
+      photoPath.substring(uploadDirAbsolutePath.length)
+    )
     const updatedWorker = await internal_updateWorker(
       worker.id,
       {
@@ -404,7 +407,9 @@ export async function internal_updateWorker(
     }
     // Save only relative part of photoPath
     const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-    const relativePath = photoPath.substring(uploadDirAbsolutePath.length)
+    const relativePath = path.normalize(
+      photoPath.substring(uploadDirAbsolutePath.length)
+    )
     data.photoPath = relativePath
   } else if (data.photoFileRemoved) {
     // If original file was deleted on client and was not replaced (it is not in files) file should be deleted.

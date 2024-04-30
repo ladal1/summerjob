@@ -1,4 +1,4 @@
-import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
+import { getWorkersUploadDir } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
@@ -43,7 +43,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed) {
     return
   }
-  const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/workers'
+  const uploadDir = await getWorkersUploadDir()
   const { files, json } = await parseFormWithImages(
     req,
     res,
@@ -59,17 +59,17 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const fileFieldNames = Object.keys(files)
+  await updateWorker(
+    worker.id,
+    workerData,
+    fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
+  )
   await logger.apiRequest(
     APILogEvent.WORKER_MODIFY,
     worker.id,
     workerData,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     session!
-  )
-  await updateWorker(
-    worker.id,
-    workerData,
-    fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
   )
 
   res.status(204).end()

@@ -159,10 +159,7 @@ class Common {
   }
 
   private getUploadDirForImages = (): string => {
-    return (
-      path.resolve(process.cwd() + '/../') +
-      (process.env.UPLOAD_DIR || '/web-storage')
-    )
+    return path.resolve(`../${process.env.UPLOAD_DIR || '/web-storage'}`)
   }
 
   private deleteFile = async (oldPhotoPath: string) => {
@@ -192,14 +189,16 @@ class Common {
   }
 
   getAbsolutePath = (relativePath: string) => {
-    return this.getUploadDirForImagesForCurrentEvent() + relativePath
+    return path.join(this.getUploadDirForImagesForCurrentEvent(), relativePath)
   }
 
   deleteWorkersPhoto = async (workerId: string) => {
     const resp = await this.get(`/api/workers/${workerId}`, Id.WORKERS)
     const relativePath = resp.body.photoPath
-    const absolutePath =
-      this.getUploadDirForImagesForCurrentEvent() + relativePath
+    const absolutePath = path.join(
+      this.getUploadDirForImagesForCurrentEvent(),
+      relativePath
+    )
     this.deleteFile(absolutePath)
   }
   //#endregion
@@ -579,6 +578,9 @@ export const Tools = {
 
 //#region Helpers
 export const getFileNameAndType = (photoPath: string) => {
+  const fileType = path.extname(photoPath)
+  const fileName = path.basename(photoPath, fileType)
+  /*
   const lastSlashIndex = photoPath.lastIndexOf('/')
   const lastDotIndex = photoPath.lastIndexOf('.')
   // there should be some / and . in name of photoPath
@@ -586,7 +588,7 @@ export const getFileNameAndType = (photoPath: string) => {
   lastDotIndex.should.not.equal(-1)
   // newly created photo should be named as {id}.{type}
   const fileName = photoPath.slice(lastSlashIndex + 1, lastDotIndex)
-  const fileType = photoPath.slice(lastDotIndex)
+  const fileType = photoPath.slice(lastDotIndex)*/
   return { fileName, fileType }
 }
 //#endregion
