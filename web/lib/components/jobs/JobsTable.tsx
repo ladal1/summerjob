@@ -106,7 +106,7 @@ export function JobsTable({
     []
   )
 
-  const sortedData = useMemo(
+  const sortedData = useMemo<ProposedJobComplete[]>(
     () => [
       ...sortData(pinnedJobs, getSortable, sortOrder),
       ...sortData(waitingJobs, getSortable, sortOrder),
@@ -114,12 +114,12 @@ export function JobsTable({
     [sortOrder, waitingJobs, pinnedJobs, getSortable]
   )
 
-  const sortedCompleted = useMemo(
+  const sortedCompleted = useMemo<ProposedJobComplete[]>(
     () => sortData(completedJobs, getSortable, sortOrder),
     [sortOrder, completedJobs, getSortable]
   )
 
-  const sortedHidden = useMemo(
+  const sortedHidden = useMemo<ProposedJobComplete[]>(
     () => sortData(hiddenJobs, getSortable, sortOrder),
     [sortOrder, hiddenJobs, getSortable]
   )
@@ -144,7 +144,10 @@ export function JobsTable({
             shouldShowJob(job) && (
               <ProposedJobRow
                 key={job.id}
-                job={job}
+                job={{
+                  ...job,
+                  address: job.address.split(',').slice(0, 2).join(', '),
+                }}
                 workerId={workerId}
                 reloadJobs={reloadJobs}
               />
@@ -164,7 +167,10 @@ export function JobsTable({
               shouldShowJob(job) && (
                 <ProposedJobRow
                   key={job.id}
-                  job={job}
+                  job={{
+                    ...job,
+                    address: job.address.split(',').slice(0, 2).join(', '),
+                  }}
                   workerId={workerId}
                   reloadJobs={reloadJobs}
                 />
@@ -185,7 +191,10 @@ export function JobsTable({
               shouldShowJob(job) && (
                 <ProposedJobRow
                   key={job.id}
-                  job={job}
+                  job={{
+                    ...job,
+                    address: job.address.split(',').slice(0, 2).join(', '),
+                  }}
                   workerId={workerId}
                   reloadJobs={reloadJobs}
                 />
