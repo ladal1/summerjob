@@ -57,6 +57,9 @@ enum ToolName {
   HEADPHONES  
   CHAINSAW    
   CIRCULAR_SAW
+  RAKE
+  PITCHFORK
+  SHOVEL
 }
 
 enum Skill {
