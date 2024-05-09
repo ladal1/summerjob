@@ -218,7 +218,10 @@ export function PillSelect({
               )}
               <span
                 className="pill-close"
-                onClick={() => removeSelectedItem(selectedItem)}
+                onClick={e => {
+                  e.nativeEvent.stopImmediatePropagation()
+                  removeSelectedItem(selectedItem)
+                }}
               >
                 <i className="fa-solid fa-xmark" />
               </span>

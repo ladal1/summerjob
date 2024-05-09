@@ -1,5 +1,6 @@
 import { useAPIPostUpdate } from 'lib/fetcher/post'
 import { PostComplete } from 'lib/types/post'
+import { useCallback, useEffect, useState } from 'react'
 
 interface ParticipateProps {
   post: PostComplete
@@ -8,6 +9,15 @@ interface ParticipateProps {
 }
 
 export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
+  const isEnrolled = useCallback(() => {
+    return (
+      post.participants &&
+      post.participants.map(t => t.workerId).includes(userId)
+    )
+  }, [post.participants, userId])
+
+  const [checked, setChecked] = useState(post.isMandatory || isEnrolled)
+
   const { trigger, isMutating } = useAPIPostUpdate(post.id, {
     onSuccess: onUpdated,
   })
@@ -20,12 +30,9 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
     return post.isMandatory || isMutating
   }
 
-  const isEnrolled =
-    post.participants && post.participants.map(t => t.workerId).includes(userId)
-
-  const defaultChecked = () => {
-    return isEnrolled || post.isMandatory
-  }
+  useEffect(() => {
+    setChecked(post.isMandatory || isEnrolled)
+  }, [isEnrolled, post.isMandatory])
 
   return (
     <>
@@ -44,10 +51,10 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
             type="checkbox"
             id={post.id}
             disabled={isDisabled()}
-            defaultChecked={defaultChecked()}
-            onClick={e => {
+            checked={checked}
+            onChange={e => {
               e.stopPropagation()
-              triggerParticipate(!isEnrolled)
+              triggerParticipate(!checked)
             }}
           />
         </div>

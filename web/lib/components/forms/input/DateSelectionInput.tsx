@@ -1,25 +1,33 @@
-import { UseFormRegisterReturn } from 'react-hook-form'
-import DateSelection from '../DateSelection'
-import { Label } from '../Label'
 import { DateBool } from 'lib/data/dateSelectionType'
+import {
+  FieldValues,
+  UseFormRegisterReturn,
+  UseFormSetValue,
+} from 'react-hook-form'
+import { Label } from '../Label'
+import DateSelection from '../DateSelection'
 
-interface DateSelectionInputProps {
+interface DateSelectionInputProps<FormData extends FieldValues> {
   id: string
   label: string
   register: () => UseFormRegisterReturn
+  setValue?: UseFormSetValue<FormData>
   days: DateBool[][]
   disableAfter?: number
+  allowSpecialButtons?: boolean
   margin?: boolean
 }
 
-export const DateSelectionInput = ({
+export const DateSelectionInput = <FormData extends FieldValues>({
   id,
   label,
   register,
+  setValue,
   days,
   disableAfter = undefined,
+  allowSpecialButtons = false,
   margin = true,
-}: DateSelectionInputProps) => {
+}: DateSelectionInputProps<FormData>) => {
   return (
     <div className="d-flex flex-column m-0">
       <Label id={id} label={label} margin={margin} />
@@ -28,6 +36,8 @@ export const DateSelectionInput = ({
         days={days}
         disableAfter={disableAfter}
         register={register}
+        setValue={setValue}
+        allowSpecialButtons={allowSpecialButtons}
       />
     </div>
   )

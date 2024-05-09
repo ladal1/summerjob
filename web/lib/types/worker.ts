@@ -60,6 +60,9 @@ export const WorkerCreateSchema = z
           .positive({ message: err.nonPositiveNumber }),
         z.nan(),
       ])
+      .openapi({
+        type: 'number',
+      })
       .nullable()
       .optional(),
     photoFile: z

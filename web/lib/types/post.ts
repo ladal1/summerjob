@@ -190,41 +190,56 @@ export function deserializePostsDates(post: PostComplete) {
   return post
 }
 
-export const PostFilterSchema = z.object({
-  availability: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
-  timeFrom: z
-    .string()
-    .refine(
-      time => time === null || time.length === 0 || validateTimeInput(time),
-      {
-        message: err.invalidRegexTime,
-      }
-    )
-    .transform(time => {
-      if (time !== null && time.length === 0) {
-        return null
-      }
-      return time
-    })
-    .nullable(),
-  timeTo: z
-    .string()
-    .refine(
-      time => time === null || time.length === 0 || validateTimeInput(time),
-      {
-        message: err.invalidRegexTime,
-      }
-    )
-    .transform(time => {
-      if (time !== null && time.length === 0) {
-        return null
-      }
-      return time
-    })
-    .nullable(),
-  tags: z.array(z.nativeEnum(PostTag)).optional(),
-  participate: z.boolean(),
-})
+export const PostFilterSchema = z
+  .object({
+    availability: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
+    timeFrom: z
+      .string()
+      .refine(
+        time => time === null || time.length === 0 || validateTimeInput(time),
+        {
+          message: err.invalidRegexTime,
+        }
+      )
+      .transform(time => {
+        if (time !== null && time.length === 0) {
+          return null
+        }
+        return time
+      })
+      .nullable(),
+    timeTo: z
+      .string()
+      .refine(
+        time => time === null || time.length === 0 || validateTimeInput(time),
+        {
+          message: err.invalidRegexTime,
+        }
+      )
+      .transform(time => {
+        if (time !== null && time.length === 0) {
+          return null
+        }
+        return time
+      })
+      .nullable(),
+    tags: z.array(z.nativeEnum(PostTag)).optional(),
+    participate: z.boolean(),
+    showAll: z.boolean(),
+  })
+  .superRefine((value, ctx) => {
+    if (
+      value.timeFrom !== null &&
+      value.timeTo !== null &&
+      value.timeFrom.localeCompare(value.timeTo) > 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: err.timeMoreThanOrEqualOtherTime,
+        path: ['timeFrom'],
+      })
+    }
+  })
 
 export type PostFilterDataInput = z.input<typeof PostFilterSchema>
 export type PostFilterData = z.infer<typeof PostFilterSchema>

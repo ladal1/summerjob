@@ -37,7 +37,10 @@ export const SortPostsBy = ({
         <SortPostsModal
           sorts={sorts}
           selected={selected}
-          onSelected={onSelected}
+          onSelected={(sort: SortObject) => {
+            onSelected(sort)
+            onCloseModal()
+          }}
           onClose={onCloseModal}
         />
       )}

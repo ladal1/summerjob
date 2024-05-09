@@ -7,11 +7,10 @@ import { PostFilterSchema } from 'lib/types/post'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
-import FormWarning from '../forms/FormWarning'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { PillSelectInput } from '../forms/input/PillSelectInput'
-import { Label } from '../forms/Label'
+import { TimeInput } from '../forms/input/TimeInput'
 import { Modal, ModalSize } from '../modal/Modal'
 
 const schema = PostFilterSchema
@@ -44,6 +43,7 @@ export const FilterPostsModal = ({
       timeTo: filters.timeTo,
       tags: filters.tags,
       participate: filters.participate,
+      showAll: filters.showAll,
     },
   })
   const onSubmit = (dataForm: PostFilterForm) => {
@@ -103,35 +103,19 @@ export const FilterPostsModal = ({
             label="Platné pro dny"
             register={() => register('availability')}
             days={allDates}
+            setValue={setValue}
+            allowSpecialButtons={true}
             margin={false}
           />
         </div>
-        <Label id="timeFrom" label="Čas" />
-        <div className="d-flex w-50">
-          <input
-            className="form-control smj-input p-0 fs-5"
-            id="timeFrom"
-            placeholder="00:00"
-            type="time"
-            {...register('timeFrom')}
-          />
-          <span className="ps-4 pe-4">-</span>
-          <input
-            className="form-control smj-input p-0 fs-5"
-            id="timeTo"
-            placeholder="00:00"
-            type="time"
-            {...register('timeTo')}
-          />
-        </div>
-        {(errors.timeFrom || errors.timeTo) && (
-          <FormWarning
-            message={
-              (errors?.timeFrom?.message as string | undefined) ||
-              (errors?.timeTo?.message as string | undefined)
-            }
-          />
-        )}
+        <TimeInput
+          label="Čas"
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          timeFromId="timeFrom"
+          timeToId="timeTo"
+        />
         <PillSelectInput
           id="tags"
           label="Tagy"
@@ -150,6 +134,11 @@ export const FilterPostsModal = ({
               id: 'participate',
               icon: 'fas fa-people-pulling',
               label: 'Účastním se',
+            },
+            {
+              id: 'showAll',
+              icon: 'fas fa-eye',
+              label: 'Zobrazit všechny příspěvky bez ohledu na den',
             },
           ]}
         />

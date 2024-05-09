@@ -135,12 +135,19 @@ export default function PostsClientPage({
   const selectedDaysQ = searchParams?.get('days')
 
   const today = () => {
-    const todayDate = new Date()
+    const todayDate = new Date(
+      new Date().setHours(
+        firstDay.getHours(),
+        firstDay.getMinutes(),
+        firstDay.getSeconds(),
+        firstDay.getMilliseconds()
+      )
+    )
     const todayDay = {
       id: todayDate.toJSON(),
-      day: new Date(todayDate.setHours(firstDay.getHours())),
+      day: new Date(todayDate),
     }
-    if (days.includes(todayDay)) {
+    if (days.some(day => day.id === todayDay.id)) {
       return [todayDay]
     }
     return days
@@ -181,6 +188,15 @@ export default function PostsClientPage({
 
   const [participate, setParticipate] = useState(
     participateQ ? getBoolean(participateQ) : false
+  )
+
+  //#endregion
+
+  //#region ShowAll
+
+  const showAllQ = searchParams?.get('show')
+  const [showAll, setShowAll] = useState(
+    showAllQ ? getBoolean(showAllQ) : false
   )
 
   //#endregion
@@ -226,6 +242,7 @@ export default function PostsClientPage({
     timeTo: timeTo,
     tags: tags,
     participate: participate,
+    showAll: showAll,
   })
 
   useMemo(() => {
@@ -256,6 +273,10 @@ export default function PostsClientPage({
     setTags(filters.tags)
   }, [filters.tags])
 
+  useMemo(() => {
+    setShowAll(filters.showAll)
+  }, [filters.showAll])
+
   //#endregion
 
   // replace url with new query parameters
@@ -270,6 +291,7 @@ export default function PostsClientPage({
         timeFrom: timeFrom === null ? '' : timeFrom,
         timeTo: timeTo === null ? '' : timeTo,
         tags: tags?.join(';') ?? '',
+        showAll: `${showAll}`,
       })}`,
       {
         scroll: false,
@@ -284,6 +306,7 @@ export default function PostsClientPage({
     timeFrom,
     timeTo,
     tags,
+    showAll,
   ])
 
   const [pinnedPosts, otherPosts] = useMemo(() => {
@@ -314,6 +337,7 @@ export default function PostsClientPage({
       normalizeString(search).trimEnd(),
       selectedDays,
       participate,
+      showAll,
       timeFrom,
       timeTo,
       tags,
@@ -325,6 +349,7 @@ export default function PostsClientPage({
     search,
     selectedDays,
     participate,
+    showAll,
     timeFrom,
     timeTo,
     tags,
@@ -409,7 +434,7 @@ export default function PostsClientPage({
           </div>
         </div>
         <div className="row">
-          <div className="col-md-3">
+          <div className="col-lg-4">
             <PostType title="Obecné">
               {regularPosts.map((item, index) => (
                 <div key={index} className="pb-1">
@@ -423,7 +448,7 @@ export default function PostsClientPage({
               ))}
             </PostType>
           </div>
-          <div className="col">
+          <div className="col-lg">
             <PostType title="Časové">
               {timePosts.map((item, index) => (
                 <React.Fragment key={`time-${index}`}>
@@ -475,6 +500,7 @@ function filterPosts(
   text: string,
   selectedDays: Day[],
   participate: boolean,
+  showAll: boolean,
   timeFrom: string | null,
   timeTo: string | null,
   tags: PostTag[] | undefined,
@@ -491,6 +517,9 @@ function filterPosts(
       return true
     })
     .filter(post => {
+      if (showAll) {
+        return true
+      }
       if (selectedDays.length === 0) {
         return post.availability === undefined || post.availability.length === 0
       } else {

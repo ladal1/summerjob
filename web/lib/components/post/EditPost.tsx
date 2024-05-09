@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
-import FormWarning from '../forms/FormWarning'
+import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { MapInput } from '../forms/input/MapInput'
@@ -21,8 +21,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
-import { Label } from '../forms/Label'
-import { Form } from '../forms/Form'
+import { TimeInput } from '../forms/input/TimeInput'
 
 const schema = PostUpdateSchema
 type PostForm = z.input<typeof schema>
@@ -214,32 +213,14 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
             days={allDates}
           />
         </div>
-        <Label id="timeFrom" label="Čas" />
-        <div className="d-flex w-50">
-          <input
-            className="form-control smj-input p-0 fs-5"
-            id="timeFrom"
-            placeholder="00:00"
-            type="time"
-            {...register('timeFrom')}
-          />
-          <span className="ps-4 pe-4">-</span>
-          <input
-            className="form-control smj-input p-0 fs-5"
-            id="timeTo"
-            placeholder="00:00"
-            type="time"
-            {...register('timeTo')}
-          />
-        </div>
-        {(errors.timeFrom || errors.timeTo) && (
-          <FormWarning
-            message={
-              (errors?.timeFrom?.message as string | undefined) ||
-              (errors?.timeTo?.message as string | undefined)
-            }
-          />
-        )}
+        <TimeInput
+          label="Čas"
+          register={register}
+          errors={errors}
+          setValue={setValue}
+          timeFromId="timeFrom"
+          timeToId="timeTo"
+        />
         <MapInput
           address={{
             id: 'address',
