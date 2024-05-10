@@ -26,16 +26,22 @@ export const OtherAttributesInput = <FormData extends FieldValues>({
 
       {objects.map(item => (
         <React.Fragment key={item.id}>
-          <div className="form-check align-self-center align-items-center d-flex gap-2 mt-2">
-            <input
-              className="form-check-input smj-checkbox"
-              type="checkbox"
-              id={item.id}
-              {...register(item.id as Path<FormData>)}
-            />
-            <label className="form-check-label ms-2" htmlFor={item.id}>
-              <IconAndLabel icon={item.icon} label={item.label} />
-            </label>
+          <div className="mt-2">
+            <div className="d-flex align-items-start gap-3">
+              <div>
+                <input
+                  className="form-check-input smj-checkbox "
+                  type="checkbox"
+                  id={item.id}
+                  {...register(item.id as Path<FormData>)}
+                />
+              </div>
+              <div>
+                <label className="form-check-label" htmlFor={item.id}>
+                  <IconAndLabel icon={item.icon} label={item.label} />
+                </label>
+              </div>
+            </div>
           </div>
         </React.Fragment>
       ))}

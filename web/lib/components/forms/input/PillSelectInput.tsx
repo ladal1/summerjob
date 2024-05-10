@@ -1,11 +1,10 @@
-import { FieldErrors, FieldValues } from 'react-hook-form'
-import { Label } from '../Label'
-import React from 'react'
-import FormWarning from '../FormWarning'
 import {
   PillSelect,
   PillSelectItem,
 } from 'lib/components/filter-select/PillSelect'
+import { FieldErrors, FieldValues } from 'react-hook-form'
+import FormWarning from '../FormWarning'
+import { Label } from '../Label'
 
 interface PillSelectInputProps<FormData extends FieldValues> {
   id: string

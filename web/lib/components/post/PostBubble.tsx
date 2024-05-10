@@ -37,12 +37,10 @@ export const PostBubble = ({
         onClick={() => setIsOpenedInfoModal(true)}
       >
         <div className="p-3">
-          <div className="d-flex justify-content-between align-items-baseline">
-            <span className="me-4">
-              <h4>{item.name}</h4>
-            </span>
+          <div className="d-flex justify-content-between gap-3">
+            <h4>{item.name}</h4>
             {onUpdated && (
-              <div className="allign-self-end">
+              <div className="">
                 <PostBubbleActions
                   post={item}
                   advancedAccess={advancedAccess}

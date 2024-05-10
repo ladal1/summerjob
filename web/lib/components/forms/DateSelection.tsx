@@ -1,14 +1,17 @@
 import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
 import React, { useCallback, useEffect, useState } from 'react'
-import { UseFormRegisterReturn } from 'react-hook-form'
+import { UseFormRegisterReturn, UseFormSetValue } from 'react-hook-form'
 import CallSMJTeamModal from '../modal/CallSMJTeamModal'
+import { InputActionButton } from './InputActionButton'
 
 interface DateSelectionProps {
   name: string
   days: DateBool[][]
   disableAfter?: number
   register: () => UseFormRegisterReturn
+  setValue?: UseFormSetValue<any>
+  allowSpecialButtons: boolean
 }
 
 export default function DateSelection({
@@ -16,6 +19,8 @@ export default function DateSelection({
   days,
   disableAfter = undefined,
   register,
+  setValue,
+  allowSpecialButtons,
 }: DateSelectionProps) {
   const firstDay = days[0][0].date
   const lastDay = days[days.length - 1][days[0].length - 1].date
@@ -71,9 +76,47 @@ export default function DateSelection({
 
   //#endregion
 
+  //#region Special buttons
+
+  const clearAll = () => {
+    if (setValue === undefined) {
+      return
+    }
+    setValue(name, [], { shouldDirty: true, shouldValidate: true })
+  }
+
+  const selectAll = () => {
+    if (setValue === undefined) {
+      return
+    }
+    const allSelectedDays = days
+      .flat()
+      .filter(day => !day.isDisabled)
+      .map(day => day.date.toJSON())
+    setValue(name, allSelectedDays, { shouldDirty: true, shouldValidate: true })
+  }
+
+  //#endregion
+
   return (
     <div className="container p-0 m-0">
-      <label className="form-label fw-normal fs-5">{label}</label>
+      <div className="d-flex justify-content-between align-items-baseline gap-3">
+        <label className="form-label fw-normal fs-5">{label}</label>
+        {allowSpecialButtons && (
+          <div className="d-inline-flex gap-2">
+            <InputActionButton
+              className="fas fa-xmark smj-action-delete"
+              onClick={clearAll}
+              title="Vypnout všechny dny"
+            />
+            <InputActionButton
+              className="fas fa-check smj-action-complete"
+              onClick={selectAll}
+              title="Zvolit všechny dny"
+            />
+          </div>
+        )}
+      </div>
       <div className="row gx-2">
         {weekDays.map(day => (
           <React.Fragment key={day}>

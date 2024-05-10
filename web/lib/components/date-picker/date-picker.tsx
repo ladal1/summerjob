@@ -24,7 +24,10 @@ export default function SimpleDatePicker({
       >
         <i className="fas fa-chevron-left"></i>
       </button>
-      <span className="form-control p-2 text-center align-self-center border-bottom">
+      <span
+        className="form-control p-2 text-center align-self-center border-bottom"
+        style={{ minWidth: '200px' }}
+      >
         {formatDateLong(initialDate)}
       </span>
       <button

@@ -131,24 +131,26 @@ export default function AddJobToPlanForm({
         <label className="form-label fw-bold" htmlFor="job-filter">
           Joby:
         </label>
-        <Controller
-          control={control}
-          name="jobs"
-          render={({ field: { onChange, value, ref } }) => (
-            <Select
-              ref={ref}
-              value={value?.map(formDataToItem)}
-              options={items}
-              onChange={val => onChange(val.map(v => itemToFormData(v)))}
-              placeholder={'Vyberte joby...'}
-              formatOptionLabel={formatOptionLabel}
-              isMulti
-              getOptionValue={option => option.searchable}
-              styles={colourStyles}
-              closeMenuOnSelect={false}
-            />
-          )}
-        />
+        <div onClick={e => e.nativeEvent.stopImmediatePropagation()}>
+          <Controller
+            control={control}
+            name="jobs"
+            render={({ field: { onChange, value, ref } }) => (
+              <Select
+                ref={ref}
+                value={value?.map(formDataToItem)}
+                options={items}
+                onChange={val => onChange(val.map(v => itemToFormData(v)))}
+                placeholder={'Vyberte joby...'}
+                formatOptionLabel={formatOptionLabel}
+                isMulti
+                getOptionValue={option => option.searchable}
+                styles={colourStyles}
+                closeMenuOnSelect={false}
+              />
+            )}
+          />
+        </div>
 
         <input type="hidden" {...register('jobs')} />
         {errors.jobs && <FormWarning message={errors.jobs.message} />}

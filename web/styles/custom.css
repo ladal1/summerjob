@@ -27,8 +27,17 @@
 .smj-white-bubble {
   background-color: var(--white);
 }
+
 .smj-white-bubble:hover {
   background-color: var(--white-hover);
+}
+
+.smj-color-bubble-pinned:hover .pill-static {
+  background-color: #b6b6b6;
+}
+
+.smj-color-bubble:hover .pill-static {
+  background-color: #b6b6b6;
 }
 
 .smj-dark {
@@ -77,7 +86,7 @@
   }
 }
 
-@media (min-width: 1495px) {
+@media (min-width: 1522px) {
   .navbar-nav .navbar-div {
     padding-top: 6px;
     padding-bottom: 6px;

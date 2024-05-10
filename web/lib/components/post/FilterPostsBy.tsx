@@ -21,7 +21,9 @@ export const FilterPostsBy = ({
   const activeFilter: number = useMemo(() => {
     let count = 0
 
-    if (filters.availability.length !== 0) {
+    if (filters.showAll) {
+      count++
+    } else if (filters.availability.length !== 0) {
       count++
     }
     if (filters.tags && filters.tags.length !== 0) {
