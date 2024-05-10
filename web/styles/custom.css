@@ -234,7 +234,7 @@ img.smj-nav-logo {
 
 .smj-sticky-col-right {
   position: sticky;
-  z-index: 0;
+  z-index: 501;
   right: 0;
   box-shadow: -5px 0px 5px -3px var(--shadow) !important;
 }
@@ -753,6 +753,3 @@ img.smj-nav-logo {
   background-color: #fdc345;
 }
 
-.modal {
-  margin-top: 10%;
-}
