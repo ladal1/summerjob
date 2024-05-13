@@ -24,7 +24,9 @@ export const PostBubbleActions = ({
     return (
       <>
         <div>Opravdu chcete smazat příspěvek {post.name}?</div>
-        Dojde také k odhlášení všech uživatelů z této události.
+        {(post.isOpenForParticipants || post.isMandatory) && (
+          <div>Dojde také k odhlášení všech uživatelů z této události.</div>
+        )}
       </>
     )
   }
@@ -55,7 +57,7 @@ export const PostBubbleActions = ({
           <DeleteIcon
             onClick={trigger}
             isBeingDeleted={isMutating}
-            showConfirmation={post.isOpenForParticipants || post.isMandatory}
+            showConfirmation={true}
             getConfirmationMessage={confirmationText}
           />
           {error && (
