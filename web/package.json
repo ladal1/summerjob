@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^4.5.3",
-    "@hookform/resolvers": "^2.9.10",
+    "@hookform/resolvers": "^3.4.2",
     "@next-auth/prisma-adapter": "^1.0.5",
     "@prisma/client": "^5.10.2",
     "@types/amqplib": "^0.10.1",
