@@ -22,7 +22,7 @@
     "@types/amqplib": "^0.10.1",
     "amqplib": "^0.10.3",
     "dotenv": "^16.0.3",
-    "husky": "^8.0.3"
+    "husky": "^9.1.2"
   },
   "devDependencies": {
     "@ackee/styleguide-backend-config": "^0.3.13",
