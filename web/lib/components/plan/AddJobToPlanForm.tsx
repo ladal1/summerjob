@@ -131,20 +131,26 @@ export default function AddJobToPlanForm({
         <label className="form-label fw-bold" htmlFor="job-filter">
           Joby:
         </label>
-        <div onClick={e => e.nativeEvent.stopImmediatePropagation()}>
-          <Controller
+        <div
+          onClick={(e: React.MouseEvent) =>
+            e.nativeEvent.stopImmediatePropagation()
+          }
+        >
+          <Controller<ActiveJobCreateFormData, 'jobs'>
             control={control}
             name="jobs"
             render={({ field: { onChange, value, ref } }) => (
-              <Select
+              <Select<SelectItem, true>
                 ref={ref}
                 value={value?.map(formDataToItem)}
                 options={items}
-                onChange={val => onChange(val.map(v => itemToFormData(v)))}
+                onChange={(val: readonly SelectItem[]) =>
+                  onChange(val.map(v => itemToFormData(v)))
+                }
                 placeholder={'Vyberte joby...'}
                 formatOptionLabel={formatOptionLabel}
                 isMulti
-                getOptionValue={option => option.searchable}
+                getOptionValue={(option: SelectItem) => option.searchable}
                 styles={colourStyles}
                 closeMenuOnSelect={false}
               />
