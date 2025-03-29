@@ -188,11 +188,11 @@ export default function ApplicationAdminDetailPage() {
               </tr>
               <tr>
                 <th scope="row">Nářadí, se kterým umí zacházet</th>
-                <td>{application.toolsSkills}</td>
+                <td>{application.toolsSkills || 'Neuvedeno'}</td>
               </tr>
               <tr>
                 <th scope="row">Nářadí, které přiveze</th>
-                <td>{application.toolsBringing}</td>
+                <td>{application.toolsBringing || 'Neuvedeno'}</td>
               </tr>
               <tr>
                 <th scope="row">Zúčastnil se dříve</th>

@@ -135,3 +135,24 @@ export async function deleteSummerJobEvent(id: string) {
   })
   return event
 }
+
+export async function toggleApplicationOpen(id: string) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id },
+  })
+
+  console.log(event)
+
+  if (!event) {
+    throw new InvalidDataError('Event not found')
+  }
+
+  const updated = await prisma.summerJobEvent.update({
+    where: { id },
+    data: {
+      isApplicationOpen: !event.isApplicationOpen,
+    },
+  })
+
+  return updated.isApplicationOpen
+}

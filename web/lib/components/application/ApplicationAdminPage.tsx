@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import ApplicationToggleButton from './ApplicationToggleButton'
 
 interface ApplicationListItem {
   id: string
@@ -31,9 +32,17 @@ interface ApplicationListItem {
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED'
 }
 
+interface ApplicationAdminPageProps {
+  eventId: string
+  isApplicationOpen: boolean
+}
+
 type ApplicationStatusFilter = 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED'
 
-export default function ApplicationAdminPage() {
+export default function ApplicationAdminPage({
+  eventId,
+  isApplicationOpen,
+}: ApplicationAdminPageProps) {
   const [applications, setApplications] = useState<ApplicationListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -46,6 +55,8 @@ export default function ApplicationAdminPage() {
   const isAllSelected =
     applications.length > 0 &&
     applications.every(app => selectedIds.includes(app.id))
+
+  console.log(eventId)
 
   useEffect(() => {
     const load = async () => {
@@ -206,6 +217,10 @@ export default function ApplicationAdminPage() {
 
   return (
     <div className="container mt-2">
+      <ApplicationToggleButton
+        eventId={eventId}
+        initialValue={isApplicationOpen}
+      />
       <div className="d-flex justify-content-between align-items-center mb-3">
         <select
           className="form-select form-select-sm"
@@ -249,7 +264,7 @@ export default function ApplicationAdminPage() {
       ) : (
         <>
           {applications.length === 0 ? (
-            <p>Žádná přihláška</p>
+            <p className="text-center text-secondary">Žádná přihláška</p>
           ) : (
             <>
               <div className="d-flex gap-2 my-3">

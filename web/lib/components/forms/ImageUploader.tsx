@@ -23,6 +23,10 @@ interface ImageUploaderProps<FormData extends FieldValues> {
   maxPhotos?: number
   maxFileSize?: number
   mandatory?: boolean
+  setError?: (
+    name: Path<FormData>,
+    error: { type: string; message?: string }
+  ) => void
 }
 
 export const ImageUploader = <FormData extends FieldValues>({
@@ -34,6 +38,7 @@ export const ImageUploader = <FormData extends FieldValues>({
   registerPhoto,
   removeExistingPhoto,
   removeNewPhoto,
+  setError,
   multiple = false,
   maxPhotos = 1,
   mandatory = false,
@@ -50,6 +55,21 @@ export const ImageUploader = <FormData extends FieldValues>({
 
   const onFileUploadChange = (fileInput: FileList | null) => {
     if (!fileInput || fileInput.length === 0) {
+      return
+    }
+
+    const allFiles = Array.from(fileInput)
+    const invalidFile = allFiles.find(
+      file => !file.type.startsWith('image') || file.size > maxFileSize
+    )
+
+    if (invalidFile && setError) {
+      setError(id, {
+        type: 'manual',
+        message: !invalidFile.type.startsWith('image')
+          ? 'Pouze obrázky jsou povolené'
+          : 'Maximální velikost souboru je 10 MB',
+      })
       return
     }
 
