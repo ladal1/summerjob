@@ -378,7 +378,7 @@ export default function ApplicationsPage({
                 label={
                   <>
                     Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu
-                    (modrá/černá). Objednávka je závazná.{' '}
+                    (modrá/červená/zelená). Objednávka je závazná.{' '}
                     <a
                       href="https://summerjob.eu/merch"
                       target="_blank"
