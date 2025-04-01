@@ -1,6 +1,8 @@
+import { ReactNode } from 'react'
+
 interface LabelProps {
   id: string
-  label?: string
+  label?: string | ReactNode
   margin?: boolean // generally very used part of className
   className?: string // other aditional part to className
   mandatory?: boolean

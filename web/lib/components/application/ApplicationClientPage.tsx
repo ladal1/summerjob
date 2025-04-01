@@ -309,6 +309,7 @@ export default function ApplicationsPage({
                 mandatory
                 setError={setError}
                 clearErrors={clearErrors}
+                defaultValue={startDate}
               />
             </div>
             <div className="w-100 w-md-45">
@@ -322,6 +323,7 @@ export default function ApplicationsPage({
                 mandatory
                 setError={setError}
                 clearErrors={clearErrors}
+                defaultValue={endDate}
               />
             </div>
           </div>
@@ -373,7 +375,19 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
-                label="Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu (modrá/černá). Objednávka je závazná."
+                label={
+                  <>
+                    Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu
+                    (modrá/černá). Objednávka je závazná.{' '}
+                    <a
+                      href="https://summerjob.eu/merch"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Prohlédnout trička
+                    </a>
+                  </>
+                }
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
                 placeholder="XS, S, M, L, XL, XXL"
@@ -442,7 +456,10 @@ export default function ApplicationsPage({
               />
               <p className="mt-3 text-muted fs-6 fw-lighter">
                 Pokud se kvůli výši příspěvku nemůžeš z finančních důvodů
-                zúčastnit, ozvi se nám na email: summerjob@summerjob.eu
+                zúčastnit, ozvi se nám na email:{' '}
+                <a href="mailto:summerjob@summerjob.eu">
+                  summerjob@summerjob.eu
+                </a>
               </p>
             </div>
           </div>

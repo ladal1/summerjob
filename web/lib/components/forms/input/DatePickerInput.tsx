@@ -21,6 +21,7 @@ interface DatePickerInputProps {
   mandatory?: boolean
   minDate?: string
   maxDate?: string
+  defaultValue?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setError: UseFormSetError<any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,11 +36,13 @@ export function DatePickerInput({
   mandatory = false,
   minDate,
   maxDate,
+  defaultValue,
   setError,
   clearErrors,
 }: DatePickerInputProps) {
   const parsedMin = minDate ? new Date(minDate) : undefined
   const parsedMax = maxDate ? new Date(maxDate) : undefined
+  const parsedDefaultValue = defaultValue ? new Date(defaultValue) : undefined
 
   return (
     <div className="relative w-100">
@@ -54,7 +57,7 @@ export function DatePickerInput({
             // @ts-expect-error: date-fns locale typing conflict
             locale={cs}
             placeholderText="Vyberte datum"
-            selected={field.value ? new Date(field.value) : null}
+            selected={field.value ? new Date(field.value) : parsedDefaultValue}
             onChange={date => {
               if (!date) {
                 setError(id, { message: 'Datum je povinné' })
