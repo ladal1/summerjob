@@ -25,7 +25,10 @@ export const ApplicationCreateSchema = z
       .string()
       .min(9, 'Telefonní číslo je povinné')
       .max(20, 'Telefonní číslo je příliš dlouhé')
-      .refine(value => /^[0-9+]+$/.test(value), 'Nesprávné telefonní číslo'),
+      .refine(
+        value => /^[0-9+ ]+$/.test(value),
+        'Nesprávný formát telefonního čísla'
+      ),
     email: z
       .string()
       .email('Neplatný email')
