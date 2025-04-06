@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useMemo } from 'react'
 import DatePicker from 'react-datepicker'
 import {
   Controller,
@@ -42,7 +42,17 @@ export function DatePickerInput({
 }: DatePickerInputProps) {
   const parsedMin = minDate ? new Date(minDate) : undefined
   const parsedMax = maxDate ? new Date(maxDate) : undefined
-  const parsedDefaultValue = defaultValue ? new Date(defaultValue) : undefined
+  const parsedDefaultValue = useMemo(
+    () => (defaultValue ? new Date(defaultValue) : undefined),
+    [defaultValue]
+  )
+
+  // Validate default value on component mount
+  useEffect(() => {
+    if (parsedDefaultValue && mandatory) {
+      clearErrors(id)
+    }
+  }, [parsedDefaultValue, mandatory, clearErrors, id])
 
   return (
     <div className="relative w-100">
@@ -51,6 +61,7 @@ export function DatePickerInput({
       <Controller
         control={control}
         name={id}
+        defaultValue={defaultValue}
         render={({ field }) => (
           <DatePicker
             id={id}
@@ -66,6 +77,11 @@ export function DatePickerInput({
 
               clearErrors(id)
               field.onChange(date.toISOString())
+            }}
+            onSelect={date => {
+              if (date) {
+                clearErrors(id)
+              }
             }}
             dateFormat="dd.MM.yyyy"
             minDate={parsedMin}
