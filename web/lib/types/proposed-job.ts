@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { Serialized } from './serialize'
 import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
-import { Allergy, JobType } from '../prisma/client'
+import { WorkAllergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import {
   ToolCompleteSchema,
@@ -43,7 +43,7 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 const ProposedJobBasicSchema = z
   .object({
     areaId: z.string({ required_error: err.emptyAreaId }).nullable(),
-    allergens: z.array(z.nativeEnum(Allergy)),
+    allergens: z.array(z.nativeEnum(WorkAllergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
     name: z

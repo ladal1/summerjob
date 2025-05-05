@@ -1,4 +1,3 @@
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
 import type { Worker } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
@@ -7,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { ExpandableRow } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
 import MoveWorkerModal from './MoveWorkerModal'
+import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 
 const NO_JOB = 'NO_JOB'
 
@@ -155,8 +155,10 @@ function formatWorkerData(
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
   }`
-  const allergies = worker.allergies
-  const allergiesMapped = allergies.map(key => allergyMapping[key])
+
+  const allergies = [
+    ...worker.workAllergies.map(key => workAllergyMapping[key]),
+  ]
 
   return [
     { content: name },
@@ -176,7 +178,7 @@ function formatWorkerData(
         </>
       ),
     },
-    { content: allergiesMapped.join(', ') },
+    { content: allergies.join(', ') },
     {
       content: (
         <span

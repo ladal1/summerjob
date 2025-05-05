@@ -748,7 +748,10 @@ export class BasicPlanner implements Planner {
    * @returns True if the worker is allergic to any of the allergens, false otherwise.
    */
   isAllergicTo(worker: WorkerComplete, allergens: string[]): boolean {
-    return worker.allergies.some(id => allergens.includes(id))
+    return (
+      worker.foodAllergies.some((id: string) => allergens.includes(id)) ||
+      worker.workAllergies.some((id: string) => allergens.includes(id))
+    )
   }
 
   /**
