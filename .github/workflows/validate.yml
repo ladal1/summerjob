@@ -53,7 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools wheel build
           pip install -r src/requirements.txt ruff
-
+        timeout-minutes: 3
 
       - name: Run linter
         run: ruff .
