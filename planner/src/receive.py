@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import os
-import pika
 from planner.src.solver import generate_plan_from_message
 from rabbitmq_setup import setup_connection, QUEUE_NAME
 

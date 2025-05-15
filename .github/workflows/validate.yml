@@ -9,29 +9,29 @@ env:
   DATABASE_URL: 'postgresql://test:test@localhost:5432/test?schema=public'
 
 jobs:
-  # lint-web:
-  #   name: Lint web
-  #   strategy:
-  #     matrix:
-  #       node-version: [18]
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./web
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v3
+  lint-web:
+    name: Lint web
+    strategy:
+      matrix:
+        node-version: [18]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
 
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Run tests
-  #       run: npm run lint
+      - name: Run tests
+        run: npm run lint
 
   lint-planner:
     name: Lint planner
@@ -53,31 +53,31 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools wheel build
           pip install -r src/requirements.txt ruff
-        timeout-minutes: 3
+        timeout-minutes: 1
 
       - name: Run linter
         run: ruff check .
 
-  # build-web:
-  #   name: Build web
-  #   strategy:
-  #     matrix:
-  #       node-version: [18]
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./web
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v3
+  build-web:
+    name: Build web
+    strategy:
+      matrix:
+        node-version: [18]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
 
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Run tests
-  #       run: npm run build
+      - name: Run tests
+        run: npm run build

@@ -1,6 +1,5 @@
 import os
 import psycopg2
-from psycopg2 import extras
 from pulp import LpMinimize, LpProblem, lpSum, LpVariable
 import pandas as pd
 import uuid
