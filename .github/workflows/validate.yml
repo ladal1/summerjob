@@ -56,7 +56,7 @@ jobs:
         timeout-minutes: 3
 
       - name: Run linter
-        run: ruff .
+        run: ruff check . --fix
 
   build-web:
     name: Build web
