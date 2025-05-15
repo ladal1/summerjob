@@ -48,9 +48,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt ruff
+        run: pip install -r src/requirements.txt ruff
 
       - name: Run linter
         run: ruff .
