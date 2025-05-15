@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import pika
-from planners.solver import generate_plan_from_message
+from planner.src.solver import generate_plan_from_message
 from rabbitmq_setup import setup_connection, QUEUE_NAME
 
 channel = setup_connection()

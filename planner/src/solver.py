@@ -5,7 +5,7 @@ import pandas as pd
 import uuid
 
 
-from queries import *
+from planner.src.queries import *
 
 
 def dictionarify(query_results):
