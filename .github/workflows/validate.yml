@@ -32,6 +32,7 @@ jobs:
 
       - name: Run tests
         run: npm run lint
+
   lint-planner:
     name: Lint planner
     runs-on: ubuntu-latest
@@ -45,7 +46,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -56,6 +57,7 @@ jobs:
 
       - name: Run linter
         run: ruff .
+
   build-web:
     name: Build web
     strategy:
