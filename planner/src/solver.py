@@ -1,9 +1,14 @@
+import os
 import psycopg2
 from psycopg2 import extras
 from pulp import LpMinimize, LpProblem, lpSum, LpVariable
 import pandas as pd
 import uuid
 
+from dotenv import load_dotenv
+# Load variables from .env
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 from planner.src.queries import *
 
@@ -195,7 +200,7 @@ def generate_rides(received_plan_id, connection):
 
 
 def generate_plan_from_message(received_plan_id):
-    connection = psycopg2.connect("postgresql://username:password@localhost:5432/summerjob",
+    connection = psycopg2.connect(DATABASE_URL,
                                   options="-c search_path=public")
     generate_rides(received_plan_id, connection)
 

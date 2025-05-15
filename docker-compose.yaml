@@ -60,6 +60,8 @@ services:
       - QUEUE_NAME=${QUEUE_NAME}
     networks:
       - summerjob-network
+    image: "ghcr.io/ladal1/summerjob-planner:latest"
+    restart: on-failure:5
 
   summerjob-amqp:
     container_name: summerjob-amqp

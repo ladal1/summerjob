@@ -2,13 +2,7 @@ name: Check valid code
 
 on:
   push:
-    branches:
-      - main
-      - develop
   pull_request:
-    branches:
-      - main
-      - develop
 
 env:
   NEXTAUTH_SECRET: 'test'
