@@ -1,4 +1,4 @@
-import { useApiPostParticipateChange, useAPIPostUpdate } from 'lib/fetcher/post'
+import { useApiPostParticipateChange } from 'lib/fetcher/post'
 import { PostComplete } from 'lib/types/post'
 import { useCallback, useEffect, useState } from 'react'
 

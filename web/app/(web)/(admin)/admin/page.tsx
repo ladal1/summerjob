@@ -18,7 +18,10 @@ export default function AdminPage() {
               <div className="row">
                 <div className="col">
                   <h5>Ročníky</h5>
-                  <p>Nastavit aktuální ročník, upravit oblasti.</p>
+                  <p>
+                    Nastavit aktuální ročník, spravovat přístup k přihláškám,
+                    upravit oblasti.
+                  </p>
                 </div>
                 <div className="col d-flex justify-content-end align-items-center gap-3">
                   <i className="fas fa-chevron-right"></i>
@@ -47,6 +50,20 @@ export default function AdminPage() {
                 <div className="col">
                   <h5>Logy</h5>
                   <p>Prohlédnout si záznamy aktivit.</p>
+                </div>
+                <div className="col d-flex justify-content-end align-items-center gap-3">
+                  <i className="fas fa-chevron-right"></i>
+                </div>
+              </div>
+            </Link>
+            <Link
+              className="list-group-item list-group-item-action"
+              href="/admin/applications"
+            >
+              <div className="row">
+                <div className="col">
+                  <h5>Přihlášky</h5>
+                  <p>Zobrazit přihlášky.</p>
                 </div>
                 <div className="col d-flex justify-content-end align-items-center gap-3">
                   <i className="fas fa-chevron-right"></i>

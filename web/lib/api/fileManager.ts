@@ -9,6 +9,11 @@ export const getWorkersUploadDir = async () => {
   return path.join(uploadDir, '/workers')
 }
 
+export const getApplicationsUploadDir = async () => {
+  const uploadDir = await getUploadDirForImages()
+  return path.join(uploadDir, '/applications')
+}
+
 export const getProposedJobsUploadDir = async () => {
   const uploadDir = await getUploadDirForImagesForCurrentEvent()
   return path.join(uploadDir, '/proposed-jobs')

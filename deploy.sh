@@ -24,6 +24,10 @@ docker exec -t summerjob-db echo "summerjob-db:5432:$POSTGRES_DB:$POSTGRES_USER:
 docker exec -t summerjob-db bash -c "pg_dumpall -c -U $POSTGRES_USER | gzip > $filename"
 docker cp summerjob-db:/$filename backup/$filename
 
+# Apply database migrations
+echo "Applying database migrations"
+docker compose run --rm summerjob-web npx prisma migrate deploy
+
 # Download new docker manifest
 echo "🔖 Downloading new docker compose manifest"
 mv docker-compose.yaml docker-compose.yaml.old

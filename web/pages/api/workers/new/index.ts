@@ -16,7 +16,7 @@ async function post(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  const temporaryName = generateFileName(30) // temporary name for the file
+  const temporaryName = generateFileName(30)
   const uploadDir = await getWorkersUploadDir()
   const { files, json } = await parseFormWithImages(
     req,
@@ -30,11 +30,14 @@ async function post(
     return
   }
   const fileFieldNames = Object.keys(files)
+
   const worker = await createWorker(
     singleWorker,
     fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
   )
+
   await logger.apiRequest(APILogEvent.WORKER_CREATE, 'workers', worker, session)
+
   res.status(201).json(worker)
 }
 

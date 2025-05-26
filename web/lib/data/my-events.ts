@@ -20,6 +20,7 @@ export async function getMyEvents(workerId: string): Promise<PostComplete[]> {
   }
   const posts = await prisma.post.findMany({
     where: {
+      forEventId: activeEvent.id,
       OR: [
         {
           isMandatory: true,

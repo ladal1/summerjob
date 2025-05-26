@@ -20,8 +20,25 @@ async function apiRequest(
   pinoLogger.debug({ type, resourceId, data })
 }
 
+async function apiRequestWithoutSession(
+  type: APILogEvent,
+  resourceId: string,
+  data: object
+) {
+  const payload = JSON.stringify(data)
+  await addLogEvent(
+    'anonymous',
+    'Anonymous User',
+    resourceId,
+    type,
+    payload === '""' ? '' : payload
+  )
+  pinoLogger.debug({ type, resourceId, data })
+}
+
 const logger = {
   apiRequest,
+  apiRequestWithoutSession,
   info: pinoLogger.info.bind(pinoLogger),
   debug: pinoLogger.debug.bind(pinoLogger),
   error: pinoLogger.error.bind(pinoLogger),

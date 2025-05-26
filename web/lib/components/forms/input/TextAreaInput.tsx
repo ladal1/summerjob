@@ -11,6 +11,7 @@ interface TextAreaProps
   id: string
   label: string
   register: () => UseFormRegisterReturn
+  labelClassName?: string
   errors: FieldErrors<FormData>
   margin?: boolean
   mandatory?: boolean
@@ -21,6 +22,7 @@ export const TextAreaInput = ({
   label,
   register,
   errors,
+  labelClassName = '',
   margin = true,
   mandatory = false,
   ...rest
@@ -29,7 +31,13 @@ export const TextAreaInput = ({
 
   return (
     <>
-      <Label id={id} label={label} margin={margin} mandatory={mandatory} />
+      <Label
+        id={id}
+        label={label}
+        margin={margin}
+        mandatory={mandatory}
+        className={labelClassName}
+      />
       <textarea
         id={id}
         className="form-control border smj-textarea p-2 fs-5"

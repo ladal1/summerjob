@@ -10,6 +10,7 @@ interface DateSelectionProps {
   days: DateBool[][]
   disableAfter?: number
   register: () => UseFormRegisterReturn
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue?: UseFormSetValue<any>
   allowSpecialButtons: boolean
 }

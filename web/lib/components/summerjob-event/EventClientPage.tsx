@@ -6,6 +6,8 @@ import AreaList from '../area/AreaList'
 import EditBox from '../forms/EditBox'
 import DeleteEventButton from './DeleteEventButton'
 import SetEventActiveButton from './SetEventActiveButton'
+import ApplicationToggleButton from './ApplicationToggleButton'
+import PasswordProtectionForm from './PasswordProtectionForm'
 
 interface EventClientPageProps {
   sEvent: Serialized
@@ -54,6 +56,28 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
               <DeleteEventButton smjEvent={event} onSuccess={onEventDeleted} />
             </div>
           </EditBox>
+
+          <EditBox>
+            <h4 className="mb-3">Přihlášky</h4>
+            <div className="d-flex justify-content-between align-items-center mt-3 flex-sm-row flex-column">
+              <div className="d-flex flex-column">
+                <label className="fs-5">Povolit přihlášky</label>
+                <p className="text-muted">
+                  Přepnutí otevření či uzavření přihlašování na tento ročník.
+                </p>
+              </div>
+              <ApplicationToggleButton
+                eventId={event.id}
+                initialValue={event.isApplicationOpen}
+              />
+            </div>
+            <hr />
+            <PasswordProtectionForm
+              eventId={event.id}
+              initialEnabled={event.isPasswordProtected}
+            />
+          </EditBox>
+
           <EditBox>
             <AreaList
               areas={event.areas}

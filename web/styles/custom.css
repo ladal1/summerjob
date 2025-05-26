@@ -762,3 +762,47 @@ img.smj-nav-logo {
   background-color: #fdc345;
 }
 
+.w-45 {
+  width: 45% !important;
+}
+
+.infobox {
+  --bs-bg-opacity: 1;
+  background-color: #DAEDFF;
+  padding: 8px;
+  padding-right: 40px;
+  border-radius: 10px;
+}
+
+form.application .light-placeholder + input::placeholder,
+form.application .light-placeholder + textarea::placeholder,
+form.application .light-placeholder + div > input::placeholder,
+form.application input.custom-input::placeholder{
+  color: var(--bs-gray-400);
+  font-size: medium;
+}
+
+.border-start-success {
+  border-left-color: #4bdf3e !important; 
+}
+.border-start-danger {
+  border-left-color: #e75b69 !important; 
+}
+.border-start-warning {
+  border-left-color: #fdcc37 !important; 
+}
+
+@media (min-width: 768px) {
+  .w-md-45 { width: 45% !important; }
+}
+
+.react-datepicker-wrapper,
+.react-datepicker__input-container,
+.react-datepicker__input-container input {
+  width: 100% !important;
+}
+
+.react-datepicker__input-container input::placeholder {
+  color: var(--bs-gray-400) !important;
+  font-size: medium !important;
+}

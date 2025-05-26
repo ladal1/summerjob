@@ -11,6 +11,7 @@ interface FilterSelectInputProps<FormData extends FieldValues> {
   label: string
   placeholder: string
   items: FilterSelectItem[]
+  labelClassName?: string
   errors: FieldErrors<FormData>
   onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem | undefined
@@ -23,6 +24,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   label,
   placeholder,
   items,
+  labelClassName = '',
   errors,
   onSelected,
   defaultSelected,
@@ -33,7 +35,12 @@ export const FilterSelectInput = <FormData extends FieldValues>({
 
   return (
     <div className="d-flex flex-column m-0">
-      <Label id={id} label={label} mandatory={mandatory} />
+      <Label
+        id={id}
+        label={label}
+        mandatory={mandatory}
+        className={labelClassName}
+      />
       <FilterSelect
         id={id}
         placeholder={placeholder}

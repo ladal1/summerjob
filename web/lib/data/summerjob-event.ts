@@ -16,6 +16,7 @@ import {
   unblockRegisteredUsers,
 } from './users'
 import { PrismaTransactionClient } from 'lib/types/prisma'
+import { hash, compare } from 'bcryptjs'
 
 export async function getSummerJobEventById(
   id: string
@@ -134,4 +135,101 @@ export async function deleteSummerJobEvent(id: string) {
     },
   })
   return event
+}
+
+export async function toggleApplicationOpen(id: string) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Event not found')
+  }
+
+  const updated = await prisma.summerJobEvent.update({
+    where: { id },
+    data: {
+      isApplicationOpen: !event.isApplicationOpen,
+    },
+  })
+
+  return updated.isApplicationOpen
+}
+
+export async function setApplicationPasswordProtection(
+  id: string,
+  enable: boolean,
+  password?: string
+): Promise<boolean> {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Event not found')
+  }
+
+  if (enable && !password) {
+    throw new InvalidDataError('Password is required to enable protection')
+  }
+
+  let applicationPasswordHash: string | null = null
+
+  if (enable && password) {
+    applicationPasswordHash = await hash(password, 10)
+  }
+
+  const updated = await prisma.summerJobEvent.update({
+    where: { id },
+    data: {
+      isPasswordProtected: enable,
+      applicationPasswordHash,
+    },
+  })
+
+  return updated.isPasswordProtected
+}
+
+export async function checkApplicationPassword(
+  eventId: string,
+  password: string
+) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id: eventId },
+    select: {
+      isPasswordProtected: true,
+      applicationPasswordHash: true,
+    },
+  })
+
+  if (!event) {
+    throw new Error('Ročník nenalezen')
+  }
+
+  if (!event.isPasswordProtected) {
+    return true
+  }
+
+  if (!password || !event.applicationPasswordHash) {
+    return false
+  }
+
+  const isMatch = await compare(password, event.applicationPasswordHash)
+
+  return isMatch
+}
+
+export async function isApplicationPasswordProtected(
+  eventId: string
+): Promise<boolean> {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id: eventId },
+    select: { isPasswordProtected: true },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Ročník nenalezen')
+  }
+
+  return event.isPasswordProtected
 }

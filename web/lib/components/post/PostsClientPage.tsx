@@ -6,7 +6,6 @@ import {
   compareDates,
   compareTimes,
   datesBetween,
-  formatDateShort,
   formateTime,
   getHourAndMinute,
   normalizeString,

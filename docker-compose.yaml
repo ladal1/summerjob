@@ -47,22 +47,21 @@ services:
   summerjob-planner:
     container_name: summerjob-planner
     hostname: summerjob-planner
-    image: "ghcr.io/ladal1/summerjob-planner:latest"
-    restart: on-failure:5
-    environment:
-      - AMQP_URL=${AMQP_URL}
-      - QUEUE_NAME=${QUEUE_NAME}
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@summerjob-db:5432/${POSTGRES_DB}?schema=public
-    networks:
-      - summerjob-network
     build:
-      context: planner
+      context: ./planner
       dockerfile: Dockerfile
     depends_on:
       summerjob-db:
         condition: service_started
       summerjob-amqp:
         condition: service_healthy
+    environment:
+      - AMQP_URL=${AMQP_URL}
+      - QUEUE_NAME=${QUEUE_NAME}
+    networks:
+      - summerjob-network
+    image: "ghcr.io/ladal1/summerjob-planner:latest"
+    restart: on-failure:5
 
   summerjob-amqp:
     container_name: summerjob-amqp

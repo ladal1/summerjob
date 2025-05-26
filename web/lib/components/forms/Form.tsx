@@ -14,6 +14,7 @@ interface FormProps {
   formId: string
   shouldShowBackButton?: boolean
   children: React.ReactNode
+  saveBar?: boolean
 }
 
 export const Form = ({
@@ -27,6 +28,7 @@ export const Form = ({
   formId,
   shouldShowBackButton = true,
   children,
+  saveBar = true,
 }: FormProps) => {
   const router = useRouter()
   return (
@@ -38,32 +40,35 @@ export const Form = ({
           <div className="bg-white">
             <div className="p-3 pb-2 rounded-bottom">
               {children}
-              <div className="smj-sticky-col-bottom pb-2 mt-3">
-                <div
-                  className={`d-flex ${
-                    shouldShowBackButton
-                      ? 'justify-content-between gap-3'
-                      : 'justify-content-end'
-                  } smj-grey rounded-5 p-2`}
-                >
-                  {shouldShowBackButton && (
-                    <button
-                      className="btn btn-secondary ms-4"
-                      type="button"
-                      onClick={() => router.back()}
-                    >
-                      Zpět
-                    </button>
-                  )}
-                  <input
-                    form={formId}
-                    type={'submit'}
-                    className="btn btn-primary me-4"
-                    value={'Uložit'}
-                    disabled={isInputDisabled}
-                  />
+
+              {saveBar && (
+                <div className="smj-sticky-col-bottom pb-2 mt-3">
+                  <div
+                    className={`d-flex ${
+                      shouldShowBackButton
+                        ? 'justify-content-between gap-3'
+                        : 'justify-content-end'
+                    } smj-grey rounded-5 p-2`}
+                  >
+                    {shouldShowBackButton && (
+                      <button
+                        className="btn btn-secondary ms-4"
+                        type="button"
+                        onClick={() => router.back()}
+                      >
+                        Zpět
+                      </button>
+                    )}
+                    <input
+                      form={formId}
+                      type={'submit'}
+                      className="btn btn-primary me-4"
+                      value={'Uložit'}
+                      disabled={isInputDisabled}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
           {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}

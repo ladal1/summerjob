@@ -26,13 +26,9 @@ Potřebné nástroje:
   ```console
   [summerjob/web]$ npm ci
   ```
-- Nechte si vygenerovat databázi:
+- Spusťte migrace pro inicializaci databáze:
   ```console
-  [summerjob/web]$ npx prisma generate
-  ```
-- Tuhle databázi pak použijte do aplikace:
-  ```console
-  [summerjob/web]$ npx prisma db push
+  [summerjob/web]$ npx prisma migrate dev
   ```
 - Vytvořte si administrátorský účet (_POZN: Vytvořeným emailem se budete přihlašovat._):
   ```console
@@ -65,6 +61,14 @@ Potřebné nástroje:
   ```
 
 Aplikace defaultně běží na adrese: http://localhost:3000 .
+
+## Správa databázových migrací
+
+- Pokud provedete změny v prisma/schema.prisma (např. přidáte nebo upravíte tabulky), je nutné vytvořit novou migraci:
+
+  ```console
+  [summerjob/web]$ npx prisma migrate dev --name NAZEV_MIGRACE
+  ```
 
 ## Časté problémy
 

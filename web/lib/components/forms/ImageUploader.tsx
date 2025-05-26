@@ -22,6 +22,11 @@ interface ImageUploaderProps<FormData extends FieldValues> {
   multiple?: boolean
   maxPhotos?: number
   maxFileSize?: number
+  mandatory?: boolean
+  setError?: (
+    name: Path<FormData>,
+    error: { type: string; message?: string }
+  ) => void
 }
 
 export const ImageUploader = <FormData extends FieldValues>({
@@ -33,8 +38,10 @@ export const ImageUploader = <FormData extends FieldValues>({
   registerPhoto,
   removeExistingPhoto,
   removeNewPhoto,
+  setError,
   multiple = false,
   maxPhotos = 1,
+  mandatory = false,
   maxFileSize = 1024 * 1024 * 10, // 10 MB
 }: ImageUploaderProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
@@ -48,6 +55,21 @@ export const ImageUploader = <FormData extends FieldValues>({
 
   const onFileUploadChange = (fileInput: FileList | null) => {
     if (!fileInput || fileInput.length === 0) {
+      return
+    }
+
+    const allFiles = Array.from(fileInput)
+    const invalidFile = allFiles.find(
+      file => !file.type.startsWith('image') || file.size > maxFileSize
+    )
+
+    if (invalidFile && setError) {
+      setError(id, {
+        type: 'manual',
+        message: !invalidFile.type.startsWith('image')
+          ? 'Pouze obrázky jsou povolené'
+          : 'Maximální velikost souboru je 10 MB',
+      })
       return
     }
 
@@ -89,7 +111,7 @@ export const ImageUploader = <FormData extends FieldValues>({
 
   return (
     <>
-      <Label id={id} label={label} />
+      <Label id={id} label={label} mandatory={mandatory} />
       {secondaryLabel && <p className="text-muted">{secondaryLabel}</p>}
       <div className="row mb-2 smj-file-upload">
         <input

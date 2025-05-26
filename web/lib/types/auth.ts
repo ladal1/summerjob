@@ -12,6 +12,7 @@ export enum Permission {
   CARS = 'CARS',
   WORKERS = 'WORKERS',
   POSTS = 'POSTS',
+  APPLICATIONS = 'APPLICATIONS',
 }
 
 export type ExtendedSession = Session & {

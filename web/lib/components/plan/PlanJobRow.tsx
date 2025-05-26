@@ -188,31 +188,21 @@ export function PlanJobRow({
   ]
 
   //#region Register additional issues
-  const sameWorkIssuesWorkers = new Map()
-  const [sameWorkIssue, setSameWorkIssue] = useState<boolean>(false)
+  //const sameWorkIssuesWorkers = new Map()
+  const [sameWorkIssue] = useState<boolean>(false)
 
-  const registerSameWorkerIssue = (workerId: string, value: boolean) => {
-    sameWorkIssuesWorkers.set(workerId, value)
-    const hasIssues = Array.from(job.workers).some(worker =>
-      sameWorkIssuesWorkers.get(worker.id)
-    )
-    if (hasIssues !== sameWorkIssue) {
-      setSameWorkIssue(hasIssues)
-    }
-  }
+  // const registerSameWorkerIssue = (workerId: string, value: boolean) => {
+  //   sameWorkIssuesWorkers.set(workerId, value)
+  //   const hasIssues = Array.from(job.workers).some(worker =>
+  //     sameWorkIssuesWorkers.get(worker.id)
+  //   )
+  //   if (hasIssues !== sameWorkIssue) {
+  //     setSameWorkIssue(hasIssues)
+  //   }
+  // }
 
-  const sameCoworkerIssuesWorkers = new Map()
-  const [sameCoworkerIssue, setSameCoworkerIssue] = useState<boolean>(false)
+  const [sameCoworkerIssue] = useState<boolean>(false)
 
-  const registerSameCoworkerIssue = (workerId: string, value: boolean) => {
-    sameCoworkerIssuesWorkers.set(workerId, value)
-    const hasIssues = Array.from(job.workers).some(worker =>
-      sameCoworkerIssuesWorkers.get(worker.id)
-    )
-    if (hasIssues !== sameCoworkerIssue) {
-      setSameCoworkerIssue(hasIssues)
-    }
-  }
   //#endregion
 
   return (

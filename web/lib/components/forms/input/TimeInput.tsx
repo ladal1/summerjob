@@ -14,6 +14,7 @@ interface TimeInputProps<FormData extends FieldValues> {
   label?: string
   register: UseFormRegister<FormData>
   errors: FieldErrors<FormData>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>
   timeFromId: string
   timeToId: string

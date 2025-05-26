@@ -17,16 +17,11 @@ export function APIAccessController(
       return
     }
 
-    if (
-      !isAccessAllowed(
-        Array.isArray(permissions)
-          ? permissions
-          : req.method
-          ? (permissions as Record<string, any>)[req.method] ?? []
-          : [],
-        session
-      )
-    ) {
+    const allowedPermissions = Array.isArray(permissions)
+      ? permissions
+      : permissions[req.method as keyof typeof permissions] ?? []
+
+    if (!isAccessAllowed(allowedPermissions, session)) {
       res.status(403).end()
       return
     }
