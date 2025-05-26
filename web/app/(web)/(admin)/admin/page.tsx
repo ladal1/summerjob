@@ -18,7 +18,10 @@ export default function AdminPage() {
               <div className="row">
                 <div className="col">
                   <h5>Ročníky</h5>
-                  <p>Nastavit aktuální ročník, upravit oblasti.</p>
+                  <p>
+                    Nastavit aktuální ročník, spravovat přístup k přihláškám,
+                    upravit oblasti.
+                  </p>
                 </div>
                 <div className="col d-flex justify-content-end align-items-center gap-3">
                   <i className="fas fa-chevron-right"></i>

@@ -791,3 +791,18 @@ form.application input.custom-input::placeholder{
 .border-start-warning {
   border-left-color: #fdcc37 !important; 
 }
+
+@media (min-width: 768px) {
+  .w-md-45 { width: 45% !important; }
+}
+
+.react-datepicker-wrapper,
+.react-datepicker__input-container,
+.react-datepicker__input-container input {
+  width: 100% !important;
+}
+
+.react-datepicker__input-container input::placeholder {
+  color: var(--bs-gray-400) !important;
+  font-size: medium !important;
+}

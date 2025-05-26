@@ -1,4 +1,8 @@
-import { type DetailedHTMLProps, type InputHTMLAttributes } from 'react'
+import {
+  ReactNode,
+  type DetailedHTMLProps,
+  type InputHTMLAttributes,
+} from 'react'
 import { FieldErrors, Path, UseFormRegisterReturn } from 'react-hook-form'
 import FormWarning from '../FormWarning'
 import { Label } from '../Label'
@@ -9,7 +13,7 @@ interface TextInputProps
     HTMLInputElement
   > {
   id: string
-  label: string
+  label: string | ReactNode
   register: () => UseFormRegisterReturn
   errors: FieldErrors<FormData>
   labelClassName?: string

@@ -1,12 +1,30 @@
 'use client'
 
+import React, { useEffect, useMemo } from 'react'
+import DatePicker from 'react-datepicker'
 import {
   Controller,
-  UseFormClearErrors,
   UseFormSetError,
+  UseFormClearErrors,
 } from 'react-hook-form'
-import { useState } from 'react'
 import { Label } from '../Label'
+import 'react-datepicker/dist/react-datepicker.css'
+import { cs } from 'date-fns/locale'
+
+// Helper function to safely parse date strings
+const parseDate = (dateString: string | undefined): Date | undefined => {
+  if (!dateString) return undefined
+
+  // If it's already in YYYY-MM-DD format, append time
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const date = new Date(dateString + 'T00:00:00')
+    return isNaN(date.getTime()) ? undefined : date
+  }
+
+  // Try to parse as-is first
+  const date = new Date(dateString)
+  return isNaN(date.getTime()) ? undefined : date
+}
 
 interface DatePickerInputProps {
   id: string
@@ -18,6 +36,7 @@ interface DatePickerInputProps {
   mandatory?: boolean
   minDate?: string
   maxDate?: string
+  defaultValue?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setError: UseFormSetError<any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,115 +51,71 @@ export function DatePickerInput({
   mandatory = false,
   minDate,
   maxDate,
+  defaultValue,
   setError,
   clearErrors,
 }: DatePickerInputProps) {
-  const [displayValue, setDisplayValue] = useState<string>('')
+  const parsedMin = parseDate(minDate)
+  const parsedMax = parseDate(maxDate)
+  const parsedDefaultValue = useMemo(
+    () => parseDate(defaultValue),
+    [defaultValue]
+  )
 
-  const formatToCzech = (date: string) => {
-    if (!date) return ''
-    const [year, month, day] = date.split('-')
-    return `${day}.${month}.${year}`
-  }
-
-  const formatToISO = (date: string) => {
-    const parts = date.split('.')
-    if (parts.length !== 3) return ''
-    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(
-      2,
-      '0'
-    )}`
-  }
-
-  const isValidDate = (dateStr: string) => {
-    const regex = /^\d{1,2}\.\d{1,2}\.\d{4}$/ // Ověří správný formát DD.MM.YYYY
-    if (!regex.test(dateStr)) return false
-
-    const [day, month, year] = dateStr.split('.').map(Number)
-    if (year < 1900 || year > 2100) return false // rozsah let
-
-    const date = new Date(year, month - 1, day)
-    return (
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day
-    )
-  }
-
-  const isWithinRange = (isoDate: string) => {
-    const selectedDate = new Date(isoDate)
-    const min = minDate ? new Date(minDate.split('T')[0]) : null
-    const max = maxDate ? new Date(maxDate.split('T')[0]) : null
-
-    console.log(selectedDate)
-    console.log(min)
-    console.log(max)
-
-    if (min && selectedDate < min) {
-      return false
+  // Validate default value on component mount
+  useEffect(() => {
+    if (parsedDefaultValue && mandatory) {
+      clearErrors(id)
     }
-
-    if (max && selectedDate > max) {
-      return false
-    }
-
-    return true
-  }
+  }, [parsedDefaultValue, mandatory, clearErrors, id])
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-100">
       <Label id={id} label={label} mandatory={mandatory} />
-      <div className="relative flex items-center">
-        <Controller
-          control={control}
-          name={id}
-          render={({ field }) => (
-            <input
-              id={id}
-              type="text"
-              value={displayValue}
-              placeholder="DD.MM.YYYY"
-              onChange={e => {
-                const inputDate = e.target.value
-                setDisplayValue(inputDate) // český formát do UI
 
-                if (!isValidDate(inputDate)) {
-                  setError(id, { message: 'Neplatné datum' })
-                  return
+      <Controller
+        control={control}
+        name={id}
+        defaultValue={defaultValue}
+        render={({ field }) => (
+          <DatePicker
+            id={id}
+            // @ts-expect-error: date-fns locale typing conflict
+            locale={cs}
+            placeholderText="Vyberte datum"
+            selected={field.value ? parseDate(field.value) : parsedDefaultValue}
+            onChange={date => {
+              if (!date || isNaN(date.getTime())) {
+                if (mandatory) {
+                  setError(id, { message: 'Datum je povinné' })
                 }
+                return
+              }
 
-                const isoDate = formatToISO(inputDate)
-                if (!isWithinRange(isoDate) && minDate && maxDate) {
-                  setError(id, {
-                    message: `Datum musí být mezi ${formatToCzech(
-                      minDate.split('T')[0]
-                    )} a ${formatToCzech(maxDate.split('T')[0])}`,
-                  })
-                  return
-                }
-
-                // Pokud je datum správné, uložíme jej
+              clearErrors(id)
+              // Format date as YYYY-MM-DD to avoid timezone issues
+              const year = date.getFullYear()
+              const month = String(date.getMonth() + 1).padStart(2, '0')
+              const day = String(date.getDate()).padStart(2, '0')
+              field.onChange(`${year}-${month}-${day}`)
+            }}
+            onSelect={date => {
+              if (date) {
                 clearErrors(id)
-                field.onChange(isoDate)
-              }}
-              onBlur={() => {
-                if (
-                  isValidDate(displayValue) &&
-                  isWithinRange(formatToISO(displayValue))
-                ) {
-                  setDisplayValue(formatToCzech(field.value))
-                } else {
-                  setDisplayValue(displayValue) // Nenechá hodnotu zmizet
-                }
-              }}
-              className="pl-10 w-100 rounded-lg p0 text-gray-900 border-0 smj-input form-control p-0"
-            />
-          )}
-        />
-      </div>
+              }
+            }}
+            dateFormat="dd.MM.yyyy"
+            minDate={parsedMin}
+            maxDate={parsedMax}
+            className="form-control smj-input p-0 w-100"
+            showPopperArrow={false}
+            autoComplete="off"
+          />
+        )}
+      />
 
-      {errors?.[id] && (errors[id]?.message as string) !== 'Invalid date' && (
-        <p className="text-danger text-sm mt-1">{errors[id]?.message}</p>
+      {errors?.[id] && (
+        <p className="text-danger text-sm mt-1">{errors[id].message}</p>
       )}
     </div>
   )

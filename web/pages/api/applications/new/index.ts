@@ -11,6 +11,11 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { APILogEvent } from 'lib/types/logger'
 import { generateFileName } from 'lib/api/fileManager'
 import { getApplicationsUploadDir } from 'lib/api/fileManager'
+import {
+  checkApplicationPassword,
+  isApplicationPasswordProtected,
+} from 'lib/data/summerjob-event'
+import { sendApplicationSummaryEmail } from 'lib/email/sendApplicationSummary'
 
 export type ApplicationAPIPostData = ApplicationCreateDataInput
 
@@ -25,20 +30,48 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
     1
   )
 
+  const eventId = json?.eventId
+  const providedPassword = json?.applicationPassword
+
+  if (!eventId) {
+    return res.status(400).json({ message: 'Chybí ID ročníku.' })
+  }
+
+  const isProtected = await isApplicationPasswordProtected(eventId)
+
+  if (isProtected) {
+    if (!providedPassword) {
+      return res.status(401).json({ message: 'Heslo nebylo zadáno.' })
+    }
+
+    const isValid = await checkApplicationPassword(eventId, providedPassword)
+    if (!isValid) {
+      return res.status(401).json({ message: 'Neplatné heslo.' })
+    }
+  }
+
   const applicationData = validateOrSendError(
     ApplicationCreateSchema,
     json,
     res
   )
+
   if (!applicationData) {
     return
   }
+
   const file = files?.photoFile
     ? Array.isArray(files.photoFile)
       ? files.photoFile[0]
       : files.photoFile
     : undefined
   const application = await createApplication(applicationData, file)
+
+  try {
+    await sendApplicationSummaryEmail(applicationData.email, applicationData)
+  } catch (err) {
+    console.error('Nepodařilo se odeslat rekapitulační email:', err)
+  }
 
   await logger.apiRequestWithoutSession(
     APILogEvent.APPLICATION_CREATE,

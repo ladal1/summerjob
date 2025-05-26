@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -20,22 +20,29 @@ import { Form } from 'lib/components/forms/Form'
 import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
 import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
+import 'react-datepicker/dist/react-datepicker.css'
+import ApplicationPasswordForm from './ApplicationPasswordForm'
 
 interface ApplicationsPageProps {
   startDate: string
   endDate: string
+  isApplicationOpen: boolean
+  isPasswordProtected: boolean
+  eventId: string
 }
 
 export default function ApplicationsPage({
   startDate,
   endDate,
+  isApplicationOpen,
+  isPasswordProtected,
+  eventId,
 }: ApplicationsPageProps) {
-  const [isApplicationOpen, setIsApplicationOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [hasAccess, setHasAccess] = useState(!isPasswordProtected)
+  const [isLoading, setIsLoading] = useState(false)
+
   const router = useRouter()
-  const applicationStart = new Date('2025-03-01T00:00:00')
-  const applicationEnd = new Date('2025-05-01T23:59:59')
-  const now = new Date()
 
   const {
     register,
@@ -49,19 +56,50 @@ export default function ApplicationsPage({
   } = useForm<ApplicationCreateDataInput>({
     resolver: zodResolver(ApplicationCreateSchema),
   })
-  const { trigger, isMutating, error, reset } = useAPIApplicationCreate({
+  const { isMutating, error, reset } = useAPIApplicationCreate({
     onSuccess: () => setSubmitted(true),
   })
 
-  useEffect(() => {
-    setIsApplicationOpen(now >= applicationStart && now <= applicationEnd)
-  }, [])
-
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
-      await trigger(data)
+      setIsLoading(true)
+
+      const formData = new FormData()
+
+      const password = isPasswordProtected
+        ? localStorage.getItem(`application-password-${eventId}`)
+        : null
+
+      const { photoFile, ...rest } = data
+
+      if (photoFile) {
+        formData.append('photoFile', photoFile)
+      }
+
+      const jsonData = {
+        ...rest,
+        applicationPassword: password,
+        eventId,
+      }
+
+      formData.append('jsonData', JSON.stringify(jsonData))
+
+      const response = await fetch('/api/applications/new', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Odpověď serveru:', error)
+        throw new Error('Odeslání přihlášky selhalo')
+      }
+
+      setSubmitted(true)
     } catch (err) {
       console.error('Chyba při odesílání přihlášky:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -70,29 +108,41 @@ export default function ApplicationsPage({
     router.back()
   }
 
-  if (!isApplicationOpen) {
+  if (isApplicationOpen) {
     return (
-      <>
-        {applicationStart >= now && (
-          <p className="text-center text-lg font-weight-bold mt-5">
-            Čas pro podání přihlášky ještě nenastal.
-          </p>
-        )}
+      <p className="text-center text-lg font-weight-bold mt-5">
+        Přihlašování není aktuálně otevřené.
+      </p>
+    )
+  }
 
-        {applicationEnd < now && (
-          <p className="text-center text-lg font-weight-bold mt-5">
-            Čas pro podání přihlášky již vypršel.
-          </p>
-        )}
-      </>
+  if (isPasswordProtected && !hasAccess) {
+    return (
+      <div className="max-w-md mx-auto mt-10 p-4">
+        <ApplicationPasswordForm
+          eventId={eventId}
+          onSuccess={() => setHasAccess(true)}
+        />
+      </div>
     )
   }
 
   if (submitted) {
     return (
-      <p className="text-center text-lg font-weight-bold mt-5">
-        Přihláška byla úspěšně odeslána!
-      </p>
+      <div className="bg-white rounded shadow p-4 p-md-5 mx-auto w-75 mt-5">
+        <p className="mt-1 display-6 mb-3">Přihláška byla úspěšně odeslána!</p>
+        <p className="text-muted text-base font-normal">
+          O přijetí tě budeme informovat během následujících tří týdnů.{' '}
+          <strong>
+            Samotné odeslání přihlášky ještě neznamená, že máš účast jistou.
+          </strong>{' '}
+          Díky za pochopení!
+        </p>
+        <p className="text-muted text-base font-normal">
+          Na tvůj e-mail jsme právě odeslali tebou vyplňené informace z
+          formuláře.
+        </p>
+      </div>
     )
   }
 
@@ -141,8 +191,8 @@ export default function ApplicationsPage({
             přijet makat na celý týden, splňují věkový limit a přihlásili se
             nejrychleji. Tak hodně štěstí, těšíme se! 🙂
           </p>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="firstName"
                 label="Jméno"
@@ -153,7 +203,7 @@ export default function ApplicationsPage({
                 mandatory
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="lastName"
                 label="Příjmení"
@@ -165,8 +215,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <DatePickerInput
                 id="birthDate"
                 label="Datum narození"
@@ -177,7 +227,7 @@ export default function ApplicationsPage({
                 clearErrors={clearErrors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <FilterSelectInput
                 id="gender"
                 label="Pohlaví"
@@ -193,8 +243,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="phone"
                 label="Telefon"
@@ -205,7 +255,7 @@ export default function ApplicationsPage({
                 mandatory
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="email"
                 label="Email"
@@ -217,8 +267,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="address"
                 label="Plná adresa"
@@ -229,7 +279,7 @@ export default function ApplicationsPage({
                 mandatory
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <FilterSelectInput
                 id="pastParticipation"
                 label="Už jsi se v minulosti zúčastnil/a?"
@@ -247,8 +297,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <DatePickerInput
                 id="arrivalDate"
                 label="Datum příjezdu"
@@ -259,9 +309,10 @@ export default function ApplicationsPage({
                 mandatory
                 setError={setError}
                 clearErrors={clearErrors}
+                defaultValue={startDate}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <DatePickerInput
                 id="departureDate"
                 label="Datum odjezdu"
@@ -272,11 +323,12 @@ export default function ApplicationsPage({
                 mandatory
                 setError={setError}
                 clearErrors={clearErrors}
+                defaultValue={endDate}
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="toolsSkills"
                 label="Nářadí, se kterým umíš zacházet"
@@ -286,7 +338,7 @@ export default function ApplicationsPage({
                 errors={errors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="toolsBringing"
                 label="Nářadí, které přivezeš"
@@ -297,8 +349,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="foodAllergies"
                 label="Alergie na jídlo"
@@ -308,7 +360,7 @@ export default function ApplicationsPage({
                 errors={errors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="workAllergies"
                 label="Alergie při pracovních podmínkách"
@@ -319,24 +371,36 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            {/* <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
-                label="Máš zájem o tričko (350 Kč)? Vyplň velikost."
+                label={
+                  <>
+                    Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu
+                    (modrá/červená/zelená). Objednávka je závazná.{' '}
+                    <a
+                      href="https://summerjob.eu/merch"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Prohlédnout trička
+                    </a>
+                  </>
+                }
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
                 placeholder="XS, S, M, L, XL, XXL"
                 errors={errors}
               />
-            </div>
-            <div className="w-45">
+            </div> */}
+            <div className="w-100 w-md-45">
               <TextInput
                 id="playsInstrument"
-                label="Umíš hrát na hudební nástroj?"
+                label="Chceš zpívat nebo hrát na hudební nástroj ve schole?"
                 register={() => register('playsInstrument')}
                 labelClassName="light-placeholder"
-                placeholder="Kytara, housle, klavír..."
+                placeholder="Ano, umím hrát na housle,.."
                 errors={errors}
               />
             </div>
@@ -357,13 +421,14 @@ export default function ApplicationsPage({
             placeholder="Vaše poznámka"
             errors={errors}
           />
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <ImageUploader
                 id="photoFile"
                 label="Fotografie"
-                secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+                secondaryLabel="Fotka nám ulehčí rozdělování práce. Maximálně 1 soubor o maximální velikosti 10 MB."
                 errors={errors}
+                setError={setError}
                 mandatory={true}
                 registerPhoto={fileList => {
                   registerPhoto(fileList.length > 0 ? fileList[0] : null)
@@ -371,14 +436,14 @@ export default function ApplicationsPage({
                 removeNewPhoto={removeNewPhoto}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <BulletPointSelect
                 id="accommodationPrice"
                 label="Účastnický příspěvek"
                 labelClassName="light-placeholder"
                 options={[
-                  { value: 1600, label: '1600 Kč' },
-                  { value: 2000, label: '2000 Kč' },
+                  { value: 1600, label: '1600 Kč (základní)' },
+                  { value: 2000, label: '2000 Kč (sponzorský)' },
                 ]}
                 setError={setError}
                 clearErrors={clearErrors}
@@ -389,6 +454,13 @@ export default function ApplicationsPage({
                 mandatory
                 minCustomValue={1600}
               />
+              <p className="mt-3 text-muted fs-6 fw-lighter">
+                Pokud se kvůli výši příspěvku nemůžeš z finančních důvodů
+                zúčastnit, ozvi se nám na email:{' '}
+                <a href="mailto:summerjob@summerjob.eu">
+                  summerjob@summerjob.eu
+                </a>
+              </p>
             </div>
           </div>
           <OtherAttributesInput
@@ -397,12 +469,13 @@ export default function ApplicationsPage({
               {
                 id: 'ownsCar',
                 icon: 'fa fa-car',
-                label: 'Vlastním auto, které mohu použít',
+                label: 'Přijedu autem a jsem ochotný/á vozit pracanty na joby.',
               },
               {
                 id: 'canBeMedic',
                 icon: 'fa fa-briefcase-medical',
-                label: 'Mohu se zúčastnit jako zdravotník',
+                label:
+                  'Jsem zdravotník (lékař, sestra, záchranář, nebo absolvent kurzu ZZA s platným certifikátem) a jsem ochotný/á se spoluúčastnit na péči o summerjobáky.',
               },
             ]}
           />
@@ -410,9 +483,9 @@ export default function ApplicationsPage({
             type="submit"
             className="w-full btn btn-primary d-block m-auto
             my-5"
-            disabled={isMutating}
+            disabled={isLoading}
           >
-            {isMutating ? 'Odesílání...' : 'Odeslat přihlášku'}
+            {isLoading ? 'Odesílání...' : 'Odeslat přihlášku'}
           </button>
         </form>
       </Form>

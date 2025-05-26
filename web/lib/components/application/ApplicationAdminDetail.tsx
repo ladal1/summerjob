@@ -41,24 +41,6 @@ export default function ApplicationAdminDetailPage() {
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
 
-  async function updateStatus(id: string, newStatus: 'accept' | 'reject') {
-    try {
-      const res = await fetch(`/api/applications/${id}/${newStatus}`, {
-        method: 'PATCH',
-      })
-
-      if (!res.ok) throw new Error('Nepodařilo se aktualizovat stav')
-
-      const updated = await res.json()
-      setApplication(prev =>
-        prev ? { ...prev, status: updated.status } : null
-      )
-    } catch (err) {
-      console.error(err)
-      alert('Chyba při změně stavu přihlášky.')
-    }
-  }
-
   useEffect(() => {
     if (!id) return
 
@@ -108,7 +90,7 @@ export default function ApplicationAdminDetailPage() {
         ← Zpět na seznam
       </Link>
 
-      <div className="my-4 d-flex align-items-center gap-3">
+      {/* <div className="my-4 d-flex align-items-center gap-3">
         <span>
           <strong>Status:</strong>{' '}
           <span
@@ -144,9 +126,9 @@ export default function ApplicationAdminDetailPage() {
             </button>
           </>
         )}
-      </div>
+      </div> */}
 
-      <div className="card mb-4">
+      <div className="card my-4">
         <div className="card-body">
           <table className="table table-sm table-borderless table-hover mb-0">
             <tbody>
@@ -188,11 +170,11 @@ export default function ApplicationAdminDetailPage() {
               </tr>
               <tr>
                 <th scope="row">Nářadí, se kterým umí zacházet</th>
-                <td>{application.toolsSkills}</td>
+                <td>{application.toolsSkills || 'Neuvedeno'}</td>
               </tr>
               <tr>
                 <th scope="row">Nářadí, které přiveze</th>
-                <td>{application.toolsBringing}</td>
+                <td>{application.toolsBringing || 'Neuvedeno'}</td>
               </tr>
               <tr>
                 <th scope="row">Zúčastnil se dříve</th>

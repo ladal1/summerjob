@@ -1,0 +1,2 @@
+ALTER TABLE "SummerJobEvent"
+ADD COLUMN "isApplicationOpen" BOOLEAN NOT NULL DEFAULT FALSE;

@@ -8,16 +8,35 @@ minBirthDate.setFullYear(minBirthDate.getFullYear() - 18)
 
 export const ApplicationCreateSchema = z
   .object({
-    firstName: z.string().min(1, 'Jméno je povinné'),
-    lastName: z.string().min(1, 'Příjmení je povinné'),
+    firstName: z
+      .string()
+      .min(1, 'Jméno je povinné')
+      .max(50, 'Jméno je příliš dlouhé'),
+    lastName: z
+      .string()
+      .min(1, 'Příjmení je povinné')
+      .max(50, 'Příjmení je příliš dlouhé'),
     birthDate: z.coerce
       .date()
       .refine(date => date <= minBirthDate, 'Musíte být starší 18 let')
       .refine(date => date <= today, 'Datum narození nemůže být v budoucnosti'),
     gender: z.enum(['Muž', 'Žena']),
-    phone: z.string().min(9, 'Telefonní číslo je povinné'),
-    email: z.string().email('Neplatný email'),
-    address: z.string().min(1, 'Adresa je povinná'),
+    phone: z
+      .string()
+      .min(9, 'Telefonní číslo je povinné')
+      .max(20, 'Telefonní číslo je příliš dlouhé')
+      .refine(
+        value => /^[0-9+ ]+$/.test(value),
+        'Nesprávný formát telefonního čísla'
+      ),
+    email: z
+      .string()
+      .email('Neplatný email')
+      .max(100, 'Email je příliš dlouhý'),
+    address: z
+      .string()
+      .min(1, 'Adresa je povinná')
+      .max(200, 'Adresa je příliš dlouhá'),
     pastParticipation: z.boolean(),
     arrivalDate: z.coerce
       .date()
@@ -25,15 +44,36 @@ export const ApplicationCreateSchema = z
     departureDate: z.coerce
       .date()
       .refine(date => date >= today, 'Datum odjezdu nemůže být v minulosti'),
-    foodAllergies: z.string().optional(),
-    workAllergies: z.string().optional(),
-    toolsSkills: z.string(),
-    toolsBringing: z.string(),
-    heardAboutUs: z.string().optional(),
-    playsInstrument: z.string().optional(),
-    tShirtSize: z.string().optional(),
-    additionalInfo: z.string().optional(),
-    accommodationPrice: z.string().min(1, 'Cena za ubytování je povinná'),
+    foodAllergies: z
+      .string()
+      .max(200, 'Text je příliš dlouhý, max 200 znaků.')
+      .optional(),
+    workAllergies: z
+      .string()
+      .max(200, 'Text je příliš dlouhý, max 200 znaků.')
+      .optional(),
+    toolsSkills: z.string().max(300, 'Text je příliš dlouhý, max 300 znaků.'),
+    toolsBringing: z.string().max(300, 'Text je příliš dlouhý, max 300 znaků.'),
+    heardAboutUs: z
+      .string()
+      .max(300, 'Text je příliš dlouhý, max 300 znaků.')
+      .optional(),
+    playsInstrument: z
+      .string()
+      .max(150, 'Text je příliš dlouhý, max 150 znaků.')
+      .optional(),
+    tShirtSize: z
+      .string()
+      .max(30, 'Zadejte např. S, M, L... a barvu')
+      .optional(),
+    additionalInfo: z
+      .string()
+      .max(1000, 'Zpráva je příliš dlouhá, max 1000 znaků.')
+      .optional(),
+    accommodationPrice: z
+      .string()
+      .min(1, 'Cena za ubytování je povinná')
+      .max(10, 'Číslo je příliš velké.'),
     ownsCar: z.boolean().default(false),
     canBeMedic: z.boolean().default(false),
     photo: z.string().optional(),

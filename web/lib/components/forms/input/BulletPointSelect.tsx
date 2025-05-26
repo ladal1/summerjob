@@ -100,7 +100,6 @@ export const BulletPointSelect = ({
           onChange={e => {
             const value = e.target.value
             setTextInput(true)
-            console.log('Input value:', value)
 
             setCustomValue(value)
             if (value && parseInt(value) < minCustomValue) {

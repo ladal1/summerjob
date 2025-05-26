@@ -147,8 +147,6 @@ export default function ApplicationAdminPage() {
       'Status',
     ].join(',')
 
-    console.log(selectedApps)
-
     const csvRows = selectedApps.map(app => {
       return [
         app.firstName,
@@ -249,7 +247,7 @@ export default function ApplicationAdminPage() {
       ) : (
         <>
           {applications.length === 0 ? (
-            <p>Žádná přihláška</p>
+            <p className="text-center text-secondary">Žádná přihláška</p>
           ) : (
             <>
               <div className="d-flex gap-2 my-3">
