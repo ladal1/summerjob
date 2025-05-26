@@ -78,7 +78,7 @@ interface RowProps {
   data: any[]
 }
 
-export function SimpleRow({ data }: RowProps) {
+function SimpleRow({ data }: RowProps) {
   return (
     <tr>
       {data.map((field, index) => {

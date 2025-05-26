@@ -16,7 +16,7 @@ API se nachází v adresáři `pages/api`. Složka `pages/api` je speciální sl
 /
 ├── app/                    # Webové stránky
 ├── lib/
-│   ├── api/                # Pomocné soubory pro API, OpenAPI, Swagger
+│   ├── api/                # Pomocné soubory pro API
 │   ├── auth/               # Pomocné soubory pro ověřování uživatelů
 │   ├── components/         # Interaktivní komponenty pro webové stránky (většina obsahu webu)
 │   ├── data/               # Spojení s databází, přístup k datům

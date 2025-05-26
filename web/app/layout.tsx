@@ -4,9 +4,10 @@ export const metadata = {
   title: { template: '%s | SummerJob Plánovač', default: 'SummerJob Plánovač' },
   description: 'SummerJob Plánovač',
   author: 'SummerJob',
+
   icons: {
     icon: '/favicon.ico',
-  },
+  }
 }
 
 export default function RootLayout({

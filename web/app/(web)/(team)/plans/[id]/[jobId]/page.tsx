@@ -4,13 +4,14 @@ import { getActiveJobById } from 'lib/data/active-jobs'
 import { serializeActiveJob } from 'lib/types/active-job'
 
 type PathProps = {
-  params: {
+  params: Promise<{
     id: string
     jobId: string
-  }
+  }>
 }
 
-export default async function EditActiveJobPage({ params }: PathProps) {
+export default async function EditActiveJobPage(props: PathProps) {
+  const params = await props.params;
   const job = await getActiveJobById(params.jobId)
   if (!job) {
     return <ErrorPage404 message="Job nenalezen."></ErrorPage404>

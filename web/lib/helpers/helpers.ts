@@ -138,7 +138,7 @@ export function pick<
 }
 
 export function formatNumberAfterThreeDigits(value: string) {
-  return value.replace(/(?=(\d{3})+(?!\d))/g, ' ')
+  return value.replace(/(?=(\d{3})+(?!\d))/g, ' ');
 }
 
 export function formatPhoneNumber(value: string) {
@@ -161,16 +161,16 @@ export function formatPhoneNumber(value: string) {
 
 // Replace redundant spaces by one space and trim spaces from front.
 export function removeRedundantSpace(value: string) {
-  return value.replace(/\s+/g, ' ').trimStart()
+  return value.replace(/\s+/g, ' ').trimStart();
 }
 
 // Get rid of anything that isn't non negative number
 export function formatNumber(value: string) {
-  return value.replace(/\D/g, '')
+  return value.replace(/\D/g, '');
 }
 
 export function removeAccent(str: string) {
-  return str.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  return str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
 }
 
 export function normalizeString(str: string) {
@@ -181,7 +181,7 @@ export function normalizeString(str: string) {
 }
 
 export function validateTimeInput(str: string) {
-  return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(str)
+  return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(str);
 }
 
 export function getHourAndMinute(time: string) {

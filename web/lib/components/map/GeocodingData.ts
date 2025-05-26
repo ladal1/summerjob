@@ -17,7 +17,7 @@ export const getGeocodingData = async (address: string | undefined): Promise<[nu
       return null
     }
   } 
-  catch (error) {
+  catch {
     return null
   }
 }
@@ -31,7 +31,7 @@ export const getReverseGeocodingData = async (latitude: number | undefined, long
     const data = await response.json()
     return data.display_name
   } 
-  catch (error) {
+  catch {
     return null
   }
 }

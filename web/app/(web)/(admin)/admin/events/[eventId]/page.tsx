@@ -5,12 +5,13 @@ import { getSummerJobEventById } from 'lib/data/summerjob-event'
 import { serializeSummerJobEvent } from 'lib/types/summerjob-event'
 
 type Props = {
-  params: {
+  params: Promise<{
     eventId: string
-  }
+  }>
 }
 
-export default async function SummerJobEventPage({ params }: Props) {
+export default async function SummerJobEventPage(props: Props) {
+  const params = await props.params;
   const event = await getSummerJobEventById(params.eventId)
   if (!event) {
     return <ErrorPage404 message="Ročník nenalezen."></ErrorPage404>

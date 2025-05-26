@@ -11,14 +11,14 @@ export default async function ProposedJobsPage() {
   const jobs = await getProposedJobs()
   const serialized = serializeProposedJobs(jobs)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const { startDate, endDate } = summerJobEvent!
   return (
     <ProposedJobsClientPage
       initialData={serialized}
       startDate={startDate.toJSON()}
       endDate={endDate.toJSON()}
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+       
       workerId={session!.userID}
     />
   )

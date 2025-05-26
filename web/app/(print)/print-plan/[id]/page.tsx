@@ -11,9 +11,9 @@ import { ToolCompleteData } from 'lib/types/tool'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 
 type PathProps = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 function formatTools(tools: ToolCompleteData[]) {
@@ -27,7 +27,8 @@ function formatTools(tools: ToolCompleteData[]) {
     .join(', ')
 }
 
-export default async function PrintPlanPage({ params }: PathProps) {
+export default async function PrintPlanPage(props: PathProps) {
+  const params = await props.params;
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
   const sortedJobs = plan.jobs.sort((a, b) =>

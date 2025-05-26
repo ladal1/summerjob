@@ -8,14 +8,14 @@ import { Permission } from 'lib/types/auth'
 import { serializeWorker } from 'lib/types/worker'
 
 export const metadata = {
-  title: 'Můj profil',
+  title: 'Můj profil'
 }
 
 export const dynamic = 'force-dynamic'
 
 export default async function MyProfilePage() {
   const session = await getSMJSession()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const worker = await getWorkerById(session!.userID)
 
   if (!worker || !worker.availability) {
@@ -23,7 +23,7 @@ export default async function MyProfilePage() {
   }
   const serializedWorker = serializeWorker(worker)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())

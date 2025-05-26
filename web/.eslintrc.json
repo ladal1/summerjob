@@ -1,8 +1,0 @@
-{
-  "extends": [
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "next/core-web-vitals"
-  ],
-  "ignorePatterns": ["lib/prisma/**/*", "node_modules/**/*", "build/**/*"]
-}

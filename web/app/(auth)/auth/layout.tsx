@@ -3,7 +3,7 @@ import 'styles/custom.css'
 import 'styles/auth.css'
 
 export const metadata = {
-  title: 'Přihlášení',
+  title: 'Přihlášení'
 }
 
 export default async function AuthLayout({

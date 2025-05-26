@@ -16,7 +16,7 @@ async function get(
     return
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const plans = await getMyPlans(session!.userID)
   res.status(200).json(plans)
 }

@@ -8,12 +8,13 @@ import { getAreas } from '../../../../../lib/data/areas'
 import { serializeAreas } from '../../../../../lib/types/area'
 
 type PathProps = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function EditProposedJobPage({ params }: PathProps) {
+export default async function EditProposedJobPage(props: PathProps) {
+  const params = await props.params;
   const job = await getProposedJobById(params.id)
   if (!job) {
     return <ErrorPage404 message="Job nenalezen."></ErrorPage404>
@@ -22,7 +23,7 @@ export default async function EditProposedJobPage({ params }: PathProps) {
   const areas = await getAreas()
   const serializedAreas = serializeAreas(areas)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())

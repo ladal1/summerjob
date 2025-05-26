@@ -103,7 +103,7 @@ export const parseFormWithImages = async (
         for (const file of uploadedFiles) {
           try {
             await deleteFile(path.resolve(uploadDir, file))
-          } catch (error) {}
+          } catch {}
         }
         res.status(err.httpCode).json({
           error: new ApiBadRequestError(

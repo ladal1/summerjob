@@ -1,0 +1,10 @@
+{
+    "web/**/*.{js,jsx,ts,tsx}": [
+        "cd web && npx prettier --write",
+        "cd web && npx eslint --fix",
+        "cd web && npx eslint"
+    ],
+    "*/**/*.{json,css,md}": [
+        "npx prettier --write"
+    ]
+}

@@ -7,7 +7,7 @@ import { Permission } from 'lib/types/auth'
 import { serializePosts } from 'lib/types/post'
 
 export const metadata = {
-  title: 'Nástěnka',
+  title: 'Nástěnka'
 }
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,7 @@ export default async function PostsPage() {
 
   const isAdvancedAccessAllowed = await withPermissions([Permission.POSTS])
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
@@ -30,7 +30,7 @@ export default async function PostsPage() {
       endDate={endDate.toJSON()}
       allDates={allDates}
       advancedAccess={isAdvancedAccessAllowed.success}
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+       
       userId={session!.userID}
     />
   )

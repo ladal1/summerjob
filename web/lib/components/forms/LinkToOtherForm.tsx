@@ -8,7 +8,7 @@ interface LinkToOtherFormProps {
 export const LinkToOtherForm = ({
   label,
   labelBold = true,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+   
   handleEditedForm = () => {},
   margin = true,
 }: LinkToOtherFormProps) => {
