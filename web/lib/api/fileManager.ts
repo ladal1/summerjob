@@ -41,7 +41,12 @@ export const generateFileName = (length: number): string => {
 }
 
 export const deleteFile = async (oldPhotoPath: string) => {
-  await promises.unlink(oldPhotoPath) // delete replaced/original file
+  const safeBaseDir = path.resolve(getUploadDirForImages());
+  const resolvedPath = path.resolve(oldPhotoPath);
+  if (!resolvedPath.startsWith(safeBaseDir)) {
+    throw new Error('Attempt to delete a file outside the allowed directory');
+  }
+  await promises.unlink(resolvedPath); // delete replaced/original file
 }
 
 export const renameFile = async (
