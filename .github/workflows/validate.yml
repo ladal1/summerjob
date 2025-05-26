@@ -2,13 +2,7 @@ name: Check valid code
 
 on:
   push:
-    branches:
-      - main
-      - develop
   pull_request:
-    branches:
-      - main
-      - develop
 
 env:
   NEXTAUTH_SECRET: 'test'
@@ -38,11 +32,9 @@ jobs:
 
       - name: Run tests
         run: npm run lint
+
   lint-planner:
     name: Lint planner
-    strategy:
-      matrix:
-        node-version: [18]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -51,16 +43,21 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel build
+          pip install -r src/requirements.txt ruff
+        timeout-minutes: 1
 
-      - name: Run tests
-        run: npm run lint
+      - name: Run linter
+        run: ruff check .
+
   build-web:
     name: Build web
     strategy:
@@ -84,27 +81,3 @@ jobs:
 
       - name: Run tests
         run: npm run build
-
-  # build-planner:
-  #   name: Build planner
-  #   strategy:
-  #     matrix:
-  #       node-version: [16, 18]
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./planner
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v3
-
-  #     - name: Setup node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-
-  #     - name: Install dependencies
-  #       run: npm ci
-
-  #     - name: Run tests
-  #       run: npm run build
