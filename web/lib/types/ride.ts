@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 import { Car, Ride, Worker } from 'lib/prisma/client'
 import { z } from 'zod'

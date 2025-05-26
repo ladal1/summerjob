@@ -98,7 +98,7 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
             key={i}
             active={false}
             page={'...'}
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
+             
             onClick={() => {}}
             disabled={true}
           />
@@ -168,7 +168,7 @@ function PaginationButton({
       <a
         className="smj-page-link"
         href="#"
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
+         
         onClick={disabled ? () => {} : onClick}
       >
         {page}

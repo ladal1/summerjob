@@ -68,7 +68,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     APILogEvent.WORKER_MODIFY,
     worker.id,
     workerData,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+     
     session!
   )
 
@@ -88,7 +88,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   await logger.apiRequest(APILogEvent.WORKER_DELETE, worker.id, {}, session!)
   await deleteWorker(worker.id)
 

@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function MyPlanPage() {
   const session = await getSMJSession()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const userId = session!.userID
   const worker = await getWorkerById(userId)
   if (!worker || !worker.availability) {
@@ -25,12 +25,12 @@ export default async function MyPlanPage() {
   let plans: MyPlan[] = []
   try {
     plans = await getMyPlans(worker.id)
-  } catch (e) {}
+  } catch {}
   const events = await getMyEvents(userId)
   const sEvents = serializePosts(events)
 
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const { startDate, endDate } = summerJobEvent!
   return (
     <MyPlanClientPage

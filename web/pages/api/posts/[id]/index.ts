@@ -55,7 +55,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     postData,
     fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
   )
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   await logger.apiRequest(APILogEvent.POST_MODIFY, post.id, postData, session!)
 
   res.status(204).end()
@@ -103,7 +103,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   }
 
   await deletePost(post.id)
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   await logger.apiRequest(APILogEvent.POST_DELETE, post.id, {}, session!)
 
   res.status(204).end()

@@ -26,7 +26,7 @@ export default async function PlanPage(props: PathProps) {
       id={params.id}
       initialDataPlan={serialized}
       initialDataJoblessWorkers={joblessSerialized}
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+       
       workerId={session!.userID}
     />
   )

@@ -1,4 +1,4 @@
-from planner.src.rabbitmq_setup import setup_connection
+from src.rabbitmq_setup import setup_connection
 
 channel = setup_connection()
 

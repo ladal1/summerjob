@@ -45,7 +45,7 @@ export async function withPermissions(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSession()
   const allowed = isAccessAllowed(permissions, session)
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -63,7 +63,7 @@ export async function withPermissionsAPI(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSessionAPI(req, res)
   const allowed = isAccessAllowed(permissions, session)
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   return allowed ? { success: true, session: session! } : { success: false }
 }
 

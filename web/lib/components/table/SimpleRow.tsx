@@ -13,10 +13,10 @@ export function SimpleRow({
   data,
   draggable = false,
   onDragStart,
-  /* eslint-disable @typescript-eslint/no-empty-function */
+   
   onMouseEnter = () => {},
   onMouseLeave = () => {},
-}: /* eslint-enable @typescript-eslint/no-empty-function */
+}:  
 RowProps) {
   const style = draggable ? { cursor: 'grab' } : {}
   return (

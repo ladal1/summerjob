@@ -64,7 +64,7 @@ export const updatePhotoPathByNewFilename = (
 export const createDirectory = async (dirName: string) => {
   try {
     await promises.access(dirName)
-  } catch (error) {
+  } catch {
     await promises.mkdir(dirName, { recursive: true })
   }
 }
@@ -73,5 +73,5 @@ export const deleteDirectory = async (dirName: string) => {
   try {
     await promises.access(dirName)
     await promises.rmdir(dirName)
-  } catch (error) {}
+  } catch {}
 }

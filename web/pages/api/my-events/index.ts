@@ -15,7 +15,7 @@ async function get(
   if (!summerJobEvent) {
     return
   }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+   
   const plans = await getMyEvents(session!.userID)
   res.status(200).json(plans)
 }
