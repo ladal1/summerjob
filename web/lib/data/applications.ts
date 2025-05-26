@@ -104,7 +104,8 @@ export async function updateApplication(
     photoPath = path.join(uploadDir, fileName)
 
     const resolvedPhotoPath = path.resolve(photoPath) // Normalize the path
-    if (!resolvedPhotoPath.startsWith(uploadDir)) {
+    const relativePath = path.relative(uploadDir, resolvedPhotoPath)
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
       throw new Error('Invalid file path: Path is outside the allowed directory.')
     }
     await renameFile(file.filepath, resolvedPhotoPath)
