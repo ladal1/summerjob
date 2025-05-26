@@ -48,7 +48,12 @@ export const renameFile = async (
   oldPhotoPath: string,
   newPhotoPath: string
 ) => {
-  await promises.rename(oldPhotoPath, newPhotoPath)
+  const uploadRoot = path.resolve(getUploadDirForImages()) // Safe root directory
+  const resolvedNewPath = path.resolve(newPhotoPath) // Normalize the new path
+  if (!resolvedNewPath.startsWith(uploadRoot)) {
+    throw new Error('Invalid file path: Path is outside the allowed directory.')
+  }
+  await promises.rename(oldPhotoPath, resolvedNewPath)
 }
 
 export const updatePhotoPathByNewFilename = (
