@@ -103,7 +103,12 @@ export async function updateApplication(
     const fileName = `${id}${fileExtension}`
     photoPath = path.join(uploadDir, fileName)
 
-    await renameFile(file.filepath, photoPath)
+    const resolvedPhotoPath = path.resolve(photoPath) // Normalize the path
+    const relativePath = path.relative(uploadDir, resolvedPhotoPath)
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+      throw new Error('Invalid file path: Path is outside the allowed directory.')
+    }
+    await renameFile(file.filepath, resolvedPhotoPath)
 
     const oldPhotoPath = await getApplicationPhotoPathById(id, prismaClient)
     if (oldPhotoPath) {
