@@ -6,7 +6,8 @@ channel = setup_connection()
 def callback(ch, method, properties, body):
     print(f" [x] Received {body}")
 
-channel.basic_consume(queue='task_queue',
+queue_name = os.getenv('QUEUE_NAME', 'task_queue')
+channel.basic_consume(queue=queue_name,
                       on_message_callback=callback,
                       auto_ack=True)
 
