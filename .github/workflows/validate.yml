@@ -16,7 +16,7 @@ jobs:
     name: Lint web
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [22, 24]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -65,7 +65,7 @@ jobs:
     name: Build web
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [22, 24]
     runs-on: ubuntu-latest
     defaults:
       run:
