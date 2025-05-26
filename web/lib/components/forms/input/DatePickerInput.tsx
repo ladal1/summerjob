@@ -11,6 +11,21 @@ import { Label } from '../Label'
 import 'react-datepicker/dist/react-datepicker.css'
 import { cs } from 'date-fns/locale'
 
+// Helper function to safely parse date strings
+const parseDate = (dateString: string | undefined): Date | undefined => {
+  if (!dateString) return undefined
+
+  // If it's already in YYYY-MM-DD format, append time
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const date = new Date(dateString + 'T00:00:00')
+    return isNaN(date.getTime()) ? undefined : date
+  }
+
+  // Try to parse as-is first
+  const date = new Date(dateString)
+  return isNaN(date.getTime()) ? undefined : date
+}
+
 interface DatePickerInputProps {
   id: string
   label: string
@@ -40,10 +55,10 @@ export function DatePickerInput({
   setError,
   clearErrors,
 }: DatePickerInputProps) {
-  const parsedMin = minDate ? new Date(minDate) : undefined
-  const parsedMax = maxDate ? new Date(maxDate) : undefined
+  const parsedMin = parseDate(minDate)
+  const parsedMax = parseDate(maxDate)
   const parsedDefaultValue = useMemo(
-    () => (defaultValue ? new Date(defaultValue) : undefined),
+    () => parseDate(defaultValue),
     [defaultValue]
   )
 
@@ -68,15 +83,21 @@ export function DatePickerInput({
             // @ts-expect-error: date-fns locale typing conflict
             locale={cs}
             placeholderText="Vyberte datum"
-            selected={field.value ? new Date(field.value) : parsedDefaultValue}
+            selected={field.value ? parseDate(field.value) : parsedDefaultValue}
             onChange={date => {
-              if (!date) {
-                setError(id, { message: 'Datum je povinné' })
+              if (!date || isNaN(date.getTime())) {
+                if (mandatory) {
+                  setError(id, { message: 'Datum je povinné' })
+                }
                 return
               }
 
               clearErrors(id)
-              field.onChange(date.toISOString())
+              // Format date as YYYY-MM-DD to avoid timezone issues
+              const year = date.getFullYear()
+              const month = String(date.getMonth() + 1).padStart(2, '0')
+              const day = String(date.getDate()).padStart(2, '0')
+              field.onChange(`${year}-${month}-${day}`)
             }}
             onSelect={date => {
               if (date) {
