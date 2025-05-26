@@ -108,7 +108,7 @@ export default function ApplicationsPage({
     router.back()
   }
 
-  if (isApplicationOpen) {
+  if (!isApplicationOpen) {
     return (
       <p className="text-center text-lg font-weight-bold mt-5">
         Přihlašování není aktuálně otevřené.
