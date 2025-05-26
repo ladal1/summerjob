@@ -176,7 +176,7 @@ export default function ApplicationAdminPage() {
         .map(
           field => `"${String(field).replace(/"/g, '""')}"` // Na ošetření uvozovek
         )
-        .join(',')
+        .join(',');
     })
 
     const csv = [csvHeader, ...csvRows].join('\n')

@@ -5,10 +5,11 @@ import { redirect } from 'next/navigation'
 import logoImage from 'public/logo-smj-yellow.png'
 
 type Props = {
-  searchParams?: { [key: string]: string | string[] | undefined }
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function AuthErrorPage({ searchParams }: Props) {
+export default async function AuthErrorPage(props: Props) {
+  const searchParams = await props.searchParams;
   const session = await getSMJSession()
   if (session) {
     redirect('/')

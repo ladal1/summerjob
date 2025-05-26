@@ -8,7 +8,7 @@ import { Permission } from 'lib/types/auth'
 import { serializeWorker } from 'lib/types/worker'
 
 export const metadata = {
-  title: 'Můj profil',
+  title: 'Můj profil'
 }
 
 export const dynamic = 'force-dynamic'

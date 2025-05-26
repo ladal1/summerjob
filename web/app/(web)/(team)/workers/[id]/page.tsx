@@ -8,12 +8,13 @@ import { Permission } from 'lib/types/auth'
 import { serializeWorker } from 'lib/types/worker'
 
 type Params = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function EditWorkerPage({ params }: Params) {
+export default async function EditWorkerPage(props: Params) {
+  const params = await props.params;
   const worker = await getWorkerById(params.id)
   if (!worker) {
     return <ErrorPage404 message="Pracant nenalezen." />

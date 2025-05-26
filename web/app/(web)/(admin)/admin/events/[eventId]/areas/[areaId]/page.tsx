@@ -4,13 +4,14 @@ import { getAreaById } from 'lib/data/areas'
 import { serializeAreaComp } from 'lib/types/area'
 
 type PathProps = {
-  params: {
+  params: Promise<{
     eventId: string
     areaId: string
-  }
+  }>
 }
 
-export default async function EditAreaPage({ params }: PathProps) {
+export default async function EditAreaPage(props: PathProps) {
+  const params = await props.params;
   const area = await getAreaById(params.areaId)
   if (!area) return <ErrorPage404 message="Oblast nenalezena." />
   const sArea = serializeAreaComp(area)

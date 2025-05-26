@@ -9,7 +9,7 @@ import { MyPlan, serializeMyPlans } from 'lib/types/my-plan'
 import { serializePosts } from 'lib/types/post'
 
 export const metadata = {
-  title: 'Můj plán',
+  title: 'Můj plán'
 }
 
 export const dynamic = 'force-dynamic'

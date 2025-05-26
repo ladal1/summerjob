@@ -4,10 +4,11 @@ import SignInClientPage from 'lib/components/auth/SignInClientPage'
 import { redirect } from 'next/navigation'
 
 type Props = {
-  searchParams?: { [key: string]: string | string[] | undefined }
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function SignInPage({ searchParams }: Props) {
+export default async function SignInPage(props: Props) {
+  const searchParams = await props.searchParams;
   const session = await getSMJSession()
   if (searchParams?.callbackUrl && session) {
     if (typeof searchParams.callbackUrl === 'string') {

@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation'
 type Props = {
-  params: {
+  params: Promise<{
     eventId: string
-  }
+  }>
 }
 
-export default function AreasPage({ params }: Props) {
+export default async function AreasPage(props: Props) {
+  const params = await props.params;
   redirect(`/admin/events/${params.eventId}`)
 }

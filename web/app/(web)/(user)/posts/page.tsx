@@ -7,7 +7,7 @@ import { Permission } from 'lib/types/auth'
 import { serializePosts } from 'lib/types/post'
 
 export const metadata = {
-  title: 'Nástěnka',
+  title: 'Nástěnka'
 }
 
 export const dynamic = 'force-dynamic'

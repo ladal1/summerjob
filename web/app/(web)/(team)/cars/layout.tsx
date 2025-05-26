@@ -3,7 +3,7 @@ import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import { Permission } from 'lib/types/auth'
 
 export const metadata = {
-  title: 'Auta',
+  title: 'Auta'
 }
 
 export default async function CarsLayout({

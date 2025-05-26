@@ -8,12 +8,13 @@ import { getAreas } from '../../../../../lib/data/areas'
 import { serializeAreas } from '../../../../../lib/types/area'
 
 type PathProps = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function EditProposedJobPage({ params }: PathProps) {
+export default async function EditProposedJobPage(props: PathProps) {
+  const params = await props.params;
   const job = await getProposedJobById(params.id)
   if (!job) {
     return <ErrorPage404 message="Job nenalezen."></ErrorPage404>

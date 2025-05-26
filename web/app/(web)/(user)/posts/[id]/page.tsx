@@ -9,12 +9,13 @@ import { Permission } from 'lib/types/auth'
 import { serializePost } from 'lib/types/post'
 
 type Params = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function EditPostPage({ params }: Params) {
+export default async function EditPostPage(props: Params) {
+  const params = await props.params;
   const post = await getPostById(params.id)
   if (!post) {
     return <ErrorPage404 message="Příspěvek nenalezen." />
