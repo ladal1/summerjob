@@ -32,7 +32,7 @@ function startWithZeros(num: number, numOfDigits = 2) {
 }
 
 function chooseWithProbability<T>(array: T[], probability: number): T[] {
-  return array.filter((_, i) => Math.random() < probability)
+  return array.filter(() => Math.random() < probability)
 }
 
 function createAllergies(): Allergy[] {
@@ -73,7 +73,7 @@ async function createWorkers(
       },
     })
   }
-  const withCar = (worker: any) => {
+  const withCar = worker => {
     const odometerValue = between(10000, 100000)
     return Prisma.validator<Prisma.WorkerCreateInput>()({
       ...worker,
@@ -271,7 +271,7 @@ async function populatePlan(
     },
   })
 
-  const ride = await prisma.ride.create({
+  await prisma.ride.create({
     data: {
       driverId: driver.id,
       carId: driver.cars[0].id,
