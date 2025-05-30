@@ -7,6 +7,9 @@ on:
       - develop
   pull_request:
 
+permissions:
+  contents: read
+
 env:
   NEXTAUTH_SECRET: 'test'
   DATABASE_URL: 'postgresql://test:test@localhost:5432/test?schema=public'
