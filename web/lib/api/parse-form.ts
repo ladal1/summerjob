@@ -6,8 +6,10 @@ import { ApiBadRequestError } from 'lib/types/api-error'
 import path from 'path'
 
 /* Get simple data from string jsonData containing json data. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getJson = (fieldsJsonData: string | string[]): any => {
+const getJson = (fieldsJsonData: string | string[] | undefined): unknown => {
+  if (!fieldsJsonData) {
+    return null
+  }
   const jsonData = Array.isArray(fieldsJsonData)
     ? fieldsJsonData[0]
     : fieldsJsonData
