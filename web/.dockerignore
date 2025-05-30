@@ -9,3 +9,4 @@ README.md
 .env
 .env.sample
 build
+prisma/migrations
