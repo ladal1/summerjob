@@ -622,8 +622,11 @@ img.smj-nav-logo {
   color: #000000;
   background-color: #fff;
   border: 1px solid #dee2e6;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
   text-decoration: none;
 }
 
@@ -768,7 +771,7 @@ img.smj-nav-logo {
 
 .infobox {
   --bs-bg-opacity: 1;
-  background-color: #DAEDFF;
+  background-color: #daedff;
   padding: 8px;
   padding-right: 40px;
   border-radius: 10px;
@@ -777,23 +780,25 @@ img.smj-nav-logo {
 form.application .light-placeholder + input::placeholder,
 form.application .light-placeholder + textarea::placeholder,
 form.application .light-placeholder + div > input::placeholder,
-form.application input.custom-input::placeholder{
+form.application input.custom-input::placeholder {
   color: var(--bs-gray-400);
   font-size: medium;
 }
 
 .border-start-success {
-  border-left-color: #4bdf3e !important; 
+  border-left-color: #4bdf3e !important;
 }
 .border-start-danger {
-  border-left-color: #e75b69 !important; 
+  border-left-color: #e75b69 !important;
 }
 .border-start-warning {
-  border-left-color: #fdcc37 !important; 
+  border-left-color: #fdcc37 !important;
 }
 
 @media (min-width: 768px) {
-  .w-md-45 { width: 45% !important; }
+  .w-md-45 {
+    width: 45% !important;
+  }
 }
 
 .react-datepicker-wrapper,
@@ -805,4 +810,100 @@ form.application input.custom-input::placeholder{
 .react-datepicker__input-container input::placeholder {
   color: var(--bs-gray-400) !important;
   font-size: medium !important;
+}
+
+/* Markdown content styling */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.markdown-content p {
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+.markdown-content u {
+  text-decoration: underline;
+}
+
+.markdown-content a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.markdown-content a:hover {
+  color: #004499;
+  text-decoration: none;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.markdown-content ul li,
+.markdown-content ol li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.markdown-content h1:first-child,
+.markdown-content h2:first-child,
+.markdown-content h3:first-child,
+.markdown-content h4:first-child,
+.markdown-content h5:first-child,
+.markdown-content h6:first-child {
+  margin-top: 0;
+}
+
+.markdown-content blockquote {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid #fdc345;
+  background-color: #f8f9fa;
+  font-style: italic;
+}
+
+.markdown-content code {
+  background-color: #f1f3f4;
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content pre {
+  background-color: #f1f3f4;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
 }

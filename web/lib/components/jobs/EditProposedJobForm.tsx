@@ -14,7 +14,7 @@ import { Serialized } from 'lib/types/serialize'
 import { ToolComplete } from 'lib/types/tool'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
 import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
 import { JobType, ToolName } from '../../prisma/client'
@@ -28,10 +28,10 @@ import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { MapInput } from '../forms/input/MapInput'
+import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { ScaleInput } from '../forms/input/ScaleInput'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { Form } from '../forms/Form'
@@ -361,21 +361,21 @@ export default function EditProposedJobForm({
             mandatory
             margin={false}
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="publicDescription"
             label="Popis navrhované práce"
-            placeholder="Popis"
+            placeholder="Popis navrhované práce... (podporuje Markdown formátování)"
             rows={4}
             register={() => register('publicDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="privateDescription"
             label="Poznámka pro organizátory"
-            placeholder="Poznámka"
+            placeholder="Poznámka pro organizátory... (podporuje Markdown formátování)"
             rows={4}
             register={() => register('privateDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
           />
           <FilterSelectInput
             id="areaId"

@@ -1,4 +1,7 @@
 'use client'
+import React from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
 import { Allergy } from 'lib/prisma/client'
 import { MyPlan } from 'lib/types/my-plan'
@@ -39,7 +42,11 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                   {selectedPlan.job.description.length > 0 && (
                     <>
                       <Label id="description" label="Popis" />
-                      {selectedPlan.job.description}
+                      <div className="markdown-content">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {selectedPlan.job.description}
+                        </ReactMarkdown>
+                      </div>
                     </>
                   )}
                   <Label id="contact" label="Kontaktní osoba" />

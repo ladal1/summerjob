@@ -9,16 +9,16 @@ import { PostTag } from 'lib/prisma/client'
 import { PostCreateData, PostCreateSchema } from 'lib/types/post'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { MapInput } from '../forms/input/MapInput'
+import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { PillSelectInput } from '../forms/input/PillSelectInput'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { TimeInput } from '../forms/input/TimeInput'
 
@@ -151,22 +151,22 @@ export default function CreatePost({ allDates }: CreatePostProps) {
             mandatory
             margin={false}
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="shortDescription"
             label="Krátký popis"
             placeholder="Popis"
             rows={2}
             register={() => register('shortDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
             mandatory
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="longDescription"
             label="Dlouhý popis"
             placeholder="Popis"
             rows={4}
             register={() => register('longDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
           />
           <div className="d-flex flex-row">
             <DateSelectionInput
