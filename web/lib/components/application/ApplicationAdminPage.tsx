@@ -59,7 +59,7 @@ export default function ApplicationAdminPage() {
 
   const [applications, setApplications] = useState<ApplicationListItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(pageQ ? parseInt(pageQ) : 1)
+  const [page, setPage] = useState(pageQ && !isNaN(parseInt(pageQ)) ? parseInt(pageQ) : 1)
   const [total, setTotal] = useState(0)
   const [perPage, setPerPage] = useState(perPageQ ? parseInt(perPageQ) : 10)
   const [perPageInput, setPerPageInput] = useState(perPageQ || '10')
