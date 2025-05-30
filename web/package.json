@@ -76,7 +76,7 @@
     "prettier": "^3.5.3",
     "prisma": "^5.17.0",
     "supertest": "^6.3.3",
-    "ts-mocha": "^10.0.0",
+    "ts-mocha": "^11.1.0",
     "zod-prisma-types": "^2.5.6"
   }
 }
