@@ -34,6 +34,24 @@ interface ApplicationListItem {
 
 type ApplicationStatusFilter = 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED'
 
+// Helper function to construct URL search parameters consistently
+function createApplicationSearchParams(
+  page: number,
+  perPage: number,
+  statusFilter: ApplicationStatusFilter
+): URLSearchParams {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    perPage: perPage.toString(),
+  })
+
+  if (statusFilter !== 'ALL') {
+    params.append('status', statusFilter)
+  }
+
+  return params
+}
+
 export default function ApplicationAdminPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -59,7 +77,9 @@ export default function ApplicationAdminPage() {
 
   const [applications, setApplications] = useState<ApplicationListItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(pageQ && !isNaN(parseInt(pageQ)) ? parseInt(pageQ) : 1)
+  const [page, setPage] = useState(
+    pageQ && !isNaN(parseInt(pageQ)) ? parseInt(pageQ) : 1
+  )
   const [total, setTotal] = useState(0)
   const [perPage, setPerPage] = useState(perPageQ ? parseInt(perPageQ) : 10)
   const [perPageInput, setPerPageInput] = useState(perPageQ || '10')
@@ -74,14 +94,11 @@ export default function ApplicationAdminPage() {
     const load = async () => {
       setLoading(true)
       try {
-        const queryParams = new URLSearchParams({
-          page: page.toString(),
-          perPage: perPage.toString(),
-        })
-
-        if (statusFilter !== 'ALL') {
-          queryParams.append('status', statusFilter)
-        }
+        const queryParams = createApplicationSearchParams(
+          page,
+          perPage,
+          statusFilter
+        )
 
         const res = await fetch(`/api/applications?${queryParams.toString()}`)
 
@@ -104,14 +121,7 @@ export default function ApplicationAdminPage() {
 
   // Update URL with current pagination state
   useEffect(() => {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      perPage: perPage.toString(),
-    })
-
-    if (statusFilter !== 'ALL') {
-      params.append('status', statusFilter)
-    }
+    const params = createApplicationSearchParams(page, perPage, statusFilter)
 
     router.replace(`?${params.toString()}`, { scroll: false })
   }, [page, perPage, statusFilter, router])
@@ -340,14 +350,10 @@ export default function ApplicationAdminPage() {
                       }}
                     />
                     <Link
-                      href={`/admin/applications/${app.id}?${new URLSearchParams(
-                        {
-                          page: page.toString(),
-                          perPage: perPage.toString(),
-                          ...(statusFilter !== 'ALL' && {
-                            status: statusFilter,
-                          }),
-                        }
+                      href={`/admin/applications/${app.id}?${createApplicationSearchParams(
+                        page,
+                        perPage,
+                        statusFilter
                       ).toString()}`}
                       className="flex-grow-1 text-decoration-none text-dark"
                     >
