@@ -108,6 +108,7 @@ const savePhotos = async (
     await createDirectory(path.join(uploadDirectory, `/proposed-jobs/${jobId}`))
     for (const fieldName of fileFieldNames) {
       const file = files[fieldName]
+      if (!file) continue
       const photoPath = getPhotoPath(file)
       const relativePath = path.normalize(
         photoPath.substring(uploadDirectory.length)

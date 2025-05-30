@@ -102,9 +102,7 @@ function jobToFilterSelectItem(job: ActiveJobNoPlan) {
   return {
     id: job.id,
     name: job.proposedJob.name,
-    searchable:
-      job.proposedJob.name + ' ' + job.proposedJob.area?.name ??
-      'Nezadaná oblast',
+    searchable: job.proposedJob.name + ' ' + job.proposedJob.area?.name,
     item: (
       <span>
         {job.proposedJob.name} (

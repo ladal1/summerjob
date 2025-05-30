@@ -80,7 +80,6 @@ export function DatePickerInput({
         render={({ field }) => (
           <DatePicker
             id={id}
-            // @ts-expect-error: date-fns locale typing conflict
             locale={cs}
             placeholderText="Vyberte datum"
             selected={field.value ? parseDate(field.value) : parsedDefaultValue}
