@@ -55,7 +55,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     postData,
     fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
   )
-   
+
   await logger.apiRequest(APILogEvent.POST_MODIFY, post.id, postData, session!)
 
   res.status(204).end()
@@ -80,7 +80,16 @@ async function setParticipation(req: NextApiRequest, res: NextApiResponse) {
       isEnrolled: !post.participants.find(p => p.workerId === session.userID),
     },
   }
-  if (!postData) {
+  if (
+    !postData ||
+    (postData.participateChange.isEnrolled &&
+      !!post.maxParticipants &&
+      post.participants.length >= post.maxParticipants)
+  ) {
+    res.status(400).json({
+      error:
+        'Cannot change participation, maximum number of participants reached.',
+    })
     return
   }
 
@@ -103,7 +112,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   }
 
   await deletePost(post.id)
-   
+
   await logger.apiRequest(APILogEvent.POST_DELETE, post.id, {}, session!)
 
   res.status(204).end()

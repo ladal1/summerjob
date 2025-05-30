@@ -4,11 +4,11 @@ import { DateBool } from 'lib/data/dateSelectionType'
 import { LabelWithIcon } from 'lib/data/enumMapping/enumMapping'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { useAPIPostCreate } from 'lib/fetcher/post'
-import { removeRedundantSpace } from 'lib/helpers/helpers'
+import { removeRedundantSpace, formatNumber } from 'lib/helpers/helpers'
 import { PostTag } from 'lib/prisma/client'
 import { PostCreateData, PostCreateSchema } from 'lib/types/post'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
@@ -33,6 +33,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<PostForm>({
     resolver: zodResolver(schema),
@@ -44,6 +45,20 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   const router = useRouter()
 
   const [saved, setSaved] = useState(false)
+
+  // Watch fields to conditionally show/disable maxParticipants
+  const isMandatory = watch('isMandatory')
+  const isOpenForParticipants = watch('isOpenForParticipants')
+
+  // Clear maxParticipants when it shouldn't be available
+  useEffect(() => {
+    if (isMandatory || !isOpenForParticipants) {
+      setValue('maxParticipants', null, {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    }
+  }, [isMandatory, isOpenForParticipants, setValue])
 
   const { trigger, isMutating, reset, error } = useAPIPostCreate({
     onSuccess: () => {
@@ -200,6 +215,23 @@ export default function CreatePost({ allDates }: CreatePostProps) {
             register={selectTags}
             errors={errors}
           />
+          {isOpenForParticipants && !isMandatory && (
+            <TextInput
+              id="maxParticipants"
+              type="number"
+              label="Maximální počet účastníků"
+              placeholder="Maximální počet účastníků"
+              min={1}
+              register={() =>
+                register('maxParticipants', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
+              errors={errors}
+            />
+          )}
           <OtherAttributesInput
             label="Další vlastnosti"
             register={register}

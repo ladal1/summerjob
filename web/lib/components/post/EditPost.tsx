@@ -4,12 +4,12 @@ import { DateBool } from 'lib/data/dateSelectionType'
 import { LabelWithIcon } from 'lib/data/enumMapping/enumMapping'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { useAPIPostUpdate } from 'lib/fetcher/post'
-import { pick, removeRedundantSpace } from 'lib/helpers/helpers'
+import { pick, removeRedundantSpace, formatNumber } from 'lib/helpers/helpers'
 import { PostTag } from 'lib/prisma/client'
 import { deserializePost, PostUpdateSchema } from 'lib/types/post'
 import { Serialized } from 'lib/types/serialize'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
@@ -38,6 +38,7 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
     handleSubmit,
     setValue,
     getValues,
+    watch,
     formState: { errors, dirtyFields },
   } = useForm<PostForm>({
     resolver: zodResolver(schema),
@@ -53,10 +54,25 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
       tags: post.tags,
       isMandatory: post.isMandatory,
       isOpenForParticipants: post.isOpenForParticipants,
+      maxParticipants: post.maxParticipants,
     },
   })
 
   const router = useRouter()
+
+  // Watch fields to conditionally show/disable maxParticipants
+  const isMandatory = watch('isMandatory')
+  const isOpenForParticipants = watch('isOpenForParticipants')
+
+  // Clear maxParticipants when it shouldn't be available
+  useEffect(() => {
+    if (isMandatory || !isOpenForParticipants) {
+      setValue('maxParticipants', null, {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    }
+  }, [isMandatory, isOpenForParticipants, setValue])
 
   const [saved, setSaved] = useState(false)
   const { trigger, isMutating, reset, error } = useAPIPostUpdate(post.id, {
@@ -263,6 +279,22 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
           register={selectTags}
           errors={errors}
         />
+        {isOpenForParticipants && !isMandatory && (
+          <TextInput
+            id="maxParticipants"
+            type="number"
+            label="Maximální počet účastníků"
+            placeholder="Maximální počet účastníků"
+            min={1}
+            register={() =>
+              register('maxParticipants', {
+                valueAsNumber: true,
+                onChange: e => (e.target.value = formatNumber(e.target.value)),
+              })
+            }
+            errors={errors}
+          />
+        )}
         <OtherAttributesInput
           label="Další vlastnosti"
           register={register}
@@ -281,6 +313,16 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
         />{' '}
         <Label id={'participants'} label="Zapsaní účastníci" />
         <p style={{ whiteSpace: 'pre-wrap' }}>
+          {post.maxParticipants && (
+            <span className="text-muted fs-7">
+              Počet účastníků: {post.participants.length} /{' '}
+              {post.maxParticipants}
+              {post.participants.length >= post.maxParticipants && (
+                <span className="text-warning ms-2">• Plná kapacita</span>
+              )}
+            </span>
+          )}
+          {post.maxParticipants && post.participants.length > 0 && <br />}
           {post.participants
             .sort((a, b) => a.worker.lastName.localeCompare(b.worker.lastName))
             .map(

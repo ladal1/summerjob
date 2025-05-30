@@ -66,6 +66,14 @@ export const PostBubble = ({
                 </span>
               ))}
             </div>
+            {item.maxParticipants && (
+              <div className="fs-7 text-muted">
+                Účastníků: {item.participants.length} / {item.maxParticipants}
+                {item.participants.length >= item.maxParticipants && (
+                  <span className="text-warning ms-1">• Plná</span>
+                )}
+              </div>
+            )}
           </div>
           {onUpdated && (
             <div

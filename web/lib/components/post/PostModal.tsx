@@ -110,7 +110,15 @@ export const PostModal = ({
         {onUpdated && (item.isMandatory || item.isOpenForParticipants) && (
           <>
             <hr />
-            <div className="d-flex justify-content-end mt-auto">
+            <div className="d-flex justify-content-between align-items-center mt-auto">
+              {item.maxParticipants && (
+                <div className="fs-7 text-muted">
+                  Účastníků: {item.participants.length} / {item.maxParticipants}
+                  {item.participants.length >= item.maxParticipants && (
+                    <span className="text-warning ms-2">• Plná kapacita</span>
+                  )}
+                </div>
+              )}
               <Participate post={item} onUpdated={onUpdated} userId={userId} />
             </div>
           </>

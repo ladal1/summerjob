@@ -125,6 +125,7 @@ model Post {
   participants          Participant[]
   forEvent              SummerJobEvent @relation(fields: [forEventId], references: [id], onDelete: Cascade)
   forEventId            String
+  maxParticipants       Int?           
 }
 
 model JobPhoto {
