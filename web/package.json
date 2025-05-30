@@ -29,7 +29,7 @@
     "@types/node": "22.15.21",
     "@types/react": "19.1.5",
     "@types/react-dom": "19.1.5",
-    "amqplib": "^0.10.3",
+    "amqplib": "^0.10.8",
     "bcryptjs": "^3.0.2",
     "date-fns": "^4.1.0",
     "formidable": "^3.5.1",
