@@ -9,6 +9,8 @@ import Image from 'next/image'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { IconAndLabel } from '../forms/IconAndLabel'
 import { Participate } from './Participate'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface PostModalProps {
   item: PostComplete
@@ -67,9 +69,17 @@ export const PostModal = ({
           </div>
         )}
         <Label id={'description'} label="Popis" margin={shouldShowMargin} />
-        <p style={{ whiteSpace: 'pre-wrap' }}>{item.shortDescription}</p>
+        <div className="markdown-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {item.shortDescription}
+          </ReactMarkdown>
+        </div>
         {item.longDescription.length > 0 && (
-          <p style={{ whiteSpace: 'pre-wrap' }}>{item.longDescription}</p>
+          <div className="markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {item.longDescription}
+            </ReactMarkdown>
+          </div>
         )}
         {item.photoPath && (
           <div className="d-inline-block smj-shadow-small bg-white rounded border p-3 mb-2">
