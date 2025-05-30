@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface ApplicationListItem {
   id: string
@@ -34,14 +35,36 @@ interface ApplicationListItem {
 type ApplicationStatusFilter = 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED'
 
 export default function ApplicationAdminPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Get initial values from URL search parameters
+  const pageQ = searchParams?.get('page')
+  const perPageQ = searchParams?.get('perPage')
+  const statusQ = searchParams?.get('status')
+
+  // Convert statusQ to uppercase and validate
+  const statusUpper = statusQ?.toUpperCase()
+  const validStatuses: ApplicationStatusFilter[] = [
+    'ALL',
+    'PENDING',
+    'ACCEPTED',
+    'REJECTED',
+  ]
+  const validatedStatus: ApplicationStatusFilter = validStatuses.includes(
+    statusUpper as ApplicationStatusFilter
+  )
+    ? (statusUpper as ApplicationStatusFilter)
+    : 'ALL'
+
   const [applications, setApplications] = useState<ApplicationListItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(pageQ ? parseInt(pageQ) : 1)
   const [total, setTotal] = useState(0)
-  const [perPage, setPerPage] = useState(10)
-  const [perPageInput, setPerPageInput] = useState('10')
+  const [perPage, setPerPage] = useState(perPageQ ? parseInt(perPageQ) : 10)
+  const [perPageInput, setPerPageInput] = useState(perPageQ || '10')
   const [statusFilter, setStatusFilter] =
-    useState<ApplicationStatusFilter>('ALL')
+    useState<ApplicationStatusFilter>(validatedStatus)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const isAllSelected =
     applications.length > 0 &&
@@ -78,6 +101,20 @@ export default function ApplicationAdminPage() {
 
     load()
   }, [page, perPage, statusFilter])
+
+  // Update URL with current pagination state
+  useEffect(() => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      perPage: perPage.toString(),
+    })
+
+    if (statusFilter !== 'ALL') {
+      params.append('status', statusFilter)
+    }
+
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }, [page, perPage, statusFilter, router])
 
   const totalPages = Math.ceil(total / perPage)
 
@@ -176,7 +213,7 @@ export default function ApplicationAdminPage() {
         .map(
           field => `"${String(field).replace(/"/g, '""')}"` // Na ošetření uvozovek
         )
-        .join(',');
+        .join(',')
     })
 
     const csv = [csvHeader, ...csvRows].join('\n')
@@ -303,7 +340,15 @@ export default function ApplicationAdminPage() {
                       }}
                     />
                     <Link
-                      href={`/admin/applications/${app.id}`}
+                      href={`/admin/applications/${app.id}?${new URLSearchParams(
+                        {
+                          page: page.toString(),
+                          perPage: perPage.toString(),
+                          ...(statusFilter !== 'ALL' && {
+                            status: statusFilter,
+                          }),
+                        }
+                      ).toString()}`}
                       className="flex-grow-1 text-decoration-none text-dark"
                     >
                       <strong>
