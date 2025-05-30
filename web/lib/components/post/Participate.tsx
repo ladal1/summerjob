@@ -27,7 +27,16 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
   }
 
   const isDisabled = () => {
-    return post.isMandatory || isMutating
+    // Always allow unenrolling if already enrolled
+    if (isEnrolled()) return post.isMandatory || isMutating
+    // For enrolling, check if spots are available
+    return post.isMandatory || isMutating || getRemainingSpots() < 1
+  }
+
+  const getRemainingSpots = () => {
+    if (!post.maxParticipants) return Infinity
+    const currentParticipants = post.participants?.length || 0
+    return post.maxParticipants - currentParticipants
   }
 
   useEffect(() => {
@@ -37,26 +46,33 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
   return (
     <>
       {(post.isMandatory || post.isOpenForParticipants) && (
-        <div className="form-check align-self-center align-items-center d-flex ">
-          <label
-            className="form-check-label fs-7 text-truncate cursor-pointer"
-            htmlFor={post.id}
-          >
-            <span className={`${isDisabled() ? 'text-muted' : 'fw-bold'}`}>
-              Zúčastním se
-            </span>
-          </label>
-          <input
-            className="form-check-input smj-checkbox ms-2 cursor-default"
-            type="checkbox"
-            id={post.id}
-            disabled={isDisabled()}
-            checked={checked}
-            onChange={e => {
-              e.stopPropagation()
-              triggerParticipate(!checked)
-            }}
-          />
+        <div className="form-check align-self-center align-items-center d-flex flex-column">
+          {post.maxParticipants && (
+            <div className="fs-7 text-muted mb-1">
+              Zbývá míst: {getRemainingSpots()}
+            </div>
+          )}
+          <div className="d-flex align-items-center">
+            <label
+              className="form-check-label fs-7 text-truncate cursor-pointer"
+              htmlFor={post.id}
+            >
+              <span className={`${isDisabled() ? 'text-muted' : 'fw-bold'}`}>
+                Zúčastním se
+              </span>
+            </label>
+            <input
+              className="form-check-input smj-checkbox ms-2 cursor-default"
+              type="checkbox"
+              id={post.id}
+              disabled={isDisabled()}
+              checked={checked}
+              onChange={e => {
+                e.stopPropagation()
+                triggerParticipate(!checked)
+              }}
+            />
+          </div>
         </div>
       )}
     </>
