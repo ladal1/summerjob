@@ -15,4 +15,4 @@ sqlacodegen==2.3.0.post1
 SQLAlchemy==1.4.0
 typing_extensions==4.13.2
 tzdata==2023.3
-vine==5.0.0
+vine==5.1.0
