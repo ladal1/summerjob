@@ -14,6 +14,8 @@ import { ToolCompleteData } from 'lib/types/tool'
 import { WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow } from '../table/ExpandableRow'
@@ -132,11 +134,23 @@ export function PlanJobRow({
   const expandedContent: RowContentsInterface[] = [
     {
       label: 'Popis',
-      content: `${job.proposedJob.publicDescription}`,
+      content: (
+        <div className="markdown-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {job.proposedJob.publicDescription}
+          </ReactMarkdown>
+        </div>
+      ),
     },
     {
       label: 'Poznámka pro organizátory',
-      content: `${job.proposedJob.privateDescription}`,
+      content: (
+        <div className="markdown-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {job.proposedJob.privateDescription}
+          </ReactMarkdown>
+        </div>
+      ),
     },
     {
       label: (

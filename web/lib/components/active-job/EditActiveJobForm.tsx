@@ -11,13 +11,13 @@ import { Serialized } from 'lib/types/serialize'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { FieldErrors, useForm } from 'react-hook-form'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { Form } from '../forms/Form'
 import FormWarning from '../forms/FormWarning'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
+import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 import RidesList from './RidesList'
@@ -125,21 +125,21 @@ export default function EditActiveJobForm({
           <FormWarning
             message={errors?.proposedJob?.name?.message as string | undefined}
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="proposedJob.publicDescription"
             label="Veřejný popis"
-            placeholder="Popis"
+            placeholder="Popis jobu (podpora Markdown)"
             rows={4}
             register={() => register('proposedJob.publicDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="proposedJob.privateDescription"
             label="Poznámka pro organizátory"
-            placeholder="Poznámka"
+            placeholder="Poznámka (podpora Markdown)"
             rows={4}
             register={() => register('proposedJob.privateDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
           />
           <FilterSelectInput
             id="responsibleWorkerId"

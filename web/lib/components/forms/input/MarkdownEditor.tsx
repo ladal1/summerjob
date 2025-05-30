@@ -15,7 +15,6 @@ interface MarkdownEditorProps {
   labelClassName?: string
   margin?: boolean
   mandatory?: boolean
-  value?: string
 }
 
 export const MarkdownEditor = ({
@@ -28,14 +27,17 @@ export const MarkdownEditor = ({
   labelClassName = '',
   margin = true,
   mandatory = false,
-  value = '',
 }: MarkdownEditorProps) => {
   const [showPreview, setShowPreview] = useState(false)
-  const [currentValue, setCurrentValue] = useState(value)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const error = errors?.[id as Path<Record<string, unknown>>]?.message as
     | string
     | undefined
+
+  const registerReturn = register()
+
+  // Get current value from the textarea element
+  const getCurrentValue = () => textareaRef.current?.value || ''
 
   const insertText = (before: string, after: string = '') => {
     if (!textareaRef.current) return
@@ -43,6 +45,7 @@ export const MarkdownEditor = ({
     const textarea = textareaRef.current
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
+    const currentValue = textarea.value
     const selectedText = currentValue.substring(start, end)
 
     const newText =
@@ -52,15 +55,18 @@ export const MarkdownEditor = ({
       after +
       currentValue.substring(end)
 
-    setCurrentValue(newText)
+    // Update the textarea value
+    textarea.value = newText
 
-    // Trigger onChange event for react-hook-form
-    const event = new Event('input', { bubbles: true })
-    Object.defineProperty(event, 'target', {
-      writable: false,
-      value: { ...textarea, value: newText },
-    })
-    textarea.dispatchEvent(event)
+    // Create a proper event object and call the register's onChange
+    const event = {
+      target: {
+        name: registerReturn.name,
+        value: newText,
+      },
+    } as React.ChangeEvent<HTMLTextAreaElement>
+
+    registerReturn.onChange(event)
 
     // Focus and set cursor position
     setTimeout(() => {
@@ -133,8 +139,6 @@ export const MarkdownEditor = ({
     }
   }
 
-  const registerReturn = register()
-
   return (
     <>
       <Label
@@ -176,28 +180,24 @@ export const MarkdownEditor = ({
         >
           <div className="markdown-content">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {currentValue || '*Náhled se zobrazí zde...*'}
+              {getCurrentValue() || '*Náhled se zobrazí zde...*'}
             </ReactMarkdown>
           </div>
         </div>
       ) : (
         <textarea
           id={id}
-          ref={textareaRef}
+          ref={e => {
+            textareaRef.current = e
+            registerReturn.ref(e)
+          }}
           className="form-control border smj-textarea p-2 fs-5"
           placeholder={placeholder}
           rows={rows}
-          value={currentValue}
           onKeyDown={handleKeyDown}
           name={registerReturn.name}
           onBlur={registerReturn.onBlur}
-          onChange={e => {
-            setCurrentValue(e.target.value)
-            // Let react-hook-form handle the change as well
-            if (registerReturn.onChange) {
-              registerReturn.onChange(e)
-            }
-          }}
+          onChange={registerReturn.onChange}
         />
       )}
 

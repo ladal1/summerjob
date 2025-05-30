@@ -1,4 +1,6 @@
 'use client'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import {
   useAPIProposedJobDelete,
   useAPIProposedJobUpdate,
@@ -80,11 +82,23 @@ export default function ProposedJobRow({
   const expandedContent: RowContentsInterface[] = [
     {
       label: 'Popis',
-      content: `${job.publicDescription}`,
+      content: (
+        <div className="markdown-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {job.publicDescription}
+          </ReactMarkdown>
+        </div>
+      ),
     },
     {
       label: 'Poznámka pro organizátory',
-      content: `${job.privateDescription}`,
+      content: (
+        <div className="markdown-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {job.privateDescription}
+          </ReactMarkdown>
+        </div>
+      ),
     },
     {
       label: 'Počet pracantů',
