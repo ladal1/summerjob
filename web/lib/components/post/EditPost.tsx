@@ -67,7 +67,7 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
   // Clear maxParticipants when it shouldn't be available
   useEffect(() => {
     if (isMandatory || !isOpenForParticipants) {
-      setValue('maxParticipants', undefined, {
+      setValue('maxParticipants', null, {
         shouldDirty: true,
         shouldValidate: true,
       })

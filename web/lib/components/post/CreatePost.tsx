@@ -53,7 +53,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   // Clear maxParticipants when it shouldn't be available
   useEffect(() => {
     if (isMandatory || !isOpenForParticipants) {
-      setValue('maxParticipants', undefined, {
+      setValue('maxParticipants', null, {
         shouldDirty: true,
         shouldValidate: true,
       })
