@@ -8,6 +8,8 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
+# Copy prisma schema for the prepare script
+COPY prisma ./prisma
 RUN npm ci && npm install -g --arch=x64 --platform=linux --libc=glibc sharp@0.33.4
 ENV NEXT_SHARP_PATH=/usr/local/lib/node_modules/sharp
 
@@ -16,16 +18,15 @@ FROM node:22-slim AS builder
 WORKDIR /app
 COPY . .
 COPY --from=deps /app/node_modules ./node_modules
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && \
+	apt-get clean && rm -rf /var/lib/apt/lists/* && \
+	npx prisma generate && \
+	npm run build
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN npx prisma generate
-
-RUN npm run build
 
 # Production image, copy all the files and run next
 FROM node:22-slim AS runner
@@ -35,10 +36,10 @@ COPY --from=deps --chown=nextjs:nodejs /usr/local/lib/node_modules/sharp /usr/lo
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-RUN apt-get update -y && apt-get install -y openssl
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    apt-get update -y && apt-get install -y --no-install-recommends openssl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
@@ -51,6 +52,6 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
+ENV PORT=3000
 
 CMD ["node", "server.js"]
