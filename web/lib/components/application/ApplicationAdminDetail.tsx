@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { format, differenceInCalendarDays } from 'date-fns'
 import Link from 'next/link'
 import { PhotoOnClickModal } from '../photo/PhotoOnClickModal'
@@ -36,10 +36,15 @@ export const dynamic = 'force-dynamic'
 
 export default function ApplicationAdminDetailPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const id = typeof params?.id === 'string' ? params?.id : null
 
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Use current URL search parameters for back navigation
+  const currentSearchParams = searchParams?.toString()
+  const backHref = `/admin/applications${currentSearchParams ? `?${currentSearchParams}` : ''}`
 
   useEffect(() => {
     if (!id) return
@@ -86,7 +91,7 @@ export default function ApplicationAdminDetailPage() {
 
   return (
     <div className="container mt-4">
-      <Link href="/admin/applications" className="btn btn-secondary">
+      <Link href={backHref} className="btn btn-secondary">
         ← Zpět na seznam
       </Link>
 
@@ -199,8 +204,8 @@ export default function ApplicationAdminDetailPage() {
                   {workingDays === 1
                     ? ' den'
                     : workingDays < 5
-                    ? ' dny'
-                    : ' dní'}
+                      ? ' dny'
+                      : ' dní'}
                 </td>
               </tr>
               <tr>
