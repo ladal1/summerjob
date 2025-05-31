@@ -157,7 +157,8 @@ export default function PostsClientPage({
     if (selectedDaysQ) {
       const daysQ = selectedDaysQ.split(';') ?? ['']
       const daysInDateQ = daysQ.map(
-        dayQ => new Date(new Date(dayQ).setHours(firstDay.getHours()))
+        dayQ =>
+          new Date(new Date(dayQ + 'T00:00:00').setHours(firstDay.getHours()))
       )
       const result = days.filter(day =>
         daysInDateQ.some(dQ => dQ.toJSON() === day.id)
@@ -285,7 +286,9 @@ export default function PostsClientPage({
     router.replace(
       `?${new URLSearchParams({
         search: search,
-        days: selectedDays.map(d => d.id).join(';') ?? '',
+        days:
+          selectedDays.map(d => d.day.toISOString().split('T')[0]).join(';') ??
+          '',
         sort: selectedSort.id,
         participate: `${participate}`,
         timeFrom: timeFrom === null ? '' : timeFrom,

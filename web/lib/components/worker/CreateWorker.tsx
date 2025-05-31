@@ -39,7 +39,7 @@ export default function CreateWorker({
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -64,6 +64,7 @@ export default function CreateWorker({
   const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true)
+      reset()
       router.refresh()
     },
   })
@@ -107,6 +108,7 @@ export default function CreateWorker({
         saved={saved}
         error={error}
         formId="create-worker"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="create-worker" onSubmit={handleSubmit(onSubmit)}>
           <TextInput

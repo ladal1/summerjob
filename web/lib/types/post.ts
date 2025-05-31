@@ -134,6 +134,12 @@ export const PostUpdateSchema = PostBasicSchema.merge(
       workerId: z.string(),
       isEnrolled: z.boolean(),
     }),
+    participantManagement: z
+      .object({
+        addParticipantIds: z.array(z.string()).optional(),
+        removeParticipantIds: z.array(z.string()).optional(),
+      })
+      .optional(),
   })
 )
   .strict()

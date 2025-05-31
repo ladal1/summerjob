@@ -25,7 +25,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<AreaUpdateData>({
     resolver: zodResolver(AreaUpdateSchema),
     defaultValues: {
@@ -38,6 +38,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
     trigger(data, {
       onSuccess: () => {
         setSaved(true)
+        reset()
       },
     })
   }
@@ -59,6 +60,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
         saved={saved}
         error={error}
         formId="edit-area"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form
           id="edit-area"

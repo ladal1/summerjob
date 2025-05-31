@@ -18,6 +18,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
   const { trigger, isMutating, error, reset } = useAPICarCreate({
     onSuccess: () => {
       setSaved(true)
+      reset()
     },
   })
 
@@ -36,7 +37,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<CarCreateData>({
     resolver: zodResolver(CarCreateSchema),
     defaultValues: {
@@ -66,6 +67,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
         saved={saved}
         error={error}
         formId="create-car"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form
           id="create-car"

@@ -36,7 +36,7 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
   const getRemainingSpots = () => {
     if (!post.maxParticipants) return Infinity
     const currentParticipants = post.participants?.length || 0
-    return post.maxParticipants - currentParticipants
+    return Math.max(0, post.maxParticipants - currentParticipants)
   }
 
   useEffect(() => {
