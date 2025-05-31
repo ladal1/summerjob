@@ -78,6 +78,7 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
   const { trigger, isMutating, reset, error } = useAPIPostUpdate(post.id, {
     onSuccess: () => {
       setSaved(true)
+      reset()
       router.refresh()
     },
   })
@@ -188,6 +189,7 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
       saved={saved}
       error={error}
       formId="edit-post"
+      isDirty={!saved && Object.keys(dirtyFields).length > 0}
     >
       <form id="edit-post" onSubmit={handleSubmit(onSubmit)}>
         <TextInput

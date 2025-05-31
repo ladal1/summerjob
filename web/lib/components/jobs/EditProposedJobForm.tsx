@@ -94,6 +94,7 @@ export default function EditProposedJobForm({
     trigger(modified, {
       onSuccess: () => {
         setSaved(true)
+        reset()
       },
     })
   }
@@ -345,6 +346,7 @@ export default function EditProposedJobForm({
         saved={saved}
         error={error}
         formId="edit-job"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="edit-job" onSubmit={handleSubmit(onSubmit)}>
           <TextInput

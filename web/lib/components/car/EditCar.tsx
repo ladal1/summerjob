@@ -39,6 +39,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
   const { trigger, isMutating, error, reset } = useAPICarUpdate(car.id, {
     onSuccess: () => {
       setSaved(true)
+      reset()
     },
   })
 
@@ -62,6 +63,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
         saved={saved}
         error={error}
         formId="edit-car"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="edit-car" onSubmit={handleSubmit(onSubmit)}>
           <TextInput

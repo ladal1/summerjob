@@ -52,7 +52,7 @@ export default function CreateProposedJobForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     setValue,
     getValues,
   } = useForm<PostForm>({
@@ -74,6 +74,7 @@ export default function CreateProposedJobForm({
       },
       onSuccess: () => {
         setSaved(true)
+        reset()
       },
     })
   }
@@ -233,6 +234,7 @@ export default function CreateProposedJobForm({
         saved={saved}
         error={error}
         formId="create-job"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form
           id="create-job"

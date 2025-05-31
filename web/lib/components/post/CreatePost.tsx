@@ -34,7 +34,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<PostForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -63,6 +63,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
   const { trigger, isMutating, reset, error } = useAPIPostCreate({
     onSuccess: () => {
       setSaved(true)
+      reset()
       router.refresh()
     },
   })
@@ -135,6 +136,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
         saved={saved}
         error={error}
         formId="create-post"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="create-post" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
