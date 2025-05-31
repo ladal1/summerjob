@@ -18,9 +18,7 @@ export async function getCarById(id: string): Promise<CarComplete | null> {
   return car
 }
 
-export async function getCars(
-  summerjobEventId?: string
-): Promise<CarComplete[]> {
+export async function getCars(): Promise<CarComplete[]> {
   const cars = await prisma.car.findMany({
     where: {
       owner: {
@@ -35,7 +33,9 @@ export async function getCars(
         deleted: false,
       },
       deleted: false,
-      ...(summerjobEventId && { forEventId: summerjobEventId }),
+      forEvent: {
+        isActive: true,
+      },
     },
     include: {
       owner: true,
