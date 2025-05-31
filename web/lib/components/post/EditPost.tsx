@@ -13,9 +13,11 @@ import { useState, useEffect } from 'react'
 import { useForm, FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
+import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
+import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { MapInput } from '../forms/input/MapInput'
 import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
@@ -23,6 +25,7 @@ import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextInput } from '../forms/input/TextInput'
 import { TimeInput } from '../forms/input/TimeInput'
 import { Label } from '../forms/Label'
+import { useAPIWorkers } from 'lib/fetcher/worker'
 
 const schema = PostUpdateSchema
 type PostForm = z.input<typeof schema>
@@ -33,6 +36,7 @@ interface EditPostProps {
 }
 export default function EditPost({ serializedPost, allDates }: EditPostProps) {
   const post = deserializePost(serializedPost)
+  const { data: workers } = useAPIWorkers()
   const {
     register,
     handleSubmit,
@@ -83,12 +87,127 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
     },
   })
 
+  //#region Participant Management
+  const [participantChanges, setParticipantChanges] = useState<{
+    addParticipantIds: string[]
+    removeParticipantIds: string[]
+  }>({
+    addParticipantIds: [],
+    removeParticipantIds: [],
+  })
+
+  // Helper functions for participant management
+  const addParticipant = (participantId: string) => {
+    if (!participantChanges.addParticipantIds.includes(participantId)) {
+      const newAddList = [
+        ...participantChanges.addParticipantIds,
+        participantId,
+      ]
+      const newRemoveList = participantChanges.removeParticipantIds.filter(
+        id => id !== participantId
+      )
+      setParticipantChanges({
+        addParticipantIds: newAddList,
+        removeParticipantIds: newRemoveList,
+      })
+    }
+  }
+
+  const removeParticipant = (participantId: string) => {
+    const isCurrentlyEnrolled = post.participants.some(
+      p => p.workerId === participantId
+    )
+    const isToBeAdded =
+      participantChanges.addParticipantIds.includes(participantId)
+    const isMarkedForRemoval =
+      participantChanges.removeParticipantIds.includes(participantId)
+
+    if (isToBeAdded) {
+      // If participant was to be added, just remove from add list
+      setParticipantChanges({
+        ...participantChanges,
+        addParticipantIds: participantChanges.addParticipantIds.filter(
+          id => id !== participantId
+        ),
+      })
+    } else if (isCurrentlyEnrolled) {
+      if (isMarkedForRemoval) {
+        // Undo removal - remove from remove list
+        setParticipantChanges({
+          ...participantChanges,
+          removeParticipantIds: participantChanges.removeParticipantIds.filter(
+            id => id !== participantId
+          ),
+        })
+      } else {
+        // Mark for removal
+        setParticipantChanges({
+          ...participantChanges,
+          removeParticipantIds: [
+            ...participantChanges.removeParticipantIds,
+            participantId,
+          ],
+        })
+      }
+    }
+  }
+
+  // Check if there are any participant changes
+  const hasParticipantChanges = () => {
+    return (
+      participantChanges.addParticipantIds.length > 0 ||
+      participantChanges.removeParticipantIds.length > 0
+    )
+  }
+
+  // Get available participants for adding (not enrolled and not already being added)
+  const getAvailableParticipants = (): FilterSelectItem[] => {
+    if (!workers) return []
+
+    const enrolledParticipantIds = new Set(
+      post.participants.map(p => p.workerId)
+    )
+    const toBeAddedIds = new Set(participantChanges.addParticipantIds)
+
+    return workers
+      .filter(
+        worker =>
+          !enrolledParticipantIds.has(worker.id) && !toBeAddedIds.has(worker.id)
+      )
+      .map(worker => ({
+        id: worker.id,
+        searchable: `${worker.firstName} ${worker.lastName}`,
+        name: `${worker.firstName} ${worker.lastName}`,
+      }))
+  }
+  //#endregion
+
   const onSubmit = (dataForm: PostForm) => {
     const modified = pick(
       dataForm,
       ...Object.keys(dirtyFields)
     ) as unknown as PostForm
+
+    // Add participant management data if there are any changes
+    if (
+      participantChanges.addParticipantIds.length > 0 ||
+      participantChanges.removeParticipantIds.length > 0
+    ) {
+      modified.participantManagement = {
+        addParticipantIds:
+          participantChanges.addParticipantIds.length > 0
+            ? participantChanges.addParticipantIds
+            : undefined,
+        removeParticipantIds:
+          participantChanges.removeParticipantIds.length > 0
+            ? participantChanges.removeParticipantIds
+            : undefined,
+      }
+    }
+
     trigger(modified)
+    // Reset participant changes after submission
+    setParticipantChanges({ addParticipantIds: [], removeParticipantIds: [] })
   }
 
   //#region Coordinates and Address
@@ -189,7 +308,10 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
       saved={saved}
       error={error}
       formId="edit-post"
-      isDirty={!saved && Object.keys(dirtyFields).length > 0}
+      isDirty={
+        !saved &&
+        (Object.keys(dirtyFields).length > 0 || hasParticipantChanges())
+      }
     >
       <form id="edit-post" onSubmit={handleSubmit(onSubmit)}>
         <TextInput
@@ -282,20 +404,23 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
           errors={errors}
         />
         {isOpenForParticipants && !isMandatory && (
-          <TextInput
-            id="maxParticipants"
-            type="number"
-            label="Maximální počet účastníků"
-            placeholder="Maximální počet účastníků"
-            min={1}
-            register={() =>
-              register('maxParticipants', {
-                valueAsNumber: true,
-                onChange: e => (e.target.value = formatNumber(e.target.value)),
-              })
-            }
-            errors={errors}
-          />
+          <>
+            <TextInput
+              id="maxParticipants"
+              type="number"
+              label="Maximální počet účastníků"
+              placeholder="Maximální počet účastníků"
+              min={1}
+              register={() =>
+                register('maxParticipants', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
+              errors={errors}
+            />
+          </>
         )}
         <OtherAttributesInput
           label="Další vlastnosti"
@@ -314,24 +439,130 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
           ]}
         />{' '}
         <Label id={'participants'} label="Zapsaní účastníci" />
-        <p style={{ whiteSpace: 'pre-wrap' }}>
+        {/* Add new participants */}
+        <div className="mb-3">
+          <FilterSelectInput
+            id="add-participants"
+            label="Přidat účastníky"
+            placeholder="Vybrat účastníky..."
+            onSelected={(participantId: string) =>
+              addParticipant(participantId)
+            }
+            items={getAvailableParticipants()}
+            errors={{}}
+            preserveSearchOnSelect={true}
+          />
+        </div>
+        {/* Current participants list with remove buttons */}
+        <div>
           {post.maxParticipants && (
-            <span className="text-muted fs-7">
-              Počet účastníků: {post.participants.length} /{' '}
-              {post.maxParticipants}
-              {post.participants.length >= post.maxParticipants && (
+            <div className="text-muted fs-7 mb-2">
+              Počet účastníků:{' '}
+              {post.participants.length +
+                participantChanges.addParticipantIds.length -
+                participantChanges.removeParticipantIds.length}{' '}
+              / {post.maxParticipants}
+              {post.participants.length +
+                participantChanges.addParticipantIds.length -
+                participantChanges.removeParticipantIds.length >=
+                post.maxParticipants && (
                 <span className="text-warning ms-2">• Plná kapacita</span>
               )}
-            </span>
+            </div>
           )}
-          {post.maxParticipants && post.participants.length > 0 && <br />}
-          {post.participants
-            .sort((a, b) => a.worker.lastName.localeCompare(b.worker.lastName))
-            .map(
-              participant =>
-                `${participant.worker.firstName} ${participant.worker.lastName}\n`
+
+          {/* Multi-column participant list */}
+          <div className="row g-2">
+            {/* Current enrolled participants */}
+            {post.participants
+              .sort((a, b) =>
+                a.worker.lastName.localeCompare(b.worker.lastName)
+              )
+              .map(participant => {
+                const isMarkedForRemoval =
+                  participantChanges.removeParticipantIds.includes(
+                    participant.workerId
+                  )
+                return (
+                  <div
+                    key={participant.workerId}
+                    className="col-12 col-md-6 col-lg-4"
+                  >
+                    <div
+                      className={`d-flex justify-content-between align-items-center p-2 border rounded ${isMarkedForRemoval ? 'bg-light' : 'bg-white'}`}
+                    >
+                      <span className="flex-grow-1 me-2 d-flex justify-content-between align-items-center">
+                        <span
+                          className={`${isMarkedForRemoval ? 'text-decoration-line-through text-muted' : ''}`}
+                        >
+                          <small>
+                            {participant.worker.firstName}{' '}
+                            {participant.worker.lastName}
+                          </small>
+                        </span>
+                        {isMarkedForRemoval && (
+                          <small className="text-danger ms-2">
+                            (bude odebrán)
+                          </small>
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${isMarkedForRemoval ? 'btn-secondary' : 'btn-outline-danger'}`}
+                        onClick={() => removeParticipant(participant.workerId)}
+                        title={
+                          isMarkedForRemoval
+                            ? 'Zrušit odebrání'
+                            : 'Odebrat účastníka'
+                        }
+                        style={{ minWidth: '32px' }}
+                      >
+                        <i
+                          className={`fas ${isMarkedForRemoval ? 'fa-undo' : 'fa-times'}`}
+                        ></i>
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+
+            {/* Participants to be added */}
+            {participantChanges.addParticipantIds.map(participantId => {
+              const worker = workers?.find(w => w.id === participantId)
+              if (!worker) return null
+              return (
+                <div key={participantId} className="col-12 col-md-6 col-lg-4">
+                  <div className="d-flex justify-content-between align-items-center p-2 border rounded bg-success-subtle">
+                    <span className="flex-grow-1 me-2 d-flex justify-content-between align-items-center">
+                      <span className="text-success">
+                        <small>
+                          {worker.firstName} {worker.lastName}
+                        </small>
+                      </span>
+                      <small className="text-success ms-2">(bude přidán)</small>
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => removeParticipant(participantId)}
+                      title="Zrušit přidání"
+                      style={{ minWidth: '32px' }}
+                    >
+                      <i className="fas fa-undo"></i>
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {post.participants.length === 0 &&
+            participantChanges.addParticipantIds.length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-muted mb-0">Zatím žádní zapsaní účastníci</p>
+              </div>
             )}
-        </p>
+        </div>
       </form>
     </Form>
   )

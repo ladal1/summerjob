@@ -13,6 +13,12 @@ interface FilterSelectProps {
   placeholder: string
   onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem
+  preserveSearchOnSelect?: boolean
+}
+
+// Helper function to remove accents from text for better search matching
+const removeAccents = (text: string): string => {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 }
 
 export function FilterSelect({
@@ -21,6 +27,7 @@ export function FilterSelect({
   placeholder,
   onSelected,
   defaultSelected,
+  preserveSearchOnSelect = false,
 }: FilterSelectProps) {
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
   const [selected, setSelected] = useState(defaultSelected?.name ?? '')
@@ -67,15 +74,22 @@ export function FilterSelect({
     hideDropdown()
     setSelected(item.name)
     onSelected(item.id) // save to form
-    setSearch(item.name)
+    // Only clear search text if preserveSearchOnSelect is false (default behavior)
+    if (!preserveSearchOnSelect) {
+      setSearch(item.name)
+    }
   }
 
   const shouldShowItem = (item: FilterSelectItem) => {
     const isSearchEmpty = search.length === 0 || search === selected
-    return (
-      isSearchEmpty ||
-      item.searchable.toLowerCase().includes(search.toLowerCase())
-    )
+    if (isSearchEmpty) {
+      return true
+    }
+
+    const normalizedSearch = removeAccents(search.toLowerCase())
+    const normalizedSearchable = removeAccents(item.searchable.toLowerCase())
+
+    return normalizedSearchable.includes(normalizedSearch)
   }
 
   return (
