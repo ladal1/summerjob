@@ -9,7 +9,7 @@ psycopg2==2.9.6
 PuLP==2.7.0
 pydantic==1.10.13
 python-dateutil==2.8.2
-pytz==2023.3
+pytz==2025.2
 six==1.16.0
 sqlacodegen==2.3.0.post1
 SQLAlchemy==1.4.0
