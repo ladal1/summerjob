@@ -15,6 +15,7 @@ interface FilterSelectInputProps<FormData extends FieldValues> {
   errors: FieldErrors<FormData>
   onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem | undefined
+  preserveSearchOnSelect?: boolean
 
   mandatory?: boolean
 }
@@ -28,6 +29,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   errors,
   onSelected,
   defaultSelected,
+  preserveSearchOnSelect,
 
   mandatory = false,
 }: FilterSelectInputProps<FormData>) => {
@@ -47,6 +49,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
         items={items}
         onSelected={onSelected}
         defaultSelected={defaultSelected}
+        preserveSearchOnSelect={preserveSearchOnSelect}
       />
       <FormWarning message={error} />
     </div>

@@ -1,7 +1,9 @@
-import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
+import UnsavedChangesModal from '../modal/UnsavedChangesModal'
 import { FormHeader } from './FormHeader'
+import { useNavigationGuard } from '../../hooks/useNavigationGuard'
+import { useEffect } from 'react'
 
 interface FormProps {
   label: string
@@ -15,6 +17,7 @@ interface FormProps {
   shouldShowBackButton?: boolean
   children: React.ReactNode
   saveBar?: boolean
+  isDirty?: boolean
 }
 
 export const Form = ({
@@ -29,8 +32,35 @@ export const Form = ({
   shouldShowBackButton = true,
   children,
   saveBar = true,
+  isDirty = false,
 }: FormProps) => {
-  const router = useRouter()
+  const {
+    showConfirmation,
+    confirmNavigation,
+    cancelNavigation,
+    disableNavigationGuard,
+    router,
+  } = useNavigationGuard({
+    isDirty,
+    isSubmitting: isInputDisabled,
+  })
+
+  // Automatically disable navigation guard when form is saved
+  useEffect(() => {
+    if (saved) {
+      disableNavigationGuard()
+    }
+  }, [saved, disableNavigationGuard])
+
+  const handleBackClick = () => {
+    router.back()
+  }
+
+  const handleSuccessModalClose = () => {
+    disableNavigationGuard()
+    onConfirmationClosed()
+  }
+
   return (
     <section className="mb-3">
       <div className="container pt-3">
@@ -54,7 +84,7 @@ export const Form = ({
                       <button
                         className="btn btn-secondary ms-4"
                         type="button"
-                        onClick={() => router.back()}
+                        onClick={handleBackClick}
                       >
                         Zpět
                       </button>
@@ -71,8 +101,14 @@ export const Form = ({
               )}
             </div>
           </div>
-          {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
+          {saved && <SuccessProceedModal onClose={handleSuccessModalClose} />}
           {error && <ErrorMessageModal onClose={resetForm} />}
+          {showConfirmation && (
+            <UnsavedChangesModal
+              onConfirm={confirmNavigation}
+              onCancel={cancelNavigation}
+            />
+          )}
         </div>
       </div>
     </section>
