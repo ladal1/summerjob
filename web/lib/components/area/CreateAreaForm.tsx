@@ -23,7 +23,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<AreaCreateData>({
     resolver: zodResolver(schema),
   })
@@ -32,6 +32,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
     trigger(data, {
       onSuccess: () => {
         setSaved(true)
+        reset()
       },
     })
   }
@@ -53,6 +54,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
         saved={saved}
         error={error}
         formId="create-area"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form
           id="create-area"

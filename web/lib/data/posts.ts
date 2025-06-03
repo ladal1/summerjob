@@ -112,13 +112,52 @@ export async function internal_updatePost(
   file: formidable.File | formidable.File[] | undefined = undefined,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  const { participateChange, photoFileRemoved, ...rest } = postData
+  const {
+    participateChange,
+    participantManagement,
+    photoFileRemoved,
+    ...rest
+  } = postData
+
+  // Handle individual participation change (legacy support)
   if (participateChange !== undefined && !participateChange.isEnrolled) {
     await prismaClient.participant.delete({
       where: {
         workerId_postId: { workerId: participateChange.workerId, postId: id },
       },
     })
+  }
+
+  // Handle bulk participant management
+  if (participantManagement) {
+    // Remove participants
+    if (
+      participantManagement.removeParticipantIds &&
+      participantManagement.removeParticipantIds.length > 0
+    ) {
+      await prismaClient.participant.deleteMany({
+        where: {
+          postId: id,
+          workerId: {
+            in: participantManagement.removeParticipantIds,
+          },
+        },
+      })
+    }
+
+    // Add participants
+    if (
+      participantManagement.addParticipantIds &&
+      participantManagement.addParticipantIds.length > 0
+    ) {
+      await prismaClient.participant.createMany({
+        data: participantManagement.addParticipantIds.map(workerId => ({
+          postId: id,
+          workerId,
+        })),
+        skipDuplicates: true, // Prevent errors if participant is already enrolled
+      })
+    }
   }
 
   // Get photoPath from uploaded photoFile. If there was uploaded image for this post, it will be deleted.
