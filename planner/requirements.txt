@@ -12,7 +12,7 @@ python-dateutil==2.9.0
 pytz==2025.2
 six==1.17.0
 sqlacodegen==2.3.0.post1
-SQLAlchemy==1.4.0
+SQLAlchemy==2.0.41
 typing_extensions==4.13.2
 tzdata==2023.3
 vine==5.1.0
