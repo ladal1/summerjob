@@ -1,6 +1,6 @@
 'use client'
 import { mapToolNameToSkill } from 'lib/data/enumMapping/mapToolNameToSkill'
-import { Skill } from 'lib/prisma/client'
+import { SkillHas } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { useMemo } from 'react'
@@ -189,7 +189,7 @@ function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
 function allergies(job: ActiveJobNoPlan) {
   const jobAllergenIds = job.proposedJob.allergens
   return job.workers.some(worker =>
-    worker.allergies.some(allergyId => jobAllergenIds.includes(allergyId))
+    worker.workAllergies.some(allergyId => jobAllergenIds.includes(allergyId))
   )
 }
 
@@ -210,7 +210,7 @@ function adorations(job: ActiveJobNoPlan, day: Date) {
 }
 
 function lowSkilledWorkers(job: ActiveJobNoPlan) {
-  const requiredSkills: Set<keyof typeof Skill> = new Set()
+  const requiredSkills: Set<keyof typeof SkillHas> = new Set()
 
   // Iterate over toolsOnSite to collect required skills
   job.proposedJob.toolsOnSite.forEach(tool => {
@@ -218,7 +218,7 @@ function lowSkilledWorkers(job: ActiveJobNoPlan) {
     skills.forEach(skill => requiredSkills.add(skill))
   })
 
-  const workersSkills: Set<keyof typeof Skill> = new Set()
+  const workersSkills: Set<keyof typeof SkillHas> = new Set()
 
   // Sum all workers skills
   job.workers.forEach(worker => {

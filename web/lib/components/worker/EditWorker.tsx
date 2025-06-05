@@ -2,8 +2,10 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
+import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
+import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import {
   formatNumber,
@@ -17,7 +19,12 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Allergy, Skill } from '../../prisma/client'
+import {
+  FoodAllergy,
+  WorkAllergy,
+  SkillHas,
+  SkillBrings,
+} from '../../prisma/client'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
@@ -64,9 +71,11 @@ export default function EditWorker({
       strong: worker.isStrong,
       team: worker.isTeam,
       note: worker.note,
-      allergyIds: worker.allergies as Allergy[],
+      foodAllergies: worker.foodAllergies as FoodAllergy[],
+      workAllergies: worker.workAllergies as WorkAllergy[],
+      skills: worker.skills as SkillHas[],
+      tools: worker.tools as SkillBrings[],
       age: worker.age,
-      skills: worker.skills as Skill[],
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
         adorationDays: worker.availability.adorationDays.map(day =>
@@ -238,18 +247,33 @@ export default function EditWorker({
             />
           </div>
           <GroupButtonsInput
-            id="allergyIds"
-            label="Alergie"
-            mapping={allergyMapping}
-            register={() => register('allergyIds')}
+            id="foodAllergies"
+            label="Potravinové alergie"
+            mapping={foodAllergyMapping}
+            register={() => register('foodAllergies')}
+          />
+          <GroupButtonsInput
+            id="workAllergies"
+            label="Pracovní alergie"
+            mapping={workAllergyMapping}
+            register={() => register('workAllergies')}
           />
           {!isProfilePage && (
-            <GroupButtonsInput
-              id="skills"
-              label="Dovednosti"
-              mapping={skillMapping}
-              register={() => register('skills')}
-            />
+            <>
+              <GroupButtonsInput
+                id="skills"
+                label="Dovednosti (umí)"
+                mapping={skillHasMapping}
+                register={() => register('skills')}
+              />
+
+              <GroupButtonsInput
+                id="tools"
+                label="Nářadí (přiveze)"
+                mapping={skillBringsMapping}
+                register={() => register('tools')}
+              />
+            </>
           )}
           {!isProfilePage && (
             <OtherAttributesInput

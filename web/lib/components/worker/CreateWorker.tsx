@@ -1,8 +1,10 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
+import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
+import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import {
   formatNumber,
@@ -47,7 +49,10 @@ export default function CreateWorker({
         workDays: [],
         adorationDays: [],
       },
-      allergyIds: [],
+      foodAllergies: [],
+      workAllergies: [],
+      skills: [],
+      tools: [],
     },
   })
 
@@ -191,18 +196,32 @@ export default function CreateWorker({
               days={allDates}
             />
           </div>
+
           <GroupButtonsInput
-            id="allergyIds"
-            label="Alergie"
-            mapping={allergyMapping}
-            register={() => register('allergyIds')}
+            id="foodAllergies"
+            label="Potravinové alergie"
+            mapping={foodAllergyMapping}
+            register={() => register('foodAllergies')}
+          />
+          <GroupButtonsInput
+            id="workAllergies"
+            label="Pracovní alergie"
+            mapping={workAllergyMapping}
+            register={() => register('workAllergies')}
           />
           <GroupButtonsInput
             id="skills"
-            label="Dovednosti"
-            mapping={skillMapping}
+            label="Dovednosti (umí)"
+            mapping={skillHasMapping}
             register={() => register('skills')}
           />
+          <GroupButtonsInput
+            id="tools"
+            label="Nářadí (přiveze)"
+            mapping={skillBringsMapping}
+            register={() => register('tools')}
+          />
+
           <OtherAttributesInput
             label="Další vlastnosti"
             register={register}

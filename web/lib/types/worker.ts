@@ -9,14 +9,19 @@ import {
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
-import { Allergy, Skill } from '../../lib/prisma/client'
+import {
+  FoodAllergy,
+  WorkAllergy,
+  SkillHas,
+  SkillBrings,
+} from '../../lib/prisma/client'
 
 useZodOpenApi
 
 export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
-  skills: z.array(z.nativeEnum(Skill)),
+  skills: z.array(z.nativeEnum(SkillHas)),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
@@ -49,8 +54,10 @@ export const WorkerCreateSchema = z
       ),
     strong: z.boolean().default(false),
     team: z.boolean().default(false),
-    skills: z.array(z.nativeEnum(Skill)),
-    allergyIds: z.array(z.nativeEnum(Allergy)),
+    skills: z.array(z.nativeEnum(SkillHas)),
+    tools: z.array(z.nativeEnum(SkillBrings)),
+    foodAllergies: z.array(z.nativeEnum(FoodAllergy)),
+    workAllergies: z.array(z.nativeEnum(WorkAllergy)),
     note: z.string().optional(),
     age: z
       .union([

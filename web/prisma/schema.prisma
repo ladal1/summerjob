@@ -26,6 +26,45 @@ enum Allergy {
   MITES
 }
 
+enum SkillHas {
+  LUMBERJACK
+  ARTIST
+  GARDENER
+  DANGER
+  ELECTRICIAN
+  HEIGHTS
+  MASON
+  OTHER
+}
+
+enum SkillBrings {
+  AXE
+  SHOVEL
+  SAW
+  POWERTOOLS
+  LADDER
+  OTHER
+}
+
+enum FoodAllergy {
+  LACTOSE
+  GLUTEN
+  NUTS
+  SEAFOOD
+  EGG
+  OTHER
+}
+
+enum WorkAllergy {
+  DUST
+  ANIMALS
+  HAY
+  POLLEN
+  MITES
+  CHEMICALS
+  OTHER
+}
+
 enum JobType {
   WOOD
   PAINTING
@@ -60,16 +99,6 @@ enum ToolName {
   RAKE
   PITCHFORK
   SHOVEL
-}
-
-enum Skill {
-  LUMBERJACK
-  ARTIST
-  GARDENER
-  DANGER
-  ELECTRICIAN
-  HEIGHTS
-  MASON
 }
 
 enum PostTag {
@@ -135,7 +164,7 @@ model JobPhoto {
   proposedJobId String?
 }
 
-model Worker {       
+model Worker {
   id                 String                      @id @default(uuid())
   firstName          String      
   lastName           String      
@@ -144,8 +173,12 @@ model Worker {
   cars               Car[]       
   isStrong           Boolean                     @default(false)
   isTeam             Boolean                     @default(false)
-  allergies          Allergy[]       
-  skills             Skill[]       
+  foodAllergies      FoodAllergy[]
+  workAllergies      WorkAllergy[]
+  skills             SkillHas[]
+  tools              SkillBrings[]
+  ownsCar            Boolean                     @default(false)
+  canBeMedic         Boolean                     @default(false)      
   jobs               ActiveJob[]       
   driving            Ride[]                      @relation("Driver")
   passengerIn        Ride[]      
@@ -160,6 +193,8 @@ model Worker {
   age                Int?
   pinnedProposedJobs PinnedProposedJobByWorker[]
   attends            Participant[]
+  application        Application?                @relation(fields: [applicationId], references: [id])
+  applicationId      String?                     @unique
 }
 
 model WorkerPermissions {
@@ -217,7 +252,7 @@ model ProposedJob {
   area               Area?                       @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId             String?                 
   activeJobs         ActiveJob[]                 
-  allergens          Allergy[]                 
+  allergens          WorkAllergy[]              
   availability       DateTime[]                  @db.Date
   jobType            JobType                     @default(OTHER)
   toolsOnSite        Tool[]                      @relation("ToolOnSite")  
@@ -379,4 +414,5 @@ model Application {
   canBeMedic     Boolean  @default(false)
   createdAt      DateTime @default(now())
   status         ApplicationStatus @default(PENDING)
+  worker Worker? @relation
 }

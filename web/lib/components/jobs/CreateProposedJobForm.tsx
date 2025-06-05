@@ -1,7 +1,7 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
+import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
@@ -424,8 +424,8 @@ export default function CreateProposedJobForm({
           />
           <GroupButtonsInput
             id="allergens"
-            label="Alergeny"
-            mapping={allergyMapping}
+            label="Pracovní alergie"
+            mapping={workAllergyMapping}
             register={() => register('allergens')}
           />
           <OtherAttributesInput

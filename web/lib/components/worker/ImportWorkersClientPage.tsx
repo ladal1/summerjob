@@ -14,7 +14,9 @@ import { useAPIWorkersCreate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { Allergy, Skill } from '../../prisma/client'
+import { FoodAllergy, WorkAllergy, SkillHas } from '../../prisma/client'
+import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 
 interface ImportWorkersClientPageProps {
   eventName: string
@@ -105,9 +107,13 @@ export default function ImportWorkersClientPage({
               </pre>
             </div>
             <p>
-              Seznam evidovaných alergií: {Object.values(Allergy).join(', ')}
+              Seznam potravinových alergií:{' '}
+              {Object.values(FoodAllergy).join(', ')}
               <br />
-              Seznam evidovaných dovedností: {Object.values(Skill).join(', ')}
+              Seznam pracovních alergií: {Object.values(WorkAllergy).join(', ')}
+              <br />
+              Seznam evidovaných dovedností:{' '}
+              {Object.values(SkillHas).join(', ')}
               <br />
               Datum je možné zadat i v jiném formátu. Před importem zkontrolujte
               níže, že se data naimportují správně.
@@ -180,7 +186,21 @@ function ResultBox({
           </small>
           <br />
           <small className="text-muted">
-            Alergie: {result.data.allergyIds.join(', ')}
+            Potravinové alergie:{' '}
+            {result.data.foodAllergies.length > 0
+              ? result.data.foodAllergies
+                  .map(a => foodAllergyMapping[a])
+                  .join(', ')
+              : 'Žádné'}
+          </small>
+          <br />
+          <small className="text-muted">
+            Pracovní alergie:{' '}
+            {result.data.workAllergies.length > 0
+              ? result.data.workAllergies
+                  .map(a => workAllergyMapping[a])
+                  .join(', ')
+              : 'Žádné'}
           </small>
           <br />
           <small className="text-muted">
@@ -242,7 +262,31 @@ function getWorkerInfo(
     return { success: false, error: 'Missing data' }
   }
   const formatedPhone = formatPhoneNumber(phone)
-  const allergies = allergiesStr.split(',').filter(a => a.trim() !== '')
+  const parsedAllergies = allergiesStr
+    .split(',')
+    .map(a => a.trim())
+    .filter(a => a !== '')
+
+  const foodAllergies = parsedAllergies.filter(a =>
+    Object.keys(FoodAllergy).includes(a)
+  ) as FoodAllergy[]
+  const workAllergies = parsedAllergies.filter(a =>
+    Object.keys(WorkAllergy).includes(a)
+  ) as WorkAllergy[]
+
+  const unknownAllergies = parsedAllergies.filter(
+    a =>
+      !Object.keys(FoodAllergy).includes(a) &&
+      !Object.keys(WorkAllergy).includes(a)
+  )
+
+  if (unknownAllergies.length > 0) {
+    return {
+      success: false,
+      error: lineWithError(`Neznámé alergie: ${unknownAllergies.join(', ')}`),
+    }
+  }
+
   const skills = skillsStr.split(',').filter(a => a.trim() !== '')
   const workDays = workDaysStr
     .split(',')
@@ -261,7 +305,8 @@ function getWorkerInfo(
     phone: formatedPhone,
     strong: false,
     team: false,
-    allergyIds: allergies,
+    foodAllergies,
+    workAllergies,
     skills,
     availability: {
       workDays,

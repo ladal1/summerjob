@@ -1,5 +1,5 @@
-import { allergyMapping } from 'lib/data/enumMapping/allergyMapping'
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
+import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
+import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import {
   useAPIActiveJobDelete,
@@ -356,7 +356,7 @@ function formatAmenities(job: ActiveJobNoPlan) {
 function formatAllergens(job: ActiveJobNoPlan) {
   if (job.proposedJob.allergens.length == 0) return 'Žádné'
   return job.proposedJob.allergens
-    .map(allergen => allergyMapping[allergen])
+    .map(allergen => workAllergyMapping[allergen])
     .join(', ')
 }
 
@@ -484,10 +484,12 @@ function formatWorkerData(
   if (worker.isStrong) abilities.push('Silák')
   if (worker.skills) {
     worker.skills.map(skill => {
-      abilities.push(skillMapping[skill])
+      abilities.push(skillHasMapping[skill])
     })
   }
-  const allergies = worker.allergies
+  const allergies = [
+    ...worker.workAllergies.map(key => workAllergyMapping[key]),
+  ]
   const workerSameWork = sameWork(worker.id, job, day, plannedJobs)
   const workerSameCoworker = sameCoworker(worker.id, job, day, plannedJobs)
 
@@ -508,7 +510,7 @@ function formatWorkerData(
     },
     { content: worker.phone },
     { content: abilities.join(', ') },
-    { content: allergies.map(key => allergyMapping[key]) },
+    { content: allergies.join(', ') },
     {
       content: (
         <RideSelect
