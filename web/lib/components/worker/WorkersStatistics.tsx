@@ -1,5 +1,5 @@
-import { skillMapping } from 'lib/data/enumMapping/skillMapping'
-import { Skill } from 'lib/prisma/client'
+import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
+import { SkillHas } from 'lib/prisma/client'
 import { WorkerComplete } from 'lib/types/worker'
 import { useMemo } from 'react'
 
@@ -26,7 +26,7 @@ export const WorkersStatistics = ({ data }: WorkersStatisticsProps) => {
 
   interface SkillsList {
     [key: string]: {
-      name: Skill
+      name: SkillHas
       amount: number
     }
   }
@@ -35,7 +35,7 @@ export const WorkersStatistics = ({ data }: WorkersStatisticsProps) => {
     () =>
       (data || []).reduce((accumulator: SkillsList, worker) => {
         const sortedSkills = worker.skills.sort((a, b) =>
-          skillMapping[a].localeCompare(skillMapping[b])
+          skillHasMapping[a].localeCompare(skillHasMapping[b])
         )
         sortedSkills.forEach(skill => {
           accumulator[skill] = {
@@ -72,7 +72,7 @@ export const WorkersStatistics = ({ data }: WorkersStatisticsProps) => {
               <tbody>
                 {Object.entries(skillsList).map(([key, skill]) => (
                   <tr key={key} className="text-end">
-                    <td>{skillMapping[skill.name]}</td>
+                    <td>{skillHasMapping[skill.name]}</td>
                     <td>{skill.amount}</td>
                   </tr>
                 ))}

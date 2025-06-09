@@ -186,12 +186,10 @@ export async function deleteWorker(id: string) {
         lastName: 'Worker',
         email: `${id}@deleted.xyz`,
         phone: '00000000',
-        allergies: {
-          set: [],
-        },
-        skills: {
-          set: [],
-        },
+        foodAllergies: { set: [] },
+        workAllergies: { set: [] },
+        skills: { set: [] },
+        tools: { set: [] },
         availability: {
           updateMany: {
             where: {},
@@ -253,13 +251,19 @@ async function internal_createWorker(
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
-      allergies: {
-        set: data.allergyIds,
+      foodAllergies: {
+        set: data.foodAllergies ?? [],
+      },
+      workAllergies: {
+        set: data.workAllergies ?? [],
+      },
+      skills: {
+        set: data.skills ?? [],
+      },
+      tools: {
+        set: data.tools ?? [],
       },
       age: data.age,
-      skills: {
-        set: data.skills,
-      },
       blocked: false,
       availability: {
         create: {
@@ -281,13 +285,19 @@ async function internal_createWorker(
       isStrong: data.strong,
       isTeam: data.team,
       note: data.note,
-      allergies: {
-        set: data.allergyIds,
+      foodAllergies: {
+        set: data.foodAllergies ?? [],
+      },
+      workAllergies: {
+        set: data.workAllergies ?? [],
+      },
+      skills: {
+        set: data.skills ?? [],
+      },
+      tools: {
+        set: data.tools ?? [],
       },
       age: data.age,
-      skills: {
-        set: data.skills,
-      },
       availability: {
         create: {
           workDays: data.availability?.workDays ?? [],
@@ -394,11 +404,15 @@ export async function internal_updateWorker(
     }
   }
 
-  const allergyUpdate = data.allergyIds
-    ? { allergies: { set: data.allergyIds } }
-    : {}
+  const allergyUpdate = {
+    ...(data.foodAllergies && { foodAllergies: { set: data.foodAllergies } }),
+    ...(data.workAllergies && { workAllergies: { set: data.workAllergies } }),
+  }
 
-  const skillsUpdate = data.skills ? { skills: { set: data.skills } } : {}
+  const skillsUpdate = {
+    ...(data.skills && { skills: { set: data.skills } }),
+    ...(data.tools && { tools: { set: data.tools } }),
+  }
 
   // Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted.
   if (file) {

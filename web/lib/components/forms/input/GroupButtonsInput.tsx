@@ -22,7 +22,13 @@ export const GroupButtonsInput = ({
       </label>
       <div id={id} className="form-check-inline">
         {Object.entries(mapping).map(([key, name]) => (
-          <ButtonGroup key={key} id={key} name={name} register={register} />
+          <ButtonGroup
+            key={key}
+            id={key}
+            name={name}
+            register={register}
+            groupId={id}
+          />
         ))}
       </div>
     </>

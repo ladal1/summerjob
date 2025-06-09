@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { format, differenceInCalendarDays } from 'date-fns'
 import Link from 'next/link'
 import { PhotoOnClickModal } from '../photo/PhotoOnClickModal'
+import { IconAndLabel } from '../forms/IconAndLabel'
 
 interface Application {
   id: string
@@ -67,6 +68,23 @@ export default function ApplicationAdminDetailPage() {
     fetchApplication()
   }, [id])
 
+  const updateStatus = async (id: string, action: 'accept' | 'reject') => {
+    try {
+      const res = await fetch(`/api/applications/${id}/${action}`, {
+        method: 'PATCH',
+      })
+
+      if (!res.ok) {
+        throw new Error('Chyba při změně statusu')
+      }
+
+      const updated = await res.json()
+      setApplication(updated)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="container mt-4">
@@ -92,10 +110,10 @@ export default function ApplicationAdminDetailPage() {
   return (
     <div className="container mt-4">
       <Link href={backHref} className="btn btn-secondary">
-        ← Zpět na seznam
+        <IconAndLabel label={'Zpět na seznam'} icon={'fa fa-arrow-left'} />
       </Link>
 
-      {/* <div className="my-4 d-flex align-items-center gap-3">
+      <div className="my-4 d-flex align-items-center gap-3">
         <span>
           <strong>Status:</strong>{' '}
           <span
@@ -131,7 +149,7 @@ export default function ApplicationAdminDetailPage() {
             </button>
           </>
         )}
-      </div> */}
+      </div>
 
       <div className="card my-4">
         <div className="card-body">
