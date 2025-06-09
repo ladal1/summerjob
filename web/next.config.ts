@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-};
+  // on all path return x-clacks-overhead header
+  async headers() {
+    return [{
+      source: '/:path*',
+      headers: [
+        {
+          key: 'X-Clacks-Overhead',
+          value: 'GNU Terry Pratchett',
+        },
+      ],
+    }]
+  },
+}
 
 export default nextConfig;
