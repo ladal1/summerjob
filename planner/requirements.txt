@@ -14,5 +14,5 @@ six==1.17.0
 sqlacodegen==2.3.0.post1
 SQLAlchemy==1.4.0
 typing_extensions==4.13.2
-tzdata==2023.3
+tzdata==2025.2
 vine==5.1.0
