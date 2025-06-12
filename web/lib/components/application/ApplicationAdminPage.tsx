@@ -310,6 +310,7 @@ export default function ApplicationAdminPage() {
                   setPage(1)
                 }}
                 title="Vymazat hledání"
+                aria-label="Clear search"
               >
                 ×
               </button>

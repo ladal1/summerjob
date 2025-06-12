@@ -12,6 +12,7 @@ import {
   ApplicationUpdateDataInput,
 } from 'lib/types/application'
 import { getApplicationsUploadDir } from 'lib/api/fileManager'
+import { Prisma } from 'lib/prisma/client'
 
 export async function getApplications() {
   return prisma.application.findMany({
@@ -173,16 +174,7 @@ export async function getApplicationsPaginated(
 ) {
   const skip = (page - 1) * perPage
 
-  let where: {
-    status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
-    AND?: Array<{
-      OR: Array<{
-        firstName?: { contains: string; mode: 'insensitive' }
-        lastName?: { contains: string; mode: 'insensitive' }
-        email?: { contains: string; mode: 'insensitive' }
-      }>
-    }>
-  } = {}
+  let where: Prisma.ApplicationFindManyArgs['where'] = {}
 
   if (status) {
     where.status = status
