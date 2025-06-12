@@ -70,7 +70,7 @@
     "eslint-config-next": "^15.3.3",
     "lint-staged": "^13.2.2",
     "maildev": "^2.2.1",
-    "mocha": "^11.5.0",
+    "mocha": "^11.6.0",
     "prettier": "^3.5.3",
     "prisma": "^6.8.2",
     "supertest": "^7.1.1",
