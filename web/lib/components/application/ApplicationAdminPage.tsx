@@ -38,7 +38,8 @@ type ApplicationStatusFilter = 'ALL' | 'PENDING' | 'ACCEPTED' | 'REJECTED'
 function createApplicationSearchParams(
   page: number,
   perPage: number,
-  statusFilter: ApplicationStatusFilter
+  statusFilter: ApplicationStatusFilter,
+  search?: string
 ): URLSearchParams {
   const params = new URLSearchParams({
     page: page.toString(),
@@ -47,6 +48,10 @@ function createApplicationSearchParams(
 
   if (statusFilter !== 'ALL') {
     params.append('status', statusFilter)
+  }
+
+  if (search && search.trim()) {
+    params.append('search', search.trim())
   }
 
   return params
@@ -60,6 +65,7 @@ export default function ApplicationAdminPage() {
   const pageQ = searchParams?.get('page')
   const perPageQ = searchParams?.get('perPage')
   const statusQ = searchParams?.get('status')
+  const searchQ = searchParams?.get('search')
 
   // Convert statusQ to uppercase and validate
   const statusUpper = statusQ?.toUpperCase()
@@ -85,6 +91,8 @@ export default function ApplicationAdminPage() {
   const [perPageInput, setPerPageInput] = useState(perPageQ || '10')
   const [statusFilter, setStatusFilter] =
     useState<ApplicationStatusFilter>(validatedStatus)
+  const [search, setSearch] = useState(searchQ || '')
+  const [searchInput, setSearchInput] = useState(searchQ || '')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const isAllSelected =
     applications.length > 0 &&
@@ -97,7 +105,8 @@ export default function ApplicationAdminPage() {
         const queryParams = createApplicationSearchParams(
           page,
           perPage,
-          statusFilter
+          statusFilter,
+          search
         )
 
         const res = await fetch(`/api/applications?${queryParams.toString()}`)
@@ -117,14 +126,19 @@ export default function ApplicationAdminPage() {
     }
 
     load()
-  }, [page, perPage, statusFilter])
+  }, [page, perPage, statusFilter, search])
 
   // Update URL with current pagination state
   useEffect(() => {
-    const params = createApplicationSearchParams(page, perPage, statusFilter)
+    const params = createApplicationSearchParams(
+      page,
+      perPage,
+      statusFilter,
+      search
+    )
 
     router.replace(`?${params.toString()}`, { scroll: false })
-  }, [page, perPage, statusFilter, router])
+  }, [page, perPage, statusFilter, search, router])
 
   const totalPages = Math.ceil(total / perPage)
 
@@ -134,6 +148,11 @@ export default function ApplicationAdminPage() {
       setPerPage(value)
       setPage(1)
     }
+  }
+
+  const handleSearchChange = () => {
+    setSearch(searchInput)
+    setPage(1)
   }
 
   const toggleSelectAll = () => {
@@ -252,20 +271,52 @@ export default function ApplicationAdminPage() {
   return (
     <div className="container mt-2">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <select
-          className="form-select form-select-sm"
-          style={{ width: '160px' }}
-          value={statusFilter}
-          onChange={e => {
-            setStatusFilter(e.target.value as ApplicationStatusFilter)
-            setPage(1)
-          }}
-        >
-          <option value="ALL">Všechny</option>
-          <option value="PENDING">Čekající</option>
-          <option value="ACCEPTED">Přijaté</option>
-          <option value="REJECTED">Zamítnuté</option>
-        </select>
+        <div className="d-flex align-items-center gap-2">
+          <select
+            className="form-select form-select-sm"
+            style={{ width: '160px' }}
+            value={statusFilter}
+            onChange={e => {
+              setStatusFilter(e.target.value as ApplicationStatusFilter)
+              setPage(1)
+            }}
+          >
+            <option value="ALL">Všechny</option>
+            <option value="PENDING">Čekající</option>
+            <option value="ACCEPTED">Přijaté</option>
+            <option value="REJECTED">Zamítnuté</option>
+          </select>
+
+          <div className="d-flex align-items-center gap-1">
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              placeholder="Hledat jméno, příjmení, email..."
+              style={{ width: '250px' }}
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onBlur={handleSearchChange}
+              onKeyDown={e => {
+                if (e.key === 'Enter') handleSearchChange()
+              }}
+            />
+            {search && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => {
+                  setSearchInput('')
+                  setSearch('')
+                  setPage(1)
+                }}
+                title="Vymazat hledání"
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
 
         <div className="d-flex align-items-center gap-2">
           <label htmlFor="perPageInput" className="form-label mb-0">
@@ -353,7 +404,8 @@ export default function ApplicationAdminPage() {
                       href={`/admin/applications/${app.id}?${createApplicationSearchParams(
                         page,
                         perPage,
-                        statusFilter
+                        statusFilter,
+                        search
                       ).toString()}`}
                       className="flex-grow-1 text-decoration-none text-dark"
                     >

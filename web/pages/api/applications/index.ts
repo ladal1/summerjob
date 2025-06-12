@@ -13,8 +13,11 @@ export default APIAccessController(
       | 'ACCEPTED'
       | 'REJECTED'
       | undefined
+    const search = Array.isArray(req.query.search)
+      ? req.query.search.join(' ')
+      : req.query.search || undefined
 
-    const result = await getApplicationsPaginated(page, perPage, status)
+    const result = await getApplicationsPaginated(page, perPage, status, search)
 
     res.status(200).json(result)
   }
