@@ -12,7 +12,7 @@ import {
   ApplicationUpdateDataInput,
 } from 'lib/types/application'
 import { getApplicationsUploadDir } from 'lib/api/fileManager'
-import { Prisma } from 'lib/prisma/client'
+import type { Prisma } from 'lib/prisma/client'
 
 export async function getApplications() {
   return prisma.application.findMany({
