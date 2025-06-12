@@ -106,7 +106,9 @@ export async function updateApplication(
     const resolvedPhotoPath = path.resolve(photoPath) // Normalize the path
     const relativePath = path.relative(uploadDir, resolvedPhotoPath)
     if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
-      throw new Error('Invalid file path: Path is outside the allowed directory.')
+      throw new Error(
+        'Invalid file path: Path is outside the allowed directory.'
+      )
     }
     await renameFile(file.filepath, resolvedPhotoPath)
 
@@ -166,11 +168,44 @@ export async function getApplicationPhotoPathById(
 export async function getApplicationsPaginated(
   page: number,
   perPage: number,
-  status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+  status?: 'PENDING' | 'ACCEPTED' | 'REJECTED',
+  search?: string
 ) {
   const skip = (page - 1) * perPage
 
-  const where = status ? { status } : {}
+  let where: {
+    status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+    AND?: Array<{
+      OR: Array<{
+        firstName?: { contains: string; mode: 'insensitive' }
+        lastName?: { contains: string; mode: 'insensitive' }
+        email?: { contains: string; mode: 'insensitive' }
+      }>
+    }>
+  } = {}
+
+  if (status) {
+    where.status = status
+  }
+
+  if (search && search.trim()) {
+    const searchTerms = search.trim().split(/\s+/)
+
+    // Create search conditions for each term
+    const searchConditions = searchTerms.map(term => ({
+      OR: [
+        { firstName: { contains: term, mode: 'insensitive' as const } },
+        { lastName: { contains: term, mode: 'insensitive' as const } },
+        { email: { contains: term, mode: 'insensitive' as const } },
+      ],
+    }))
+
+    // Combine status filter with search - all search terms must match
+    where = {
+      ...where,
+      AND: searchConditions,
+    }
+  }
 
   const [applications, total] = await Promise.all([
     prisma.application.findMany({

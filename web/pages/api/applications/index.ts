@@ -13,8 +13,9 @@ export default APIAccessController(
       | 'ACCEPTED'
       | 'REJECTED'
       | undefined
+    const search = req.query.search as string | undefined
 
-    const result = await getApplicationsPaginated(page, perPage, status)
+    const result = await getApplicationsPaginated(page, perPage, status, search)
 
     res.status(200).json(result)
   }
