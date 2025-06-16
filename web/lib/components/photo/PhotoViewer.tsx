@@ -20,6 +20,7 @@ export const PhotoViewer = ({ photoURL, alt }: PhotoViewerProps) => {
               width: '100%',
               height: '100%',
             }}
+            quality={50}
             width={500}
             height={500}
           />

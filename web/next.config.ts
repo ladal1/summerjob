@@ -1,10 +1,13 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   output: 'standalone',
   distDir: 'build',
+  images: {
+    qualities: [25, 50, 98, 100],
+  },
   async redirects() {
     return [
       {
@@ -16,16 +19,18 @@ const nextConfig: NextConfig = {
   },
   // on all path return x-clacks-overhead header
   async headers() {
-    return [{
-      source: '/:path*',
-      headers: [
-        {
-          key: 'X-Clacks-Overhead',
-          value: 'GNU Terry Pratchett',
-        },
-      ],
-    }]
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Clacks-Overhead',
+            value: 'GNU Terry Pratchett',
+          },
+        ],
+      },
+    ]
   },
 }
 
-export default nextConfig;
+export default nextConfig
