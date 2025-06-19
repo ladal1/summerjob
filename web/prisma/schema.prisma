@@ -195,6 +195,7 @@ model Worker {
   attends            Participant[]
   application        Application?                @relation(fields: [applicationId], references: [id])
   applicationId      String?                     @unique
+  adorationSlots     AdorationSlot[] @relation("SlotWorkers")
 }
 
 model WorkerPermissions {
@@ -329,6 +330,7 @@ model SummerJobEvent {
   workerAvailability WorkerAvailability[]
   cars               Car[]
   posts              Post[]
+  adorationSlots     AdorationSlot[] 
 }
 
 model Logging {
@@ -415,4 +417,15 @@ model Application {
   createdAt      DateTime @default(now())
   status         ApplicationStatus @default(PENDING)
   worker Worker? @relation
+}
+
+model AdorationSlot {
+  id        String                  @id @default(uuid())
+  dateStart DateTime                @db.Date
+  location  String
+  length    Int                     @default(60)
+  capacity  Int                     @default(1)
+  workers   Worker[]                @relation("SlotWorkers")
+  event     SummerJobEvent          @relation(fields: [eventId], references: [id])
+  eventId   String
 }
