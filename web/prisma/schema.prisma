@@ -421,7 +421,7 @@ model Application {
 
 model AdorationSlot {
   id        String                  @id @default(uuid())
-  dateStart DateTime                @db.Date
+  dateStart DateTime
   location  String
   length    Int                     @default(60)
   capacity  Int                     @default(1)
