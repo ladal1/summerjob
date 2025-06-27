@@ -5,12 +5,12 @@ import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import { NoActiveEventError } from 'lib/data/internal-error'
 
 export const getWorkersUploadDir = async () => {
-  const uploadDir = await getUploadDirForImagesForCurrentEvent()
+  const uploadDir = getUploadDirForImages()
   return path.join(uploadDir, '/workers')
 }
 
 export const getApplicationsUploadDir = async () => {
-  const uploadDir = await getUploadDirForImages()
+  const uploadDir = getUploadDirForImages()
   return path.join(uploadDir, '/applications')
 }
 
@@ -41,13 +41,13 @@ export const generateFileName = (length: number): string => {
 }
 
 export const deleteFile = async (oldPhotoPath: string) => {
-  const safeBaseDir = path.resolve(getUploadDirForImages());
-  const resolvedPath = path.resolve(oldPhotoPath);
-  const relative = path.relative(safeBaseDir, resolvedPath);
+  const safeBaseDir = path.resolve(getUploadDirForImages())
+  const resolvedPath = path.resolve(oldPhotoPath)
+  const relative = path.relative(safeBaseDir, resolvedPath)
   if (relative.startsWith('..') || path.isAbsolute(relative)) {
-    throw new Error('Attempt to delete a file outside the allowed directory');
+    throw new Error('Attempt to delete a file outside the allowed directory')
   }
-  await promises.unlink(resolvedPath); // delete replaced/original file
+  await promises.unlink(resolvedPath) // delete replaced/original file
 }
 
 export const renameFile = async (

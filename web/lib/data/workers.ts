@@ -1,7 +1,6 @@
 import {
   deleteFile,
   getUploadDirForImages,
-  getUploadDirForImagesForCurrentEvent,
   renameFile,
   updatePhotoPathByNewFilename,
 } from 'lib/api/fileManager'
@@ -323,7 +322,7 @@ async function internal_createWorker(
       updatePhotoPathByNewFilename(temporaryPhotoPath, worker.id) ?? ''
     await renameFile(temporaryPhotoPath, photoPath)
     // Save only relative part of photoPath
-    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const uploadDirAbsolutePath = getUploadDirForImages()
     const relativePath = path.normalize(
       photoPath.substring(uploadDirAbsolutePath.length)
     )
@@ -423,7 +422,7 @@ export async function internal_updateWorker(
       await deleteFile(workerPhotoPath) // delete original image if necessary
     }
     // Save only relative part of photoPath
-    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const uploadDirAbsolutePath = getUploadDirForImages()
     const relativePath = path.normalize(
       photoPath.substring(uploadDirAbsolutePath.length)
     )
