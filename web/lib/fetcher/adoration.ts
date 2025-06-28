@@ -140,3 +140,37 @@ export async function apiAdorationLogout(slotId: string) {
 
   return await res.json()
 }
+
+export async function apiAdorationAssignWorker(slotId: string, workerId: string) {
+  const res = await fetch(`/api/adoration/${slotId}/assign`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ workerId }),
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Chyba při přiřazování pracanta.')
+  }
+
+  return await res.json()
+}
+
+export async function apiAdorationUnassignWorker(slotId: string, workerId: string) {
+  const res = await fetch(`/api/adoration/${slotId}/unassign`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ workerId }),
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Chyba při odebírání pracanta.')
+  }
+
+  return await res.json()
+}

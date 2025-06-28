@@ -17,7 +17,7 @@
     "test": "ts-mocha -p 'test/tsconfig.json' 'test/**/*.spec.ts'",
     "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prettier:fix": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
-    "prepare": "npx prisma generate && cd .. && husky install web/.husky",
+    "prepare": "npx prisma generate && cd .. && husky web/.husky",
     "maildev": "maildev"
   },
   "dependencies": {
