@@ -9,7 +9,6 @@ import {
   useAPIAdorationSlotsAdmin
 } from 'lib/fetcher/adoration'
 import AdminCreateAdorationModal from './AdorationAdminCreateModal'
-import 'react-toastify/dist/ReactToastify.css'
 
 interface Props {
   event: {
