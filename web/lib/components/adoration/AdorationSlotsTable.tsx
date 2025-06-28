@@ -2,9 +2,9 @@
 
 import { format } from 'date-fns'
 import {
-  useAPIAdorationSlotsUser,
-  useAPIAdorationSignup,
-  useAPIAdorationLogout,
+  apiAdorationSlotsUser,
+  apiAdorationSignup,
+  apiAdorationLogout,
 } from 'lib/fetcher/adoration'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -18,7 +18,6 @@ interface Props {
 
 export default function AdorationSlotsTable({
   eventId,
-  initialDate,
   eventStart,
   eventEnd,
 }: Props) {
@@ -40,7 +39,7 @@ export default function AdorationSlotsTable({
     data: slots = [],
     isLoading,
     mutate,
-  } = useAPIAdorationSlotsUser(selectedDate, eventId)
+  } = apiAdorationSlotsUser(selectedDate, eventId)
   const [signuping, setSignuping] = useState<string | null>(null)
 
   useEffect(() => {
@@ -51,10 +50,11 @@ export default function AdorationSlotsTable({
   const handleSignup = async (slotId: string) => {
     try {
       setSignuping(slotId)
-      await useAPIAdorationSignup(slotId)
+      await apiAdorationSignup(slotId)
       await mutate()
     } catch (err) {
       alert('Chyba při přihlašování na adoraci.')
+      console.error('Adoration signup error:', err)
     } finally {
       setSignuping(null)
     }
@@ -63,10 +63,11 @@ export default function AdorationSlotsTable({
   const handleLogout = async (slotId: string) => {
     try {
       setSignuping(slotId)
-      await useAPIAdorationLogout(slotId)
+      await apiAdorationLogout(slotId)
       await mutate()
     } catch (err) {
       alert('Chyba při odhlašování z adorace.')
+      console.error('Adoration logout error:', err)
     } finally {
       setSignuping(null)
     }

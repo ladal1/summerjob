@@ -2,11 +2,10 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { Permission } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from 'lib/prisma/connection'
-import { ExtendedSession } from 'lib/types/auth'
 
 export default APIAccessController(
     [Permission.ADMIN],
-    async function handler(req: NextApiRequest, res: NextApiResponse, session: ExtendedSession) {
+    async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { slotIds } = req.body as { slotIds: string[] }
   
       if (!slotIds?.length) {

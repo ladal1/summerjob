@@ -47,8 +47,6 @@ export default function AdminCreateAdorationModal({
     },
   })
 
-  const values = getValues()
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (backdropRef.current && event.target === backdropRef.current) {

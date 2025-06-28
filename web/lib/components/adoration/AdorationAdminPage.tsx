@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import {
-  useAPIAdorationDeleteBulk,
-  useAPIAdorationSlotsAdmin,
-  useAPIAdorationUpdateLocationBulk,
+  apiAdorationDeleteBulk,
+  apiAdorationUpdateLocationBulk,
+  apiAdorationSlotsAdmin
 } from 'lib/fetcher/adoration'
 import AdminCreateAdorationModal from './AdorationAdminCreateModal'
 import 'react-toastify/dist/ReactToastify.css'
@@ -41,7 +41,7 @@ export default function AdminAdorationManager({ event }: Props) {
     data: slots = [],
     isLoading,
     mutate,
-  } = useAPIAdorationSlotsAdmin(date, event.id)
+  } = apiAdorationSlotsAdmin(date, event.id)
 
   const isAllSelected =
     slots.length > 0 && slots.every(slot => selectedIds.includes(slot.id))
@@ -63,7 +63,7 @@ export default function AdminAdorationManager({ event }: Props) {
 
   const deleteSelectedSlots = async () => {
     try {
-      await useAPIAdorationDeleteBulk(selectedIds)
+      await apiAdorationDeleteBulk(selectedIds)
       await mutate()
       setSelectedIds([])
     } catch (e) {
@@ -73,7 +73,7 @@ export default function AdminAdorationManager({ event }: Props) {
 
   const applyBulkLocation = async () => {
     try {
-      await useAPIAdorationUpdateLocationBulk(selectedIds, bulkLocation)
+      await apiAdorationUpdateLocationBulk(selectedIds, bulkLocation)
       await mutate()
       setSelectedIds([])
     } catch (e) {
@@ -83,7 +83,7 @@ export default function AdminAdorationManager({ event }: Props) {
 
   const getDatesBetween = (start: string, end: string) => {
     const dates = []
-    let current = new Date(start)
+    const current = new Date(start)
     const last = new Date(end)
 
     while (current <= last) {

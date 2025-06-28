@@ -6,7 +6,7 @@ import {
 
 import { toZonedTime } from 'date-fns-tz'
 
-export async function useAPIAdorationSignup(slotId: string) {
+export async function apiAdorationSignup(slotId: string) {
   const res = await fetch(`/api/adoration/${slotId}/signup`, {
     method: 'PATCH',
   })
@@ -20,7 +20,7 @@ export async function useAPIAdorationSignup(slotId: string) {
 }
 
 
-export async function useAPIAdorationDeleteBulk(slotIds: string[]) {
+export async function apiAdorationDeleteBulk(slotIds: string[]) {
   const res = await fetch('/api/adoration/delete', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ export function useAPIAdorationCreateBulk(
   return useDataCreate('/api/adoration/new', options)
 }
 
-export async function useAPIAdorationUpdateLocationBulk(
+export async function apiAdorationUpdateLocationBulk(
   slotIds: string[],
   location: string,
   options?: RequestInit
@@ -63,7 +63,7 @@ export async function useAPIAdorationUpdateLocationBulk(
   return await res.json()
 }
 
-export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
+export function apiAdorationSlotsAdmin(date: string, eventId: string): {
   data: FrontendAdorationSlot[]
   isLoading: boolean
   error?: unknown
@@ -94,7 +94,7 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
   return { ...res, data: [] }
 }
 
-  export function useAPIAdorationSlotsUser(date: string, eventId: string): {
+  export function apiAdorationSlotsUser(date: string, eventId: string): {
     data: FrontendAdorationSlot[]
     isLoading: boolean
     error?: unknown
@@ -123,7 +123,7 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
     return { ...res, data: [] }
   }
 
-export async function useAPIAdorationLogout(slotId: string) {
+export async function apiAdorationLogout(slotId: string) {
   const res = await fetch(`/api/adoration/${slotId}/logout`, {
     method: 'PATCH',
   })

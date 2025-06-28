@@ -2,14 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getAdorationSlotsForDayAdmin } from 'lib/data/adoration'
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { Permission } from 'lib/types/auth'
-import { ExtendedSession } from 'lib/types/auth'
 
 export default APIAccessController(
   [Permission.ADMIN],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
-    session: ExtendedSession
   ) {
     const { date, eventId } = req.query
 

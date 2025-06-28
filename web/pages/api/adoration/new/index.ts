@@ -2,23 +2,20 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { Permission } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { createAdorationSlotsBulk } from 'lib/data/adoration'
-import { ExtendedSession } from 'lib/types/auth'
 
 export const config = {
   api: {
-    bodyParser: false, // Důležité: vypni vestavěný parser, protože budeme používat FormData
+    bodyParser: false,
   },
 }
 
 import { IncomingForm } from 'formidable'
-import { parseISO } from 'date-fns'
 
 export default APIAccessController(
   [Permission.ADMIN],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
-    session: ExtendedSession
   ) {
     const form = new IncomingForm()
 
@@ -74,7 +71,7 @@ export default APIAccessController(
 
         res.status(200).json(result)
       } catch (e) {
-        res.status(400).json({ message: 'Neplatná data v požadavku.' })
+        res.status(400).json({ message: e })
       }
     })
   }
