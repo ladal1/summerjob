@@ -60,7 +60,7 @@ export default function MyPlanClientPage({
   // Get current day, if it is outside of smj event, pick first or last date od smj event
   const [date, setDate] = useState(determineDate(currentDate))
 
-  console.log(plans)
+  
   const sortedPlans = useMemo(() => {
     return new Array(...(plans ?? [])).sort(
       (a, b) => a.day.getTime() - b.day.getTime()
