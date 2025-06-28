@@ -10,7 +10,7 @@ load_dotenv(dotenv_path=env_path)
 
 channel, queue_name = setup_connection()
 
-def on_message(ch, method, body):
+def on_message(ch, method, properties, body):
     print(f'Received message (delivery tag: {method.delivery_tag}): {body}')
     generate_plan_from_message("9fdcbb17-5ade-4a68-a51d-1a9e7dc9e10b")
     ch.basic_ack(delivery_tag=method.delivery_tag)
