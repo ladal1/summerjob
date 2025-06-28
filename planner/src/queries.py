@@ -1,10 +1,10 @@
 select_workers = """SELECT DISTINCT "workerId" as "id",
             "isStrong", 
-            "allergies", 
+            "workAllergies", 
             "Car".id IS NOT NULL as "isDriver", 
             day = any("adorationDays") as "isAdoring",
              "Car".seats as "seats"
-    FROM "Plan" P JOIN "WorkerAvailability" WA on P."summerJobEventId" = WA."eventId" JOIN "Worker" W on WA."workerId" = W.id LEFT JOIN "Car" on W.id = "Car"."ownerId"
+    FROM "Plan" P JOIN "WorkerAvailability" WA on P."summerJobEventId" = WA."eventId" JOIN "Worker" W on WA."workerId" = W.id LEFT JOIN "Car" on W.id = "Car"."ownerId" AND "Car"."forEventId" = P."summerJobEventId"
     WHERE day = any("workDays") AND "workerId" NOT IN (SELECT AJTW."B" as Id
     FROM "ActiveJob" JOIN "_ActiveJobToWorker" AJTW on "ActiveJob".id = AJTW."A"
     WHERE "ActiveJob"."planId" = %(planId)s) AND P.id = %(planId)s"""
@@ -69,8 +69,8 @@ SELECT worker, PJ.id as job, score FROM stats JOIN "ProposedJob" PJ ON stats."jo
 
 select_drive_jobs = """
 WITH seats as (SELECT AJ.id, sum("seats") as seats
-    FROM "ActiveJob" AJ JOIN "_ActiveJobToWorker" AJTW on AJ.id = AJTW."A" JOIN "Worker" W on W.id = AJTW."B" JOIN "Car" C on W.id = C."ownerId"
-    WHERE "planId" =  %(planId)s
+    FROM "ActiveJob" AJ JOIN "_ActiveJobToWorker" AJTW on AJ.id = AJTW."A" JOIN "Worker" W on W.id = AJTW."B" JOIN "Car" C on W.id = C."ownerId" JOIN "Plan" P on AJ."planId" = P.id
+    WHERE "planId" =  %(planId)s AND C."forEventId" = P."summerJobEventId"
     GROUP BY AJ.id),
     people as (SELECT AJ.id, count(W.id) as need
     FROM "ActiveJob" AJ JOIN "_ActiveJobToWorker" AJTW on AJ.id = AJTW."A" JOIN "Worker" W on W.id = AJTW."B"
@@ -82,11 +82,12 @@ FROM seats JOIN people ON people.id = seats.id JOIN "ActiveJob" AJ ON AJ.id = se
 """
 
 select_driver = """SELECT W.id as id, C.id as "carId", "seats"
-    FROM "ActiveJob" AJ JOIN "_ActiveJobToWorker" AJTW on AJ.id = AJTW."A" JOIN "Worker" W on W.id = AJTW."B" JOIN "Car" C on W.id = C."ownerId"
-    WHERE AJ."id" = %(planId)s 
+    FROM "ActiveJob" AJ JOIN "_ActiveJobToWorker" AJTW on AJ.id = AJTW."A" JOIN "Worker" W on W.id = AJTW."B" JOIN "Car" C on W.id = C."ownerId" JOIN "Plan" P on AJ."planId" = P.id
+    WHERE AJ."id" = %(planId)s AND C."forEventId" = P."summerJobEventId"
     """
 
-select_people = """SELECT "B" as id FROM "_ActiveJobToWorker" AJTW WHERE "A" = %(planId)s AND AJTW."B" not in (SELECT "ownerId" FROM "Car") """
+select_people = """SELECT "B" as id FROM "_ActiveJobToWorker" AJTW JOIN "ActiveJob" AJ on AJTW."A" = AJ.id JOIN "Plan" P on AJ."planId" = P.id 
+                   WHERE "A" = %(planId)s AND AJTW."B" not in (SELECT "ownerId" FROM "Car" WHERE "forEventId" = P."summerJobEventId") """
 
 insert_ride = """INSERT INTO "Ride" ("id", "driverId", "carId", "jobId") VALUES (%(uuid)s, %(driver)s, %(car)s, %(job)s)"""
 

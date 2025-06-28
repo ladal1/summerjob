@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import psycopg2.extras
 from pulp import LpMinimize, LpProblem, lpSum, LpVariable
 import pandas as pd
 import uuid
@@ -13,7 +14,10 @@ from src.queries import (
 
 # Load variables from .env
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}"
 
 
 def dictionarify(query_results):
@@ -25,11 +29,16 @@ def transform_score(query_results):
 
 
 def is_viable(worker, job, forbidden, attempt):
-    if not (set(worker["allergies"]).isdisjoint(job["allergens"]) and
-            ((worker["isAdoring"] and job["supportsAdoration"]) or not worker["isAdoring"]) and
-            (job not in forbidden or attempt > 1)):
-        return True
-    return False
+    # Check if worker's allergies conflict with job allergens
+    allergies_ok = set(worker["workAllergies"]).isdisjoint(job["allergens"])
+    
+    # Check adoration requirements
+    adoration_ok = (worker["isAdoring"] and job["supportsAdoration"]) or not worker["isAdoring"]
+    
+    # Check if job is forbidden for this worker (unless it's a retry attempt)
+    forbidden_ok = job not in forbidden or attempt > 1
+    
+    return allergies_ok and adoration_ok and forbidden_ok
 
 
 def what_workers(row, plan):
@@ -172,6 +181,6 @@ def generate_rides(received_plan_id, connection):
 
 def generate_plan_from_message(received_plan_id):
     connection = psycopg2.connect(DATABASE_URL, options="-c search_path=public")
-    generate_rides(received_plan_id, connection)
-    # generate_plan(received_plan_id, connection)
-    # generate_plan(received_plan_id, connection, False)
+    # generate_rides(received_plan_id, connection)
+    generate_plan(received_plan_id, connection)
+    generate_plan(received_plan_id, connection, False)
