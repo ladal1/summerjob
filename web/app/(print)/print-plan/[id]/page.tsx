@@ -77,6 +77,10 @@ function JobInfo({
           <p style={{ whiteSpace: 'pre-wrap' }}>
             {job.proposedJob.publicDescription}
           </p>
+          <div className="mb-2" style={{ fontSize: '1.1em', fontWeight: 'bold', color: '#d63384' }}>
+            <i className="fas fa-user-nurse me-1"></i>
+            Zdravotník: 732 403 990
+          </div>
           <div>
             <i className="fas fa-user-group me-1"></i>
             {job.workers.length == 0 && 'Nikdo'}
