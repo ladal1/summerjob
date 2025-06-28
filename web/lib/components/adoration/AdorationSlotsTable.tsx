@@ -105,9 +105,9 @@ export default function AdorationSlotsTable({
                   </td>
                 </tr>
               )}
-              {slots.map(slot => {
-                const endTime = new Date(slot.localDateStart.getTime() + slot.length * 60000)
-                return (
+              {precomputedSlots.map(({ slot, endTime }) => (
+                <tr key={slot.id}>
+                  <td>{format(slot.localDateStart, 'HH:mm')}</td>
                   <tr key={slot.id}>
                     <td>{format(slot.localDateStart, 'HH:mm')}</td>
                     <td>{format(endTime, 'HH:mm')}</td>
