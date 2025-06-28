@@ -87,6 +87,7 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
         workers: slot.workers.map((w: any) => ({
           firstName: w.firstName,
           lastName: w.lastName,
+          phone: w.phone,
         })),
       }
     })

@@ -233,7 +233,7 @@ export default function AdminAdorationManager({ event }: Props) {
                     {slot.workers.length > 0 ? (
                       slot.workers.map((w, i) => (
                         <span key={i}>
-                          {w.firstName} {w.lastName}
+                          {w.firstName} {w.lastName} ({w.phone})
                           {i < slot.workers.length - 1 ? ', ' : ''}
                         </span>
                       ))

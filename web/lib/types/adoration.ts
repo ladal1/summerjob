@@ -22,5 +22,6 @@ export interface FrontendAdorationSlot {
   workers: {
     firstName: string
     lastName: string
+    phone: string
   }[]
 }
