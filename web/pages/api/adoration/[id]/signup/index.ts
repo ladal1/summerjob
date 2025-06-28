@@ -12,8 +12,6 @@ export default APIAccessController(
         session: ExtendedSession
     ) {
         const slotId = req.query.id as string
-        console.log('session:', session)
-        console.log('slotId:', slotId)
         if (!slotId || !session.userID) {
             return res.status(400).json({ message: 'Chybí slot nebo přihlášený uživatel.' })
         }
