@@ -63,15 +63,17 @@ export async function apiAdorationUpdateLocationBulk(
   return await res.json()
 }
 
-export function apiAdorationSlotsAdmin(date: string, eventId: string): {
+export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
   data: FrontendAdorationSlot[]
   isLoading: boolean
   error?: unknown
   mutate: () => void
 } {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res = useData<any[]>(`/api/adoration/admin?date=${date}&eventId=${eventId}`)
 
   if (Array.isArray(res.data)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformed: FrontendAdorationSlot[] = res.data.map((slot: any) => {
       const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
       return {
@@ -81,6 +83,7 @@ export function apiAdorationSlotsAdmin(date: string, eventId: string): {
         capacity: slot.capacity,
         length: slot.length,
         workerCount: slot.workers.length,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         workers: slot.workers.map((w: any) => ({
           firstName: w.firstName,
           lastName: w.lastName,
@@ -94,15 +97,17 @@ export function apiAdorationSlotsAdmin(date: string, eventId: string): {
   return { ...res, data: [] }
 }
 
-  export function apiAdorationSlotsUser(date: string, eventId: string): {
+  export function useAPIAdorationSlotsUser(date: string, eventId: string): {
     data: FrontendAdorationSlot[]
     isLoading: boolean
     error?: unknown
     mutate: () => void
   } {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res = useData<any[]>(`/api/adoration?date=${date}&eventId=${eventId}`)
   
     if (Array.isArray(res.data)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const transformed: FrontendAdorationSlot[] = res.data.map((slot: any) => {
         const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
         return {

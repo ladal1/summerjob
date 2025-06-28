@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import {
-  apiAdorationSlotsUser,
+  useAPIAdorationSlotsUser,
   apiAdorationSignup,
   apiAdorationLogout,
 } from 'lib/fetcher/adoration'
@@ -39,7 +39,7 @@ export default function AdorationSlotsTable({
     data: slots = [],
     isLoading,
     mutate,
-  } = apiAdorationSlotsUser(selectedDate, eventId)
+  } = useAPIAdorationSlotsUser(selectedDate, eventId)
   const [signuping, setSignuping] = useState<string | null>(null)
 
   useEffect(() => {
