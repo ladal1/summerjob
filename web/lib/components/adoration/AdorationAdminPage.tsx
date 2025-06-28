@@ -9,6 +9,10 @@ import {
   useAPIAdorationSlotsAdmin
 } from 'lib/fetcher/adoration'
 import AdminCreateAdorationModal from './AdorationAdminCreateModal'
+import AdorationWorkerAssignModal from './AdorationWorkerAssignModal'
+import AdorationEditModal from './AdorationEditModal'
+import AdorationBulkLocationModal from './AdorationBulkLocationModal'
+import type { FrontendAdorationSlot } from 'lib/types/adoration'
 
 interface Props {
   event: {
@@ -32,9 +36,13 @@ export default function AdminAdorationManager({ event }: Props) {
 
     return today < event.startDate ? event.startDate : today
   })
-  const [bulkLocation, setBulkLocation] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showBulkLocationModal, setShowBulkLocationModal] = useState(false)
+  const [selectedSlotForAssignment, setSelectedSlotForAssignment] = useState<FrontendAdorationSlot | null>(null)
+  const [selectedSlotForEdit, setSelectedSlotForEdit] = useState<FrontendAdorationSlot | null>(null)
 
   const {
     data: slots = [],
@@ -70,14 +78,35 @@ export default function AdminAdorationManager({ event }: Props) {
     }
   }
 
-  const applyBulkLocation = async () => {
+  const applyBulkLocation = async (location: string) => {
     try {
-      await apiAdorationUpdateLocationBulk(selectedIds, bulkLocation)
+      await apiAdorationUpdateLocationBulk(selectedIds, location)
       await mutate()
       setSelectedIds([])
     } catch (e) {
       console.error('Chyba při změně lokace:', e)
+      throw e
     }
+  }
+
+  const openAssignModal = (slot: FrontendAdorationSlot) => {
+    setSelectedSlotForAssignment(slot)
+    setShowAssignModal(true)
+  }
+
+  const closeAssignModal = () => {
+    setShowAssignModal(false)
+    setSelectedSlotForAssignment(null)
+  }
+
+  const openEditModal = (slot: FrontendAdorationSlot) => {
+    setSelectedSlotForEdit(slot)
+    setShowEditModal(true)
+  }
+
+  const closeEditModal = () => {
+    setShowEditModal(false)
+    setSelectedSlotForEdit(null)
   }
 
   const getDatesBetween = (start: string, end: string) => {
@@ -128,32 +157,27 @@ export default function AdminAdorationManager({ event }: Props) {
       ) : (
         <>
           <div className="d-flex gap-2 align-items-center mb-3">
-            <input
-              type="text"
-              className="form-control form-control-sm"
-              placeholder="Zadej lokaci"
-              value={bulkLocation}
-              onChange={e => setBulkLocation(e.target.value)}
-              style={{ maxWidth: '200px' }}
-            />
             <button
               className="btn btn-sm btn-outline-primary"
               disabled={selectedIds.length === 0}
-              onClick={applyBulkLocation}
+              onClick={() => setShowBulkLocationModal(true)}
             >
-              Změnit lokaci vybraným
+              <i className="fas fa-map-marker-alt me-1"></i>
+              Změnit lokaci vybraným ({selectedIds.length})
             </button>
             <button
               className="btn btn-sm btn-outline-danger"
               disabled={selectedIds.length === 0}
               onClick={deleteSelectedSlots}
             >
-              Smazat vybrané
+              <i className="fas fa-trash me-1"></i>
+              Smazat vybrané ({selectedIds.length})
             </button>
             <button
               className="btn btn-sm btn-outline-success"
               onClick={() => setShowCreateModal(true)}
             >
+              <i className="fas fa-plus me-1"></i>
               Vytvořit sloty
             </button>
           </div>
@@ -187,6 +211,7 @@ export default function AdminAdorationManager({ event }: Props) {
                 <th>Pracanti</th>
                 <th>Obsazenost</th>
                 <th>Délka</th>
+                <th>Akce</th>
               </tr>
             </thead>
             <tbody>
@@ -218,6 +243,24 @@ export default function AdminAdorationManager({ event }: Props) {
                   </td>
                   <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
                   <td>{slot.length} min</td>
+                  <td>
+                    <div className="d-flex gap-1">
+                      <button
+                        className="btn btn-sm btn-outline-dark"
+                        onClick={() => openEditModal(slot)}
+                        title="Upravit slot"
+                      >
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => openAssignModal(slot)}
+                        title="Přiřadit/odebrat pracanta"
+                      >
+                        <i className="fas fa-user-plus"></i>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -234,6 +277,31 @@ export default function AdminAdorationManager({ event }: Props) {
             setDate(newDate)
             mutate()
           }}
+        />
+      )}
+      {showAssignModal && selectedSlotForAssignment && (
+        <AdorationWorkerAssignModal
+          slot={selectedSlotForAssignment}
+          onClose={closeAssignModal}
+          onAssigned={() => {
+            mutate() // Refresh the slots data
+          }}
+        />
+      )}
+      {showEditModal && selectedSlotForEdit && (
+        <AdorationEditModal
+          slot={selectedSlotForEdit}
+          onClose={closeEditModal}
+          onUpdated={() => {
+            mutate() // Refresh the slots data
+          }}
+        />
+      )}
+      {showBulkLocationModal && (
+        <AdorationBulkLocationModal
+          selectedCount={selectedIds.length}
+          onClose={() => setShowBulkLocationModal(false)}
+          onApply={applyBulkLocation}
         />
       )}
     </div>

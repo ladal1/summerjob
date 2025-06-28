@@ -14,6 +14,7 @@ import PageHeader from '../page-header/PageHeader'
 import { HeaderNoContent } from './HeaderNoContent'
 import { filterEvents, MyEvents } from './MyEvents'
 import MyJob from './MyJob'
+import MyAdorations from './MyAdorations'
 interface MyPlanProps {
   sPlan: Serialized
   sEvents: Serialized
@@ -59,6 +60,7 @@ export default function MyPlanClientPage({
   // Get current day, if it is outside of smj event, pick first or last date od smj event
   const [date, setDate] = useState(determineDate(currentDate))
 
+  console.log(plans)
   const sortedPlans = useMemo(() => {
     return new Array(...(plans ?? [])).sort(
       (a, b) => a.day.getTime() - b.day.getTime()
@@ -104,6 +106,9 @@ export default function MyPlanClientPage({
           <HeaderNoContent label="Tento den se neučástníte žádné události z nástěnky." />
         ) : (
           <MyEvents events={filteredEvents} userId={userId} date={date} />
+        )}
+        {selectedPlan?.adorations && selectedPlan.adorations.length > 0 && (
+          <MyAdorations adorations={selectedPlan.adorations} />
         )}
       </div>
     </>

@@ -23,8 +23,8 @@ export default function AdminCreateAdorationModal({
   onClose,
   onCreated,
 }: Props) {
-  const [from, setFrom] = useState('08:00')
-  const [to, setTo] = useState('17:00')
+  const [fromTime, setFromTime] = useState('08:00')
+  const [toTime, setToTime] = useState('17:00')
   const [length, setLength] = useState(60)
   const [capacity, setCapacity] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -68,15 +68,43 @@ export default function AdminCreateAdorationModal({
     try {
       const { dateFrom, dateTo, location } = getValues()
 
+      // Validate time format
+      const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
+      if (!timeRegex.test(fromTime)) {
+        alert('Neplatný formát času "Od". Použijte formát HH:MM (např. 08:30)')
+        setLoading(false)
+        return
+      }
+      if (!timeRegex.test(toTime)) {
+        alert('Neplatný formát času "Do". Použijte formát HH:MM (např. 17:15)')
+        setLoading(false)
+        return
+      }
+
+      // Parse fromTime and toTime (HH:mm format) to hour and minute
+      const [fromHour, fromMinute] = fromTime.split(':').map(Number)
+      const [toHour, toMinute] = toTime.split(':').map(Number)
+
+      // Validate time range
+      const fromTotalMinutes = fromHour * 60 + fromMinute
+      const toTotalMinutes = toHour * 60 + toMinute
+      if (fromTotalMinutes >= toTotalMinutes) {
+        alert('Čas "Od" musí být dříve než čas "Do"')
+        setLoading(false)
+        return
+      }
+
       await createBulk({
         eventId,
         dateFrom,
         dateTo,
-        fromHour: parseInt(from.split(':')[0]),
-        toHour: parseInt(to.split(':')[0]),
+        fromHour,
+        toHour,
         length,
         location,
         capacity,
+        fromMinute,
+        toMinute,
       })
       onCreated(dateFrom)
       onClose()
@@ -124,22 +152,28 @@ export default function AdminCreateAdorationModal({
           </div>
 
           <div className="col-md-3">
-            <label className="form-label fw-bold">Od</label>
+            <label className="form-label fw-bold">Od (čas)</label>
             <input
-              type="time"
+              type="text"
               className="form-control pt-0"
-              value={from}
-              onChange={e => setFrom(e.target.value)}
+              value={fromTime}
+              placeholder="HH:MM"
+              pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+              onChange={e => setFromTime(e.target.value)}
             />
+            <div className="form-text">Formát: 24h (např. 08:30)</div>
           </div>
           <div className="col-md-3">
-            <label className="form-label fw-bold">Do</label>
+            <label className="form-label fw-bold">Do (čas)</label>
             <input
-              type="time"
+              type="text"
               className="form-control pt-0"
-              value={to}
-              onChange={e => setTo(e.target.value)}
+              value={toTime}
+              placeholder="HH:MM"
+              pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+              onChange={e => setToTime(e.target.value)}
             />
+            <div className="form-text">Formát: 24h (např. 17:15)</div>
           </div>
           <div className="col-md-3">
             <label className="form-label fw-bold">Délka slotu</label>

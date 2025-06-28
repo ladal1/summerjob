@@ -15,6 +15,12 @@ export const MyRideSchema = z.object({
 
 export type MyRide = z.infer<typeof MyRideSchema>
 
+export const WorkerContactSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  phone: z.string().min(1),
+})
+
 export const MyPlanSchema = z.object({
   day: z
     .date()
@@ -45,6 +51,18 @@ export const MyPlanSchema = z.object({
       ride: MyRideSchema.optional(),
     })
     .optional(),
+  adorations: z
+    .array(
+      z.object({
+        startTime: z.date(),
+        endTime: z.date(),
+        location: z.string().min(1),
+        previousWorkers: z.array(WorkerContactSchema).optional(),
+        nextWorkers: z.array(WorkerContactSchema).optional(),
+        sameTimeWorkers: z.array(WorkerContactSchema).optional(),
+      })
+    )
+    .optional(),
 })
 
 export type MyPlan = z.infer<typeof MyPlanSchema>
@@ -58,6 +76,20 @@ export function serializeMyPlan(plan: MyPlan): Serialized {
 export function deserializeMyPlan(serialized: Serialized): MyPlan {
   const myPlan = JSON.parse(serialized.data)
   myPlan.day = new Date(myPlan.day)
+  if (myPlan.adorations) {
+    myPlan.adorations = myPlan.adorations.map((adoration: {
+      startTime: string;
+      endTime: string;
+      location: string;
+      previousWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
+      nextWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
+      sameTimeWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
+    }) => ({
+      ...adoration,
+      startTime: new Date(adoration.startTime),
+      endTime: new Date(adoration.endTime),
+    }))
+  }
   return myPlan
 }
 
@@ -71,6 +103,20 @@ export function deserializeMyPlans(serialized: Serialized): MyPlan[] {
   const myPlans = JSON.parse(serialized.data)
   for (const myPlan of myPlans) {
     myPlan.day = new Date(myPlan.day)
+    if (myPlan.adorations) {
+      myPlan.adorations = myPlan.adorations.map((adoration: {
+        startTime: string;
+        endTime: string;
+        location: string;
+        previousWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
+        nextWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
+        sameTimeWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
+      }) => ({
+        ...adoration,
+        startTime: new Date(adoration.startTime),
+        endTime: new Date(adoration.endTime),
+      }))
+    }
   }
   return myPlans
 }

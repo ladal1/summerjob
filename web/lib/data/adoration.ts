@@ -81,8 +81,6 @@ export async function getAdorationSlotsForDayUser(
     })
 }
 
-
-
 export async function signUpForAdorationSlot(
   slotId: string,
   workerId: string,
@@ -107,6 +105,8 @@ export async function createAdorationSlotsBulk(
   length: number,
   location: string,
   capacity: number,
+  fromMinute: number = 0,
+  toMinute: number = 0,
   prismaClient: PrismaTransactionClient = prisma
 ) {
   const data: {
@@ -120,19 +120,28 @@ export async function createAdorationSlotsBulk(
   const currentDate = new Date(dateFrom)
 
   while (currentDate <= dateTo) {
-    for (let hour = fromHour; hour < toHour; hour++) {
-      for (let minute = 0; minute < 60; minute += length) {
-        const slotStart = new Date(currentDate)
-        slotStart.setHours(hour, minute, 0, 0)
+    // Calculate total start and end minutes for the day
+    const startTotalMinutes = fromHour * 60 + fromMinute
+    const endTotalMinutes = toHour * 60 + toMinute
 
-        data.push({
-          dateStart: slotStart,
-          length,
-          location,
-          eventId,
-          capacity,
-        })
-      }
+    // Generate slots from start to end time
+    for (let totalMinutes = startTotalMinutes; totalMinutes < endTotalMinutes; totalMinutes += length) {
+      const hour = Math.floor(totalMinutes / 60)
+      const minute = totalMinutes % 60
+
+      // Skip if we've gone past 23:59
+      if (hour >= 24) break
+
+      const slotStart = new Date(currentDate)
+      slotStart.setHours(hour, minute, 0, 0)
+
+      data.push({
+        dateStart: slotStart,
+        length,
+        location,
+        eventId,
+        capacity,
+      })
     }
 
     currentDate.setDate(currentDate.getDate() + 1)
@@ -153,5 +162,42 @@ export async function logoutFromAdorationSlot(
         disconnect: { id: workerId },
       },
     },
+  })
+}
+
+export async function getWorkerAdorationSlotsForDay(
+  workerId: string,
+  date: Date,
+  prismaClient: PrismaTransactionClient = prisma
+) {
+  const start = new Date(date)
+  start.setHours(0, 0, 0, 0)
+
+  const end = new Date(date)
+  end.setHours(23, 59, 59, 999)
+
+  return prismaClient.adorationSlot.findMany({
+    where: {
+      dateStart: {
+        gte: start,
+        lte: end,
+      },
+      workers: {
+        some: {
+          id: workerId,
+        },
+      },
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+        },
+      },
+    },
+    orderBy: { dateStart: 'asc' },
   })
 }

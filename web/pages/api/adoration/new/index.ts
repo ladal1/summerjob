@@ -44,6 +44,8 @@ export default APIAccessController(
           length,
           location,
           capacity,
+          fromMinute = 0,
+          toMinute = 0,
         } = parsed
 
         if (
@@ -66,7 +68,9 @@ export default APIAccessController(
           toHour,
           length,
           location,
-          capacity
+          capacity,
+          fromMinute,
+          toMinute
         )
 
         res.status(200).json(result)
