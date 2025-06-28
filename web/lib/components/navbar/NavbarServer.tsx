@@ -48,7 +48,11 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/admin',
       name: 'Administrace',
       icon: 'fas fa-cogs',
-      permissions: [Permission.ADMIN],
+      permissions: [
+        Permission.ADMIN,
+        Permission.ADORATION,
+        Permission.APPLICATIONS,
+      ],
     },
     {
       path: '/my-plan',
