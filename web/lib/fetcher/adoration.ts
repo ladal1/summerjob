@@ -1,18 +1,10 @@
-import type { AdorationSlotWithWorker } from 'lib/types/adoration'
+import type { FrontendAdorationSlot } from 'lib/types/adoration'
 import {
   useData,
   useDataCreate,
-  useDataDelete,
 } from './fetcher'
 
-export function useAPIAdorationSlots(
-  date: string,
-  eventId: string,
-  options?: Record<string, unknown>
-) {
-  const query = `/api/adoration?date=${date}&eventId=${eventId}`
-  return useData<AdorationSlotWithWorker[]>(query, options)
-}
+import { toZonedTime } from 'date-fns-tz'
 
 export async function useAPIAdorationSignup(slotId: string) {
   const res = await fetch(`/api/adoration/${slotId}/signup`, {
@@ -28,11 +20,19 @@ export async function useAPIAdorationSignup(slotId: string) {
 }
 
 
-export function useAPIAdorationDelete(
-  slotId: string,
-  options?: Record<string, unknown>
-) {
-  return useDataDelete(`/api/adoration/${slotId}`, options)
+export async function useAPIAdorationDeleteBulk(slotIds: string[]) {
+  const res = await fetch('/api/adoration/delete', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slotIds }),
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Chyba při mazání slotů.')
+  }
+
+  return await res.json()
 }
 
 export function useAPIAdorationCreateBulk(
@@ -48,7 +48,9 @@ export async function useAPIAdorationUpdateLocationBulk(
 ) {
   const res = await fetch('/api/adoration/location', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({ slotIds, location }),
     ...options,
   })
@@ -61,3 +63,75 @@ export async function useAPIAdorationUpdateLocationBulk(
   return await res.json()
 }
 
+export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
+  data: FrontendAdorationSlot[]
+  isLoading: boolean
+  error?: unknown
+  mutate: () => void
+} {
+  const res = useData<any[]>(`/api/adoration/admin?date=${date}&eventId=${eventId}`)
+
+  if (Array.isArray(res.data)) {
+    const transformed: FrontendAdorationSlot[] = res.data.map((slot: any) => {
+      const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
+      return {
+        id: slot.id,
+        localDateStart: zonedDate,
+        location: slot.location,
+        capacity: slot.capacity,
+        length: slot.length,
+        workerCount: slot.workers.length,
+        workers: slot.workers.map((w: any) => ({
+          firstName: w.firstName,
+          lastName: w.lastName,
+        })),
+      }
+    })
+
+    return { ...res, data: transformed }
+  }
+
+  return { ...res, data: [] }
+}
+
+  export function useAPIAdorationSlotsUser(date: string, eventId: string): {
+    data: FrontendAdorationSlot[]
+    isLoading: boolean
+    error?: unknown
+    mutate: () => void
+  } {
+    const res = useData<any[]>(`/api/adoration?date=${date}&eventId=${eventId}`)
+  
+    if (Array.isArray(res.data)) {
+      const transformed: FrontendAdorationSlot[] = res.data.map((slot: any) => {
+        const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
+        return {
+          id: slot.id,
+          localDateStart: zonedDate,
+          location: slot.location,
+          capacity: slot.capacity,
+          length: slot.length,
+          workerCount: slot.workerCount,
+          workers: [],
+          isUserSignedUp: slot.isUserSignedUp,
+        }
+      })
+  
+      return { ...res, data: transformed }
+    }
+  
+    return { ...res, data: [] }
+  }
+
+export async function useAPIAdorationLogout(slotId: string) {
+  const res = await fetch(`/api/adoration/${slotId}/logout`, {
+    method: 'PATCH',
+  })
+
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Chyba při odhlašování.')
+  }
+
+  return await res.json()
+}

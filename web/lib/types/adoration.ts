@@ -10,3 +10,17 @@ export interface AdorationSlotWithWorker {
     phone: string
   } | null
 }
+
+export interface FrontendAdorationSlot {
+  id: string
+  localDateStart: Date
+  location: string
+  capacity: number
+  workerCount: number
+  length: number
+  isUserSignedUp?: boolean
+  workers: {
+    firstName: string
+    lastName: string
+  }[]
+}

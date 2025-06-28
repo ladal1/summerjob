@@ -2,7 +2,7 @@
 import prisma from 'lib/prisma/connection'
 import type { PrismaTransactionClient } from 'lib/types/prisma'
 
-export async function getAdorationSlotsForDay(
+export async function getAdorationSlotsForDayAdmin(
   eventId: string,
   date: Date,
   prismaClient: PrismaTransactionClient = prisma
@@ -31,6 +31,57 @@ export async function getAdorationSlotsForDay(
     orderBy: { dateStart: 'asc' },
   })
 }
+
+export async function getAdorationSlotsForDayUser(
+  eventId: string,
+  date: Date,
+  userId: string,
+  prismaClient: PrismaTransactionClient = prisma
+) {
+  const end = new Date(date)
+  end.setHours(23, 59, 59, 999)
+
+  const all = await prismaClient.adorationSlot.findMany({
+    where: {
+      eventId,
+      dateStart: {
+        gte: date,
+        lte: end,
+      },
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      dateStart: 'asc',
+    },
+  })
+
+  return all
+    .filter(slot => {
+      const isUserSignedUp = slot.workers.some(w => w.id === userId)
+      const hasFreeCapacity = slot.workers.length < slot.capacity
+      return isUserSignedUp || hasFreeCapacity
+    })
+    .map(slot => {
+      const isUserSignedUp = slot.workers.some(w => w.id === userId)
+      return {
+        id: slot.id,
+        dateStart: slot.dateStart,
+        location: slot.location,
+        capacity: slot.capacity,
+        length: slot.length,
+        workerCount: slot.workers.length,
+        isUserSignedUp,
+      }
+    })
+}
+
+
 
 export async function signUpForAdorationSlot(
   slotId: string,
@@ -90,4 +141,17 @@ export async function createAdorationSlotsBulk(
   return prismaClient.adorationSlot.createMany({ data })
 }
 
-
+export async function logoutFromAdorationSlot(
+  slotId: string,
+  workerId: string,
+  prismaClient: PrismaTransactionClient = prisma
+) {
+  return prismaClient.adorationSlot.update({
+    where: { id: slotId },
+    data: {
+      workers: {
+        disconnect: { id: workerId },
+      },
+    },
+  })
+}

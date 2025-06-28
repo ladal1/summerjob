@@ -3,18 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
-import { useAPIAdorationSlots } from 'lib/fetcher/adoration'
+import {
+  useAPIAdorationDeleteBulk,
+  useAPIAdorationSlotsAdmin,
+  useAPIAdorationUpdateLocationBulk,
+} from 'lib/fetcher/adoration'
 import AdminCreateAdorationModal from './AdorationAdminCreateModal'
-
-interface AdorationSlot {
-  id: string
-  hour: number
-  location: string
-  worker: {
-    firstName: string
-    lastName: string
-  } | null
-}
+import 'react-toastify/dist/ReactToastify.css'
 
 interface Props {
   event: {
@@ -29,16 +24,27 @@ export default function AdminAdorationManager({ event }: Props) {
   const searchParams = useSearchParams()
 
   const [date, setDate] = useState(() => {
-    return searchParams?.get('date') || new Date().toISOString().slice(0, 10)
-  })
+    const param = searchParams?.get('date')
+    const today = new Date().toISOString().slice(0, 10)
 
+    if (param) {
+      return param
+    }
+
+    return today < event.startDate ? event.startDate : today
+  })
   const [bulkLocation, setBulkLocation] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const { data: slots = [], isLoading, mutate } = useAPIAdorationSlots(date, event.id)
+  const {
+    data: slots = [],
+    isLoading,
+    mutate,
+  } = useAPIAdorationSlotsAdmin(date, event.id)
 
-  const isAllSelected = slots.length > 0 && slots.every(slot => selectedIds.includes(slot.id))
+  const isAllSelected =
+    slots.length > 0 && slots.every(slot => selectedIds.includes(slot.id))
 
   useEffect(() => {
     const params = new URLSearchParams({ date })
@@ -56,30 +62,23 @@ export default function AdminAdorationManager({ event }: Props) {
   }
 
   const deleteSelectedSlots = async () => {
-    await Promise.all(
-      selectedIds.map(slotId =>
-        fetch(`/api/adoration/${slotId}`, {
-          method: 'DELETE',
-        })
-      )
-    )
-    await mutate()
-    setSelectedIds([])
+    try {
+      await useAPIAdorationDeleteBulk(selectedIds)
+      await mutate()
+      setSelectedIds([])
+    } catch (e) {
+      console.error('Chyba při mazání slotů:', e)
+    }
   }
 
-
   const applyBulkLocation = async () => {
-    await Promise.all(
-      selectedIds.map(slotId =>
-        fetch(`/api/adoration/${slotId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ location: bulkLocation }),
-        })
-      )
-    )
-    await mutate()
-    setSelectedIds([])
+    try {
+      await useAPIAdorationUpdateLocationBulk(selectedIds, bulkLocation)
+      await mutate()
+      setSelectedIds([])
+    } catch (e) {
+      console.error('Chyba při změně lokace:', e)
+    }
   }
 
   const getDatesBetween = (start: string, end: string) => {
@@ -120,7 +119,10 @@ export default function AdminAdorationManager({ event }: Props) {
       ) : slots.length === 0 ? (
         <>
           <p className="text-secondary">Žádné sloty pro tento den.</p>
-          <button className="btn btn-sm btn-outline-success" onClick={() => setShowCreateModal(true)}>
+          <button
+            className="btn btn-sm btn-outline-success"
+            onClick={() => setShowCreateModal(true)}
+          >
             Vytvořit sloty
           </button>
         </>
@@ -149,7 +151,10 @@ export default function AdminAdorationManager({ event }: Props) {
             >
               Smazat vybrané
             </button>
-            <button className="btn btn-sm btn-outline-success" onClick={() => setShowCreateModal(true)}>
+            <button
+              className="btn btn-sm btn-outline-success"
+              onClick={() => setShowCreateModal(true)}
+            >
               Vytvořit sloty
             </button>
           </div>
@@ -180,7 +185,9 @@ export default function AdminAdorationManager({ event }: Props) {
                 </th>
                 <th style={{ width: '100px' }}>Čas</th>
                 <th>Lokace</th>
-                <th>Pracant</th>
+                <th>Pracanti</th>
+                <th>Obsazenost</th>
+                <th>Délka</th>
               </tr>
             </thead>
             <tbody>
@@ -194,18 +201,28 @@ export default function AdminAdorationManager({ event }: Props) {
                       onChange={() => toggleSelectOne(slot.id)}
                     />
                   </td>
-                  <td><strong>{slot.hour}:00</strong></td>
+                  <td>
+                    <strong>{format(slot.localDateStart, 'HH:mm')}</strong>
+                  </td>
                   <td>{slot.location}</td>
                   <td>
-                    {slot.worker
-                      ? `${slot.worker.firstName} ${slot.worker.lastName}`
-                      : <em className="text-muted">nepřihlášen</em>}
+                    {slot.workers.length > 0 ? (
+                      slot.workers.map((w, i) => (
+                        <span key={i}>
+                          {w.firstName} {w.lastName}
+                          {i < slot.workers.length - 1 ? ', ' : ''}
+                        </span>
+                      ))
+                    ) : (
+                      <em className="text-muted">nepřihlášen</em>
+                    )}
                   </td>
+                  <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
+                  <td>{slot.length} min</td>
                 </tr>
               ))}
             </tbody>
           </table>
-
         </>
       )}
       {showCreateModal && (
@@ -214,7 +231,10 @@ export default function AdminAdorationManager({ event }: Props) {
           eventStart={event.startDate}
           eventEnd={event.endDate}
           onClose={() => setShowCreateModal(false)}
-          onCreated={mutate}
+          onCreated={newDate => {
+            setDate(newDate)
+            mutate()
+          }}
         />
       )}
     </div>

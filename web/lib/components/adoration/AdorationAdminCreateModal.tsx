@@ -11,7 +11,7 @@ interface Props {
   eventStart: string
   eventEnd: string
   onClose: () => void
-  onCreated: () => void
+  onCreated: (date: string) => void
 }
 
 const slotLengths = [15, 30, 45, 60]
@@ -80,7 +80,7 @@ export default function AdminCreateAdorationModal({
         location,
         capacity,
       })
-      onCreated()
+      onCreated(dateFrom)
       onClose()
     } catch (err) {
       alert('Chyba: ' + (err as Error).message)

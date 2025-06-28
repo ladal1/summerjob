@@ -9,7 +9,6 @@ export default APIAccessController(
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
-    session: ExtendedSession
   ) {
     const { slotIds, location } = req.body as {
       slotIds: string[]
