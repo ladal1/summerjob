@@ -5,7 +5,7 @@ import pandas as pd
 import uuid
 from dotenv import load_dotenv
 
-from planner.src.queries import (
+from src.queries import (
     insert_plan, select_jobs, select_job_details, select_strong_workers, select_workers,
     select_forbids, select_forbidden_jobs, select_active_jobs, select_areas, select_score,
     select_drive_jobs, select_driver, select_people, insert_ride, insert_rider
