@@ -30,13 +30,13 @@ def transform_score(query_results):
 
 def is_viable(worker, job, forbidden, attempt):
     # Check if worker's allergies conflict with job allergens
-    allergies_ok = set(worker["workAllergies"]).isdisjoint(job["allergens"])
+    allergies_ok = set(worker["workAllergies"] or []).isdisjoint(job["allergens"] or [])
     
     # Check adoration requirements
     adoration_ok = (worker["isAdoring"] and job["supportsAdoration"]) or not worker["isAdoring"]
     
     # Check if job is forbidden for this worker (unless it's a retry attempt)
-    forbidden_ok = job not in forbidden or attempt > 1
+    forbidden_ok = job["id"] not in forbidden or attempt > 1
     
     return allergies_ok and adoration_ok and forbidden_ok
 
@@ -98,7 +98,7 @@ def generate_plan(plan_id, connection, first_round=True, attempt=0):
             model += lpSum(job_vars.values()) >= min_workers
 
     for worker in workers:
-        model += lpSum(model_variables[worker].tolist()) == 1
+        model += lpSum(model_variables[worker].dropna().tolist()) == 1
 
     if attempt < 2:
         for forbid in forbids:
@@ -135,8 +135,11 @@ def load(dict_cursor, plan_id, query):
 
 
 def restrict_pair(forbid, friend, job, model, model_variables):
-    if model_variables.at[job, forbid] is not None and model_variables.at[job, friend] is not None:
-        model += model_variables.at[job, forbid] + model_variables.at[job, friend] <= 1
+    forbid_var = model_variables.at[job, forbid] if not pd.isna(model_variables.at[job, forbid]) else None
+    friend_var = model_variables.at[job, friend] if not pd.isna(model_variables.at[job, friend]) else None
+    
+    if forbid_var is not None and friend_var is not None:
+        model += forbid_var + friend_var <= 1
     return model
 
 

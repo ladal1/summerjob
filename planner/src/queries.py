@@ -2,7 +2,15 @@ select_workers = """SELECT DISTINCT "workerId" as "id",
             "isStrong", 
             "workAllergies", 
             "Car".id IS NOT NULL as "isDriver", 
-            day = any("adorationDays") as "isAdoring",
+            EXISTS(
+                SELECT 1 FROM "_SlotWorkers" SW 
+                JOIN "AdorationSlot" AS_slot ON SW."A" = AS_slot.id 
+                WHERE SW."B" = W.id 
+                AND AS_slot."eventId" = P."summerJobEventId"
+                AND DATE(AS_slot."dateStart") = P.day
+                AND EXTRACT(HOUR FROM AS_slot."dateStart") >= 9 
+                AND EXTRACT(HOUR FROM AS_slot."dateStart") < 17
+            ) as "isAdoring",
              "Car".seats as "seats"
     FROM "Plan" P JOIN "WorkerAvailability" WA on P."summerJobEventId" = WA."eventId" JOIN "Worker" W on WA."workerId" = W.id LEFT JOIN "Car" on W.id = "Car"."ownerId" AND "Car"."forEventId" = P."summerJobEventId"
     WHERE day = any("workDays") AND "workerId" NOT IN (SELECT AJTW."B" as Id
