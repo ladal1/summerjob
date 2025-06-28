@@ -11,7 +11,7 @@ import {
   SummerJobEvent,
   Worker,
 } from '../lib/prisma/client'
-import { faker } from '@faker-js/faker/locale/cz'
+import { faker as faker } from '@faker-js/faker'
 import { Prisma } from '../lib/prisma/client'
 
 const prisma = new PrismaClient()
@@ -44,15 +44,15 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
 
   const createWorker = () => {
     const sex = Math.random() > 0.5 ? 'male' : 'female'
-    const firstName = faker.name.firstName(sex)
-    const lastName = faker.name.lastName(sex)
+    const firstName = faker.person.firstName(sex)
+    const lastName = faker.person.lastName(sex)
     const workDays = choose(days, between(4, days.length))
 
     return Prisma.validator<Prisma.WorkerCreateInput>()({
       firstName,
       lastName,
-      phone: faker.phone.number('### ### ###'),
-      email: faker.internet.email(firstName, lastName).toLocaleLowerCase(),
+      phone: faker.phone.number(),
+      email: faker.internet.email({ firstName, lastName }).toLocaleLowerCase(),
       isStrong: Math.random() > 0.75,
       ownsCar: false,
       foodAllergies: { set: choose(Object.values(FoodAllergy), between(0, 2)) },
@@ -126,7 +126,7 @@ async function createYearlyEvent() {
   const dayEnd = between(dayStart, 28)
   const event = await prisma.summerJobEvent.create({
     data: {
-      name: `${faker.address.cityName()} ${year}`,
+      name: `${faker.location.city()} ${year}`,
       startDate: new Date(`${year}-${month}-${startWithZeros(dayStart)}`),
       endDate: new Date(`${year}-${month}-${startWithZeros(dayEnd)}`),
       isActive: true,
@@ -139,7 +139,7 @@ async function createAreas(eventId: string, count = 7) {
   const AREAS_COUNT = count
   const createArea = (areaId: number) => {
     return {
-      name: faker.address.city(),
+      name: faker.location.city(),
       summerJobEventId: eventId,
       requiresCar: Math.random() < 0.8,
       supportsAdoration: areaId === 0,
@@ -180,8 +180,8 @@ async function createProposedJobs(
       minWorkers: between(2, 3),
       maxWorkers: between(4, 6),
       strongWorkers: between(0, 1),
-      address: faker.address.streetAddress(),
-      contact: faker.name.fullName() + ', ' + faker.phone.number('### ### ###'),
+      address: faker.location.streetAddress(),
+      contact: faker.person.fullName() + ', ' + faker.phone.number(),
       hasFood: Math.random() > 0.5,
       hasShower: Math.random() > 0.7,
     }
@@ -277,8 +277,8 @@ async function createPosts(eventId: string, days: Date[], count = 10) {
   const POSTS_COUNT = count
   const createPost = () => {
     const printTime = Math.random() > 0.5
-    const hourStart = faker.datatype.number({ min: 0, max: 21 })
-    const hourEnd = faker.datatype.number({ min: hourStart, max: 23 })
+    const hourStart = faker.number.int({ min: 0, max: 21 })
+    const hourEnd = faker.number.int({ min: hourStart, max: 23 })
     const tags = choose(Object.values(PostTag), between(1, 3))
     return {
       forEventId: eventId,
@@ -291,8 +291,8 @@ async function createPosts(eventId: string, days: Date[], count = 10) {
       timeTo: printTime
         ? `${startWithZeros(hourEnd)}:${startWithZeros(between(0, 59))}`
         : undefined,
-      address: faker.address.streetAddress(),
-      coordinates: [+faker.address.longitude(), +faker.address.latitude()],
+      address: faker.location.streetAddress(),
+      coordinates: [+faker.location.longitude(), +faker.location.latitude()],
       tags: tags,
       shortDescription: faker.lorem.sentence(),
       longDescription: faker.lorem.paragraph(),
@@ -317,6 +317,26 @@ async function setEventAsInactive() {
       isActive: false,
     },
   })
+}
+
+async function seedAdorationSlots(eventId: string, startDate: Date, endDate: Date) {
+  const eventDates = datesBetween(startDate, endDate)
+
+  const allSlots = eventDates.flatMap(date => {
+    return Array.from({ length: 10 }, (_, i) => {
+      const slotTime = new Date(date)
+      slotTime.setHours(8 + i, 0, 0, 0) // 8:00 - 17:00
+
+      return {
+        date: slotTime,
+        hour: 8 + i,
+        location: `Kaple ${i + 1}`,
+        eventId,
+      }
+    })
+  })
+
+  await prisma.adorationSlot.createMany({ data: allSlots })
 }
 
 async function main() {
@@ -354,6 +374,8 @@ async function main() {
     datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
     mini ? 5 : 30
   )
+  console.log('Creating adoration slots...')
+  await seedAdorationSlots(yearlyEvent.id, yearlyEvent.startDate, yearlyEvent.endDate)
 }
 
 main()

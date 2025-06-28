@@ -70,6 +70,21 @@ export default function AdminPage() {
                 </div>
               </div>
             </Link>
+
+            <Link
+              className="list-group-item list-group-item-action"
+              href="/admin/adoration"
+            >
+              <div className="row">
+                <div className="col">
+                  <h5>Adorace</h5>
+                  <p>Vytvořit sloty, upravit lokace, spravovat adorace.</p>
+                </div>
+                <div className="col d-flex justify-content-end align-items-center gap-3">
+                  <i className="fas fa-chevron-right"></i>
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
