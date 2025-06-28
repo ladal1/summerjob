@@ -4,7 +4,6 @@ import { format } from 'date-fns'
 import {
   useAPIAdorationSlotsUser,
   apiAdorationSignup,
-  apiAdorationLogout,
 } from 'lib/fetcher/adoration'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -36,10 +35,13 @@ export default function AdorationSlotsTable({
 
   const [selectedDate, setSelectedDate] = useState(computeInitialDate)
   const {
-    data: slots = [],
+    data: allSlots = [],
     isLoading,
     mutate,
   } = useAPIAdorationSlotsUser(selectedDate, eventId)
+  
+  // Filter out full slots, but keep those where the user is signed up
+  const slots = allSlots.filter(slot => slot.workerCount < slot.capacity || slot.isUserSignedUp)
   const [signuping, setSignuping] = useState<string | null>(null)
 
   useEffect(() => {
@@ -55,19 +57,6 @@ export default function AdorationSlotsTable({
     } catch (err) {
       alert('Chyba při přihlašování na adoraci.')
       console.error('Adoration signup error:', err)
-    } finally {
-      setSignuping(null)
-    }
-  }
-
-  const handleLogout = async (slotId: string) => {
-    try {
-      setSignuping(slotId)
-      await apiAdorationLogout(slotId)
-      await mutate()
-    } catch (err) {
-      alert('Chyba při odhlašování z adorace.')
-      console.error('Adoration logout error:', err)
     } finally {
       setSignuping(null)
     }
@@ -96,51 +85,54 @@ export default function AdorationSlotsTable({
       {isLoading ? (
         <p>Načítám adorace...</p>
       ) : (
-        <table className="table table-bordered table-sm mt-3">
-          <thead>
-            <tr>
-              <th>Čas</th>
-              <th>Místo</th>
-              <th>Obsazenost</th>
-              <th>Akce</th>
-            </tr>
-          </thead>
-          <tbody>
-            {slots.length === 0 && (
+        <div className="table-responsive">
+          <table className="table table-bordered table-sm mt-3">
+            <thead>
               <tr>
-                <td colSpan={4} className="text-center">
-                  Žádné dostupné adorace pro tento den.
-                </td>
+                <th style={{ width: '80px' }}>Začátek</th>
+                <th style={{ width: '80px' }}>Konec</th>
+                <th style={{ width: '80px' }}>Délka</th>
+                <th>Místo</th>
+                <th style={{ width: '120px' }}>Obsazenost</th>
+                <th style={{ width: '120px' }}>Akce</th>
               </tr>
-            )}
-            {slots.map(slot => (
-              <tr key={slot.id}>
-                <td>{format(slot.localDateStart, 'HH:mm')}</td>
-                <td>{slot.location}</td>
-                <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
-                <td>
-                  {slot.isUserSignedUp ? (
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      disabled={signuping === slot.id}
-                      onClick={() => handleLogout(slot.id)}
-                    >
-                      {signuping === slot.id ? 'Odhlašuji...' : 'Odhlásit se'}
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-sm btn-primary"
-                      disabled={signuping === slot.id}
-                      onClick={() => handleSignup(slot.id)}
-                    >
-                      {signuping === slot.id ? 'Přihlašuji...' : 'Přihlásit se'}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {slots.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center">
+                    Žádné dostupné adorace pro tento den.
+                  </td>
+                </tr>
+              )}
+              {slots.map(slot => {
+                const endTime = new Date(slot.localDateStart.getTime() + slot.length * 60000)
+                return (
+                  <tr key={slot.id}>
+                    <td>{format(slot.localDateStart, 'HH:mm')}</td>
+                    <td>{format(endTime, 'HH:mm')}</td>
+                    <td>{slot.length} min</td>
+                    <td>{slot.location}</td>
+                    <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
+                    <td>
+                      {slot.isUserSignedUp ? (
+                        <span className="badge bg-success">Přihlášen</span>
+                      ) : (
+                        <button
+                          className="btn btn-sm btn-primary"
+                          disabled={signuping === slot.id}
+                          onClick={() => handleSignup(slot.id)}
+                        >
+                          {signuping === slot.id ? 'Přihlašuji...' : 'Přihlásit se'}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

@@ -22,5 +22,33 @@ export interface FrontendAdorationSlot {
   workers: {
     firstName: string
     lastName: string
+    phone: string
   }[]
+}
+
+// API response types
+export interface APIAdorationWorker {
+  id: string
+  firstName: string
+  lastName: string
+  phone: string
+}
+
+export interface APIAdorationSlotAdmin {
+  id: string
+  dateStart: string
+  location: string
+  capacity: number
+  length: number
+  workers: APIAdorationWorker[]
+}
+
+export interface APIAdorationSlotUser {
+  id: string
+  dateStart: string
+  location: string
+  capacity: number
+  length: number
+  workerCount: number
+  isUserSignedUp: boolean
 }

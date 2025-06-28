@@ -1,4 +1,9 @@
-import type { FrontendAdorationSlot } from 'lib/types/adoration'
+import type { 
+  FrontendAdorationSlot, 
+  APIAdorationSlotAdmin, 
+  APIAdorationSlotUser,
+  APIAdorationWorker 
+} from 'lib/types/adoration'
 import {
   useData,
   useDataCreate,
@@ -69,12 +74,10 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
   error?: unknown
   mutate: () => void
 } {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const res = useData<any[]>(`/api/adoration/admin?date=${date}&eventId=${eventId}`)
+  const res = useData<APIAdorationSlotAdmin[]>(`/api/adoration/admin?date=${date}&eventId=${eventId}`)
 
   if (Array.isArray(res.data)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transformed: FrontendAdorationSlot[] = res.data.map((slot: any) => {
+    const transformed: FrontendAdorationSlot[] = res.data.map((slot: APIAdorationSlotAdmin) => {
       const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
       return {
         id: slot.id,
@@ -83,10 +86,10 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
         capacity: slot.capacity,
         length: slot.length,
         workerCount: slot.workers.length,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        workers: slot.workers.map((w: any) => ({
+        workers: slot.workers.map((w: APIAdorationWorker) => ({
           firstName: w.firstName,
           lastName: w.lastName,
+          phone: w.phone,
         })),
       }
     })
@@ -103,12 +106,10 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
     error?: unknown
     mutate: () => void
   } {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = useData<any[]>(`/api/adoration?date=${date}&eventId=${eventId}`)
+    const res = useData<APIAdorationSlotUser[]>(`/api/adoration?date=${date}&eventId=${eventId}`)
   
     if (Array.isArray(res.data)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const transformed: FrontendAdorationSlot[] = res.data.map((slot: any) => {
+      const transformed: FrontendAdorationSlot[] = res.data.map((slot: APIAdorationSlotUser) => {
         const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
         return {
           id: slot.id,
