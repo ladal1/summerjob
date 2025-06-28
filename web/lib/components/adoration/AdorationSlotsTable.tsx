@@ -73,6 +73,13 @@ export default function AdorationSlotsTable({
     }
   }
 
+  const canUnregister = (slotStartTime: Date) => {
+    const now = new Date()
+    const timeDiff = slotStartTime.getTime() - now.getTime()
+    const sixHoursInMs = 6 * 60 * 60 * 1000 // 6 hours in milliseconds
+    return timeDiff > sixHoursInMs
+  }
+
   return (
     <div>
       <div className="mb-3">
@@ -113,32 +120,42 @@ export default function AdorationSlotsTable({
                 </td>
               </tr>
             )}
-            {slots.map(slot => (
-              <tr key={slot.id}>
-                <td>{format(slot.localDateStart, 'HH:mm')}</td>
-                <td>{slot.location}</td>
-                <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
-                <td>
-                  {slot.isUserSignedUp ? (
-                    <button
-                      className="btn btn-sm btn-outline-danger"
-                      disabled={signuping === slot.id}
-                      onClick={() => handleLogout(slot.id)}
-                    >
-                      {signuping === slot.id ? 'Odhlašuji...' : 'Odhlásit se'}
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-sm btn-primary"
-                      disabled={signuping === slot.id}
-                      onClick={() => handleSignup(slot.id)}
-                    >
-                      {signuping === slot.id ? 'Přihlašuji...' : 'Přihlásit se'}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {slots.map(slot => {
+              const canUnregisterFromSlot = canUnregister(slot.localDateStart)
+              return (
+                <tr key={slot.id}>
+                  <td>{format(slot.localDateStart, 'HH:mm')}</td>
+                  <td>{slot.location}</td>
+                  <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
+                  <td>
+                    {slot.isUserSignedUp ? (
+                      canUnregisterFromSlot ? (
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          disabled={signuping === slot.id}
+                          onClick={() => handleLogout(slot.id)}
+                        >
+                          {signuping === slot.id ? 'Odhlašuji...' : 'Odhlásit se'}
+                        </button>
+                      ) : (
+                        <span className="text-muted small">
+                          <i className="fas fa-lock me-1"></i>
+                          Nelze se odhlásit (méně než 6h do začátku)
+                        </span>
+                      )
+                    ) : (
+                      <button
+                        className="btn btn-sm btn-primary"
+                        disabled={signuping === slot.id}
+                        onClick={() => handleSignup(slot.id)}
+                      >
+                        {signuping === slot.id ? 'Přihlašuji...' : 'Přihlásit se'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       )}
