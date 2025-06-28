@@ -77,7 +77,7 @@ export default function AdorationSlotsTable({
     const now = new Date()
     const timeDiff = slotStartTime.getTime() - now.getTime()
     const sixHoursInMs = 6 * 60 * 60 * 1000 // 6 hours in milliseconds
-    return timeDiff > sixHoursInMs
+    return timeDiff >= sixHoursInMs
   }
 
   return (
