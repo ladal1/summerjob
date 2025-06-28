@@ -84,7 +84,7 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
         length: slot.length,
         workerCount: slot.workers.length,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        workers: slot.workers.map((w: any) => ({
+        workers: slot.workers.map((w: Worker) => ({
           firstName: w.firstName,
           lastName: w.lastName,
           phone: w.phone,
