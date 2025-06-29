@@ -349,19 +349,34 @@ def generate_rides(received_plan_id, connection):
             if driver_id in people:
                 people.remove(driver_id)
         
+        # Sort drivers by available seats (descending) to use larger cars first
+        sorted_drivers = sorted(drivers.items(), key=lambda x: x[1]["seats"], reverse=True)
+        
+        # Calculate total capacity and check if we need all drivers
+        total_people = len(people)
         people_pointer = 0
-        for driver in drivers:
-            ride = uuid.uuid4()
-            dict_cursor.execute(insert_ride, {"uuid": ride, "driver": driver, "car": drivers[driver]["carId"], "job": job})
-            connection.commit()
-            seats = drivers[driver]["seats"]
-            # Don't add the driver as a rider - they're already the driver
-            # dict_cursor.execute(insert_rider, {"ride": ride, "worker": driver})
-            seats -= 1  # Driver
-            while seats > 0 and people_pointer < len(people):
-                dict_cursor.execute(insert_rider, {"ride": ride, "worker": people[people_pointer]})
-                people_pointer += 1
-                seats -= 1
+        
+        for driver_id, driver_info in sorted_drivers:
+            # Check if there are still people to transport
+            if people_pointer >= total_people:
+                break
+                
+            # Calculate available seats (subtract 1 for the driver)
+            available_seats = driver_info["seats"] - 1
+            
+            # Only create a ride if there are people to transport
+            if people_pointer < total_people:
+                ride = uuid.uuid4()
+                dict_cursor.execute(insert_ride, {"uuid": ride, "driver": driver_id, "car": driver_info["carId"], "job": job})
+                connection.commit()
+                
+                # Assign riders to this car
+                riders_in_this_car = 0
+                while available_seats > 0 and people_pointer < total_people:
+                    dict_cursor.execute(insert_rider, {"ride": ride, "worker": people[people_pointer]})
+                    people_pointer += 1
+                    available_seats -= 1
+                    riders_in_this_car += 1
 
 
 def generate_plan_from_message(received_plan_id):
