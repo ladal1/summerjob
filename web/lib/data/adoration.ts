@@ -102,6 +102,77 @@ export async function getAdorationSlotsForDayUser(
     })
 }
 
+export async function getAllAdorationSlotsForEventUser(
+  eventId: string,
+  userId: string,
+  prismaClient: PrismaTransactionClient = prisma
+) {
+  // Get slots where user is signed up
+  const userSlots = await prismaClient.adorationSlot.findMany({
+    where: {
+      eventId,
+      workers: {
+        some: {
+          id: userId,
+        },
+      },
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  })
+
+  // Get slots with available capacity
+  const availableSlots = await prismaClient.adorationSlot.findMany({
+    where: {
+      eventId,
+      workers: {
+        none: {
+          id: userId,
+        },
+      },
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  })
+
+  // Filter available slots to only those with free capacity
+  const filteredAvailableSlots = availableSlots.filter(
+    slot => slot.workers.length < slot.capacity
+  )
+
+  // Combine and deduplicate
+  const allSlots = [...userSlots, ...filteredAvailableSlots]
+  const uniqueSlots = allSlots.filter(
+    (slot, index, self) => index === self.findIndex(s => s.id === slot.id)
+  )
+
+  // Sort by date and map to desired format
+  return uniqueSlots
+    .sort((a, b) => a.dateStart.getTime() - b.dateStart.getTime())
+    .map(slot => {
+      const isUserSignedUp = slot.workers.some(w => w.id === userId)
+      return {
+        id: slot.id,
+        dateStart: slot.dateStart,
+        location: slot.location,
+        capacity: slot.capacity,
+        length: slot.length,
+        workerCount: slot.workers.length,
+        isUserSignedUp,
+      }
+    })
+}
+
 export async function signUpForAdorationSlot(
   slotId: string,
   workerId: string,

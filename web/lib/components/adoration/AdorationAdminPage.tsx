@@ -196,7 +196,7 @@ export default function AdminAdorationManager({ event }: Props) {
           </div>
 
           <table className="table table-bordered table-sm mt-3">
-            <thead className="table-light">
+            <thead className="table-primary">
               <tr>
                 <th style={{ width: '40px' }}>
                   <input
@@ -206,63 +206,91 @@ export default function AdminAdorationManager({ event }: Props) {
                     onChange={toggleSelectAll}
                   />
                 </th>
-                <th style={{ width: '100px' }}>Čas</th>
+                <th style={{ width: '120px' }} className="text-center d-none d-md-table-cell">Čas</th>
+                <th style={{ width: '80px' }} className="text-center d-md-none">Čas</th>
                 <th>Lokace</th>
                 <th>Pracanti</th>
-                <th>Obsazenost</th>
-                <th>Délka</th>
-                <th>Akce</th>
+                <th style={{ width: '120px' }} className="d-none d-md-table-cell">Akce</th>
+                <th style={{ width: '60px' }} className="d-md-none">Akce</th>
               </tr>
             </thead>
             <tbody>
-              {slots.map(slot => (
-                <tr key={slot.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={selectedIds.includes(slot.id)}
-                      onChange={() => toggleSelectOne(slot.id)}
-                    />
-                  </td>
-                  <td>
-                    <strong>{format(slot.localDateStart, 'HH:mm')}</strong>
-                  </td>
-                  <td>{slot.location}</td>
-                  <td>
-                    {slot.workers.length > 0 ? (
-                      slot.workers.map((w, i) => (
-                        <span key={i}>
-                          {w.firstName} {w.lastName} ({w.phone})
-                          {i < slot.workers.length - 1 ? ', ' : ''}
-                        </span>
-                      ))
-                    ) : (
-                      <em className="text-muted">nepřihlášen</em>
-                    )}
-                  </td>
-                  <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
-                  <td>{slot.length} min</td>
-                  <td>
-                    <div className="d-flex gap-1">
-                      <button
-                        className="btn btn-sm btn-outline-dark"
-                        onClick={() => openEditModal(slot)}
-                        title="Upravit slot"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => openAssignModal(slot)}
-                        title="Přiřadit/odebrat pracanta"
-                      >
-                        <i className="fas fa-user-plus"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {slots.map(slot => {
+                const endTime = new Date(slot.localDateStart.getTime() + slot.length * 60000)
+                const startTimeStr = format(slot.localDateStart, 'HH:mm')
+                const endTimeStr = format(endTime, 'HH:mm')
+                return (
+                  <tr key={slot.id}>
+                    <td className="align-middle">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={selectedIds.includes(slot.id)}
+                        onChange={() => toggleSelectOne(slot.id)}
+                      />
+                    </td>
+                    <td className="text-center align-middle d-none d-md-table-cell">
+                      <strong>{startTimeStr} - {endTimeStr}</strong>
+                      <br />
+                      <small className="text-muted">{slot.length} min</small>
+                    </td>
+                    <td className="text-center align-middle d-md-none" style={{ width: '80px' }}>
+                      <strong>{startTimeStr}<br/>-<br/>{endTimeStr}</strong>
+                      <br />
+                      <small className="text-muted">{slot.length}min</small>
+                    </td>
+                    <td className="align-middle">{slot.location}</td>
+                    <td className="align-middle">
+                      <strong>({slot.workerCount}/{slot.capacity})</strong>
+                      {slot.workers.length > 0 && (
+                        <>
+                          <br />
+                          {slot.workers.map((w, i) => (
+                            <span key={i}>
+                              {w.firstName} {w.lastName} ({w.phone})
+                              {i < slot.workers.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </>
+                      )}
+                    </td>
+                    <td className="align-middle">
+                      <div className="d-flex gap-1 d-none d-md-flex">
+                        <button
+                          className="btn btn-sm btn-outline-dark"
+                          onClick={() => openEditModal(slot)}
+                          title="Upravit slot"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => openAssignModal(slot)}
+                          title="Přiřadit/odebrat pracanta"
+                        >
+                          <i className="fas fa-user-plus"></i>
+                        </button>
+                      </div>
+                      <div className="d-flex flex-column gap-2 d-md-none">
+                        <button
+                          className="btn btn-sm btn-outline-dark"
+                          onClick={() => openEditModal(slot)}
+                          title="Upravit slot"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => openAssignModal(slot)}
+                          title="Přiřadit/odebrat pracanta"
+                        >
+                          <i className="fas fa-user-plus"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </>
