@@ -95,7 +95,7 @@ select_driver = """SELECT W.id as id, C.id as "carId", "seats"
     """
 
 select_people = """SELECT "B" as id FROM "_ActiveJobToWorker" AJTW JOIN "ActiveJob" AJ on AJTW."A" = AJ.id JOIN "Plan" P on AJ."planId" = P.id 
-                   WHERE "A" = %(planId)s AND AJTW."B" not in (SELECT "ownerId" FROM "Car" WHERE "forEventId" = P."summerJobEventId") """
+                   WHERE AJTW."A" = %(planId)s AND AJTW."B" not in (SELECT "ownerId" FROM "Car" WHERE "forEventId" = P."summerJobEventId") """
 
 insert_ride = """INSERT INTO "Ride" ("id", "driverId", "carId", "jobId") VALUES (%(uuid)s, %(driver)s, %(car)s, %(job)s)"""
 
