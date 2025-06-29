@@ -23,7 +23,7 @@ export default async function AdorationPageServer() {
           <p className="text-muted mb-0">Přihlašte se na adorační časy</p>
         </div>
       </div>
-      <AdorationSlotsTable eventId={event.id} eventStart="" eventEnd="" />
+      <AdorationSlotsTable eventId={event.id} />
     </div>
   )
 }
