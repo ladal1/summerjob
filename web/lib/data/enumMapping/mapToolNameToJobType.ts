@@ -26,6 +26,8 @@ const toolToJobTypeMapping: Record<string, (keyof typeof JobType)[]> = {
   PITCHFORK: ['GARDEN'],
   RAKE: ['GARDEN'],
   SHOVEL: ['GARDEN', 'HOUSEWORK'],
+  HEDGE_TRIMMER: ['GARDEN', 'WOOD'],
+  STRING_TRIMMER: ['GARDEN'],
 }
 
 export const mapToolNameToJobType = (id: string) => {
