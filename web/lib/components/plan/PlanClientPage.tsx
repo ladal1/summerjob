@@ -60,6 +60,49 @@ export default function PlanClientPage({
 
   const reloadPlan = useCallback(() => mutate(), [mutate])
 
+  //#region Adoration data
+  const [adorationByWorker, setAdorationByWorker] = useState<Map<string, boolean>>(new Map())
+
+  useEffect(() => {
+    if (!planData) return
+
+    const fetchAdorationData = async () => {
+      try {
+        // Fetch all adoration slots for the plan day
+        const response = await fetch(`/api/adoration/admin?date=${planData.day.toISOString().slice(0, 10)}&eventId=${planData.summerJobEventId}`)
+        if (!response.ok) return
+
+        const slots = await response.json()
+        const workerAdorationMap = new Map<string, boolean>()
+
+        // Process slots to find workers with adoration during work hours (8:00-18:00)
+        slots.forEach((slot: { dateStart: string; length: number; workers: { id: string }[] }) => {
+          const slotStart = new Date(slot.dateStart)
+          const slotEnd = new Date(slotStart.getTime() + slot.length * 60 * 1000)
+          
+          const dayStart = new Date(planData.day)
+          dayStart.setHours(8, 0, 0, 0)
+          const dayEnd = new Date(planData.day)
+          dayEnd.setHours(18, 0, 0, 0)
+
+          // Check if slot overlaps with working hours
+          if (slotStart < dayEnd && slotEnd > dayStart) {
+            slot.workers.forEach((worker: { id: string }) => {
+              workerAdorationMap.set(worker.id, true)
+            })
+          }
+        })
+
+        setAdorationByWorker(workerAdorationMap)
+      } catch (error) {
+        console.error('Failed to fetch adoration data:', error)
+      }
+    }
+
+    fetchAdorationData()
+  }, [planData])
+  //#endregion
+
   const workersWithoutJob = useMemo(() => {
     if (!workersWithoutJobData) return []
     if (!planData) return workersWithoutJobData
@@ -352,6 +395,7 @@ export default function PlanClientPage({
                     reloadJoblessWorkers={reloadJoblessWorkers}
                     reloadPlan={reloadPlan}
                     onHover={setWorkerPhotoURL}
+                    adorationByWorker={adorationByWorker}
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">
@@ -460,7 +504,10 @@ function getAvailableContacts(plan?: PlanComplete) {
 }
 
 function isWorkerAvailable(worker: WorkerComplete, day: Date) {
-  return worker.availability.workDays
+  const isWorkDay = worker.availability.workDays
     .map(d => d.getTime())
     .includes(day.getTime())
+  
+  // Workers with adoration are still available for work, they just get a visual indicator
+  return isWorkDay
 }

@@ -4,13 +4,15 @@ import { SkillHas } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { useMemo } from 'react'
+import { hasWorkerAdorationOnDay } from 'lib/helpers/adoration'
 
 interface ActiveJobIssueProps {
   job: ActiveJobNoPlan
   day: Date
   ridesForOtherJobs: RidesForJob[]
-  sameWorkIssue?: boolean
-  sameCoworkerIssue?: boolean
+  sameWorkIssue: boolean
+  sameCoworkerIssue: boolean
+  adorationByWorker?: Map<string, boolean>
 }
 
 export function ActiveJobIssueBanner({
@@ -19,10 +21,11 @@ export function ActiveJobIssueBanner({
   ridesForOtherJobs,
   sameWorkIssue = false,
   sameCoworkerIssue = false,
+  adorationByWorker = new Map(),
 }: ActiveJobIssueProps) {
   const issues = useMemo(
-    () => getIssues(job, ridesForOtherJobs, day),
-    [job, ridesForOtherJobs, day]
+    () => getIssues(job, ridesForOtherJobs, day, adorationByWorker),
+    [job, ridesForOtherJobs, day, adorationByWorker]
   )
   const hasIssues =
     Object.values(issues).some(i => i) || sameWorkIssue || sameCoworkerIssue
@@ -120,10 +123,11 @@ export function ActiveJobIssueIcon({
   ridesForOtherJobs,
   sameWorkIssue = false,
   sameCoworkerIssue = false,
+  adorationByWorker = new Map(),
 }: ActiveJobIssueProps) {
   const issues = useMemo(
-    () => getIssues(job, ridesForOtherJobs, day),
-    [job, ridesForOtherJobs, day]
+    () => getIssues(job, ridesForOtherJobs, day, adorationByWorker),
+    [job, ridesForOtherJobs, day, adorationByWorker]
   )
   const hasIssues =
     Object.values(issues).some(i => i) || sameWorkIssue || sameCoworkerIssue
@@ -133,7 +137,8 @@ export function ActiveJobIssueIcon({
 function getIssues(
   job: ActiveJobNoPlan,
   ridesForOtherJobs: RidesForJob[],
-  day: Date
+  day: Date,
+  adorationByWorker: Map<string, boolean>
 ) {
   return {
     tooManyWorkers: tooManyWorkers(job),
@@ -143,7 +148,7 @@ function getIssues(
     missingResponsible: missingResponsible(job),
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
-    adorations: adorations(job, day),
+    adorations: adorations(job, day, adorationByWorker),
     lowSkilledWorkers: lowSkilledWorkers(job),
   }
 }
@@ -193,16 +198,12 @@ function allergies(job: ActiveJobNoPlan) {
   )
 }
 
-function adorations(job: ActiveJobNoPlan, day: Date) {
+function adorations(job: ActiveJobNoPlan, day: Date, adorationByWorker: Map<string, boolean>) {
   if (job.proposedJob.area?.supportsAdoration) {
     return false
   }
   for (const worker of job.workers) {
-    if (
-      worker.availability.adorationDays
-        .map(d => d.getTime())
-        .includes(day.getTime())
-    ) {
+    if (hasWorkerAdorationOnDay(worker.id, day, adorationByWorker)) {
       return true
     }
   }

@@ -221,7 +221,6 @@ export async function addAdminsToEvent(
           create: {
             eventId,
             workDays: [],
-            adorationDays: [],
           },
         },
       },

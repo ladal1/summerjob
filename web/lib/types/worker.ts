@@ -102,15 +102,6 @@ export const WorkerCreateSchema = z
             format: 'date',
           },
         }),
-      adorationDays: z
-        .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
-        .openapi({
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'date',
-          },
-        }),
     }),
   })
   .strict()
@@ -160,9 +151,6 @@ export function deserializeWorkers(data: Serialized) {
 
 export function deserializeWorkerAvailability(worker: WorkerComplete) {
   worker.availability.workDays = worker.availability.workDays.map(
-    day => new Date(day)
-  )
-  worker.availability.adorationDays = worker.availability.adorationDays.map(
     day => new Date(day)
   )
   return worker

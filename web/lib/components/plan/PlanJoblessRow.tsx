@@ -1,3 +1,4 @@
+import { hasWorkerAdorationOnDay } from 'lib/helpers/adoration'
 import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
 import type { Worker } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
@@ -22,6 +23,7 @@ interface PlanJoblessRowProps {
   ) => (e: React.DragEvent<HTMLTableRowElement>) => void
   reloadPlan: () => void
   onWorkerHover: (url: string | null) => void
+  adorationByWorker?: Map<string, boolean>
 }
 
 export function PlanJoblessRow({
@@ -33,6 +35,7 @@ export function PlanJoblessRow({
   onWorkerDragStart,
   reloadPlan,
   onWorkerHover,
+  adorationByWorker = new Map(),
 }: PlanJoblessRowProps) {
   const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined)
   const [workerIds, setWorkerIds] = useState<string[]>([])
@@ -119,7 +122,7 @@ export function PlanJoblessRow({
             <tbody>
               {joblessWorkers.map(worker => (
                 <SimpleRow
-                  data={formatWorkerData(worker, planDay, setWorkerToMove)}
+                  data={formatWorkerData(worker, planDay, setWorkerToMove, adorationByWorker)}
                   key={worker.id}
                   draggable={true}
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
@@ -150,7 +153,8 @@ export function PlanJoblessRow({
 function formatWorkerData(
   worker: WorkerComplete,
   planDay: Date,
-  requestMoveWorker: (worker: WorkerComplete) => void
+  requestMoveWorker: (worker: WorkerComplete) => void,
+  adorationByWorker: Map<string, boolean>
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
@@ -172,9 +176,9 @@ function formatWorkerData(
           {worker.isStrong && (
             <i className="fas fa-dumbbell me-2" title={'Silák'} />
           )}
-          {worker.availability.adorationDays.find(
-            x => x.getTime() === planDay.getTime()
-          ) && <i className="fa fa-church" title={'Adoruje'} />}
+          {hasWorkerAdorationOnDay(worker.id, planDay, adorationByWorker) && (
+            <i className="fa fa-church" title={'Adoruje'} />
+          )}
         </>
       ),
     },

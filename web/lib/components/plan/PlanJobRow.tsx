@@ -1,3 +1,4 @@
+import { hasWorkerAdorationOnDay } from 'lib/helpers/adoration'
 import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
@@ -42,6 +43,7 @@ interface PlanJobRowProps {
   ) => (e: React.DragEvent<HTMLTableRowElement>) => void
   reloadPlan: () => void
   onWorkerHover: (url: string | null) => void
+  adorationByWorker?: Map<string, boolean>
 }
 
 export function PlanJobRow({
@@ -53,6 +55,7 @@ export function PlanJobRow({
   onWorkerDragStart,
   reloadPlan,
   onWorkerHover,
+  adorationByWorker = new Map(),
 }: PlanJobRowProps) {
   //#region Update job
   const { data: activeJobs } = useAPIActiveJobs({
@@ -231,7 +234,8 @@ export function PlanJobRow({
             confirmDelete,
             isBeingDeleted,
             sameWorkIssue,
-            sameCoworkerIssue
+            sameCoworkerIssue,
+            adorationByWorker
           )}
           onDrop={onWorkerDropped(job.id)}
         >
@@ -242,6 +246,7 @@ export function PlanJobRow({
               ridesForOtherJobs={ridesForOtherJobs}
               sameWorkIssue={sameWorkIssue}
               sameCoworkerIssue={sameCoworkerIssue}
+              adorationByWorker={adorationByWorker}
             />
             <RowContent data={expandedContent} />
             <div className="table-responsive text-nowrap">
@@ -287,7 +292,8 @@ export function PlanJobRow({
                         activeJobs,
                         removeWorkerFromJob,
                         setWorkerToMove,
-                        reloadPlan
+                        reloadPlan,
+                        adorationByWorker
                       )}
                       onMouseEnter={() =>
                         worker.photoPath
@@ -378,7 +384,8 @@ function formatRowData(
   deleteJob: () => void,
   isBeingDeleted: boolean,
   sameWorkIssue: boolean,
-  sameCoworkerIssue: boolean
+  sameCoworkerIssue: boolean,
+  adorationByWorker: Map<string, boolean>
 ): RowCells[] {
   return [
     {
@@ -401,6 +408,7 @@ function formatRowData(
             ridesForOtherJobs={ridesForOtherJobs}
             sameWorkIssue={sameWorkIssue}
             sameCoworkerIssue={sameCoworkerIssue}
+            adorationByWorker={adorationByWorker}
           />
         </span>
       ),
@@ -469,16 +477,15 @@ function formatWorkerData(
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined,
   removeWorker: (workerId: string) => void,
   requestMoveWorker: (worker: WorkerComplete) => void,
-  reloadPlan: () => void
+  reloadPlan: () => void,
+  adorationByWorker: Map<string, boolean>
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
   }`
   const abilities = []
   const isDriver = job?.rides.map(r => r.driverId).includes(worker.id) || false
-  const wantsAdoration = worker.availability.adorationDays
-    .map(d => d.getTime())
-    .includes(day.getTime())
+  const wantsAdoration = hasWorkerAdorationOnDay(worker.id, day, adorationByWorker)
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')

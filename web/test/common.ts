@@ -79,7 +79,6 @@ async function initDB() {
         create: {
           eventId: event.id,
           workDays: [start],
-          adorationDays: [start],
         },
       },
     },
@@ -478,7 +477,6 @@ export function createWorkerData() {
     skills: [],
     availability: {
       workDays: [],
-      adorationDays: [],
     },
   }
 }
