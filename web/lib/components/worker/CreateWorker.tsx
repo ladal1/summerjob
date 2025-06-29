@@ -47,7 +47,6 @@ export default function CreateWorker({
     defaultValues: {
       availability: {
         workDays: [],
-        adorationDays: [],
       },
       foodAllergies: [],
       workAllergies: [],
@@ -181,7 +180,7 @@ export default function CreateWorker({
             mandatory
           />
           <div className="d-flex flex-row flex-wrap">
-            <div className="me-5">
+            <div className="me-5 width-300">
               <DateSelectionInput
                 id="availability.workDays"
                 label="Pracovní dostupnost"
@@ -189,12 +188,6 @@ export default function CreateWorker({
                 days={allDates}
               />
             </div>
-            <DateSelectionInput
-              id="availability.adorationDays"
-              label="Dny adorace"
-              register={() => register('availability.adorationDays')}
-              days={allDates}
-            />
           </div>
 
           <GroupButtonsInput

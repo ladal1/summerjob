@@ -186,13 +186,11 @@ export async function createWorkerFromApplication(application: Application) {
       },
       update: {
         workDays,
-        adorationDays: [],
       },
       create: {
         worker: { connect: { id: existingWorker.id } },
         event: { connect: { id: activeEventId } },
         workDays,
-        adorationDays: [],
       },
     })
 
@@ -224,7 +222,6 @@ export async function createWorkerFromApplication(application: Application) {
       availability: {
         create: {
           workDays,
-          adorationDays: [],
           event: {
             connect: { id: activeEventId },
           },

@@ -63,7 +63,6 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
         create: {
           eventId,
           workDays,
-          adorationDays: chooseWithProbability(workDays, 0.15),
         },
       },
       permissions: {

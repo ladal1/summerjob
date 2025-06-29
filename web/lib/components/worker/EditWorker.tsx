@@ -78,9 +78,6 @@ export default function EditWorker({
       age: worker.age,
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
-        adorationDays: worker.availability.adorationDays.map(day =>
-          day.toJSON()
-        ),
       },
     },
   })
@@ -228,20 +225,11 @@ export default function EditWorker({
               ? 'Změnou e-mailu dojde k odhlášení z aplikace.'
               : 'Změnou e-mailu dojde k odhlášení uživatele z aplikace.'}
           </p>
-          <div className="d-flex flex-row flex-wrap">
-            <div className="me-5">
-              <DateSelectionInput
-                id="availability.workDays"
-                label="Pracovní dostupnost"
-                register={() => register('availability.workDays')}
-                days={allDates}
-                disableAfter={isProfilePage ? 18 : undefined}
-              />
-            </div>
+          <div className="d-inline-block">
             <DateSelectionInput
-              id="availability.adorationDays"
-              label="Dny adorace"
-              register={() => register('availability.adorationDays')}
+              id="availability.workDays"
+              label="Pracovní dostupnost"
+              register={() => register('availability.workDays')}
               days={allDates}
               disableAfter={isProfilePage ? 18 : undefined}
             />

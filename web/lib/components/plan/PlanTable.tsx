@@ -42,6 +42,7 @@ interface PlanTableProps {
   reloadJoblessWorkers: () => void
   reloadPlan: () => void
   onHover: (url: string | null) => void
+  adorationByWorker?: Map<string, boolean>
 }
 
 export function PlanTable({
@@ -51,6 +52,7 @@ export function PlanTable({
   reloadJoblessWorkers,
   reloadPlan,
   onHover,
+  adorationByWorker = new Map(),
 }: PlanTableProps) {
   //#region Sort
   const getSortable = useMemo(
@@ -123,6 +125,7 @@ export function PlanTable({
             onWorkerDragStart={onWorkerDragStart}
             reloadPlan={reload}
             onWorkerHover={onHover}
+            adorationByWorker={adorationByWorker}
           />
         ))}
       {joblessWorkers && plan && (
@@ -135,6 +138,7 @@ export function PlanTable({
           onWorkerDragStart={onWorkerDragStart}
           reloadPlan={reload}
           onWorkerHover={onHover}
+          adorationByWorker={adorationByWorker}
         />
       )}
     </SortableTable>

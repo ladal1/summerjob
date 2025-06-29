@@ -74,8 +74,7 @@ export default function ImportWorkersClientPage({
       endISO = convertToISOFormat(end)
     }
     const workDaysExample = startISO + (endISO ? `,${endISO}` : '')
-    const adorationDaysExample = startISO
-    return workDaysExample + ';' + adorationDaysExample
+    return workDaysExample
   }
 
   return (
@@ -99,7 +98,7 @@ export default function ImportWorkersClientPage({
               Import akceptuje data oddělená středníkem v následujícím formátu:
               <pre>
                 Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny
-                práce;Dny adorace
+                práce
               </pre>
               Příklad:
               <pre>
@@ -125,7 +124,7 @@ export default function ImportWorkersClientPage({
               name="data"
               className="form-control border p-1"
               rows={10}
-              placeholder="Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny práce;Dny adorace"
+              placeholder="Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny práce"
               value={importData}
               onChange={e => setImportData(e.target.value)}
             />
@@ -213,13 +212,6 @@ function ResultBox({
               .map(d => capitalizeFirstLetter(formatDateShort(d)))
               .join(', ')}
           </small>
-          <br />
-          <small className="text-muted">
-            Adoruje:{' '}
-            {result.data.availability.adorationDays
-              .map(d => capitalizeFirstLetter(formatDateShort(d)))
-              .join(', ')}
-          </small>
         </>
       ) : (
         <>
@@ -256,9 +248,8 @@ function getWorkerInfo(
     allergiesStr,
     skillsStr,
     workDaysStr,
-    adorationDaysStr,
   ] = line.split(';')
-  if (adorationDaysStr === undefined) {
+  if (workDaysStr === undefined) {
     return { success: false, error: 'Missing data' }
   }
   const formatedPhone = formatPhoneNumber(phone)
@@ -292,11 +283,6 @@ function getWorkerInfo(
     .split(',')
     .filter(a => a.trim() !== '')
     .map(date => date + ' GMT')
-  const adorationDays =
-    adorationDaysStr
-      ?.split(',')
-      .filter(a => a.trim() !== '')
-      .map(date => date + ' GMT') ?? []
   const parsed = WorkerCreateSchema.safeParse({
     firstName,
     lastName,
@@ -310,7 +296,6 @@ function getWorkerInfo(
     skills,
     availability: {
       workDays,
-      adorationDays,
     },
     photoFile: undefined,
   })
@@ -327,10 +312,7 @@ function getWorkerInfo(
     return { success: false, error: lineWithError(error) }
   }
   // Check that all dates are within the event
-  for (const date of [
-    ...parsed.data.availability.workDays,
-    ...parsed.data.availability.adorationDays,
-  ]) {
+  for (const date of parsed.data.availability.workDays) {
     if (date < eventStart || date > eventEnd) {
       return {
         success: false,

@@ -194,7 +194,6 @@ export async function deleteWorker(id: string) {
             where: {},
             data: {
               workDays: [],
-              adorationDays: [],
             },
           },
         },
@@ -267,7 +266,6 @@ async function internal_createWorker(
       availability: {
         create: {
           workDays: data.availability.workDays,
-          adorationDays: data.availability.adorationDays,
           event: {
             connect: {
               id: activeEventId,
@@ -300,7 +298,6 @@ async function internal_createWorker(
       availability: {
         create: {
           workDays: data.availability?.workDays ?? [],
-          adorationDays: data.availability?.adorationDays ?? [],
           event: {
             connect: {
               id: activeEventId,
@@ -462,7 +459,6 @@ export async function internal_updateWorker(
           },
           data: {
             workDays: data.availability?.workDays,
-            adorationDays: data.availability?.adorationDays,
           },
         },
       },
