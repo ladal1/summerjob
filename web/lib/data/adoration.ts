@@ -117,9 +117,12 @@ export async function createAdorationSlotsBulk(
     capacity: number
   }[] = []
 
-  const currentDate = new Date(dateFrom)
+  // Create local date objects to avoid timezone issues
+  const startDate = new Date(dateFrom.getFullYear(), dateFrom.getMonth(), dateFrom.getDate())
+  const endDate = new Date(dateTo.getFullYear(), dateTo.getMonth(), dateTo.getDate())
+  const currentDate = new Date(startDate)
 
-  while (currentDate <= dateTo) {
+  while (currentDate <= endDate) {
     // Calculate total start and end minutes for the day
     const startTotalMinutes = fromHour * 60 + fromMinute
     const endTotalMinutes = toHour * 60 + toMinute
@@ -132,8 +135,8 @@ export async function createAdorationSlotsBulk(
       // Skip if we've gone past 23:59
       if (hour >= 24) break
 
-      const slotStart = new Date(currentDate)
-      slotStart.setHours(hour, minute, 0, 0)
+      // Create slot start time in local timezone
+      const slotStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hour, minute, 0, 0)
 
       data.push({
         dateStart: slotStart,
