@@ -11,7 +11,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const isAllowed = await withPermissions([Permission.ADMIN])
+  const isAllowed = await withPermissions([Permission.ADMIN, Permission.APPLICATIONS, Permission.ADORATION])
   if (!isAllowed.success) {
     return <AccessDeniedPage />
   }

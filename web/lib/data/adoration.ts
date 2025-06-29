@@ -7,15 +7,20 @@ export async function getAdorationSlotsForDayAdmin(
   date: Date,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  const end = new Date(date)
-  end.setHours(23, 59, 59, 999)
+  // Convert local date (+2 timezone) to UTC for database query
+  // The input date is in local timezone, but database stores UTC timestamps
+  const startUTC = new Date(date)
+  startUTC.setHours(0, 0, 0, 0)
+  
+  const endUTC = new Date(date)
+  endUTC.setHours(23, 59, 59, 999)
 
   return prismaClient.adorationSlot.findMany({
     where: {
       eventId,
       dateStart: {
-        gte: date,
-        lte: end,
+        gte: startUTC,
+        lte: endUTC,
       },
     },
     include: {
@@ -38,15 +43,20 @@ export async function getAdorationSlotsForDayUser(
   userId: string,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  const end = new Date(date)
-  end.setHours(23, 59, 59, 999)
-
+  // Convert local date (+2 timezone) to UTC for database query
+  // The input date is in local timezone, but database stores UTC timestamps
+  const startUTC = new Date(date)
+  startUTC.setHours(0, 0, 0, 0)
+  
+  const endUTC = new Date(date)
+  endUTC.setHours(23, 59, 59, 999)
+  
   const all = await prismaClient.adorationSlot.findMany({
     where: {
       eventId,
       dateStart: {
-        gte: date,
-        lte: end,
+        gte: startUTC,
+        lte: endUTC,
       },
     },
     include: {
