@@ -29,8 +29,30 @@ def transform_score(query_results):
 
 
 def is_viable(worker, job, forbidden, attempt):
+    # Handle worker allergies - ensure we have a proper list/array
+    worker_allergies = worker["workAllergies"] or []
+    if isinstance(worker_allergies, str):
+        # If it's a string like "DUST" or "{DUST,MITES}", parse it
+        if worker_allergies.startswith('{') and worker_allergies.endswith('}'):
+            # Handle PostgreSQL array format like "{DUST,MITES}"
+            worker_allergies = worker_allergies[1:-1].split(',') if len(worker_allergies) > 2 else []
+        else:
+            # Handle single allergy as string
+            worker_allergies = [worker_allergies] if worker_allergies else []
+    
+    # Handle job allergens - ensure we have a proper list/array  
+    job_allergens = job["allergens"] or []
+    if isinstance(job_allergens, str):
+        # If it's a string like "{}" or "{DUST,MITES}", parse it
+        if job_allergens.startswith('{') and job_allergens.endswith('}'):
+            # Handle PostgreSQL array format like "{DUST,MITES}"
+            job_allergens = job_allergens[1:-1].split(',') if len(job_allergens) > 2 else []
+        else:
+            # Handle single allergen as string
+            job_allergens = [job_allergens] if job_allergens else []
+    
     # Check if worker's allergies conflict with job allergens
-    allergies_ok = set(worker["workAllergies"] or []).isdisjoint(job["allergens"] or [])
+    allergies_ok = set(worker_allergies).isdisjoint(set(job_allergens))
     
     # Check adoration requirements
     adoration_ok = (worker["isAdoring"] and job["supportsAdoration"]) or not worker["isAdoring"]
@@ -42,7 +64,7 @@ def is_viable(worker, job, forbidden, attempt):
 
 
 def what_workers(row, plan):
-    workers = [index for index, value in row.items() if value.varValue > 0]
+    workers = [index for index, value in row.items() if hasattr(value, 'varValue') and value.varValue > 0]
     plan[row.name] = workers
 
 
@@ -113,14 +135,170 @@ def generate_plan(plan_id, connection, first_round=True, attempt=0):
 
     model += lpSum(score)
 
+    # Debug information before solving
+    print(f"=== DEBUG INFO - Attempt {attempt}, First Round: {first_round} ===")
+    print(f"Total workers: {len(workers)}")
+    print(f"Total jobs: {len(jobs)}")
+    print(f"Strong workers: {sum(1 for w in workers.values() if w['isStrong'])}")
+    print(f"Drivers: {sum(1 for w in workers.values() if w['isDriver'])}")
+    
+    # Check job requirements
+    total_min_workers = sum(job_properties[job]["minWorkers"] for job in jobs)
+    total_max_workers = sum(job_properties[job]["maxWorkers"] for job in jobs)
+    total_strong_needed = sum(job_properties[job]["strongWorkers"] for job in jobs) if first_round else 0
+    total_cars_needed = sum(job_properties[job]["neededCars"] for job in jobs) if first_round and attempt < 1 else 0
+    
+    print(f"Total minimum workers needed: {total_min_workers}")
+    print(f"Total maximum workers available: {total_max_workers}")
+    if first_round:
+        print(f"Total strong workers needed: {total_strong_needed}")
+        if attempt < 1:
+            print(f"Total cars needed: {total_cars_needed}")
+    
+    # Check viability constraints with detailed breakdown
+    viable_assignments = 0
+    jobs_with_zero_viable = []
+    for job in jobs:
+        viable_for_job = 0
+        allergy_blocked = 0
+        adoration_blocked = 0
+        forbidden_blocked = 0
+        
+        for worker in workers:
+            worker_data = workers[worker]
+            job_data = job_properties[job]
+            
+            # Check each constraint individually
+            worker_allergies = worker_data["workAllergies"] or []
+            if isinstance(worker_allergies, str):
+                if worker_allergies.startswith('{') and worker_allergies.endswith('}'):
+                    worker_allergies = worker_allergies[1:-1].split(',') if len(worker_allergies) > 2 else []
+                else:
+                    worker_allergies = [worker_allergies] if worker_allergies else []
+            
+            job_allergens = job_data["allergens"] or []
+            if isinstance(job_allergens, str):
+                if job_allergens.startswith('{') and job_allergens.endswith('}'):
+                    job_allergens = job_allergens[1:-1].split(',') if len(job_allergens) > 2 else []
+                else:
+                    job_allergens = [job_allergens] if job_allergens else []
+            
+            allergies_ok = set(worker_allergies).isdisjoint(set(job_allergens))
+            adoration_ok = (worker_data["isAdoring"] and job_data["supportsAdoration"]) or not worker_data["isAdoring"]
+            forbidden_ok = job_data["id"] not in forbidden_jobs or attempt > 1
+            
+            if not allergies_ok:
+                allergy_blocked += 1
+            elif not adoration_ok:
+                adoration_blocked += 1
+            elif not forbidden_ok:
+                forbidden_blocked += 1
+            else:
+                viable_for_job += 1
+                viable_assignments += 1
+        
+        print(f"Job {job}: {viable_for_job} viable workers (needs {job_properties[job]['minWorkers']}-{job_properties[job]['maxWorkers']})")
+        
+        if viable_for_job == 0:
+            jobs_with_zero_viable.append(job)
+            print(f"  ❌ BLOCKED: {allergy_blocked} by allergies, {adoration_blocked} by adoration, {forbidden_blocked} by forbidden")
+            print(f"  Job allergens: {job_data.get('allergens', [])}")
+            print(f"  Job supports adoration: {job_data.get('supportsAdoration', False)}")
+            print(f"  Job forbidden: {job_data['id'] in forbidden_jobs}")
+        elif viable_for_job < job_properties[job]['minWorkers']:
+            print(f"  ⚠️  INSUFFICIENT: needs {job_properties[job]['minWorkers']} but only {viable_for_job} viable")
+    
+    if jobs_with_zero_viable:
+        print(f"\n🚨 CRITICAL: {len(jobs_with_zero_viable)} jobs have ZERO viable workers!")
+        print(f"Zero-viable jobs: {jobs_with_zero_viable[:3]}{'...' if len(jobs_with_zero_viable) > 3 else ''}")
+    
+    print(f"Total viable worker-job assignments: {viable_assignments}")
+    print(f"Total forbidden pairs constraints: {len(forbids)}")
+    print(f"Total forbidden jobs for workers: {len(forbidden_jobs)}")
+    
+    # Sample worker allergies and adoration status
+    workers_with_allergies = sum(1 for w in workers.values() if w.get("workAllergies") and len(w["workAllergies"]) > 0)
+    adoring_workers = sum(1 for w in workers.values() if w.get("isAdoring", False))
+    print(f"Workers with allergies: {workers_with_allergies}")
+    print(f"Adoring workers: {adoring_workers}")
+    
+    # Sample job characteristics for zero-viable jobs
+    if len(jobs_with_zero_viable) > 0:
+        print(f"\nAnalyzing first zero-viable job: {jobs_with_zero_viable[0]}")
+        sample_job = job_properties[jobs_with_zero_viable[0]]
+        print(f"  Allergens: {sample_job.get('allergens', [])}")
+        print(f"  Supports adoration: {sample_job.get('supportsAdoration', False)}")
+        print(f"  In forbidden list: {sample_job['id'] in forbidden_jobs}")
+        
+        # Test allergy logic with a sample worker
+        sample_worker_id = list(workers.keys())[0]
+        sample_worker = workers[sample_worker_id]
+        print(f"\nTesting allergy logic with worker {sample_worker_id}:")
+        
+        # Parse worker allergies properly
+        raw_worker_allergies = sample_worker.get('workAllergies', [])
+        worker_allergies = raw_worker_allergies or []
+        if isinstance(worker_allergies, str):
+            if worker_allergies.startswith('{') and worker_allergies.endswith('}'):
+                worker_allergies = worker_allergies[1:-1].split(',') if len(worker_allergies) > 2 else []
+            else:
+                worker_allergies = [worker_allergies] if worker_allergies else []
+        
+        # Parse job allergens properly  
+        raw_job_allergens = sample_job.get('allergens', [])
+        job_allergens = raw_job_allergens or []
+        if isinstance(job_allergens, str):
+            if job_allergens.startswith('{') and job_allergens.endswith('}'):
+                job_allergens = job_allergens[1:-1].split(',') if len(job_allergens) > 2 else []
+            else:
+                job_allergens = [job_allergens] if job_allergens else []
+        
+        print(f"  Worker allergies (raw): {raw_worker_allergies}")
+        print(f"  Worker allergies (parsed): {worker_allergies}")
+        print(f"  Job allergens (raw): {raw_job_allergens}")
+        print(f"  Job allergens (parsed): {job_allergens}")
+        
+        worker_allergy_set = set(worker_allergies)
+        job_allergen_set = set(job_allergens)
+        is_disjoint = worker_allergy_set.isdisjoint(job_allergen_set)
+        print(f"  Worker allergy set: {worker_allergy_set}")
+        print(f"  Job allergen set: {job_allergen_set}")
+        print(f"  Are disjoint (no conflict): {is_disjoint}")
+        print(f"  Intersection (conflicts): {worker_allergy_set.intersection(job_allergen_set)}")
+        
+        # Test with multiple workers to see the pattern
+        print("\nTesting allergy logic with first 3 workers on this job:")
+        for i, worker_id in enumerate(list(workers.keys())[:3]):
+            worker = workers[worker_id]
+            worker_allergies = set(worker["workAllergies"] or [])
+            job_allergens = set(sample_job["allergens"] or [])
+            is_disjoint = worker_allergies.isdisjoint(job_allergens)
+            print(f"  Worker {i+1}: allergies={worker_allergies}, disjoint={is_disjoint}")
+    
+    if attempt > 0:
+        print("Area driver requirements:")
+        for area in areas:
+            print(f"  Area {area}: needs {areas[area]['requiredDrivers']} drivers")
+
     status = model.solve()
     if status == -1:
+        print(f"SOLVER FAILED - Status: {status}")
+        print("Possible causes:")
+        print("1. Not enough workers for job minimum requirements")
+        print("2. Insufficient strong workers or drivers")
+        print("3. Too many forbidden combinations")
+        print("4. Conflicting area driver requirements")
+        print("5. Allergy conflicts eliminating too many assignments")
         if attempt >= 2:
-            print("fail")
+            print("Maximum retry attempts reached - giving up")
             return
         else:
+            print(f"Retrying with attempt {attempt + 1}...")
             generate_plan(plan_id, connection, first_round, attempt + 1)
             return
+    else:
+        print(f"SOLVER SUCCESS - Status: {status}")
+        print("="*50)
 
     res_dict = {}
     model_variables.apply(lambda v: what_workers(v, res_dict), axis=1)
@@ -164,18 +342,22 @@ def generate_rides(received_plan_id, connection):
     jobs = load(dict_cursor, received_plan_id, select_drive_jobs)
     for job in jobs:
         drivers = load(dict_cursor, job, select_driver)
-        people = list(load(dict_cursor, job, select_people).keys()) + list(drivers.keys())
+        people = list(load(dict_cursor, job, select_people).keys())
+        
+        # Remove drivers from people list to avoid double counting
+        for driver_id in drivers.keys():
+            if driver_id in people:
+                people.remove(driver_id)
+        
         people_pointer = 0
         for driver in drivers:
-            if not people:
-                break
-            people.remove(driver)
             ride = uuid.uuid4()
             dict_cursor.execute(insert_ride, {"uuid": ride, "driver": driver, "car": drivers[driver]["carId"], "job": job})
             connection.commit()
             seats = drivers[driver]["seats"]
-            dict_cursor.execute(insert_rider, {"ride": ride, "worker": driver})
-            seats -= 1
+            # Don't add the driver as a rider - they're already the driver
+            # dict_cursor.execute(insert_rider, {"ride": ride, "worker": driver})
+            seats -= 1  # Driver
             while seats > 0 and people_pointer < len(people):
                 dict_cursor.execute(insert_rider, {"ride": ride, "worker": people[people_pointer]})
                 people_pointer += 1
@@ -184,6 +366,7 @@ def generate_rides(received_plan_id, connection):
 
 def generate_plan_from_message(received_plan_id):
     connection = psycopg2.connect(DATABASE_URL, options="-c search_path=public")
-    # generate_rides(received_plan_id, connection)
     generate_plan(received_plan_id, connection)
     generate_plan(received_plan_id, connection, False)
+    generate_rides(received_plan_id, connection)
+    print("Plan generation completed. Listening for the next messages...")
