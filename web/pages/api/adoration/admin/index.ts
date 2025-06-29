@@ -4,7 +4,7 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { Permission } from 'lib/types/auth'
 
 export default APIAccessController(
-  [Permission.ADMIN],
+  [Permission.ADMIN, Permission.ADORATION],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
