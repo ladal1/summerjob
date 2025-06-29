@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { signUpForAdorationSlot } from 'lib/data/adoration'
 
 export default APIAccessController(
-  [Permission.ADMIN],
+  [Permission.ADMIN, Permission.ADORATION],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,

@@ -5,7 +5,7 @@ import { logoutFromAdorationSlot } from 'lib/data/adoration'
 import { ExtendedSession } from 'lib/types/auth'
 
 export default APIAccessController(
-  [Permission.ADORATION],
+  [Permission.ADMIN, Permission.ADORATION],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,

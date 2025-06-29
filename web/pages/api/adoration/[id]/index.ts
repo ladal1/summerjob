@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from 'lib/prisma/connection'
 
 export default APIAccessController(
-  [Permission.ADMIN],
+  [Permission.ADMIN, Permission.ADORATION],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,

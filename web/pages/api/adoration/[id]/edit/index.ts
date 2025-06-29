@@ -12,7 +12,7 @@ const EditAdorationSlotSchema = z.object({
 })
 
 export default APIAccessController(
-  [Permission.ADMIN],
+  [Permission.ADMIN, Permission.ADORATION],
   async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'PATCH') {
       return res.status(405).json({ message: 'Method not allowed' })
