@@ -17,6 +17,10 @@ def on_message(ch, method, properties, body):
     try:
         message = json.loads(body)
         plan_id = message.get("planId")
+        if plan_id is None:
+            print("Missing 'planId' in message")
+            ch.basic_nack(delivery_tag=method.delivery_tag)
+            return
     except (ValueError, json.JSONDecodeError):
         print("Invalid message format")
         ch.basic_nack(delivery_tag=method.delivery_tag)
