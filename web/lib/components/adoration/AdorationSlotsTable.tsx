@@ -10,7 +10,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 interface Props {
   eventId: string
-  initialDate: string
   eventStart: string
   eventEnd: string
 }
@@ -23,17 +22,10 @@ export default function AdorationSlotsTable({
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const computeInitialDate = () => {
-    const urlDate = searchParams?.get('date')
-    if (urlDate) return urlDate
+  const [selectedDate, setSelectedDate] = useState<string | null>(() => {
+    return searchParams?.get('date') || null
+  })
 
-    const today = new Date()
-    const start = new Date(eventStart)
-
-    return today < start ? eventStart : today.toISOString().slice(0, 10)
-  }
-
-  const [selectedDate, setSelectedDate] = useState(computeInitialDate)
   const {
     data: allSlots = [],
     isLoading,
@@ -44,9 +36,19 @@ export default function AdorationSlotsTable({
   const slots = allSlots.filter(slot => slot.workerCount < slot.capacity || slot.isUserSignedUp)
   const [signuping, setSignuping] = useState<string | null>(null)
 
+  // When data loads and we have no explicit date, set the date based on the first slot
   useEffect(() => {
-    const params = new URLSearchParams({ date: selectedDate })
-    router.replace(`?${params.toString()}`, { scroll: false })
+    if (!selectedDate && slots.length > 0) {
+      const firstSlotDate = slots[0].localDateStart.toISOString().slice(0, 10)
+      setSelectedDate(firstSlotDate)
+    }
+  }, [selectedDate, slots])
+
+  useEffect(() => {
+    if (selectedDate) {
+      const params = new URLSearchParams({ date: selectedDate })
+      router.replace(`?${params.toString()}`, { scroll: false })
+    }
   }, [selectedDate, router])
 
   const handleSignup = async (slotId: string) => {
@@ -74,7 +76,7 @@ export default function AdorationSlotsTable({
             type="date"
             className="form-control form-control-sm"
             style={{ width: '160px' }}
-            value={selectedDate}
+            value={selectedDate || ''}
             onChange={e => setSelectedDate(e.target.value)}
             min={eventStart}
             max={eventEnd}

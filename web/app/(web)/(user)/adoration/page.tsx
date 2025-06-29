@@ -10,14 +10,13 @@ export default async function AdorationPageServer() {
     return <p className="text-center mt-5 font-semibold">Žádný aktivní ročník</p>
   }
 
-  const today = new Date().toISOString().slice(0, 10)
   const eventStart = event.startDate.toISOString().slice(0, 10)
   const eventEnd = event.endDate.toISOString().slice(0, 10)
 
   return (
     <div className="container mt-4">
       <h2>Adorace</h2>
-      <AdorationSlotsTable initialDate={today} eventId={event.id} eventStart={eventStart} eventEnd={eventEnd} />
+      <AdorationSlotsTable eventId={event.id} eventStart={eventStart} eventEnd={eventEnd} />
     </div>
   )
 }
