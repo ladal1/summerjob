@@ -1,19 +1,36 @@
 // lib/data/adoration.ts
 import prisma from 'lib/prisma/connection'
 import type { PrismaTransactionClient } from 'lib/types/prisma'
+import { startOfDay, endOfDay, addDays, format } from 'date-fns'
+import { fromZonedTime } from 'date-fns-tz'
+
+// CEST timezone identifier
+const CEST_TZ = 'Europe/Prague'
+
+// Utility functions for timezone conversions
+function cestDateToUtc(date: Date): { startUTC: Date; endUTC: Date } {
+  // Convert CEST date to start and end of day in UTC
+  const cestStart = startOfDay(date)
+  const cestEnd = endOfDay(date)
+  
+  return {
+    startUTC: fromZonedTime(cestStart, CEST_TZ),
+    endUTC: fromZonedTime(cestEnd, CEST_TZ)
+  }
+}
+
+function createSlotTimeUtc(date: Date, hour: number, minute: number): Date {
+  // Create a CEST time and convert to UTC
+  const cestTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, minute, 0, 0)
+  return fromZonedTime(cestTime, CEST_TZ)
+}
 
 export async function getAdorationSlotsForDayAdmin(
   eventId: string,
   date: Date,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  // Convert local date (+2 timezone) to UTC for database query
-  // The input date is in local timezone, but database stores UTC timestamps
-  const startUTC = new Date(date)
-  startUTC.setHours(0, 0, 0, 0)
-  
-  const endUTC = new Date(date)
-  endUTC.setHours(23, 59, 59, 999)
+  const { startUTC, endUTC } = cestDateToUtc(date)
 
   return prismaClient.adorationSlot.findMany({
     where: {
@@ -43,13 +60,7 @@ export async function getAdorationSlotsForDayUser(
   userId: string,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  // Convert local date (+2 timezone) to UTC for database query
-  // The input date is in local timezone, but database stores UTC timestamps
-  const startUTC = new Date(date)
-  startUTC.setHours(0, 0, 0, 0)
-  
-  const endUTC = new Date(date)
-  endUTC.setHours(23, 59, 59, 999)
+  const { startUTC, endUTC } = cestDateToUtc(date)
   
   const all = await prismaClient.adorationSlot.findMany({
     where: {
@@ -127,11 +138,6 @@ export async function createAdorationSlotsBulk(
     capacity: number
   }[] = []
 
-  // Create local date objects to avoid timezone issues
-  const startDate = new Date(dateFrom.getFullYear(), dateFrom.getMonth(), dateFrom.getDate())
-  const endDate = new Date(dateTo.getFullYear(), dateTo.getMonth(), dateTo.getDate())
-  const currentDate = new Date(startDate)
-
   // Calculate total start and end minutes
   const startTotalMinutes = fromHour * 60 + fromMinute
   const endTotalMinutes = toHour * 60 + toMinute
@@ -139,7 +145,9 @@ export async function createAdorationSlotsBulk(
   // Check if this is a cross-day time range (e.g., 23:00 to 07:00)
   const isCrossDay = startTotalMinutes >= endTotalMinutes
 
-  while (currentDate <= endDate) {
+  let currentDate = new Date(dateFrom)
+  
+  while (currentDate <= dateTo) {
     if (isCrossDay) {
       // Handle cross-day time range (e.g., 23:00 to 07:00 next day)
       
@@ -148,11 +156,9 @@ export async function createAdorationSlotsBulk(
         const hour = Math.floor(totalMinutes / 60)
         const minute = totalMinutes % 60
 
-        // Skip if we've gone past 23:59
         if (hour >= 24) break
 
-        const slotStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hour, minute, 0, 0)
-
+        const slotStart = createSlotTimeUtc(currentDate, hour, minute)
         data.push({
           dateStart: slotStart,
           length,
@@ -163,18 +169,15 @@ export async function createAdorationSlotsBulk(
       }
 
       // Second part: from start of next day (00:00) to end time
-      // Only create these slots if we're not on the last day or if the last day allows next day slots
-      const nextDay = new Date(currentDate)
-      nextDay.setDate(nextDay.getDate() + 1)
+      const nextDay = addDays(currentDate, 1)
       
       // Only create next day slots if the next day is within the date range or it's not the last day
-      if (nextDay <= endDate || currentDate < endDate) {
+      if (nextDay <= dateTo || currentDate < dateTo) {
         for (let totalMinutes = 0; totalMinutes < endTotalMinutes; totalMinutes += length) {
           const hour = Math.floor(totalMinutes / 60)
           const minute = totalMinutes % 60
 
-          const slotStart = new Date(nextDay.getFullYear(), nextDay.getMonth(), nextDay.getDate(), hour, minute, 0, 0)
-
+          const slotStart = createSlotTimeUtc(nextDay, hour, minute)
           data.push({
             dateStart: slotStart,
             length,
@@ -190,11 +193,9 @@ export async function createAdorationSlotsBulk(
         const hour = Math.floor(totalMinutes / 60)
         const minute = totalMinutes % 60
 
-        // Skip if we've gone past 23:59
         if (hour >= 24) break
 
-        const slotStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hour, minute, 0, 0)
-
+        const slotStart = createSlotTimeUtc(currentDate, hour, minute)
         data.push({
           dateStart: slotStart,
           length,
@@ -205,7 +206,7 @@ export async function createAdorationSlotsBulk(
       }
     }
 
-    currentDate.setDate(currentDate.getDate() + 1)
+    currentDate = addDays(currentDate, 1)
   }
 
   return prismaClient.adorationSlot.createMany({ data })
@@ -231,11 +232,7 @@ export async function getWorkerAdorationSlotsForDay(
   date: Date,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  const start = new Date(date)
-  start.setHours(0, 0, 0, 0)
-
-  const end = new Date(date)
-  end.setHours(23, 59, 59, 999)
+  const { startUTC: start, endUTC: end } = cestDateToUtc(date)
 
   return prismaClient.adorationSlot.findMany({
     where: {
@@ -272,9 +269,7 @@ export async function findNearestDateWithAdorationSlots(
   fromDate: Date,
   prismaClient: PrismaTransactionClient = prisma
 ): Promise<string | null> {
-  // Set the start time to beginning of the day
-  const startDate = new Date(fromDate)
-  startDate.setHours(0, 0, 0, 0)
+  const { startUTC: startDate } = cestDateToUtc(fromDate)
 
   // Find the earliest slot from the given date onwards
   const nearestSlot = await prismaClient.adorationSlot.findFirst({
@@ -292,5 +287,5 @@ export async function findNearestDateWithAdorationSlots(
     },
   })
 
-  return nearestSlot ? nearestSlot.dateStart.toISOString().slice(0, 10) : null
+  return nearestSlot ? format(nearestSlot.dateStart, 'yyyy-MM-dd') : null
 }

@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "TZ=UTC next dev",
     "build": "npx prisma generate && next build",
-    "start": "next start",
+    "start": "TZ=UTC next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "seed-mini": "ts-node --skip-project prisma/seed.ts mini",

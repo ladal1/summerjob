@@ -9,6 +9,7 @@ services:
       - webserver
       # - additional networks for reverse proxy or specify open ports below
     environment:
+      - TZ=UTC
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@summerjob-db:5432/${POSTGRES_DB}?schema=public
       - EMAIL_SERVER=${EMAIL_SERVER}
       - EMAIL_FROM=${EMAIL_FROM}
