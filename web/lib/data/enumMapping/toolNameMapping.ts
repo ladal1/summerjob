@@ -27,4 +27,6 @@ export const toolNameMapping: EnumMapping<keyof typeof ToolName> = {
   RAKE: 'Hrabě',
   SHOVEL: 'Lopata',
   PITCHFORK: 'Vidle',
+  HEDGE_TRIMMER: 'Plotostřih',
+  STRING_TRIMMER: 'Strunová sekačka',
 }
