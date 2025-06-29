@@ -102,6 +102,47 @@ export async function getAdorationSlotsForDayUser(
     })
 }
 
+export async function getAllAdorationSlotsForEventUser(
+  eventId: string,
+  userId: string,
+  prismaClient: PrismaTransactionClient = prisma
+) {
+  const all = await prismaClient.adorationSlot.findMany({
+    where: {
+      eventId,
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      dateStart: 'asc',
+    },
+  })
+
+  return all
+    .filter(slot => {
+      const isUserSignedUp = slot.workers.some(w => w.id === userId)
+      const hasFreeCapacity = slot.workers.length < slot.capacity
+      return isUserSignedUp || hasFreeCapacity
+    })
+    .map(slot => {
+      const isUserSignedUp = slot.workers.some(w => w.id === userId)
+      return {
+        id: slot.id,
+        dateStart: slot.dateStart,
+        location: slot.location,
+        capacity: slot.capacity,
+        length: slot.length,
+        workerCount: slot.workers.length,
+        isUserSignedUp,
+      }
+    })
+}
+
 export async function signUpForAdorationSlot(
   slotId: string,
   workerId: string,

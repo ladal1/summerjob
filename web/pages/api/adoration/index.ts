@@ -1,6 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAdorationSlotsForDayUser, findNearestDateWithAdorationSlots } from 'lib/data/adoration'
+import { getAdorationSlotsForDayUser, getAllAdorationSlotsForEventUser } from 'lib/data/adoration'
 import { ExtendedSession } from 'lib/types/auth'
 
 export default APIAccessController(
@@ -17,24 +17,15 @@ export default APIAccessController(
       return res.status(400).json({ message: 'Chybí eventId nebo přihlášený uživatel.' })
     }
 
-    let targetDate: Date
-
     if (dateParam) {
-      targetDate = new Date(dateParam)
+      // If date is provided, return slots for that specific day
+      const targetDate = new Date(dateParam)
+      const slots = await getAdorationSlotsForDayUser(eventId, targetDate, session.userID)
+      return res.status(200).json(slots)
     } else {
-      // If no date provided, find the nearest date with adoration slots
-      const today = new Date()
-      const nearestDateStr = await findNearestDateWithAdorationSlots(eventId, today)
-      
-      if (!nearestDateStr) {
-        return res.status(200).json([]) // No slots found
-      }
-      
-      targetDate = new Date(nearestDateStr)
+      // If no date provided, return all slots for the event
+      const slots = await getAllAdorationSlotsForEventUser(eventId, session.userID)
+      return res.status(200).json(slots)
     }
-
-    const slots = await getAdorationSlotsForDayUser(eventId, targetDate, session.userID)
-
-    res.status(200).json(slots)
   }
 )

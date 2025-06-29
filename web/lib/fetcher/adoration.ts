@@ -100,35 +100,64 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
   return { ...res, data: [] }
 }
 
-  export function useAPIAdorationSlotsUser(date: string | null, eventId: string): {
-    data: FrontendAdorationSlot[]
-    isLoading: boolean
-    error?: unknown
-    mutate: () => void
-  } {
-    const dateParam = date ? `date=${date}&` : ''
-    const res = useData<APIAdorationSlotUser[]>(`/api/adoration?${dateParam}eventId=${eventId}`)
+export function useAPIAdorationSlotsUser(date: string | null, eventId: string): {
+  data: FrontendAdorationSlot[]
+  isLoading: boolean
+  error?: unknown
+  mutate: () => void
+} {
+  const dateParam = date ? `date=${date}&` : ''
+  const res = useData<APIAdorationSlotUser[]>(`/api/adoration?${dateParam}eventId=${eventId}`)
   
-    if (Array.isArray(res.data)) {
-      const transformed: FrontendAdorationSlot[] = res.data.map((slot: APIAdorationSlotUser) => {
-        const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
-        return {
-          id: slot.id,
-          localDateStart: zonedDate,
-          location: slot.location,
-          capacity: slot.capacity,
-          length: slot.length,
-          workerCount: slot.workerCount,
-          workers: [],
-          isUserSignedUp: slot.isUserSignedUp,
-        }
-      })
+  if (Array.isArray(res.data)) {
+    const transformed: FrontendAdorationSlot[] = res.data.map((slot: APIAdorationSlotUser) => {
+      const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
+      return {
+        id: slot.id,
+        localDateStart: zonedDate,
+        location: slot.location,
+        capacity: slot.capacity,
+        length: slot.length,
+        workerCount: slot.workerCount,
+        workers: [],
+        isUserSignedUp: slot.isUserSignedUp,
+      }
+    })
   
-      return { ...res, data: transformed }
-    }
-  
-    return { ...res, data: [] }
+    return { ...res, data: transformed }
   }
+  
+  return { ...res, data: [] }
+}
+
+export function useAPIAdorationSlotsAllUser(eventId: string): {
+  data: FrontendAdorationSlot[]
+  isLoading: boolean
+  error?: unknown
+  mutate: () => void
+} {
+  const res = useData<APIAdorationSlotUser[]>(`/api/adoration?eventId=${eventId}`)
+
+  if (Array.isArray(res.data)) {
+    const transformed: FrontendAdorationSlot[] = res.data.map((slot: APIAdorationSlotUser) => {
+      const zonedDate = toZonedTime(slot.dateStart, 'Europe/Prague')
+      return {
+        id: slot.id,
+        localDateStart: zonedDate,
+        location: slot.location,
+        capacity: slot.capacity,
+        length: slot.length,
+        workerCount: slot.workerCount,
+        workers: [],
+        isUserSignedUp: slot.isUserSignedUp,
+      }
+    })
+
+    return { ...res, data: transformed }
+  }
+
+  return { ...res, data: [] }
+}
 
 export async function apiAdorationLogout(slotId: string) {
   const res = await fetch(`/api/adoration/${slotId}/logout`, {
