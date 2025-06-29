@@ -180,7 +180,7 @@ export default function CreateWorker({
             mandatory
           />
           <div className="d-flex flex-row flex-wrap">
-            <div className="me-5" style={{ width: '300px' }}>
+            <div className="me-5 width-300">
               <DateSelectionInput
                 id="availability.workDays"
                 label="Pracovní dostupnost"
