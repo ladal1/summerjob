@@ -176,7 +176,7 @@ function formatWorkerData(
           {worker.isStrong && (
             <i className="fas fa-dumbbell me-2" title={'Silák'} />
           )}
-          {hasWorkerAdorationOnDay(worker.id, planDay, adorationByWorker) && (
+          {hasWorkerAdorationOnDay(worker.id, adorationByWorker) && (
             <i className="fa fa-church" title={'Adoruje'} />
           )}
         </>

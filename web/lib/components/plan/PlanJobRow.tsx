@@ -485,7 +485,7 @@ function formatWorkerData(
   }`
   const abilities = []
   const isDriver = job?.rides.map(r => r.driverId).includes(worker.id) || false
-  const wantsAdoration = hasWorkerAdorationOnDay(worker.id, day, adorationByWorker)
+  const wantsAdoration = hasWorkerAdorationOnDay(worker.id, adorationByWorker)
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')

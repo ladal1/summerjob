@@ -203,7 +203,7 @@ function adorations(job: ActiveJobNoPlan, day: Date, adorationByWorker: Map<stri
     return false
   }
   for (const worker of job.workers) {
-    if (hasWorkerAdorationOnDay(worker.id, day, adorationByWorker)) {
+    if (hasWorkerAdorationOnDay(worker.id, adorationByWorker)) {
       return true
     }
   }
