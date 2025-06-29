@@ -1,11 +1,10 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
-import { Permission } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getAdorationSlotsForDayUser, findNearestDateWithAdorationSlots } from 'lib/data/adoration'
 import { ExtendedSession } from 'lib/types/auth'
 
 export default APIAccessController(
-  [Permission.ADORATION],
+  [],
   async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
