@@ -2,7 +2,7 @@ import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import PostsClientPage from 'lib/components/post/PostsClientPage'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
-import { getPosts } from 'lib/data/posts'
+import { getPostsWithAdorationFlag } from 'lib/data/posts'
 import { Permission } from 'lib/types/auth'
 import { serializePosts } from 'lib/types/post'
 
@@ -13,7 +13,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function PostsPage() {
-  const posts = await getPosts()
+  const { posts } = await getPostsWithAdorationFlag()
   const sPosts = serializePosts(posts)
 
   const isAdvancedAccessAllowed = await withPermissions([Permission.POSTS])

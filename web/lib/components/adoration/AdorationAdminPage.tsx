@@ -261,6 +261,8 @@ export default function AdminAdorationManager({ event }: Props) {
                       </button>
                     </div>
                   </td>
+                  <td>{`${slot.workerCount} / ${slot.capacity}`}</td>
+                  <td>{slot.length} min</td>
                 </tr>
               ))}
             </tbody>

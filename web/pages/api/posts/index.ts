@@ -3,21 +3,21 @@ import { generateFileName, getPostsUploadDir } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { createPost, getPosts } from 'lib/data/posts'
+import { createPost, getPostsWithAdorationFlag } from 'lib/data/posts'
 import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { PostCreateSchema } from 'lib/types/post'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-export type PostsAPIGetResponse = Awaited<ReturnType<typeof getPosts>>
+export type PostsAPIGetResponse = Awaited<ReturnType<typeof getPostsWithAdorationFlag>>
 async function get(
   _req: NextApiRequest,
   res: NextApiResponse<PostsAPIGetResponse>
 ) {
-  const posts = await getPosts()
+  const { posts, hasAdoration } = await getPostsWithAdorationFlag()
   posts.map(post => post.availability.map(a => new Date(a)))
-  res.status(200).json(posts)
+  res.status(200).json({ posts, hasAdoration })
 }
 
 async function post(

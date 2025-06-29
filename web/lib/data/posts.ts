@@ -13,36 +13,35 @@ import { PrismaTransactionClient } from 'lib/types/prisma'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import path from 'path'
+import { existsAdorationSlot } from './adoration'
 
-export async function getPosts(): Promise<PostComplete[]> {
-  const posts = await prisma.post.findMany({
-    where: {
-      forEvent: { isActive: true },
-    },
-    include: {
-      participants: {
-        select: {
-          workerId: true,
-          worker: {
-            select: {
-              firstName: true,
-              lastName: true,
+export async function getPostsWithAdorationFlag(): Promise<{
+  posts: PostComplete[]
+  hasAdoration: boolean
+}> {
+  const [posts, hasAdoration] = await Promise.all([
+    prisma.post.findMany({
+      where: { forEvent: { isActive: true } },
+      include: {
+        participants: {
+          select: {
+            workerId: true,
+            worker: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: [
-      {
-        availability: 'asc',
-      },
-      {
-        timeFrom: 'asc',
-      },
-    ],
-  })
-  return posts
+      orderBy: [{ availability: 'asc' }, { timeFrom: 'asc' }],
+    }),
+    existsAdorationSlot(),
+  ])
+  return { posts, hasAdoration }
 }
+
 
 export async function getPostById(id: string): Promise<PostComplete | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()

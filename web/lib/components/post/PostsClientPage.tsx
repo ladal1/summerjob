@@ -28,6 +28,7 @@ import { Sort, SortObject, SortPostsBy } from './SortPostsBy'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { FilterPostsBy } from './FilterPostsBy'
 import { PostTag } from 'lib/prisma/client'
+import AdorationBox from '../adoration/AdorationBox'
 
 const sorts: Sort[] = [
   {
@@ -100,6 +101,8 @@ export default function PostsClientPage({
   const { data, error, mutate } = useAPIPosts({
     fallbackData: inititalPosts,
   })
+
+  const hasAdoration = data?.hasAdoration ?? false
 
   const firstDay = new Date(startDate)
   const lastDay = new Date(endDate)
@@ -311,9 +314,10 @@ export default function PostsClientPage({
     tags,
     showAll,
   ])
+  const posts = useMemo(() => data?.posts ?? [], [data?.posts])
 
   const [pinnedPosts, otherPosts] = useMemo(() => {
-    const { pinned, other } = (data ?? [])
+    const { pinned, other } = (posts ?? [])
       .map(item => deserializePostsDates(item))
       .reduce(
         (acc, post) => {
@@ -331,7 +335,7 @@ export default function PostsClientPage({
       )
 
     return [pinned, other]
-  }, [data])
+  }, [posts])
 
   const fulltextData = useMemo(() => getFulltextData(otherPosts), [otherPosts])
 
@@ -449,6 +453,11 @@ export default function PostsClientPage({
         <div className="row">
           <div className="col-lg-4">
             <PostType title="Obecné">
+              {hasAdoration && (
+                <div className="pb-1">
+                  <AdorationBox />
+                </div>
+              )}
               {regularPosts.map((item, index) => (
                 <div key={index} className="pb-1">
                   <PostBubble

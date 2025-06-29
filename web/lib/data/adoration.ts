@@ -201,3 +201,7 @@ export async function getWorkerAdorationSlotsForDay(
     orderBy: { dateStart: 'asc' },
   })
 }
+export async function existsAdorationSlot(): Promise<boolean> {
+  const count = await prisma.adorationSlot.count()
+  return count > 0
+}
