@@ -100,13 +100,14 @@ export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
   return { ...res, data: [] }
 }
 
-  export function useAPIAdorationSlotsUser(date: string, eventId: string): {
+  export function useAPIAdorationSlotsUser(date: string | null, eventId: string): {
     data: FrontendAdorationSlot[]
     isLoading: boolean
     error?: unknown
     mutate: () => void
   } {
-    const res = useData<APIAdorationSlotUser[]>(`/api/adoration?date=${date}&eventId=${eventId}`)
+    const dateParam = date ? `date=${date}&` : ''
+    const res = useData<APIAdorationSlotUser[]>(`/api/adoration?${dateParam}eventId=${eventId}`)
   
     if (Array.isArray(res.data)) {
       const transformed: FrontendAdorationSlot[] = res.data.map((slot: APIAdorationSlotUser) => {
@@ -174,4 +175,19 @@ export async function apiAdorationUnassignWorker(slotId: string, workerId: strin
   }
 
   return await res.json()
+}
+
+export async function apiGetNearestDateWithAdorationSlots(
+  eventId: string,
+  fromDate: string
+): Promise<string | null> {
+  const res = await fetch(`/api/adoration/nearest-date?eventId=${eventId}&fromDate=${fromDate}`)
+  
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.message || 'Chyba při hledání nejbližšího data s adoračními sloty.')
+  }
+
+  const data = await res.json()
+  return data.nearestDate
 }

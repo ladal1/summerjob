@@ -85,13 +85,28 @@ export default function AdminCreateAdorationModal({
       const [fromHour, fromMinute] = fromTime.split(':').map(Number)
       const [toHour, toMinute] = toTime.split(':').map(Number)
 
-      // Validate time range
+      // Calculate total minutes for validation
       const fromTotalMinutes = fromHour * 60 + fromMinute
       const toTotalMinutes = toHour * 60 + toMinute
-      if (fromTotalMinutes >= toTotalMinutes) {
-        alert('Čas "Od" musí být dříve než čas "Do"')
+
+      // Validate that times are different
+      if (fromTotalMinutes === toTotalMinutes) {
+        alert('Čas "Od" a "Do" nemohou být stejné')
         setLoading(false)
         return
+      }
+
+      // Check if this is a cross-day range and warn user
+      if (fromTotalMinutes > toTotalMinutes) {
+        const confirmCrossDay = confirm(
+          `Vytváříte sloty přes půlnoc (${fromTime} - ${toTime}). ` +
+          'Sloty budou vytvořeny od startovního času do konce dne a od začátku dalšího dne do koncového času. ' +
+          'Pokračovat?'
+        )
+        if (!confirmCrossDay) {
+          setLoading(false)
+          return
+        }
       }
 
       await createBulk({
@@ -173,7 +188,7 @@ export default function AdminCreateAdorationModal({
               pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
               onChange={e => setToTime(e.target.value)}
             />
-            <div className="form-text">Formát: 24h (např. 17:15)</div>
+            <div className="form-text">Formát: 24h (např. 17:15 nebo 07:00 pro přes půlnoc)</div>
           </div>
           <div className="col-md-3">
             <label className="form-label fw-bold">Délka slotu</label>
