@@ -12,8 +12,6 @@ import type { FrontendAdorationSlot } from 'lib/types/adoration'
 
 interface Props {
   eventId: string
-  eventStart: string
-  eventEnd: string
 }
 
 export default function AdorationSlotsTable({
@@ -113,10 +111,10 @@ export default function AdorationSlotsTable({
               <table className="table table-bordered table-sm">
                 <thead className="table-primary">
                   <tr>
-                    <th style={{ width: '120px' }} className="text-center d-none d-md-table-cell">Čas</th>
+                    <th style={{ width: '90px' }} className="text-center d-none d-md-table-cell">Čas</th>
                     <th style={{ width: '60px' }} className="text-center d-md-none">Čas</th>
                     <th style={{ width: '200px' }}>Místo</th>
-                    <th style={{ width: '180px' }}>Akce</th>
+                    <th style={{ width: '80px' }} className="text-center">Akce</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -133,7 +131,7 @@ export default function AdorationSlotsTable({
                           {startTimeStr}<br/>-<br/>{endTimeStr}
                         </td>
                         <td>{slot.location}</td>
-                        <td>
+                        <td className="text-center">
                           {slot.isUserSignedUp ? (
                             <span className="badge bg-success">Přihlášen ({slot.workerCount}/{slot.capacity})</span>
                           ) : (

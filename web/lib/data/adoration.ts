@@ -107,9 +107,15 @@ export async function getAllAdorationSlotsForEventUser(
   userId: string,
   prismaClient: PrismaTransactionClient = prisma
 ) {
-  const all = await prismaClient.adorationSlot.findMany({
+  // Get slots where user is signed up
+  const userSlots = await prismaClient.adorationSlot.findMany({
     where: {
       eventId,
+      workers: {
+        some: {
+          id: userId,
+        },
+      },
     },
     include: {
       workers: {
@@ -118,17 +124,41 @@ export async function getAllAdorationSlotsForEventUser(
         },
       },
     },
-    orderBy: {
-      dateStart: 'asc',
+  })
+
+  // Get slots with available capacity
+  const availableSlots = await prismaClient.adorationSlot.findMany({
+    where: {
+      eventId,
+      workers: {
+        none: {
+          id: userId,
+        },
+      },
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+        },
+      },
     },
   })
 
-  return all
-    .filter(slot => {
-      const isUserSignedUp = slot.workers.some(w => w.id === userId)
-      const hasFreeCapacity = slot.workers.length < slot.capacity
-      return isUserSignedUp || hasFreeCapacity
-    })
+  // Filter available slots to only those with free capacity
+  const filteredAvailableSlots = availableSlots.filter(
+    slot => slot.workers.length < slot.capacity
+  )
+
+  // Combine and deduplicate
+  const allSlots = [...userSlots, ...filteredAvailableSlots]
+  const uniqueSlots = allSlots.filter(
+    (slot, index, self) => index === self.findIndex(s => s.id === slot.id)
+  )
+
+  // Sort by date and map to desired format
+  return uniqueSlots
+    .sort((a, b) => a.dateStart.getTime() - b.dateStart.getTime())
     .map(slot => {
       const isUserSignedUp = slot.workers.some(w => w.id === userId)
       return {
