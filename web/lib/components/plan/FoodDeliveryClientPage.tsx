@@ -128,6 +128,7 @@ export default function FoodDeliveryClientPage({
   const [saveMessageType, setSaveMessageType] = useState<'success' | 'error'>('success')
   const [isOperationLoading, setIsOperationLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isAssigningJobs, setIsAssigningJobs] = useState(false) // New state to track when actively assigning jobs
   
   // Track last saved state to prevent unnecessary saves
   const lastSavedStateRef = useRef<string>('')
@@ -181,19 +182,25 @@ export default function FoodDeliveryClientPage({
 
   // Courier assignment functions
   const assignJobToCourier = useCallback((jobId: string, courierNumber: number) => {
+    setIsAssigningJobs(true)
     setJobCourierAssignments(prev => {
       const newMap = new Map(prev)
       newMap.set(jobId, courierNumber)
       return newMap
     })
+    // Reset the assigning flag after a short delay to allow multiple rapid assignments
+    setTimeout(() => setIsAssigningJobs(false), 500)
   }, [])
 
   const unassignJob = useCallback((jobId: string) => {
+    setIsAssigningJobs(true)
     setJobCourierAssignments(prev => {
       const newMap = new Map(prev)
       newMap.delete(jobId)
       return newMap
     })
+    // Reset the assigning flag after a short delay
+    setTimeout(() => setIsAssigningJobs(false), 500)
   }, [])
 
   // Clear all assignments
@@ -349,8 +356,8 @@ export default function FoodDeliveryClientPage({
 
   // Auto-save assignments whenever they change (debounced)
   useEffect(() => {
-    // Don't auto-save on initial load, when no data is available, or when currently saving
-    if (!planData || foodDeliveries === undefined || isSaving) return
+    // Don't auto-save on initial load, when no data is available, when currently saving, or when actively assigning jobs
+    if (!planData || foodDeliveries === undefined || isSaving || isAssigningJobs) return
     
     // Create a serialized representation of current assignments for comparison
     const currentStateString = JSON.stringify(
@@ -398,7 +405,14 @@ export default function FoodDeliveryClientPage({
       try {
         const assignmentsByDelivery = new Map<number, string[]>()
         
-        // Group jobs by courier
+        // First, initialize all existing couriers with empty arrays to preserve them
+        if (foodDeliveries) {
+          foodDeliveries.forEach(delivery => {
+            assignmentsByDelivery.set(delivery.courierNum, [])
+          })
+        }
+        
+        // Then, group jobs by courier (this will populate the arrays for couriers with jobs)
         jobCourierAssignments.forEach((courierNum, jobId) => {
           if (!assignmentsByDelivery.has(courierNum)) {
             assignmentsByDelivery.set(courierNum, [])
@@ -406,7 +420,7 @@ export default function FoodDeliveryClientPage({
           assignmentsByDelivery.get(courierNum)!.push(jobId)
         })
         
-        // Create delivery data for the bulk replace
+        // Create delivery data for the bulk replace - includes all couriers, even empty ones
         const deliveryData = Array.from(assignmentsByDelivery.entries()).map(([courierNum, jobIds]) => ({
           courierNum,
           planId,
@@ -417,10 +431,14 @@ export default function FoodDeliveryClientPage({
         }))
         
         await bulkReplaceFoodDeliveries(deliveryData)
-        mutateFoodDeliveries()
         
-        // Update the ref to track the saved state
+        // Update the ref to track the saved state BEFORE calling mutateFoodDeliveries
         lastSavedStateRef.current = currentStateString
+        
+        // Delay the data refresh to avoid immediate state conflicts
+        setTimeout(() => {
+          mutateFoodDeliveries()
+        }, 100)
         
         setSaveMessage('Přiřazení automaticky uloženo')
         setSaveMessageType('success')
@@ -438,10 +456,10 @@ export default function FoodDeliveryClientPage({
         setIsOperationLoading(false)
         setIsSaving(false)
       }
-    }, 1000) // 1 second debounce
+    }, 2500) // 2.5 second debounce - longer to allow multiple rapid assignments
     
     return () => clearTimeout(timeoutId)
-  }, [jobCourierAssignments, planData, foodDeliveries, isSaving, planId, bulkReplaceFoodDeliveries, mutateFoodDeliveries])
+  }, [jobCourierAssignments, planData, foodDeliveries, isSaving, isAssigningJobs, planId, bulkReplaceFoodDeliveries, mutateFoodDeliveries])
 
   // Group jobs by courier assignment
   const jobsByCourier = useMemo(() => {
@@ -900,9 +918,14 @@ export default function FoodDeliveryClientPage({
                                                         key={courierNumber}
                                                         className="btn btn-sm btn-outline-primary"
                                                         onClick={() => assignJobToCourier(job.id, courierNumber)}
+                                                        disabled={isSaving || isOperationLoading}
                                                         title={`Přiřadit rozvozníkovi ${courierNumber}`}
                                                       >
-                                                        {courierNumber}
+                                                        {isSaving ? (
+                                                          <i className="fas fa-spinner fa-spin"></i>
+                                                        ) : (
+                                                          courierNumber
+                                                        )}
                                                       </button>
                                                     ))}
                                                   </div>
@@ -1097,7 +1120,7 @@ export default function FoodDeliveryClientPage({
                                         {needsFoodDelivery && (
                                           <span className="badge bg-warning text-dark">
                                             <i className="fas fa-utensils me-1"></i>
-                                            Nemá jídlo na místě
+                                            Nemá jídlo na místě ({job.workers.length - workersWithAllergies.length} pracant{(job.workers.length - workersWithAllergies.length) === 1 ? '' : 'ů'})
                                           </span>
                                         )}
                                         {hasWorkersWithAllergies && (
@@ -1126,13 +1149,18 @@ export default function FoodDeliveryClientPage({
                                                     ? unassignJob(job.id)
                                                     : assignJobToCourier(job.id, courierNumber)
                                                 }
+                                                disabled={isSaving || isOperationLoading}
                                                 title={`${
                                                   jobCourierAssignments.get(job.id) === courierNumber 
                                                     ? 'Odebrat z' 
                                                     : 'Přiřadit'
                                                 } rozvozníka ${courierNumber}`}
                                               >
-                                                {courierNumber}
+                                                {isSaving && jobCourierAssignments.get(job.id) === courierNumber ? (
+                                                  <i className="fas fa-spinner fa-spin"></i>
+                                                ) : (
+                                                  courierNumber
+                                                )}
                                               </button>
                                             ))}
                                           </div>
