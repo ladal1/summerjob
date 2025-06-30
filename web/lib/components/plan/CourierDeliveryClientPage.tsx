@@ -225,7 +225,7 @@ export default function CourierDeliveryClientPage({
                               Mapa všech dodávek rozvozníka {courierNum}
                             </h5>
                           </div>
-                          <div className="card-body p-3" style={{ height: '460px', display: 'flex', flexDirection: 'column' }}>
+                          <div className="card-body p-3" style={{ height: 'calc(100% - 40px)', display: 'flex', flexDirection: 'column' }}>
                             <div style={{ flex: 1, width: '100%' }}>
                               {(() => {
                                 const jobOrder: { [jobId: string]: number } = {}
