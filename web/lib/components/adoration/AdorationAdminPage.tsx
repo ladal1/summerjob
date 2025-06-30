@@ -20,9 +20,10 @@ interface Props {
     startDate: string
     endDate: string
   }
+  canDeleteSlots: boolean
 }
 
-export default function AdminAdorationManager({ event }: Props) {
+export default function AdminAdorationManager({ event, canDeleteSlots }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -165,14 +166,16 @@ export default function AdminAdorationManager({ event }: Props) {
               <i className="fas fa-map-marker-alt me-1"></i>
               Změnit lokaci vybraným ({selectedIds.length})
             </button>
-            <button
-              className="btn btn-sm btn-outline-danger"
-              disabled={selectedIds.length === 0}
-              onClick={deleteSelectedSlots}
-            >
-              <i className="fas fa-trash me-1"></i>
-              Smazat vybrané ({selectedIds.length})
-            </button>
+            {canDeleteSlots && (
+              <button
+                className="btn btn-sm btn-outline-danger"
+                disabled={selectedIds.length === 0}
+                onClick={deleteSelectedSlots}
+              >
+                <i className="fas fa-trash me-1"></i>
+                Smazat vybrané ({selectedIds.length})
+              </button>
+            )}
             <button
               className="btn btn-sm btn-outline-success"
               onClick={() => setShowCreateModal(true)}
