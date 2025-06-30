@@ -18,6 +18,7 @@ import FormWarning from '../forms/FormWarning'
 
 interface AddJobToPlanFormProps {
   planId: string
+  planDate: Date
   onComplete: () => void
   workerId: string
 }
@@ -29,6 +30,7 @@ const ActiveJobCreateFormSchema = z.object({
 
 export default function AddJobToPlanForm({
   planId,
+  planDate,
   onComplete,
   workerId,
 }: AddJobToPlanFormProps) {
@@ -66,8 +68,8 @@ export default function AddJobToPlanForm({
       return a.name.localeCompare(b.name)
     })
 
-    return sorted.map<SelectItem>(job => jobToSelectItem(job, workerId))
-  }, [data, workerId])
+    return sorted.map<SelectItem>(job => jobToSelectItem(job, workerId, planDate))
+  }, [data, workerId, planDate])
 
   const itemToFormData = (item: SelectItem) => ({
     proposedJobId: item.id,
@@ -87,7 +89,7 @@ export default function AddJobToPlanForm({
         item: <></>,
       }
     }
-    return jobToSelectItem(job, workerId)
+    return jobToSelectItem(job, workerId, planDate)
   }
 
   const formatOptionLabel = (
@@ -170,10 +172,17 @@ export default function AddJobToPlanForm({
 function AddJobSelectItem({
   job,
   workerId,
+  planDate,
 }: {
   job: ProposedJobComplete
   workerId: string
+  planDate: Date
 }) {
+  // Filter availability to only include dates from the plan date onwards
+  const availableDaysFromPlanDate = job.availability.filter(
+    (day) => new Date(day) >= planDate
+  )
+
   return (
     <>
       <div className="text-wrap">
@@ -182,7 +191,7 @@ function AddJobSelectItem({
           <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
         )}
         {job.requiredDays - job.activeJobs.length >=
-          job.availability.length && (
+          availableDaysFromPlanDate.length && (
           <>
             <i className="ms-2 fas fa-triangle-exclamation smj-action-pinned" />
             <Issue>
@@ -211,7 +220,8 @@ function AddJobSelectItem({
 
 function jobToSelectItem(
   job: ProposedJobComplete,
-  workerId: string
+  workerId: string,
+  planDate: Date
 ): SelectItem {
   return {
     id: job.id,
@@ -224,7 +234,7 @@ function jobToSelectItem(
     ).toLocaleLowerCase(),
     publicDescription: job.publicDescription,
     privateDescription: job.privateDescription,
-    item: <AddJobSelectItem job={job} workerId={workerId} />,
+    item: <AddJobSelectItem job={job} workerId={workerId} planDate={planDate} />,
   }
 }
 
