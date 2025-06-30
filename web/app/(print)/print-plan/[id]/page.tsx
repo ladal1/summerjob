@@ -6,6 +6,8 @@ import { ActiveJobNoPlan } from 'lib/types/active-job'
 import Image from 'next/image'
 import logoImage from 'public/logo-smj-yellow.png'
 import React from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import '/styles/print.css'
 import { ToolCompleteData } from 'lib/types/tool'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
@@ -74,9 +76,11 @@ function JobInfo({
       <div className="job-data-col">
         <div className="w-50">
           <h2>{job.proposedJob.name}</h2>
-          <p style={{ whiteSpace: 'pre-wrap' }}>
-            {job.proposedJob.publicDescription}
-          </p>
+          <div className="markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {job.proposedJob.publicDescription}
+            </ReactMarkdown>
+          </div>
           <div className="mb-2" style={{ fontSize: '1.1em', fontWeight: 'bold', color: '#d63384' }}>
             <i className="fas fa-user-nurse me-1"></i>
             Zdravotník: 732 403 990

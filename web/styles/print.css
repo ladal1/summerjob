@@ -189,3 +189,118 @@ h2 {
 .text-break-word {
   word-break: break-word;
 }
+
+/* Markdown content styles for print */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.markdown-content p {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+.markdown-content u {
+  text-decoration: underline;
+}
+
+.markdown-content a {
+  color: #000;
+  text-decoration: underline;
+}
+
+.markdown-content a:hover {
+  color: #000;
+  text-decoration: none;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin-bottom: 0.5rem;
+  padding-left: 1.2rem;
+}
+
+.markdown-content ul li,
+.markdown-content ol li {
+  margin-bottom: 0.2rem;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.markdown-content h1:first-child,
+.markdown-content h2:first-child,
+.markdown-content h3:first-child,
+.markdown-content h4:first-child,
+.markdown-content h5:first-child,
+.markdown-content h6:first-child {
+  margin-top: 0;
+}
+
+.markdown-content blockquote {
+  margin: 0.5rem 0;
+  padding: 0.25rem 0.5rem;
+  border-left: 2px solid #666;
+  background-color: #f5f5f5;
+  font-style: italic;
+}
+
+.markdown-content code {
+  background-color: #f1f1f1;
+  padding: 0.1rem 0.2rem;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content pre {
+  background-color: #f1f1f1;
+  padding: 0.5rem;
+  border-radius: 3px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+  font-size: 0.85em;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.markdown-content table th,
+.markdown-content table td {
+  border: 1px solid #666;
+  padding: 0.2rem 0.3rem;
+  text-align: left;
+}
+
+.markdown-content table th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+}
