@@ -237,7 +237,7 @@ img.smj-nav-logo {
 
 .smj-sticky-col-top {
   position: sticky;
-  z-index: 500;
+  z-index: 1000;
   top: 0;
 }
 
@@ -245,14 +245,42 @@ img.smj-nav-logo {
   position: sticky;
   z-index: 501;
   right: 0;
+}
+
+/* Only show shadow when the table is horizontally scrollable */
+.table-responsive.is-scrollable .smj-sticky-col-right {
   box-shadow: -5px 0px 5px -3px var(--shadow) !important;
+}
+
+/* Ensure sticky columns have consistent background colors */
+.smj-sticky-col-right.smj-expandable-row {
+  background-color: #ececec !important;
+}
+
+.smj-expandable-row:hover .smj-sticky-col-right,
+.smj-sticky-col-right.smj-expandable-row:hover {
+  background-color: #dddddd !important;
 }
 
 .smj-sticky-col-left {
   position: sticky;
   z-index: 0;
   left: 0;
+}
+
+/* Only show shadow when the table is horizontally scrollable */
+.table-responsive.is-scrollable .smj-sticky-col-left {
   box-shadow: 5px 0px 5px -3px var(--shadow) !important;
+}
+
+/* Ensure sticky columns have consistent background colors */
+.smj-sticky-col-left.smj-expandable-row {
+  background-color: #ececec !important;
+}
+
+.smj-expandable-row:hover .smj-sticky-col-left,
+.smj-sticky-col-left.smj-expandable-row:hover {
+  background-color: #dddddd !important;
 }
 
 .smj-light-grey {

@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react'
+import { CSSProperties, useRef, useEffect } from 'react'
 
 export interface SortableColumn {
   id: string
@@ -27,6 +27,30 @@ export function SortableTable({
   currentSort,
   onRequestedSort,
 }: SortableTableProps) {
+  const tableContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const checkScrollable = () => {
+      const container = tableContainerRef.current
+      if (container) {
+        const isScrollable = container.scrollWidth > container.clientWidth
+        if (isScrollable) {
+          container.classList.add('is-scrollable')
+        } else {
+          container.classList.remove('is-scrollable')
+        }
+      }
+    }
+
+    // Check on mount and when window resizes
+    checkScrollable()
+    window.addEventListener('resize', checkScrollable)
+
+    return () => {
+      window.removeEventListener('resize', checkScrollable)
+    }
+  }, [children]) // Re-check when table content changes
+
   const onSortClicked = (columnId: string) => {
     if (currentSort === undefined || onRequestedSort === undefined) {
       return
@@ -57,7 +81,7 @@ export function SortableTable({
   }
 
   return (
-    <div className="table-responsive mb-2 smj-shadow rounded-3">
+    <div ref={tableContainerRef} className="table-responsive mb-2 smj-shadow rounded-3">
       <table className="table  mb-0">
         <thead className="smj-table-header text-nowrap">
           <tr>
