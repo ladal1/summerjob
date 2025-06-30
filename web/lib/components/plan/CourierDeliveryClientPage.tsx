@@ -375,6 +375,10 @@ export default function CourierDeliveryClientPage({
                                               <div key={worker.id} className="worker-allergies-box">
                                                 <div className="small fw-bold text-dark">
                                                   {worker.firstName} {worker.lastName}
+                                                  <a href={`tel:${worker.phone}`} className="text-decoration-none ms-2">
+                                                    <i className="fas fa-phone me-1"></i>
+                                                    {worker.phone}
+                                                  </a>
                                                 </div>
                                                 <div className="d-flex flex-wrap gap-1 mt-1">
                                                   {worker.allergies.map((allergy, allergyIndex) => (
