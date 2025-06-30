@@ -367,7 +367,7 @@ function formatAllergens(job: ActiveJobNoPlan) {
 
 function formatTools(tools: ToolCompleteData[]) {
   if (tools.length == 0) return 'Žádné'
-  return tools
+  return [...tools]
     .sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
     .map(
       tool =>
