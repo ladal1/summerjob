@@ -96,6 +96,13 @@ export function PlanJobRow({
     triggerUpdate({ workerIds: newWorkers })
   }
 
+  const promoteWorkerToResponsible = (workerId: string) => {
+    if (isBeingUpdated) {
+      return
+    }
+    triggerUpdate({ responsibleWorkerId: workerId })
+  }
+
   const onWorkerMoved = () => {
     setWorkerToMove(undefined)
     reloadPlan()
@@ -195,10 +202,6 @@ export function PlanJobRow({
       ${job.proposedJob.strongWorkers}`,
     },
     {
-      label: 'Zodpovědná osoba',
-      content: `${responsibleWorkerName(job)}`,
-    },
-    {
       label: '',
       content: ``,
     },
@@ -292,6 +295,7 @@ export function PlanJobRow({
                         activeJobs,
                         removeWorkerFromJob,
                         setWorkerToMove,
+                        promoteWorkerToResponsible,
                         reloadPlan,
                         adorationByWorker
                       )}
@@ -341,11 +345,6 @@ export function PlanJobRow({
   )
 }
 
-function responsibleWorkerName(job: ActiveJobNoPlan) {
-  if (!job.responsibleWorker) return 'Není'
-  return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`
-}
-
 function formatAmenities(job: ActiveJobNoPlan) {
   return (
     <>
@@ -369,6 +368,7 @@ function formatAllergens(job: ActiveJobNoPlan) {
 function formatTools(tools: ToolCompleteData[]) {
   if (tools.length == 0) return 'Žádné'
   return tools
+    .sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
     .map(
       tool =>
         toolNameMapping[tool.tool] +
@@ -477,6 +477,7 @@ function formatWorkerData(
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined,
   removeWorker: (workerId: string) => void,
   requestMoveWorker: (worker: WorkerComplete) => void,
+  promoteWorker: (workerId: string) => void,
   reloadPlan: () => void,
   adorationByWorker: Map<string, boolean>
 ) {
@@ -486,6 +487,7 @@ function formatWorkerData(
   const abilities = []
   const isDriver = job?.rides.map(r => r.driverId).includes(worker.id) || false
   const wantsAdoration = hasWorkerAdorationOnDay(worker.id, adorationByWorker)
+  const isResponsible = job.responsibleWorker?.id === worker.id
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')
@@ -511,6 +513,9 @@ function formatWorkerData(
           {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
           {wantsAdoration && (
             <i className="fas fa-church ms-2" title="Chce adorovat"></i>
+          )}{' '}
+          {isResponsible && (
+            <i className="fas fa-user-tie ms-2" title="Zodpovědná osoba"></i>
           )}
         </>
       ),
@@ -535,12 +540,30 @@ function formatWorkerData(
           key={`actions-${worker.id}`}
           className="d-flex align-items-center gap-3"
         >
+          <span style={{ width: '16px', textAlign: 'center' }}>
+            {!isResponsible && promoteWorkerIcon(() => promoteWorker(worker.id))}
+          </span>
           {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
           {removeWorkerIcon(() => removeWorker(worker.id))}
         </span>
       ),
     },
   ]
+}
+
+function promoteWorkerIcon(promote: () => void) {
+  return (
+    <>
+      <i
+        className="fas fa-star smj-action-edit cursor-pointer"
+        title="Povýšit na zodpovědnou osobu"
+        onClick={e => {
+          e.stopPropagation()
+          promote()
+        }}
+      ></i>
+    </>
+  )
 }
 
 function moveWorkerToJobIcon(move: () => void) {

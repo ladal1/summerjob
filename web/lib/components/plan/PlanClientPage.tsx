@@ -1,5 +1,6 @@
 'use client'
 import ErrorPage from 'lib/components/error-page/ErrorPage'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { Modal, ModalSize } from 'lib/components/modal/Modal'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
@@ -191,6 +192,10 @@ export default function PlanClientPage({
       const workerNames = job.workers
         .map(w => `${w.firstName} ${w.lastName}`)
         .join(' ')
+      const toolsToTakeWith = job.proposedJob.toolsToTakeWith
+        .sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
+        .map(tool => toolNameMapping[tool.tool])
+        .join(' ')
       map.set(
         job.id,
         normalizeString(
@@ -202,7 +207,9 @@ export default function PlanClientPage({
             ';' +
             job.proposedJob.contact +
             ';' +
-            workerNames
+            workerNames +
+            ';' +
+            toolsToTakeWith
         )
       )
     })
