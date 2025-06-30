@@ -18,9 +18,10 @@ L.Marker.prototype.options.icon = DefaultIcon
 interface JobsMapViewProps {
   jobs: ActiveJobNoPlan[]
   jobOrder?: { [jobId: string]: number } // Optional mapping of job ID to order number
+  height?: number // Optional height in pixels, defaults to 280px
 }
 
-export default function JobsMapView({ jobs, jobOrder }: JobsMapViewProps) {
+export default function JobsMapView({ jobs, jobOrder, height = 280 }: JobsMapViewProps) {
   // Create numbered icons for ordered jobs
   const createNumberedIcon = (number: number) => {
     return L.divIcon({
@@ -98,7 +99,7 @@ export default function JobsMapView({ jobs, jobOrder }: JobsMapViewProps) {
         </p>
       </div>
       
-      <div style={{ height: '280px', width: '100%', overflow: 'hidden' }}>
+      <div style={{ height: `${height}px`, width: '100%', overflow: 'hidden' }}>
         <MapContainer
           center={mapCenter}
           zoom={10}
