@@ -6,7 +6,7 @@ export const foodAllergyMapping: Record<FoodAllergy, string> = {
   [FoodAllergy.NUTS]: 'Ořechy',
   [FoodAllergy.SEAFOOD]: 'Mořské plody',
   [FoodAllergy.EGG]: 'Vejce',
-  [FoodAllergy.VEGETARIAN]: 'Vegetariáns',
+  [FoodAllergy.VEGETARIAN]: 'Vegetarián',
   [FoodAllergy.VEGAN]: 'Veganský',
   [FoodAllergy.OTHER]: 'Jiné',
 }
