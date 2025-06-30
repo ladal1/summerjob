@@ -303,6 +303,7 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
           eventId={event.id}
           eventStart={event.startDate}
           eventEnd={event.endDate}
+          selectedDate={date}
           onClose={() => setShowCreateModal(false)}
           onCreated={newDate => {
             setDate(newDate)

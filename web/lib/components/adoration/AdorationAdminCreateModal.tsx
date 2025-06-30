@@ -10,6 +10,7 @@ interface Props {
   eventId: string
   eventStart: string
   eventEnd: string
+  selectedDate?: string
   onClose: () => void
   onCreated: (date: string) => void
 }
@@ -20,6 +21,7 @@ export default function AdminCreateAdorationModal({
   eventId,
   eventStart,
   eventEnd,
+  selectedDate,
   onClose,
   onCreated,
 }: Props) {
@@ -41,8 +43,8 @@ export default function AdminCreateAdorationModal({
     handleSubmit: formHandleSubmit,
   } = useForm({
     defaultValues: {
-      dateFrom: eventStart,
-      dateTo: eventEnd,
+      dateFrom: selectedDate || eventStart,
+      dateTo: selectedDate || eventEnd,
       location: ''
     },
   })
@@ -98,11 +100,20 @@ export default function AdminCreateAdorationModal({
 
       // Check if this is a cross-day range and warn user
       if (fromTotalMinutes > toTotalMinutes) {
-        const confirmCrossDay = confirm(
-          `Vytváříte sloty přes půlnoc (${fromTime} - ${toTime}). ` +
-          'Sloty budou vytvořeny od startovního času do konce dne a od začátku dalšího dne do koncového času. ' +
-          'Pokračovat?'
-        )
+        const { dateFrom, dateTo } = getValues()
+        const daysDiff = Math.floor((new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / (24 * 60 * 60 * 1000))
+        
+        let message = `Vytváříte sloty přes půlnoc (${fromTime} - ${toTime}). `
+        
+        if (daysDiff <= 1) {
+          message += 'Vytvoří se jeden souvislý blok slotů od startovního času do koncového času následujícího dne. '
+        } else {
+          message += 'Sloty budou vytvořeny pro každý den v rozmezí - od startovního času do konce dne a od začátku dalšího dne do koncového času. '
+        }
+        
+        message += 'Pokračovat?'
+        
+        const confirmCrossDay = confirm(message)
         if (!confirmCrossDay) {
           setLoading(false)
           return
@@ -188,7 +199,7 @@ export default function AdminCreateAdorationModal({
               pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
               onChange={e => setToTime(e.target.value)}
             />
-            <div className="form-text">Formát: 24h (např. 17:15 nebo 07:00 pro přes půlnoc)</div>
+            <div className="form-text">Formát: 24h (např. 17:15 nebo 07:00 pro souvislý blok přes půlnoc)</div>
           </div>
           <div className="col-md-3">
             <label className="form-label fw-bold">Délka slotu</label>
