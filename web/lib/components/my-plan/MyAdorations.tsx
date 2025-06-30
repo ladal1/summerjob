@@ -13,8 +13,6 @@ export default function MyAdorations({ adorations }: MyAdorationsProps) {
     return null
   }
 
-  console.log('MyAdorations', adorations)
-
   return (
     <div className="mt-4">
       <div className="d-flex align-items-center mb-3">

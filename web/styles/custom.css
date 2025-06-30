@@ -693,14 +693,10 @@ img.smj-nav-logo {
 
 .smj-map-container {
   z-index: 1; /* Fix for too high z-index of zoom panel */
-  height: 370px;
+  height: 100%;
   width: 100%;
-}
-
-@media (max-width: 768px) {
-  .smj-map-container {
-    height: 210px;
-  }
+  border-radius: 0.375rem;
+  overflow: hidden;
 }
 
 .pill {
@@ -906,4 +902,109 @@ form.application input.custom-input::placeholder {
 .markdown-content pre code {
   background-color: transparent;
   padding: 0;
+}
+
+/* Food delivery courier cards styling */
+.courier-card {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.courier-card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.courier-card .card-header {
+  background: linear-gradient(135deg, #007bff, #0056b3) !important;
+  border-bottom: none;
+}
+
+.courier-job-item {
+  border-left: 3px solid #007bff;
+  transition: all 0.2s ease;
+}
+
+.courier-job-item:hover {
+  border-left-color: #0056b3;
+  background-color: #f8f9fa;
+}
+
+.job-order-badge {
+  min-width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.reorder-btn {
+  transition: all 0.2s ease;
+}
+
+.reorder-btn:hover:not(:disabled) {
+  background-color: #f8f9fa !important;
+  border-color: #007bff !important;
+}
+
+.allergen-badge {
+  font-size: 0.65rem !important;
+  padding: 0.25rem 0.4rem !important;
+}
+
+.worker-allergies-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  background-color: #f8f9fa;
+  margin-bottom: 0.25rem;
+  max-width: 200px;
+}
+
+.worker-allergies-box .small {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.worker-allergy-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.4rem 0.5rem;
+  background-color: #f8f9fa;
+  margin-bottom: 0.25rem;
+  max-width: 200px;
+}
+
+/* Mobile-specific improvements for courier delivery page */
+@media (max-width: 768px) {
+  .h2-md {
+    font-size: 1.5rem !important;
+  }
+  
+  .worker-allergies-box {
+    max-width: 100%;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .job-order-badge {
+    font-size: 1rem !important;
+    padding: 0.4rem 0.6rem !important;
+  }
+  
+  .flex-md-fill-none {
+    flex: 1 1 auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .flex-md-fill-none {
+    flex: 0 0 auto;
+  }
+  
+  .w-md-auto {
+    width: auto !important;
+  }
 }

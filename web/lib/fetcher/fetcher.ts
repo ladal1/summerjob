@@ -14,29 +14,34 @@ const sendData =
   async (url: string, { arg }: { arg: any }) => {
     const formData = new FormData()
 
-    let jsonData = '{'
-    let first = true
-    const convertData = (key: string, value: any) => {
-      if (value instanceof (File || Blob)) {
-        formData.append(key, value)
-      } else if (value instanceof FileList) {
-        for (let i = 0; i < value.length; i++) {
-          const file = value[i]
-          formData.append(`file${i}`, file)
+    // Handle arrays directly
+    if (Array.isArray(arg)) {
+      formData.append('jsonData', JSON.stringify(arg))
+    } else {
+      let jsonData = '{'
+      let first = true
+      const convertData = (key: string, value: any) => {
+        if (value instanceof (File || Blob)) {
+          formData.append(key, value)
+        } else if (value instanceof FileList) {
+          for (let i = 0; i < value.length; i++) {
+            const file = value[i]
+            formData.append(`file${i}`, file)
+          }
+        } else {
+          jsonData +=
+            (first ? '' : ',') + '"' + key + '"' + ':' + JSON.stringify(value)
+          first = false
         }
-      } else {
-        jsonData +=
-          (first ? '' : ',') + '"' + key + '"' + ':' + JSON.stringify(value)
-        first = false
       }
-    }
-    Object.entries(arg).forEach(([key, value]) => {
-      convertData(key, value)
-    })
-    jsonData += '}'
+      Object.entries(arg).forEach(([key, value]) => {
+        convertData(key, value)
+      })
+      jsonData += '}'
 
-    // JSON.stringify(arg) could be used here, but among arg can be file or blob too, so we want to avoid those keys
-    formData.append('jsonData', jsonData)
+      // JSON.stringify(arg) could be used here, but among arg can be file or blob too, so we want to avoid those keys
+      formData.append('jsonData', jsonData)
+    }
 
     const res = await fetch(url, {
       method: method,

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { format } from 'date-fns'
+import { fromZonedTime } from 'date-fns-tz'
 import { useForm } from 'react-hook-form'
 import type { FrontendAdorationSlot } from 'lib/types/adoration'
 
@@ -100,6 +101,22 @@ export default function AdorationEditModal({
       
       const length = (toHour * 60 + toMinute) - (fromHour * 60 + fromMinute)
 
+      // Convert user's Europe/Prague time to UTC time
+      // The user sees and enters time in Europe/Prague timezone, but the server
+      // API expects time values that when applied with setHours() will result in the correct UTC time.
+      // Since setHours() operates in the server's local timezone (appears to be UTC),
+      // we need to convert the user's Europe/Prague time to UTC.
+      
+      // Create a date representing the user's input time in Europe/Prague timezone
+      const localDate = new Date(slot.localDateStart)
+      const userInputDate = new Date(localDate.getFullYear(), localDate.getMonth(), localDate.getDate(), fromHour, fromMinute, 0, 0)
+      
+      // Convert from Europe/Prague to UTC
+      const utcDate = fromZonedTime(userInputDate, 'Europe/Prague')
+      
+      // Extract UTC time components to send to API
+      const utcFromMinute = utcDate.getUTCHours() * 60 + utcDate.getUTCMinutes()
+
       const response = await fetch(`/api/adoration/${slot.id}/edit`, {
         method: 'PATCH',
         headers: {
@@ -107,7 +124,7 @@ export default function AdorationEditModal({
         },
         body: JSON.stringify({
           capacity: data.capacity,
-          fromMinute: fromHour * 60 + fromMinute,
+          fromMinute: utcFromMinute,
           length: length,
           location: data.location,
         }),
