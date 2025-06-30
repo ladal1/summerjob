@@ -89,7 +89,7 @@ export default function RideSelect({
       .split(' ')
       .map(word => word[0])
       .join('')
-      .toLocaleUpperCase()
+      .toUpperCase()
   }
 
   return (

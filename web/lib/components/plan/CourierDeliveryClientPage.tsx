@@ -16,14 +16,17 @@ const JobsMapView = dynamic(() => import('./JobsMapView'), { ssr: false })
 interface CourierDeliveryClientPageProps {
   planId: string
   courierId: string
+  hasDeliveryManagementAccess: boolean
   initialDataPlan?: unknown // Plan data from server-side rendering
 }
 
 export default function CourierDeliveryClientPage({
   planId,
   courierId,
+  hasDeliveryManagementAccess,
   initialDataPlan,
 }: CourierDeliveryClientPageProps) {
+  
   // Get delivery data with plan data
   const {
     data: deliveryData,
@@ -159,17 +162,25 @@ export default function CourierDeliveryClientPage({
         title={`Rozvozník ${courierNum} - ${planData ? formatDateLong(new Date(planData.day)) : 'Načítání...'}`}
       >
         <div className="d-flex flex-column flex-md-row gap-2">
-          <Link href={`/plan/${planId}/food-delivery`}>
-            <button className="btn btn-secondary btn-with-icon w-100" type="button">
-              <i className="fas fa-arrow-left"></i>
-              <span>Zpět na správu rozvozu</span>
-            </button>
-          </Link>
+          {hasDeliveryManagementAccess && (
+            <Link href={`/plan/${planId}/food-delivery`} className="flex-md-shrink-0">
+              <button className="btn btn-secondary btn-with-icon w-100" type="button" style={{ minWidth: '220px' }}>
+                <i className="fas fa-arrow-left"></i>
+                <span>Zpět na správu rozvozu</span>
+              </button>
+            </Link>
+          )}
           {courierJobs.length > 0 && (
             <button
-              className="btn btn-info btn-with-icon w-100"
+              className="btn btn-with-icon w-100"
               type="button"
               onClick={() => setShowMap(!showMap)}
+              style={{ 
+                backgroundColor: 'var(--primary)', 
+                color: 'var(--text)',
+                borderColor: 'var(--primary)',
+                minWidth: '180px'
+              }}
             >
               <i className="fas fa-map"></i>
               <span>{showMap ? 'Skrýt mapu' : 'Zobrazit mapu'}</span>
@@ -214,7 +225,7 @@ export default function CourierDeliveryClientPage({
                               Mapa všech dodávek rozvozníka {courierNum}
                             </h5>
                           </div>
-                          <div className="card-body p-3" style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
+                          <div className="card-body p-3" style={{ height: 'calc(100% - 40px)', display: 'flex', flexDirection: 'column' }}>
                             <div style={{ flex: 1, width: '100%' }}>
                               {(() => {
                                 const jobOrder: { [jobId: string]: number } = {}
@@ -226,6 +237,7 @@ export default function CourierDeliveryClientPage({
                                   <JobsMapView 
                                     jobs={courierJobs.map(({ job }) => job) as unknown as ActiveJobNoPlan[]}
                                     jobOrder={jobOrder}
+                                    height={420}
                                   />
                                 )
                               })()}
@@ -239,8 +251,8 @@ export default function CourierDeliveryClientPage({
                   {/* Delivery Summary */}
                   <div className="row mb-4">
                     <div className="col">
-                      <div className="card border-primary">
-                        <div className="card-header bg-primary text-white">
+                      <div className="card" style={{ borderColor: 'var(--primary)' }}>
+                        <div className="card-header" style={{ backgroundColor: 'var(--primary)', color: 'var(--text)' }}>
                           <h5 className="card-title mb-0">
                             <i className="fas fa-truck me-2"></i>
                             Přehled dodávek - Rozvozník {courierNum}
@@ -436,8 +448,13 @@ export default function CourierDeliveryClientPage({
                                           href={googleMapsLink}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="btn btn-info flex-fill flex-md-fill-none"
+                                          className="btn flex-fill flex-md-fill-none"
                                           title="Otevřít v Google Maps"
+                                          style={{ 
+                                            backgroundColor: 'var(--primary)', 
+                                            color: 'var(--text)',
+                                            borderColor: 'var(--primary)'
+                                          }}
                                         >
                                           <i className="fas fa-map-marked-alt me-2"></i>
                                           Navigace
