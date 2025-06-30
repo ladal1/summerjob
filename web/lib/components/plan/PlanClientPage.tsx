@@ -192,7 +192,7 @@ export default function PlanClientPage({
       const workerNames = job.workers
         .map(w => `${w.firstName} ${w.lastName}`)
         .join(' ')
-      const toolsToTakeWith = job.proposedJob.toolsToTakeWith
+      const toolsToTakeWith = [...job.proposedJob.toolsToTakeWith]
         .sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
         .map(tool => toolNameMapping[tool.tool])
         .join(' ')
