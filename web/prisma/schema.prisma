@@ -52,6 +52,8 @@ enum FoodAllergy {
   NUTS
   SEAFOOD
   EGG
+  VEGETARIAN
+  VEGAN
   OTHER
 }
 
@@ -274,16 +276,17 @@ model PinnedProposedJobByWorker {
 }
 
 model ActiveJob {
-  id                  String      @id @default(uuid())
-  proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id], onDelete: Cascade)
-  proposedJobId       String
-  workers             Worker[]
-  plan                Plan        @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId              String
-  rides               Ride[]
-  responsibleWorker   Worker?     @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])
-  responsibleWorkerId String?
-  completed           Boolean     @default(false)
+  id                     String                 @id @default(uuid())
+  proposedJob            ProposedJob            @relation(fields: [proposedJobId], references: [id], onDelete: Cascade)
+  proposedJobId          String
+  workers                Worker[]
+  plan                   Plan                   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId                 String
+  rides                  Ride[]
+  responsibleWorker      Worker?                @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])
+  responsibleWorkerId    String?
+  completed              Boolean                @default(false)
+  foodDeliveryJobOrders  FoodDeliveryJobOrder[]
 
   @@unique([proposedJobId, planId])
 }
@@ -303,6 +306,7 @@ model Plan {
   id               String         @id @default(uuid())
   day              DateTime       @unique @db.Date
   jobs             ActiveJob[]
+  foodDeliveries   FoodDelivery[]
   summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
   summerJobEventId String
   published        Boolean        @default(false)
@@ -430,4 +434,30 @@ model AdorationSlot {
   workers   Worker[]                @relation("SlotWorkers")
   event     SummerJobEvent          @relation(fields: [eventId], references: [id])
   eventId   String
+}
+
+model FoodDelivery {
+  id         String                @id @default(uuid())
+  courierNum Int                   // Courier number (1, 2, 3, etc.)
+  plan       Plan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId     String
+  jobs       FoodDeliveryJobOrder[]
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+
+  @@unique([courierNum, planId]) // Each courier can have only one delivery per plan
+}
+
+model FoodDeliveryJobOrder {
+  id             String       @id @default(uuid())
+  foodDelivery   FoodDelivery @relation(fields: [foodDeliveryId], references: [id], onDelete: Cascade)
+  foodDeliveryId String
+  activeJob      ActiveJob    @relation(fields: [activeJobId], references: [id], onDelete: Cascade)
+  activeJobId    String
+  order          Int          // Order of delivery (1, 2, 3, etc.)
+  completed      Boolean      @default(false)
+  completedAt    DateTime?
+
+  @@unique([foodDeliveryId, activeJobId]) // Each job can appear only once per delivery
+  @@unique([foodDeliveryId, order])       // Each order position is unique per delivery
 }

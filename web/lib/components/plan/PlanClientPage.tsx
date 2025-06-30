@@ -344,6 +344,12 @@ export default function PlanClientPage({
                 {!planData?.published ? 'Zveřejnit plán' : 'Odzveřejnit plán'}
               </span>
             </button>
+            <Link href={`/plan/${planData?.id}/food-delivery`} prefetch={false}>
+              <button className="btn btn-warning btn-with-icon" type="button">
+                <i className="fas fa-utensils"></i>
+                <span>Rozvoz jídla</span>
+              </button>
+            </Link>
             <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
               <button className="btn btn-secondary btn-with-icon" type="button">
                 <i className="fas fa-print"></i>
