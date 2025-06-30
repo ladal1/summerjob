@@ -413,7 +413,7 @@ export default function PlanClientPage({
                 </div>
               </div>
             </div>
-            {isJobModalOpen && (
+            {isJobModalOpen && planData && (
               <Modal
                 title={'Přidat joby do plánu'}
                 size={ModalSize.LARGE}
@@ -421,6 +421,7 @@ export default function PlanClientPage({
               >
                 <AddJobToPlanForm
                   planId={id}
+                  planDate={planData.day}
                   workerId={workerId}
                   onComplete={closeModal}
                 />
