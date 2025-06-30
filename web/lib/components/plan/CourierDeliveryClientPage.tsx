@@ -73,15 +73,10 @@ export default function CourierDeliveryClientPage({
       .sort((a, b) => a!.order - b!.order)
   }, [courierDelivery, planData])
 
-  // State for UI feedback
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
-  const [saveMessageType, setSaveMessageType] = useState<'success' | 'error'>('success')
-  const [isOperationLoading, setIsOperationLoading] = useState(false)
   const [showMap, setShowMap] = useState(false)
 
   // Function to mark job delivery as complete/incomplete
   const toggleJobCompletion = useCallback(async (jobOrderId: string, currentStatus: boolean) => {
-    setIsOperationLoading(true)
     try {
       const response = await fetch(`/api/plans/${planId}/food-deliveries/job-orders/${jobOrderId}/complete`, {
         method: 'POST',
@@ -97,19 +92,27 @@ export default function CourierDeliveryClientPage({
         throw new Error('Failed to update job completion status')
       }
       
-      // Refresh the data and wait for it to complete
-      await mutateDeliveryData(undefined, { revalidate: true })
+      // Optimistically update the local data instead of revalidating
+      await mutateDeliveryData((current) => {
+        if (!current) return current
+        
+        // Create a deep copy and update the specific job's completion status
+        const updatedData = { ...current }
+        updatedData.delivery = { ...current.delivery }
+        updatedData.delivery.jobs = current.delivery.jobs.map(job => 
+          job.id === jobOrderId 
+            ? { ...job, completed: !currentStatus }
+            : job
+        )
+        
+        return updatedData
+      }, false) // false = don't revalidate immediately
       
-      setSaveMessage(`Dodávka byla ${!currentStatus ? 'označena jako hotová' : 'označena jako nedokončená'}.`)
-      setSaveMessageType('success')
-      setTimeout(() => setSaveMessage(null), 3000)
     } catch (error) {
       console.error('Failed to update job completion:', error)
-      setSaveMessage('Chyba při aktualizaci stavu dodávky.')
-      setSaveMessageType('error')
-      setTimeout(() => setSaveMessage(null), 5000)
-    } finally {
-      setIsOperationLoading(false)
+      
+      // On error, revalidate to get the correct state
+      mutateDeliveryData()
     }
   }, [planId, mutateDeliveryData])
 
@@ -177,24 +180,6 @@ export default function CourierDeliveryClientPage({
 
       <section>
         <div className="container-fluid">
-          {/* Display save/error messages */}
-          {saveMessage && (
-            <div className="row mb-4">
-              <div className="col">
-                <div className={`alert ${saveMessageType === 'success' ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`}>
-                  <i className={`fas ${saveMessageType === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2`}></i>
-                  {saveMessage}
-                  <button 
-                    type="button" 
-                    className="btn-close" 
-                    onClick={() => setSaveMessage(null)}
-                    aria-label="Close"
-                  ></button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Display food delivery loading error */}
           {error && (
             <div className="row mb-4">
@@ -204,18 +189,6 @@ export default function CourierDeliveryClientPage({
                   <strong>Chyba při načítání dodávek:</strong>
                   <br />
                   {error.message || 'Neznámá chyba'}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Show loading state during data refresh */}
-          {isOperationLoading && (
-            <div className="row mb-4">
-              <div className="col">
-                <div className="alert alert-info">
-                  <i className="fas fa-spinner fa-spin me-2"></i>
-                  Aktualizuji data...
                 </div>
               </div>
             </div>
@@ -448,7 +421,6 @@ export default function CourierDeliveryClientPage({
                                       <button
                                         className={`btn flex-fill flex-md-fill-none ${completed ? 'btn-warning' : 'btn-success'}`}
                                         onClick={() => toggleJobCompletion(jobOrderId, completed)}
-                                        disabled={isOperationLoading}
                                         title={completed ? 'Označit jako nedokončeno' : 'Označit jako hotovo'}
                                       >
                                         <i className={`fas ${completed ? 'fa-undo' : 'fa-check'} me-2`}></i>
