@@ -5,6 +5,16 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+// Fix for Marker Icon that is not defaultly showing for react-leaflet
+// Set this once at module scope to avoid performance issues
+const DefaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet/dist/images/marker-shadow.png',
+  iconAnchor: [11, 46], // fix icon position
+  popupAnchor: [2, -46], // fix popup window position
+})
+L.Marker.prototype.options.icon = DefaultIcon
+
 interface JobsMapViewProps {
   jobs: ActiveJobNoPlan[]
   jobOrder?: { [jobId: string]: number } // Optional mapping of job ID to order number
@@ -34,15 +44,6 @@ export default function JobsMapView({ jobs, jobOrder }: JobsMapViewProps) {
       popupAnchor: [0, -15]
     })
   }
-
-  // Fix for Marker Icon that is not defaultly showing for react-leaflet
-  const DefaultIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet/dist/images/marker-shadow.png',
-    iconAnchor: [11, 46], // fix icon position
-    popupAnchor: [2, -46], // fix popup window position
-  })
-  L.Marker.prototype.options.icon = DefaultIcon
 
   // Filter jobs that have coordinates
   const jobsWithCoordinates = useMemo(() => {
