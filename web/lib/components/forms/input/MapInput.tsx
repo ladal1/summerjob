@@ -133,7 +133,7 @@ export const MapInput = ({ address, coordinates, errors }: MapInputProps) => {
       )}
       <FormWarning message={errorCoordinates} />
       <div className="pt-3">
-        <div className="container p-0 m-0">
+        <div className="container p-0 m-0" style={{ height: '400px' }}>
           <Map
             center={coordinates.init ?? [49.8203, 15.4784]} // Czech republic
             zoom={6}
