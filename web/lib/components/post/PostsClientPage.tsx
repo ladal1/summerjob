@@ -146,10 +146,28 @@ export default function PostsClientPage({
         firstDay.getMilliseconds()
       )
     )
+    const tomorrowDate = new Date(todayDate)
+    tomorrowDate.setDate(todayDate.getDate() + 1)
+    
     const todayDay = {
       id: todayDate.toJSON(),
       day: new Date(todayDate),
     }
+    const tomorrowDay = {
+      id: tomorrowDate.toJSON(),
+      day: new Date(tomorrowDate),
+    }
+    
+    // Return only today and tomorrow if they exist in the available days
+    const todayAndTomorrow = days.filter(day => 
+      day.id === todayDay.id || day.id === tomorrowDay.id
+    )
+    
+    if (todayAndTomorrow.length > 0) {
+      return todayAndTomorrow
+    }
+    
+    // Fallback to all upcoming days if today/tomorrow are not available
     if (days.some(day => day.id === todayDay.id)) {
       return days.filter(day => day.day.getTime() >= todayDay.day.getTime())
     }
@@ -479,7 +497,7 @@ export default function PostsClientPage({
                       {item.timeFrom && item.timeTo && (
                         <div className="fw-bold text-center">
                           <div>
-                            {formatDateToDayShort(item.availability[0])}
+                            {formatDateToDayShort(getMostRelevantDate(item.availability))}
                           </div>
                           {/* Mobile: single line */}
                           <div className="d-block d-sm-none">
@@ -673,4 +691,52 @@ function getDays(firstDay: Date, lastDay: Date) {
     day: date,
   }))
   return days
+}
+
+function getMostRelevantDate(availability: Date[]): Date {
+  if (!availability || availability.length === 0) {
+    return new Date()
+  }
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+
+  // If today is available, show today
+  const todayAvailable = availability.find(date => {
+    const availDate = new Date(date)
+    availDate.setHours(0, 0, 0, 0)
+    return availDate.getTime() === today.getTime()
+  })
+  if (todayAvailable) {
+    return todayAvailable
+  }
+
+  // If tomorrow is available, show tomorrow  
+  const tomorrowAvailable = availability.find(date => {
+    const availDate = new Date(date)
+    availDate.setHours(0, 0, 0, 0)
+    return availDate.getTime() === tomorrow.getTime()
+  })
+  if (tomorrowAvailable) {
+    return tomorrowAvailable
+  }
+
+  // Find the next available date in the future
+  const futureDate = availability
+    .map(date => new Date(date))
+    .filter(date => {
+      date.setHours(0, 0, 0, 0)
+      return date.getTime() >= today.getTime()
+    })
+    .sort((a, b) => a.getTime() - b.getTime())[0]
+
+  if (futureDate) {
+    return futureDate
+  }
+
+  // Fall back to the first date (original behavior)
+  return availability[0]
 }
