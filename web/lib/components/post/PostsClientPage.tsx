@@ -277,7 +277,7 @@ export default function PostsClientPage({
     showPast: showPast,
   })
 
-  useMemo(() => {
+  useEffect(() => {
     setSelectedDays(
       filters.availability.map(date => {
         const day = new Date(date)
@@ -289,27 +289,27 @@ export default function PostsClientPage({
     )
   }, [filters.availability])
 
-  useMemo(() => {
+  useEffect(() => {
     setParticipate(filters.participate)
   }, [filters.participate])
 
-  useMemo(() => {
+  useEffect(() => {
     setTimeFrom(filters.timeFrom)
   }, [filters.timeFrom])
 
-  useMemo(() => {
+  useEffect(() => {
     setTimeTo(filters.timeTo)
   }, [filters.timeTo])
 
-  useMemo(() => {
+  useEffect(() => {
     setTags(filters.tags)
   }, [filters.tags])
 
-  useMemo(() => {
+  useEffect(() => {
     setShowAll(filters.showAll)
   }, [filters.showAll])
 
-  useMemo(() => {
+  useEffect(() => {
     setShowPast(filters.showPast)
   }, [filters.showPast])
 
