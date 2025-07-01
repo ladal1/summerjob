@@ -33,9 +33,19 @@ export default async function PrintPlanPage(props: PathProps) {
   const params = await props.params;
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
-  const sortedJobs = plan.jobs.sort((a, b) =>
-    a.proposedJob.name.localeCompare(b.proposedJob.name)
-  )
+  const sortedJobs = plan.jobs.sort((a, b) => {
+    // First sort by area name (handling null areas)
+    const areaA = a.proposedJob.area?.name ?? 'Nezadaná oblast'
+    const areaB = b.proposedJob.area?.name ?? 'Nezadaná oblast'
+    const areaComparison = areaA.localeCompare(areaB)
+    
+    if (areaComparison !== 0) {
+      return areaComparison
+    }
+    
+    // If areas are the same, sort by original job ID
+    return a.id.localeCompare(b.id)
+  })
   for (let i = 1; i <= sortedJobs.length; i++) {
     sortedJobs[i - 1].id = i.toString()
   }
