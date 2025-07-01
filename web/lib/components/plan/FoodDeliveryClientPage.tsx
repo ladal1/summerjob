@@ -524,7 +524,7 @@ export default function FoodDeliveryClientPage({
           <PageHeader
             title={`Rozvoz jídla - ${planData ? formatDateLong(planData.day) : 'Načítání...'}`}
           >
-            <Link href={`/plan/${planId}`}>
+            <Link href={`/plans/${planId}`}>
               <button className="btn btn-secondary btn-with-icon" type="button">
                 <i className="fas fa-arrow-left"></i>
                 <span>Zpět na plán</span>
