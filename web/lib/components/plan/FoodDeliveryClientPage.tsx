@@ -1084,19 +1084,21 @@ export default function FoodDeliveryClientPage({
                                       style={{ transform: 'scale(1.3)' }}
                                     />
                                     <div className="flex-grow-1">
-                                      <h6 className="mb-1">
+                                      <h6 className="mb-2">
                                         <strong>{job.proposedJob.name}</strong>
-                                        {job.completed && (
-                                          <span className="badge bg-success ms-2">Hotovo</span>
-                                        )}
-                                        {jobCourierAssignments.has(job.id) && (
-                                          <span className="badge bg-primary ms-2">
-                                            <i className="fas fa-truck me-1"></i>
-                                            Rozvozník {jobCourierAssignments.get(job.id)}
-                                          </span>
-                                        )}
+                                        <div className="d-flex flex-wrap gap-2 mt-1">
+                                          {job.completed && (
+                                            <span className="badge bg-success">Hotovo</span>
+                                          )}
+                                          {jobCourierAssignments.has(job.id) && (
+                                            <span className="badge bg-primary">
+                                              <i className="fas fa-truck me-1"></i>
+                                              Rozvozník {jobCourierAssignments.get(job.id)}
+                                            </span>
+                                          )}
+                                        </div>
                                       </h6>
-                                      <div className="d-flex gap-3 text-muted small">
+                                      <div className="d-flex flex-column flex-lg-row gap-2 gap-lg-3 text-muted small">
                                         <span>
                                           <i className="fas fa-map-marker-alt me-1"></i>
                                           {job.proposedJob.area?.name || 'Nezadaná oblast'}
@@ -1106,17 +1108,19 @@ export default function FoodDeliveryClientPage({
                                           {job.proposedJob.address}
                                         </span>
                                         {job.responsibleWorker && (
-                                          <span>
-                                            <i className="fas fa-user-tie me-1"></i>
-                                            Vedoucí: <strong>{job.responsibleWorker.firstName} {job.responsibleWorker.lastName}</strong>
-                                            <a href={`tel:${job.responsibleWorker.phone}`} className="text-decoration-none ms-2">
+                                          <div className="d-flex flex-column flex-sm-row gap-1 gap-sm-2">
+                                            <span>
+                                              <i className="fas fa-user-tie me-1"></i>
+                                              Vedoucí: <strong>{job.responsibleWorker.firstName} {job.responsibleWorker.lastName}</strong>
+                                            </span>
+                                            <a href={`tel:${job.responsibleWorker.phone}`} className="text-decoration-none">
                                               <i className="fas fa-phone me-1"></i>
                                               {job.responsibleWorker.phone}
                                             </a>
-                                          </span>
+                                          </div>
                                         )}
                                       </div>
-                                      <div className="d-flex gap-2 mt-1">
+                                      <div className="d-flex flex-wrap gap-2 mt-2">
                                         {needsFoodDelivery && (
                                           <span className="badge bg-warning text-dark">
                                             <i className="fas fa-utensils me-1"></i>
@@ -1132,7 +1136,7 @@ export default function FoodDeliveryClientPage({
                                       </div>
                                     </div>
                                     {showCourierAssignment && jobsByCourier.length > 0 && (
-                                      <div className="ms-3">
+                                      <div className="ms-2 d-none d-md-block">
                                         <div className="btn-group-vertical" role="group">
                                           <small className="text-muted mb-1">Přiřadit:</small>
                                           <div className="btn-group" role="group">
@@ -1168,37 +1172,96 @@ export default function FoodDeliveryClientPage({
                                       </div>
                                     )}
                                   </div>
+                                  {/* Mobile courier assignment buttons */}
+                                  {showCourierAssignment && jobsByCourier.length > 0 && (
+                                    <div className="d-md-none mt-2 pt-2 border-top">
+                                      <small className="text-muted">Přiřadit rozvozníka:</small>
+                                      <div className="d-flex flex-wrap gap-1 mt-1">
+                                        {jobsByCourier.map(({ courierNumber }) => (
+                                          <button
+                                            key={courierNumber}
+                                            className={`btn btn-sm ${
+                                              jobCourierAssignments.get(job.id) === courierNumber 
+                                                ? 'btn-primary' 
+                                                : 'btn-outline-primary'
+                                            }`}
+                                            onClick={() => 
+                                              jobCourierAssignments.get(job.id) === courierNumber 
+                                                ? unassignJob(job.id)
+                                                : assignJobToCourier(job.id, courierNumber)
+                                            }
+                                            disabled={isSaving || isOperationLoading}
+                                            title={`${
+                                              jobCourierAssignments.get(job.id) === courierNumber 
+                                                ? 'Odebrat z' 
+                                                : 'Přiřadit'
+                                            } rozvozníka ${courierNumber}`}
+                                          >
+                                            {isSaving && jobCourierAssignments.get(job.id) === courierNumber ? (
+                                              <i className="fas fa-spinner fa-spin"></i>
+                                            ) : (
+                                              `Rozvozník ${courierNumber}`
+                                            )}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="card-body">
                                   {workersWithAllergies.length > 0 ? (
                                     <div className="table-responsive">
-                                      <table className="table table-sm mb-0" style={{ tableLayout: 'fixed' }}>
+                                      <table className="table table-sm mb-0">
                                         <thead>
                                           <tr>
-                                            <th style={{ width: '35%' }}>Pracant</th>
-                                            <th style={{ width: '30%' }}>Telefon</th>
-                                            <th style={{ width: '35%' }}>Alergie</th>
+                                            <th className="d-none d-md-table-cell" style={{ width: '35%' }}>Pracant</th>
+                                            <th className="d-none d-md-table-cell" style={{ width: '30%' }}>Telefon</th>
+                                            <th className="d-none d-md-table-cell" style={{ width: '35%' }}>Alergie</th>
+                                            <th className="d-md-none">Pracanti s alergiemi</th>
                                           </tr>
                                         </thead>
                                         <tbody>
                                           {workersWithAllergies.map((worker, index) => (
                                             <tr key={`${worker.id}-${index}`}>
-                                              <td>
+                                              {/* Desktop layout */}
+                                              <td className="d-none d-md-table-cell">
                                                 <strong>{worker.firstName} {worker.lastName}</strong>
                                               </td>
-                                              <td>
+                                              <td className="d-none d-md-table-cell">
                                                 <a href={`tel:${worker.phone}`} className="text-decoration-none">
                                                   <i className="fas fa-phone me-1"></i>
                                                   {worker.phone}
                                                 </a>
                                               </td>
-                                              <td>
+                                              <td className="d-none d-md-table-cell">
                                                 <div className="d-flex flex-wrap gap-1">
                                                   {worker.allergies.map((allergy, allergyIndex) => (
                                                     <span 
                                                       key={allergyIndex} 
-                                                      className="badge bg-danger"
-                                                      style={{ fontSize: '0.75em' }}
+                                                      className="badge bg-danger text-white"
+                                                      style={{ fontSize: '0.75rem' }}
+                                                    >
+                                                      {allergy}
+                                                    </span>
+                                                  ))}
+                                                </div>
+                                              </td>
+                                              {/* Mobile layout */}
+                                              <td className="d-md-none">
+                                                <div className="mb-2">
+                                                  <strong>{worker.firstName} {worker.lastName}</strong>
+                                                  <br />
+                                                  <a href={`tel:${worker.phone}`} className="text-decoration-none text-muted">
+                                                    <i className="fas fa-phone me-1"></i>
+                                                    {worker.phone}
+                                                  </a>
+                                                </div>
+                                                <div className="d-flex flex-wrap gap-1">
+                                                  {worker.allergies.map((allergy, allergyIndex) => (
+                                                    <span 
+                                                      key={allergyIndex} 
+                                                      className="badge bg-danger text-white"
+                                                      style={{ fontSize: '0.7rem' }}
                                                     >
                                                       {allergy}
                                                     </span>

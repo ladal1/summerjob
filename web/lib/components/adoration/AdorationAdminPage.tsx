@@ -44,6 +44,7 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
   const [showBulkLocationModal, setShowBulkLocationModal] = useState(false)
   const [selectedSlotForAssignment, setSelectedSlotForAssignment] = useState<FrontendAdorationSlot | null>(null)
   const [selectedSlotForEdit, setSelectedSlotForEdit] = useState<FrontendAdorationSlot | null>(null)
+  const [showOnlyUnfilled, setShowOnlyUnfilled] = useState(false)
 
   const {
     data: slots = [],
@@ -51,16 +52,13 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
     mutate,
   } = useAPIAdorationSlotsAdmin(date, event.id)
 
-  const isAllSelected =
-    slots.length > 0 && slots.every(slot => selectedIds.includes(slot.id))
-
   useEffect(() => {
     const params = new URLSearchParams({ date })
     router.replace(`?${params.toString()}`, { scroll: false })
   }, [date, router])
 
   const toggleSelectAll = () => {
-    setSelectedIds(isAllSelected ? [] : slots.map(slot => slot.id))
+    setSelectedIds(isAllSelected ? [] : sortedSlots.map(slot => slot.id))
   }
 
   const toggleSelectOne = (id: string) => {
@@ -125,22 +123,75 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
 
   const dates = getDatesBetween(event.startDate, event.endDate)
 
+  // Helper function to get slot status styling
+  const getSlotStatusInfo = (slot: FrontendAdorationSlot) => {
+    const { workerCount, capacity } = slot
+    
+    if (workerCount === 0) {
+      return {
+        badgeClass: 'bg-danger',
+        badgeText: 'Prázdný',
+        icon: 'fas fa-exclamation-triangle',
+        rowClass: 'table-danger'
+      }
+    } else if (workerCount < capacity) {
+      return {
+        badgeClass: 'bg-warning text-dark',
+        badgeText: 'Částečně obsazen',
+        icon: 'fas fa-clock',
+        rowClass: 'table-warning'
+      }
+    } else if (workerCount === capacity) {
+      return {
+        badgeClass: 'bg-success',
+        badgeText: 'Obsazen',
+        icon: 'fas fa-check-circle',
+        rowClass: ''
+      }
+    } else {
+      return {
+        badgeClass: 'bg-dark',
+        badgeText: 'Přeplněn',
+        icon: 'fas fa-exclamation-circle',
+        rowClass: ''
+      }
+    }
+  }
+
+  // Filter slots but keep original time order
+  const sortedSlots = [...slots]
+    .filter(slot => showOnlyUnfilled ? slot.workerCount < slot.capacity : true)
+    .sort((a, b) => a.localDateStart.getTime() - b.localDateStart.getTime())
+
+  // Statistics for the current day (from all slots, not filtered)
+  const emptySlots = slots.filter(s => s.workerCount === 0).length
+  const partiallyFilledSlots = slots.filter(s => s.workerCount > 0 && s.workerCount < s.capacity).length
+  const fullSlots = slots.filter(s => s.workerCount === s.capacity).length
+
+  // Get unfilled slots for the bubble indicator
+  const unfilledSlots = slots.filter(s => s.workerCount < s.capacity).sort((a, b) => a.localDateStart.getTime() - b.localDateStart.getTime())
+
+  const isAllSelected =
+    sortedSlots.length > 0 && sortedSlots.every(slot => selectedIds.includes(slot.id))
+
   return (
     <div className="container mt-2">
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h4 className="mb-0">Adorace – administrace</h4>
-        <select
-          className="form-select form-select-sm"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          style={{ width: '220px' }}
-        >
-          {dates.map(d => (
-            <option key={d} value={d}>
-              {format(parseISO(d), 'd. M. yyyy')}
-            </option>
-          ))}
-        </select>
+        <div className="d-flex gap-2 align-items-center">
+          <select
+            className="form-select form-select-sm"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            style={{ width: '220px' }}
+          >
+            {dates.map(d => (
+              <option key={d} value={d}>
+                {format(parseISO(d), 'd. M. yyyy')}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {isLoading ? (
@@ -157,6 +208,63 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
         </>
       ) : (
         <>
+          {/* Filter Controls */}
+          <div className="row mb-3">
+            <div className="col-12">
+              <div className="form-check form-switch">
+                <input 
+                  className="form-check-input" 
+                  type="checkbox" 
+                  id="showOnlyUnfilled"
+                  checked={showOnlyUnfilled}
+                  onChange={(e) => setShowOnlyUnfilled(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="showOnlyUnfilled">
+                  <i className="fas fa-filter me-1"></i>
+                  Zobrazit pouze neobsazené sloty
+                  {showOnlyUnfilled && (
+                    <span className="badge bg-primary ms-2">
+                      {sortedSlots.length} z {slots.length}
+                    </span>
+                  )}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Statistics Section */}
+          <div className="row mb-3">
+            <div className="col-12">
+              <div className="d-flex gap-3 align-items-center flex-wrap">
+                <div className="d-flex align-items-center">
+                  <span className="badge bg-danger me-2">{emptySlots}</span>
+                  <small className="text-muted">Prázdné sloty</small>
+                </div>
+                <div className="d-flex align-items-center">
+                  <span className="badge bg-warning text-dark me-2">{partiallyFilledSlots}</span>
+                  <small className="text-muted">Částečně obsazené</small>
+                </div>
+                <div className="d-flex align-items-center">
+                  <span className="badge bg-success me-2">{fullSlots}</span>
+                  <small className="text-muted">Plně obsazené</small>
+                </div>
+                {unfilledSlots.length > 0 && (
+                  <div className="d-flex align-items-center ms-auto">
+                    <div className="badge bg-info text-white me-2">
+                      <i className="fas fa-clock me-1"></i>
+                      Volné sloty: {unfilledSlots.map((slot, index) => (
+                        <span key={slot.id}>
+                          {format(slot.localDateStart, 'HH:mm')}
+                          {index < unfilledSlots.length - 1 ? ', ' : ''}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="d-flex gap-2 align-items-center mb-3">
             <button
               className="btn btn-sm btn-outline-primary"
@@ -218,12 +326,14 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
               </tr>
             </thead>
             <tbody>
-              {slots.map(slot => {
+              {sortedSlots.map(slot => {
                 const endTime = new Date(slot.localDateStart.getTime() + slot.length * 60000)
                 const startTimeStr = format(slot.localDateStart, 'HH:mm')
                 const endTimeStr = format(endTime, 'HH:mm')
+                const statusInfo = getSlotStatusInfo(slot)
+                
                 return (
-                  <tr key={slot.id}>
+                  <tr key={slot.id} className={statusInfo.rowClass}>
                     <td className="align-middle">
                       <input
                         type="checkbox"
@@ -244,17 +354,24 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
                     </td>
                     <td className="align-middle">{slot.location}</td>
                     <td className="align-middle">
-                      <strong>({slot.workerCount}/{slot.capacity})</strong>
+                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <span className={`badge ${statusInfo.badgeClass}`}>
+                          <i className={`${statusInfo.icon} me-1`}></i>
+                          {slot.workerCount}/{slot.capacity}
+                        </span>
+                        <small className={`badge ${statusInfo.badgeClass} opacity-75`}>
+                          {statusInfo.badgeText}
+                        </small>
+                      </div>
                       {slot.workers.length > 0 && (
-                        <>
-                          <br />
-                          {slot.workers.map((w, i) => (
-                            <span key={i}>
+                        <div className="mt-1">
+                          <small className="text-muted me-2">Přiřazení:</small>
+                          {slot.workers.map((w, index) => (
+                            <span key={index} className="badge bg-light text-dark me-1 mb-1 d-inline-block" style={{ fontSize: '0.75rem' }}>
                               {w.firstName} {w.lastName} ({w.phone})
-                              {i < slot.workers.length - 1 ? ', ' : ''}
                             </span>
                           ))}
-                        </>
+                        </div>
                       )}
                     </td>
                     <td className="align-middle">
