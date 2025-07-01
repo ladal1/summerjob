@@ -278,6 +278,7 @@ export default function PostsClientPage({
   })
 
   useEffect(() => {
+    // Synchronize all state variables with filter values
     setSelectedDays(
       filters.availability.map(date => {
         const day = new Date(date)
@@ -287,31 +288,13 @@ export default function PostsClientPage({
         }
       })
     )
-  }, [filters.availability])
-
-  useEffect(() => {
     setParticipate(filters.participate)
-  }, [filters.participate])
-
-  useEffect(() => {
     setTimeFrom(filters.timeFrom)
-  }, [filters.timeFrom])
-
-  useEffect(() => {
     setTimeTo(filters.timeTo)
-  }, [filters.timeTo])
-
-  useEffect(() => {
     setTags(filters.tags)
-  }, [filters.tags])
-
-  useEffect(() => {
     setShowAll(filters.showAll)
-  }, [filters.showAll])
-
-  useEffect(() => {
     setShowPast(filters.showPast)
-  }, [filters.showPast])
+  }, [filters])
 
   //#endregion
 
