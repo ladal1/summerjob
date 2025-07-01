@@ -239,6 +239,7 @@ export const PostFilterSchema = z
     tags: z.array(z.nativeEnum(PostTag)).optional(),
     participate: z.boolean(),
     showAll: z.boolean(),
+    showPast: z.boolean(),
   })
   .superRefine((value, ctx) => {
     if (

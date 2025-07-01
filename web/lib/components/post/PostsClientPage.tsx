@@ -223,6 +223,15 @@ export default function PostsClientPage({
 
   //#endregion
 
+  //#region ShowPast
+
+  const showPastQ = searchParams?.get('showPast')
+  const [showPast, setShowPast] = useState(
+    showPastQ ? getBoolean(showPastQ) : false
+  )
+
+  //#endregion
+
   //#region Time
 
   const timeFromQ = searchParams?.get('timeFrom')
@@ -265,6 +274,7 @@ export default function PostsClientPage({
     tags: tags,
     participate: participate,
     showAll: showAll,
+    showPast: showPast,
   })
 
   useMemo(() => {
@@ -299,6 +309,10 @@ export default function PostsClientPage({
     setShowAll(filters.showAll)
   }, [filters.showAll])
 
+  useMemo(() => {
+    setShowPast(filters.showPast)
+  }, [filters.showPast])
+
   //#endregion
 
   // replace url with new query parameters
@@ -316,6 +330,7 @@ export default function PostsClientPage({
         timeTo: timeTo === null ? '' : timeTo,
         tags: tags?.join(';') ?? '',
         showAll: `${showAll}`,
+        showPast: `${showPast}`,
       })}`,
       {
         scroll: false,
@@ -331,6 +346,7 @@ export default function PostsClientPage({
     timeTo,
     tags,
     showAll,
+    showPast,
   ])
   const posts = useMemo(() => data?.posts ?? [], [data?.posts])
 
@@ -368,6 +384,7 @@ export default function PostsClientPage({
       tags,
       fulltextData,
       userId,
+      showPast,
       sortPosts(selectedSort, otherPosts)
     )
   }, [
@@ -381,6 +398,7 @@ export default function PostsClientPage({
     fulltextData,
     selectedSort,
     userId,
+    showPast,
     otherPosts,
   ])
 
@@ -430,11 +448,23 @@ export default function PostsClientPage({
         )}
       </PageHeader>
       <div className="m-3">
-        <div className="row">
+        <div 
+          style={{
+            columnCount: 'auto',
+            columnWidth: '450px',
+            columnGap: '1.5rem',
+            columnFill: 'balance'
+          }}
+        >
           {pinnedPosts.map((item, index) => (
-            <div
-              className={`col-md-${12 / Math.min(3, pinnedPosts.length)}`}
+            <div 
               key={index}
+              style={{
+                breakInside: 'avoid',
+                marginBottom: '1rem',
+                display: 'inline-block',
+                width: '100%'
+              }}
             >
               <PostBubble
                 item={item}
@@ -451,6 +481,20 @@ export default function PostsClientPage({
               <Filters search={search} onSearchChanged={setSearch} />
             </div>
             <div className="row">
+              <div className="col-auto mb-2">
+                <div
+                  className="d-inline-flex align-items-baseline cursor-pointer me-2"
+                  onClick={() => setShowPast(!showPast)}
+                  title={showPast ? 'Skrýt dokončené akce' : 'Zobrazit dokončené akce'}
+                >
+                  <i className="fas fa-history me-2"></i>
+                  <div className="smj-white-bubble p-2 smj-shadow-small">
+                    <span className="overflow-ellipsis">
+                      {showPast ? 'Skrýt dokončené' : 'Zobrazit dokončené'}
+                    </span>
+                  </div>
+                </div>
+              </div>
               <div className="col-auto mb-2">
                 <SortPostsBy
                   sorts={sorts}
@@ -556,10 +600,51 @@ function filterPosts(
   tags: PostTag[] | undefined,
   searchable: Map<string, string>,
   userId: string,
+  showPast: boolean,
   posts?: PostComplete[]
 ) {
   if (!posts) return []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
   return posts
+    .filter(post => {
+      // Filter out events that have already passed (unless showPast is true)
+      if (!showPast && post.availability && post.availability.length > 0) {
+        const now = new Date()
+        const hasUpcomingDates = post.availability.some(date => {
+          const eventDate = new Date(date)
+          eventDate.setHours(0, 0, 0, 0)
+          
+          // If event is in the future, include it
+          if (eventDate.getTime() > today.getTime()) {
+            return true
+          }
+          
+          // If event is today, check if it has ended
+          if (eventDate.getTime() === today.getTime()) {
+            // If no end time specified, include it (all-day event)
+            if (!post.timeTo) {
+              return true
+            }
+            
+            // Check if the event has ended today
+            const [endHour, endMinute] = getHourAndMinute(post.timeTo)
+            const eventEndTime = new Date(eventDate)
+            eventEndTime.setHours(endHour, endMinute, 0, 0)
+            
+            // Include if event hasn't ended yet
+            return eventEndTime.getTime() > now.getTime()
+          }
+          
+          return false
+        })
+        if (!hasUpcomingDates) {
+          return false
+        }
+      }
+      return true
+    })
     .filter(post => {
       if (text.length > 0) {
         return searchable.get(post.id)?.includes(text.toLowerCase()) ?? true
