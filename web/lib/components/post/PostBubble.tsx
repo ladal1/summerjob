@@ -28,6 +28,11 @@ export const PostBubble = ({
   const onCloseModal = () => {
     setIsOpenedInfoModal(false)
   }
+  
+  // Check if post has meaningful content
+  const hasDescription = item.shortDescription && item.shortDescription.trim().length > 1
+  const isCompact = !hasDescription
+  
   return (
     <>
       <div
@@ -35,12 +40,12 @@ export const PostBubble = ({
           onUpdated && item.isPinned
             ? 'smj-color-bubble-pinned'
             : 'smj-color-bubble'
-        } rounded mt-2 mb-2 cursor-pointer smj-shadow`}
+        } rounded ${isCompact ? 'mt-1 mb-1' : 'mt-2 mb-2'} cursor-pointer smj-shadow`}
         onClick={() => setIsOpenedInfoModal(true)}
       >
-        <div className="p-3">
+        <div className={isCompact ? 'px-3 py-2' : 'p-3'}>
           <div className="d-flex justify-content-between gap-3">
-            <h4>{item.name}</h4>
+            <h4 className={isCompact ? 'mb-1 fs-5' : ''}>{item.name}</h4>
             {onUpdated && (
               <div className="">
                 <PostBubbleActions
@@ -56,12 +61,14 @@ export const PostBubble = ({
             showTime={showTime}
             fontSize="fs-7"
           />
-          <div className="fs-6 markdown-content">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {item.shortDescription}
-            </ReactMarkdown>
-          </div>
-          <div className="d-flex justify-content-between align-items-center">
+          {hasDescription && (
+            <div className="fs-6 markdown-content">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {item.shortDescription}
+              </ReactMarkdown>
+            </div>
+          )}
+          <div className={`d-flex justify-content-between align-items-center ${isCompact ? 'mt-1' : ''}`}>
             <div className="d-flex flex-wrap fs-7 text-muted">
               {item.tags.map(tag => (
                 <span key={tag} className="pill-static">

@@ -128,7 +128,9 @@ export default function FoodDeliveryClientPage({
   const [saveMessageType, setSaveMessageType] = useState<'success' | 'error'>('success')
   const [isOperationLoading, setIsOperationLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [isAssigningJobs, setIsAssigningJobs] = useState(false) // New state to track when actively assigning jobs
+  const [removingJobIds, setRemovingJobIds] = useState<Set<string>>(new Set())
+  const [pendingOperations, setPendingOperations] = useState<Set<string>>(new Set())
+  const [hasPendingChanges, setHasPendingChanges] = useState(false)
   
   // Track last saved state to prevent unnecessary saves
   const lastSavedStateRef = useRef<string>('')
@@ -182,32 +184,93 @@ export default function FoodDeliveryClientPage({
 
   // Courier assignment functions
   const assignJobToCourier = useCallback((jobId: string, courierNumber: number) => {
-    setIsAssigningJobs(true)
+    // Mark operation as pending
+    setPendingOperations(prev => new Set([...prev, jobId]))
+    
+    // Update local state immediately for responsive UI
     setJobCourierAssignments(prev => {
       const newMap = new Map(prev)
       newMap.set(jobId, courierNumber)
       return newMap
     })
-    // Reset the assigning flag after a short delay to allow multiple rapid assignments
-    setTimeout(() => setIsAssigningJobs(false), 500)
+    
+    // Show immediate feedback
+    setSaveMessage(`Job přiřazen rozvozníkovi ${courierNumber}`)
+    setSaveMessageType('success')
+    
+    // Clear pending operation after a short delay
+    setTimeout(() => {
+      setPendingOperations(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(jobId)
+        return newSet
+      })
+      setTimeout(() => setSaveMessage(null), 1000)
+    }, 300)
   }, [])
 
   const unassignJob = useCallback((jobId: string) => {
-    setIsAssigningJobs(true)
-    setJobCourierAssignments(prev => {
-      const newMap = new Map(prev)
-      newMap.delete(jobId)
-      return newMap
-    })
-    // Reset the assigning flag after a short delay
-    setTimeout(() => setIsAssigningJobs(false), 500)
+    // Mark operation as pending and job as being removed
+    setPendingOperations(prev => new Set([...prev, jobId]))
+    setRemovingJobIds(prev => new Set([...prev, jobId]))
+    
+    // Show immediate feedback
+    setSaveMessage('Odebírám přiřazení...')
+    setSaveMessageType('success')
+    
+    // Add a small delay to show the removing state before actually removing
+    setTimeout(() => {
+      setJobCourierAssignments(prev => {
+        const newMap = new Map(prev)
+        newMap.delete(jobId)
+        return newMap
+      })
+      
+      // Update message after removal
+      setSaveMessage('Přiřazení odebráno')
+      
+      // Remove from both pending and removing states after a short delay
+      setTimeout(() => {
+        setPendingOperations(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(jobId)
+          return newSet
+        })
+        setRemovingJobIds(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(jobId)
+          return newSet
+        })
+        
+        // Clear message
+        setTimeout(() => setSaveMessage(null), 1000)
+      }, 300)
+    }, 200)
   }, [])
 
   // Clear all assignments
   const clearAllAssignments = useCallback(() => {
-    setJobCourierAssignments(new Map())
-    // The auto-save effect will handle clearing the database
-  }, [])
+    // Mark all assigned jobs as being removed and pending
+    const assignedJobIds = Array.from(jobCourierAssignments.keys())
+    setPendingOperations(new Set(assignedJobIds))
+    setRemovingJobIds(new Set(assignedJobIds))
+    
+    setSaveMessage('Odebírám všechna přiřazení...')
+    setSaveMessageType('success')
+    
+    // Add delay to show removing state
+    setTimeout(() => {
+      setJobCourierAssignments(new Map())
+      setSaveMessage('Všechna přiřazení odebrána')
+      
+      // Clear both pending and removing states
+      setTimeout(() => {
+        setPendingOperations(new Set())
+        setRemovingJobIds(new Set())
+        setTimeout(() => setSaveMessage(null), 1000)
+      }, 300)
+    }, 500)
+  }, [jobCourierAssignments])
 
   // Add new courier
   const addNewCourier = useCallback(async () => {
@@ -354,50 +417,50 @@ export default function FoodDeliveryClientPage({
     }
   }, [foodDeliveries, bulkReplaceFoodDeliveries, mutateFoodDeliveries])
 
-  // Auto-save assignments whenever they change (debounced)
-  useEffect(() => {
-    // Don't auto-save on initial load, when no data is available, when currently saving, or when actively assigning jobs
-    if (!planData || foodDeliveries === undefined || isSaving || isAssigningJobs) return
-    
-    // Create a serialized representation of current assignments for comparison
-    const currentStateString = JSON.stringify(
-      Array.from(jobCourierAssignments.entries()).sort()
-    )
-    
-    // Check if the state has actually changed from what we last saved
-    if (currentStateString === lastSavedStateRef.current) return
-    
-    // Check if current assignments are different from saved deliveries
-    const currentAssignments = new Map<string, number>()
-    foodDeliveries.forEach(delivery => {
-      delivery.jobs.forEach(jobOrder => {
-        currentAssignments.set(jobOrder.activeJobId, delivery.courierNum)
+  // Debounced bulk update for assignment changes
+  const debouncedBulkUpdate = useCallback(() => {
+    const timeoutId = setTimeout(async () => {
+      // Don't save if already saving or no data available
+      if (isSaving || !planData || foodDeliveries === undefined) return
+      
+      // Create a serialized representation of current assignments for comparison
+      const currentStateString = JSON.stringify(
+        Array.from(jobCourierAssignments.entries()).sort()
+      )
+      
+      // Check if the state has actually changed from what we last saved
+      if (currentStateString === lastSavedStateRef.current) {
+        setHasPendingChanges(false)
+        return
+      }
+      
+      // Check if current assignments are different from saved deliveries
+      const currentAssignments = new Map<string, number>()
+      foodDeliveries.forEach(delivery => {
+        delivery.jobs.forEach(jobOrder => {
+          currentAssignments.set(jobOrder.activeJobId, delivery.courierNum)
+        })
       })
-    })
-    
-    // Compare current state with saved state
-    let hasChanges = false
-    if (currentAssignments.size !== jobCourierAssignments.size) {
-      hasChanges = true
-    } else {
-      for (const [jobId, courierNum] of jobCourierAssignments) {
-        if (currentAssignments.get(jobId) !== courierNum) {
-          hasChanges = true
-          break
+      
+      // Compare current state with saved state
+      let hasChanges = false
+      if (currentAssignments.size !== jobCourierAssignments.size) {
+        hasChanges = true
+      } else {
+        for (const [jobId, courierNum] of jobCourierAssignments) {
+          if (currentAssignments.get(jobId) !== courierNum) {
+            hasChanges = true
+            break
+          }
         }
       }
-    }
-    
-    // Only save if there are actual changes
-    if (!hasChanges) {
-      // Update the ref even if no DB changes needed (state might have changed but ended up the same as DB)
-      lastSavedStateRef.current = currentStateString
-      return
-    }
-    
-    const timeoutId = setTimeout(async () => {
-      // Double-check we're not currently saving before proceeding
-      if (isSaving) return
+      
+      // Only save if there are actual changes
+      if (!hasChanges) {
+        lastSavedStateRef.current = currentStateString
+        setHasPendingChanges(false)
+        return
+      }
       
       setIsSaving(true)
       setIsOperationLoading(true)
@@ -432,20 +495,22 @@ export default function FoodDeliveryClientPage({
         
         await bulkReplaceFoodDeliveries(deliveryData)
         
-        // Update the ref to track the saved state BEFORE calling mutateFoodDeliveries
+        // Update the ref to track the saved state
         lastSavedStateRef.current = currentStateString
         
-        // Delay the data refresh to avoid immediate state conflicts
-        setTimeout(() => {
-          mutateFoodDeliveries()
-        }, 100)
-        
-        setSaveMessage('Přiřazení automaticky uloženo')
+        setSaveMessage('Změny uloženy')
         setSaveMessageType('success')
-        setTimeout(() => setSaveMessage(null), 2000)
+        setTimeout(() => setSaveMessage(null), 1500)
+        
+        // Only refresh data if no more pending operations to prevent interference
+        setTimeout(() => {
+          if (!hasPendingChanges && pendingOperations.size === 0) {
+            mutateFoodDeliveries()
+          }
+        }, 200)
       } catch (error) {
         console.error('Failed to save food delivery assignments:', error)
-        let errorMessage = 'Chyba při automatickém ukládání přiřazení.'
+        let errorMessage = 'Chyba při ukládání změn.'
         if (error instanceof Error) {
           errorMessage += ` Detail: ${error.message}`
         }
@@ -455,36 +520,86 @@ export default function FoodDeliveryClientPage({
       } finally {
         setIsOperationLoading(false)
         setIsSaving(false)
+        setHasPendingChanges(false)
       }
-    }, 2500) // 2.5 second debounce - longer to allow multiple rapid assignments
+    }, 800) // Reduced debounce for faster responsiveness
     
+    return timeoutId
+  }, [
+    jobCourierAssignments, 
+    planData, 
+    foodDeliveries, 
+    isSaving, 
+    planId, 
+    bulkReplaceFoodDeliveries, 
+    mutateFoodDeliveries,
+    hasPendingChanges,
+    pendingOperations.size
+  ])
+
+  // Trigger debounced bulk update when assignments change
+  useEffect(() => {
+    if (!hasPendingChanges) return
+    
+    const timeoutId = debouncedBulkUpdate()
     return () => clearTimeout(timeoutId)
-  }, [jobCourierAssignments, planData, foodDeliveries, isSaving, isAssigningJobs, planId, bulkReplaceFoodDeliveries, mutateFoodDeliveries])
+  }, [hasPendingChanges, debouncedBulkUpdate])
+
+  // Effect to detect assignment changes and mark as pending
+  useEffect(() => {
+    // Don't trigger on initial load
+    if (!planData || foodDeliveries === undefined) return
+    
+    // Create a serialized representation of current assignments for comparison
+    const currentStateString = JSON.stringify(
+      Array.from(jobCourierAssignments.entries()).sort()
+    )
+    
+    // Check if the state has actually changed from what we last saved
+    if (currentStateString !== lastSavedStateRef.current) {
+      setHasPendingChanges(true)
+    }
+  }, [jobCourierAssignments, planData, foodDeliveries])
 
   // Group jobs by courier assignment
   const jobsByCourier = useMemo(() => {
     if (!foodDeliveries) return []
     
-    // Get all courier numbers from saved deliveries
-    const courierNumbers = foodDeliveries.map(delivery => delivery.courierNum).sort((a, b) => a - b)
+    // Get all courier numbers from saved deliveries AND any that exist only in local state
+    const savedCourierNumbers = new Set(foodDeliveries.map(delivery => delivery.courierNum))
+    const localCourierNumbers = new Set(Array.from(jobCourierAssignments.values()))
+    const allCourierNumbers = Array.from(new Set([...savedCourierNumbers, ...localCourierNumbers])).sort((a, b) => a - b)
     
-    return courierNumbers.map(courierNumber => {
+    return allCourierNumbers.map(courierNumber => {
       const delivery = foodDeliveries.find(d => d.courierNum === courierNumber)
+      // Use local state for immediate responsiveness - this is the key optimization
       const assignedJobs = jobsWithFoodDeliveryNeeds.filter(({ job }) => jobCourierAssignments.get(job.id) === courierNumber)
       
-      // Sort jobs by their order in the delivery
-      const orderedJobs = assignedJobs.sort((a, b) => {
+      // Filter out jobs that are being removed for client-side ordering
+      const activeJobs = assignedJobs.filter(({ job }) => !removingJobIds.has(job.id))
+      
+      // Sort jobs by their order in the delivery, but fall back to local assignment order for new assignments
+      const orderedJobs = activeJobs.sort((a, b) => {
         const orderA = delivery?.jobs.find(j => j.activeJobId === a.job.id)?.order || 999
         const orderB = delivery?.jobs.find(j => j.activeJobId === b.job.id)?.order || 999
         return orderA - orderB
       })
       
+      // Add client-side order numbers for immediate UI feedback
+      const jobsWithClientOrder = orderedJobs.map((jobData, index) => ({
+        ...jobData,
+        clientOrder: index + 1 // Sequential numbering starting from 1
+      }))
+      
       return {
         courierNumber,
-        jobs: orderedJobs
+        jobs: jobsWithClientOrder
       }
-    })
-  }, [foodDeliveries, jobsWithFoodDeliveryNeeds, jobCourierAssignments])
+    }).filter(courier => 
+      // Only show couriers that exist in the database OR have jobs assigned locally
+      savedCourierNumbers.has(courier.courierNumber) || courier.jobs.length > 0
+    )
+  }, [foodDeliveries, jobsWithFoodDeliveryNeeds, jobCourierAssignments, removingJobIds])
 
   // Helper function to get allergens for a specific job
   const getJobAllergens = useCallback((job: ActiveJobNoPlan) => {
@@ -524,7 +639,7 @@ export default function FoodDeliveryClientPage({
           <PageHeader
             title={`Rozvoz jídla - ${planData ? formatDateLong(planData.day) : 'Načítání...'}`}
           >
-            <Link href={`/plan/${planId}`}>
+            <Link href={`/plans/${planId}`}>
               <button className="btn btn-secondary btn-with-icon" type="button">
                 <i className="fas fa-arrow-left"></i>
                 <span>Zpět na plán</span>
@@ -638,10 +753,24 @@ export default function FoodDeliveryClientPage({
                                   className="btn btn-sm btn-outline-danger"
                                   type="button"
                                   onClick={clearAllAssignments}
-                                  disabled={jobCourierAssignments.size === 0}
+                                  disabled={jobCourierAssignments.size === 0 || removingJobIds.size > 0 || pendingOperations.size > 0}
                                 >
-                                  <i className="fas fa-trash-alt me-1"></i>
-                                  Vymazat vše
+                                  {removingJobIds.size > 0 ? (
+                                    <>
+                                      <i className="fas fa-spinner fa-spin me-1"></i>
+                                      Odebírám...
+                                    </>
+                                  ) : pendingOperations.size > 0 ? (
+                                    <>
+                                      <i className="fas fa-clock me-1"></i>
+                                      Čekám na dokončení...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="fas fa-trash-alt me-1"></i>
+                                      Vymazat vše
+                                    </>
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -654,6 +783,18 @@ export default function FoodDeliveryClientPage({
                               {jobsByCourier.length > 0 && (
                                 <span className="ms-3">
                                   • {jobsByCourier.length} aktivní rozvozník{jobsByCourier.length === 1 ? '' : 'ů'}
+                                </span>
+                              )}
+                              {hasPendingChanges && (
+                                <span className="ms-3 text-warning">
+                                  <i className="fas fa-clock me-1"></i>
+                                  Ukládám změny...
+                                </span>
+                              )}
+                              {pendingOperations.size > 0 && (
+                                <span className="ms-3 text-info">
+                                  <i className="fas fa-sync fa-spin me-1"></i>
+                                  {pendingOperations.size} operací v běhu
                                 </span>
                               )}
                             </div>
@@ -681,7 +822,18 @@ export default function FoodDeliveryClientPage({
                                                   <i className="fas fa-user me-2"></i>
                                                   Rozvozník {courierNumber}
                                                 </h6>
-                                                <small>{jobs.length} job{jobs.length === 1 ? '' : 'ů'}</small>
+                                                <small>
+                                                  {jobs.length} job{jobs.length === 1 ? '' : 'ů'}
+                                                  {(() => {
+                                                    const removingCount = jobs.filter(({ job }) => removingJobIds.has(job.id)).length
+                                                    return removingCount > 0 ? (
+                                                      <span className="text-warning ms-2">
+                                                        <i className="fas fa-spinner fa-spin me-1"></i>
+                                                        (odebírám {removingCount})
+                                                      </span>
+                                                    ) : null
+                                                  })()}
+                                                </small>
                                               </div>
                                               <div className="btn-group">
                                                 <Link href={`/plan/${planId}/courier/${foodDeliveries?.find(d => d.courierNum === courierNumber)?.id}`}>
@@ -718,19 +870,41 @@ export default function FoodDeliveryClientPage({
                                                 Žádné joby
                                               </div>
                                             ) : (
-                                              <div className="list-group list-group-flush">
-                                                {jobs.map(({ job }, jobIndex) => {
+                                              <div className="list-group list-group-flush">                                                {jobs.map(({ job, clientOrder }, jobIndex) => {
                                                   const jobAllergens = getJobAllergens(job)
                                                   const delivery = foodDeliveries?.find(d => d.courierNum === courierNumber)
-                                                  const jobOrder = delivery?.jobs.find(j => j.activeJobId === job.id)?.order || (jobIndex + 1)
+                                                  // Use client-side order for immediate feedback, fall back to database order
+                                                  const jobOrder = clientOrder || delivery?.jobs.find(j => j.activeJobId === job.id)?.order || (jobIndex + 1)
+                                                  const isBeingRemoved = removingJobIds.has(job.id)
+                                                  const isPending = pendingOperations.has(job.id)
                                                   
                                                   return (
-                                                    <div key={job.id} className="list-group-item px-2 py-2 courier-job-item">
+                                                    <div 
+                                                      key={job.id} 
+                                                      className={`list-group-item px-2 py-2 courier-job-item${isBeingRemoved ? ' removing-job' : ''}${isPending ? ' pending-job' : ''}`}
+                                                      style={isBeingRemoved ? { 
+                                                        opacity: 0.6, 
+                                                        backgroundColor: '#fff2f2',
+                                                        transition: 'all 0.3s ease-in-out',
+                                                        border: '2px dashed #dc3545',
+                                                        position: 'relative'
+                                                      } : isPending ? {
+                                                        backgroundColor: '#f8f9fa',
+                                                        transition: 'all 0.2s ease-in-out',
+                                                        border: '1px solid #6c757d'
+                                                      } : {}}
+                                                    >
                                                       <div className="d-flex justify-content-between align-items-start mb-2">
                                                         <div className="flex-grow-1 me-2">
                                                           <div className="d-flex align-items-center mb-1">
                                                             <span className="badge bg-secondary me-2 job-order-badge">{jobOrder}</span>
                                                             <small className="fw-bold">{job.proposedJob.name}</small>
+                                                            {isBeingRemoved && (
+                                                              <span className="badge bg-danger ms-2 animate-pulse">
+                                                                <i className="fas fa-spinner fa-spin me-1"></i>
+                                                                Odebírám
+                                                              </span>
+                                                            )}
                                                           </div>
                                                           <div className="small text-muted mb-1">
                                                             <i className="fas fa-map-marker-alt me-1"></i>
@@ -786,7 +960,7 @@ export default function FoodDeliveryClientPage({
                                                             <button
                                                               className="btn btn-outline-secondary btn-sm reorder-btn"
                                                               onClick={() => reorderJobInCourier(courierNumber, job.id, 'up')}
-                                                              disabled={jobIndex === 0 || isOperationLoading}
+                                                              disabled={jobIndex === 0 || isOperationLoading || isBeingRemoved || isPending || hasPendingChanges}
                                                               title="Posunout nahoru v pořadí"
                                                               style={{ fontSize: '0.7em', padding: '0.2rem 0.4rem' }}
                                                             >
@@ -795,7 +969,7 @@ export default function FoodDeliveryClientPage({
                                                             <button
                                                               className="btn btn-outline-secondary btn-sm reorder-btn"
                                                               onClick={() => reorderJobInCourier(courierNumber, job.id, 'down')}
-                                                              disabled={jobIndex === jobs.length - 1 || isOperationLoading}
+                                                              disabled={jobIndex === jobs.length - 1 || isOperationLoading || isBeingRemoved || isPending || hasPendingChanges}
                                                               title="Posunout dolů v pořadí"
                                                               style={{ fontSize: '0.7em', padding: '0.2rem 0.4rem' }}
                                                             >
@@ -803,12 +977,19 @@ export default function FoodDeliveryClientPage({
                                                             </button>
                                                           </div>
                                                           <button
-                                                            className="btn btn-sm btn-outline-danger"
+                                                            className={`btn btn-sm ${isBeingRemoved ? 'btn-danger' : 'btn-outline-danger'}`}
                                                             onClick={() => unassignJob(job.id)}
-                                                            title="Odebrat přiřazení"
+                                                            disabled={isBeingRemoved || isOperationLoading || isPending}
+                                                            title={isBeingRemoved ? "Odebírám..." : isPending ? "Zpracovávám..." : "Odebrat přiřazení"}
                                                             style={{ fontSize: '0.7em', padding: '0.2rem 0.4rem' }}
                                                           >
-                                                            <i className="fas fa-times"></i>
+                                                            {isBeingRemoved ? (
+                                                              <i className="fas fa-spinner fa-spin"></i>
+                                                            ) : isPending ? (
+                                                              <i className="fas fa-clock"></i>
+                                                            ) : (
+                                                              <i className="fas fa-times"></i>
+                                                            )}
                                                           </button>
                                                         </div>
                                                       </div>
@@ -918,10 +1099,10 @@ export default function FoodDeliveryClientPage({
                                                         key={courierNumber}
                                                         className="btn btn-sm btn-outline-primary"
                                                         onClick={() => assignJobToCourier(job.id, courierNumber)}
-                                                        disabled={isSaving || isOperationLoading}
+                                                        disabled={isSaving || isOperationLoading || pendingOperations.has(job.id) || hasPendingChanges}
                                                         title={`Přiřadit rozvozníkovi ${courierNumber}`}
                                                       >
-                                                        {isSaving ? (
+                                                        {isSaving || pendingOperations.has(job.id) ? (
                                                           <i className="fas fa-spinner fa-spin"></i>
                                                         ) : (
                                                           courierNumber
@@ -956,7 +1137,8 @@ export default function FoodDeliveryClientPage({
                     </div>
                   )}
 
-                  {showCourierAssignment && jobsByCourier.length > 0 && jobCourierAssignments.size > 0 && (
+                  {/* Statistics section - always visible when there are courier assignments */}
+                  {jobsByCourier.length > 0 && jobCourierAssignments.size > 0 && (
                     <div className="row mb-4">
                       <div className="col">
                         <div className="card border-info">
@@ -1084,19 +1266,21 @@ export default function FoodDeliveryClientPage({
                                       style={{ transform: 'scale(1.3)' }}
                                     />
                                     <div className="flex-grow-1">
-                                      <h6 className="mb-1">
+                                      <h6 className="mb-2">
                                         <strong>{job.proposedJob.name}</strong>
-                                        {job.completed && (
-                                          <span className="badge bg-success ms-2">Hotovo</span>
-                                        )}
-                                        {jobCourierAssignments.has(job.id) && (
-                                          <span className="badge bg-primary ms-2">
-                                            <i className="fas fa-truck me-1"></i>
-                                            Rozvozník {jobCourierAssignments.get(job.id)}
-                                          </span>
-                                        )}
+                                        <div className="d-flex flex-wrap gap-2 mt-1">
+                                          {job.completed && (
+                                            <span className="badge bg-success">Hotovo</span>
+                                          )}
+                                          {jobCourierAssignments.has(job.id) && (
+                                            <span className="badge bg-primary">
+                                              <i className="fas fa-truck me-1"></i>
+                                              Rozvozník {jobCourierAssignments.get(job.id)}
+                                            </span>
+                                          )}
+                                        </div>
                                       </h6>
-                                      <div className="d-flex gap-3 text-muted small">
+                                      <div className="d-flex flex-column flex-lg-row gap-2 gap-lg-3 text-muted small">
                                         <span>
                                           <i className="fas fa-map-marker-alt me-1"></i>
                                           {job.proposedJob.area?.name || 'Nezadaná oblast'}
@@ -1106,17 +1290,19 @@ export default function FoodDeliveryClientPage({
                                           {job.proposedJob.address}
                                         </span>
                                         {job.responsibleWorker && (
-                                          <span>
-                                            <i className="fas fa-user-tie me-1"></i>
-                                            Vedoucí: <strong>{job.responsibleWorker.firstName} {job.responsibleWorker.lastName}</strong>
-                                            <a href={`tel:${job.responsibleWorker.phone}`} className="text-decoration-none ms-2">
+                                          <div className="d-flex flex-column flex-sm-row gap-1 gap-sm-2">
+                                            <span>
+                                              <i className="fas fa-user-tie me-1"></i>
+                                              Vedoucí: <strong>{job.responsibleWorker.firstName} {job.responsibleWorker.lastName}</strong>
+                                            </span>
+                                            <a href={`tel:${job.responsibleWorker.phone}`} className="text-decoration-none">
                                               <i className="fas fa-phone me-1"></i>
                                               {job.responsibleWorker.phone}
                                             </a>
-                                          </span>
+                                          </div>
                                         )}
                                       </div>
-                                      <div className="d-flex gap-2 mt-1">
+                                      <div className="d-flex flex-wrap gap-2 mt-2">
                                         {needsFoodDelivery && (
                                           <span className="badge bg-warning text-dark">
                                             <i className="fas fa-utensils me-1"></i>
@@ -1132,7 +1318,7 @@ export default function FoodDeliveryClientPage({
                                       </div>
                                     </div>
                                     {showCourierAssignment && jobsByCourier.length > 0 && (
-                                      <div className="ms-3">
+                                      <div className="ms-2 d-none d-md-block">
                                         <div className="btn-group-vertical" role="group">
                                           <small className="text-muted mb-1">Přiřadit:</small>
                                           <div className="btn-group" role="group">
@@ -1149,14 +1335,14 @@ export default function FoodDeliveryClientPage({
                                                     ? unassignJob(job.id)
                                                     : assignJobToCourier(job.id, courierNumber)
                                                 }
-                                                disabled={isSaving || isOperationLoading}
+                                                disabled={isSaving || isOperationLoading || pendingOperations.has(job.id) || hasPendingChanges}
                                                 title={`${
                                                   jobCourierAssignments.get(job.id) === courierNumber 
                                                     ? 'Odebrat z' 
                                                     : 'Přiřadit'
                                                 } rozvozníka ${courierNumber}`}
                                               >
-                                                {isSaving && jobCourierAssignments.get(job.id) === courierNumber ? (
+                                                {(isSaving || pendingOperations.has(job.id)) && jobCourierAssignments.get(job.id) === courierNumber ? (
                                                   <i className="fas fa-spinner fa-spin"></i>
                                                 ) : (
                                                   courierNumber
@@ -1168,37 +1354,96 @@ export default function FoodDeliveryClientPage({
                                       </div>
                                     )}
                                   </div>
+                                  {/* Mobile courier assignment buttons */}
+                                  {showCourierAssignment && jobsByCourier.length > 0 && (
+                                    <div className="d-md-none mt-2 pt-2 border-top">
+                                      <small className="text-muted">Přiřadit rozvozníka:</small>
+                                      <div className="d-flex flex-wrap gap-1 mt-1">
+                                        {jobsByCourier.map(({ courierNumber }) => (
+                                          <button
+                                            key={courierNumber}
+                                            className={`btn btn-sm ${
+                                              jobCourierAssignments.get(job.id) === courierNumber 
+                                                ? 'btn-primary' 
+                                                : 'btn-outline-primary'
+                                            }`}
+                                            onClick={() => 
+                                              jobCourierAssignments.get(job.id) === courierNumber 
+                                                ? unassignJob(job.id)
+                                                : assignJobToCourier(job.id, courierNumber)
+                                            }
+                                            disabled={isSaving || isOperationLoading || pendingOperations.has(job.id) || hasPendingChanges}
+                                            title={`${
+                                              jobCourierAssignments.get(job.id) === courierNumber 
+                                                ? 'Odebrat z' 
+                                                : 'Přiřadit'
+                                            } rozvozníka ${courierNumber}`}
+                                          >
+                                            {(isSaving || pendingOperations.has(job.id)) && jobCourierAssignments.get(job.id) === courierNumber ? (
+                                              <i className="fas fa-spinner fa-spin"></i>
+                                            ) : (
+                                              `Rozvozník ${courierNumber}`
+                                            )}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="card-body">
                                   {workersWithAllergies.length > 0 ? (
                                     <div className="table-responsive">
-                                      <table className="table table-sm mb-0" style={{ tableLayout: 'fixed' }}>
+                                      <table className="table table-sm mb-0">
                                         <thead>
                                           <tr>
-                                            <th style={{ width: '35%' }}>Pracant</th>
-                                            <th style={{ width: '30%' }}>Telefon</th>
-                                            <th style={{ width: '35%' }}>Alergie</th>
+                                            <th className="d-none d-md-table-cell" style={{ width: '35%' }}>Pracant</th>
+                                            <th className="d-none d-md-table-cell" style={{ width: '30%' }}>Telefon</th>
+                                            <th className="d-none d-md-table-cell" style={{ width: '35%' }}>Alergie</th>
+                                            <th className="d-md-none">Pracanti s alergiemi</th>
                                           </tr>
                                         </thead>
                                         <tbody>
                                           {workersWithAllergies.map((worker, index) => (
                                             <tr key={`${worker.id}-${index}`}>
-                                              <td>
+                                              {/* Desktop layout */}
+                                              <td className="d-none d-md-table-cell">
                                                 <strong>{worker.firstName} {worker.lastName}</strong>
                                               </td>
-                                              <td>
+                                              <td className="d-none d-md-table-cell">
                                                 <a href={`tel:${worker.phone}`} className="text-decoration-none">
                                                   <i className="fas fa-phone me-1"></i>
                                                   {worker.phone}
                                                 </a>
                                               </td>
-                                              <td>
+                                              <td className="d-none d-md-table-cell">
                                                 <div className="d-flex flex-wrap gap-1">
                                                   {worker.allergies.map((allergy, allergyIndex) => (
                                                     <span 
                                                       key={allergyIndex} 
-                                                      className="badge bg-danger"
-                                                      style={{ fontSize: '0.75em' }}
+                                                      className="badge bg-danger text-white"
+                                                      style={{ fontSize: '0.75rem' }}
+                                                    >
+                                                      {allergy}
+                                                    </span>
+                                                  ))}
+                                                </div>
+                                              </td>
+                                              {/* Mobile layout */}
+                                              <td className="d-md-none">
+                                                <div className="mb-2">
+                                                  <strong>{worker.firstName} {worker.lastName}</strong>
+                                                  <br />
+                                                  <a href={`tel:${worker.phone}`} className="text-decoration-none text-muted">
+                                                    <i className="fas fa-phone me-1"></i>
+                                                    {worker.phone}
+                                                  </a>
+                                                </div>
+                                                <div className="d-flex flex-wrap gap-1">
+                                                  {worker.allergies.map((allergy, allergyIndex) => (
+                                                    <span 
+                                                      key={allergyIndex} 
+                                                      className="badge bg-danger text-white"
+                                                      style={{ fontSize: '0.7rem' }}
                                                     >
                                                       {allergy}
                                                     </span>
