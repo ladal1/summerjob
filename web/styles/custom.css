@@ -1036,3 +1036,48 @@ form.application input.custom-input::placeholder {
     width: auto !important;
   }
 }
+
+/* Job removal animations */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.removing-job {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+.removing-job .badge {
+  animation: pulse 1s infinite;
+}
+
+.animate-pulse {
+  animation: pulse 1s infinite;
+}
+
+.pending-job {
+  border-left: 3px solid #6c757d !important;
+  background-color: #f8f9fa;
+}
+
+.pending-job .badge {
+  opacity: 0.8;
+}
