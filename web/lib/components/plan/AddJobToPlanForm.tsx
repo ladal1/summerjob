@@ -46,9 +46,13 @@ export default function AddJobToPlanForm({
     handleSubmit,
     formState: { errors },
     control,
+    watch,
   } = useForm<ActiveJobCreateFormData>({
     resolver: zodResolver(ActiveJobCreateFormSchema),
   })
+
+  const watchedJobs = watch('jobs')
+  const isJobsEmpty = !watchedJobs || watchedJobs.length === 0
 
   const items = useMemo(() => {
     if (!data) {
@@ -140,9 +144,9 @@ export default function AddJobToPlanForm({
             render={({ field: { onChange, value, ref } }) => (
               <Select
                 ref={ref}
-                value={value?.map(formDataToItem)}
+                value={value?.map(formDataToItem) || []}
                 options={items}
-                onChange={val => onChange(val.map(v => itemToFormData(v)))}
+                onChange={val => onChange(val?.length > 0 ? val.map(v => itemToFormData(v)) : [])}
                 placeholder={'Vyberte joby...'}
                 formatOptionLabel={formatOptionLabel}
                 isMulti
@@ -160,7 +164,7 @@ export default function AddJobToPlanForm({
         <button
           className="btn btn-primary mt-4 float-end"
           type="submit"
-          disabled={isMutating}
+          disabled={isMutating || isJobsEmpty}
         >
           Přidat
         </button>
