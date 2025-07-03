@@ -8,7 +8,7 @@ interface RideListPrintProps {
 }
 
 export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
-  const formatSingleRide = (ride: RideComplete, fromJobId?: string) => {
+  const formatSingleRide = (ride: RideComplete, fromJobId?: number) => {
     const passengersFromOtherJobsIds = ride.passengers
       .filter(p => !job.workers.map(w => w.id).includes(p.id))
       .map(p => p.id)
@@ -85,7 +85,7 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
       })
       if (passengersFromThisJob.length > 0) {
         ridesFromOtherJobs.push({
-          jobId: otherJob.id,
+          jobId: otherJob.seqId,
           ride: ride,
           passengers: passengersFromThisJob,
         })
