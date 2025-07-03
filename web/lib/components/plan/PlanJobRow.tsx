@@ -44,6 +44,7 @@ interface PlanJobRowProps {
   reloadPlan: () => void
   onWorkerHover: (url: string | null) => void
   adorationByWorker?: Map<string, boolean>
+  jobPositionMap?: Map<string, number>
 }
 
 export function PlanJobRow({
@@ -56,6 +57,7 @@ export function PlanJobRow({
   reloadPlan,
   onWorkerHover,
   adorationByWorker = new Map(),
+  jobPositionMap = new Map(),
 }: PlanJobRowProps) {
   //#region Update job
   const { data: activeJobs } = useAPIActiveJobs({
@@ -238,7 +240,8 @@ export function PlanJobRow({
             isBeingDeleted,
             sameWorkIssue,
             sameCoworkerIssue,
-            adorationByWorker
+            adorationByWorker,
+            jobPositionMap
           )}
           onDrop={onWorkerDropped(job.id)}
         >
@@ -385,7 +388,8 @@ function formatRowData(
   isBeingDeleted: boolean,
   sameWorkIssue: boolean,
   sameCoworkerIssue: boolean,
-  adorationByWorker: Map<string, boolean>
+  adorationByWorker: Map<string, boolean>,
+  jobPositionMap: Map<string, number>
 ): RowCells[] {
   return [
     {
@@ -420,7 +424,7 @@ function formatRowData(
     { content: job.proposedJob.area?.name },
     { content: job.proposedJob.address },
     { content: formatAmenities(job) },
-    { content: job.proposedJob.priority },
+    { content: jobPositionMap.get(job.id) || job.proposedJob.priority },
     {
       content: (
         <span
