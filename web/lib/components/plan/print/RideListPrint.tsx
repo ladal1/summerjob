@@ -20,7 +20,7 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
       if (workersInThisRide.length == 0) continue
       for (const worker of workersInThisRide) {
         passengersFromOtherJobsData.push({
-          jobId: otherJob.id,
+          jobId: otherJob.seqId,
           passenger: worker,
         })
       }
