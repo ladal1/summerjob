@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
 import { Serialized } from './serialize'
 import { deserializeWorkerAvailability } from './worker'
+import { ActiveJobNoPlan } from './active-job'
 
 useZodOpenApi
 
@@ -79,4 +80,35 @@ export function deserializePlans(data: Serialized): PlanWithJobs[] {
 export function deserializePlanDate<T extends Plan>(data: T) {
   data.day = new Date(data.day)
   return data
+}
+
+/**
+ * Sorts jobs by area name (null areas are treated as "Nezadaná oblast") and then by job ID.
+ * Also reassigns sequential IDs starting from 1.
+ * @param jobs Array of jobs to sort
+ * @returns Sorted array of jobs with reassigned sequential IDs
+ */
+export function sortJobsByAreaAndId(
+  jobs: ActiveJobNoPlan[]
+): ActiveJobNoPlan[] {
+  const sortedJobs = jobs.sort((a, b) => {
+    // First sort by area name (handling null areas)
+    const areaA = a.proposedJob.area?.name ?? 'Nezadaná oblast'
+    const areaB = b.proposedJob.area?.name ?? 'Nezadaná oblast'
+    const areaComparison = areaA.localeCompare(areaB)
+
+    if (areaComparison !== 0) {
+      return areaComparison
+    }
+
+    // If areas are the same, sort by original job ID
+    return a.id.localeCompare(b.id)
+  })
+
+  // Reassign sequential IDs
+  for (let i = 1; i <= sortedJobs.length; i++) {
+    sortedJobs[i - 1].seqId = i
+  }
+
+  return sortedJobs
 }

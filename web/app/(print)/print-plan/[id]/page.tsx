@@ -3,6 +3,7 @@ import RideListPrint from 'lib/components/plan/print/RideListPrint'
 import { getPlanById } from 'lib/data/plans'
 import { formatDateLong } from 'lib/helpers/helpers'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
+import { sortJobsByAreaAndId } from 'lib/types/plan'
 import Image from 'next/image'
 import logoImage from 'public/logo-smj-yellow.png'
 import React from 'react'
@@ -33,22 +34,7 @@ export default async function PrintPlanPage(props: PathProps) {
   const params = await props.params;
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
-  const sortedJobs = plan.jobs.sort((a, b) => {
-    // First sort by area name (handling null areas)
-    const areaA = a.proposedJob.area?.name ?? 'Nezadaná oblast'
-    const areaB = b.proposedJob.area?.name ?? 'Nezadaná oblast'
-    const areaComparison = areaA.localeCompare(areaB)
-    
-    if (areaComparison !== 0) {
-      return areaComparison
-    }
-    
-    // If areas are the same, sort by original job ID
-    return a.id.localeCompare(b.id)
-  })
-  for (let i = 1; i <= sortedJobs.length; i++) {
-    sortedJobs[i - 1].id = i.toString()
-  }
+  const sortedJobs = sortJobsByAreaAndId(plan.jobs)
 
   return (
     <>
@@ -82,7 +68,7 @@ function JobInfo({
   const otherJobs = jobs.filter(j => j.id !== job.id)
   return (
     <div className="jobinfo-container">
-      <div className="job-number-col">{job.id}</div>
+      <div className="job-number-col">{job.seqId}</div>
       <div className="job-data-col">
         <div className="w-50">
           <h2>{job.proposedJob.name}</h2>

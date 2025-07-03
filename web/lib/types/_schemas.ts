@@ -27,6 +27,7 @@ export const ActiveJobNoPlanSchema = ActiveJobSchema.extend({
   proposedJob: ProposedJobWithAreaSchema,
   rides: z.array(RideCompleteSchema),
   responsibleWorker: WorkerSchema.or(z.null()),
+  seqId: z.number().optional(),
 }).openapi({
   title: 'ActiveJobNoPlan',
 })

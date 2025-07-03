@@ -152,7 +152,7 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                   <div className="col-lg-6">
                     <Label id="address" label="Adresa" />
                     {`${selectedPlan.job.location.address}, ${selectedPlan.job.location.name}`}
-                    <div className="mb-3">
+                    <div className="mb-3" style={{ height: '400px' }}>
                       <Map
                         center={selectedPlan.job.location.coordinates}
                         zoom={11}
