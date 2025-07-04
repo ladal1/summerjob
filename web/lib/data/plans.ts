@@ -102,6 +102,7 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
               cars: {
                 where: {
                   deleted: false,
+                  forEventId: activeEventId,
                 },
               },
               availability: {
