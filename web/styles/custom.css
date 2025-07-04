@@ -934,13 +934,7 @@ form.application input.custom-input::placeholder {
 
 /* Food delivery courier cards styling */
 .courier-card {
-  transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.courier-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  transform: translateY(-2px);
 }
 
 .courier-card .card-header {
@@ -950,12 +944,6 @@ form.application input.custom-input::placeholder {
 
 .courier-job-item {
   border-left: 3px solid #007bff;
-  transition: all 0.2s ease;
-}
-
-.courier-job-item:hover {
-  border-left-color: #0056b3;
-  background-color: #f8f9fa;
 }
 
 .job-order-badge {
