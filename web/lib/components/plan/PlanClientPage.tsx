@@ -5,6 +5,7 @@ import { Modal, ModalSize } from 'lib/components/modal/Modal'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
 import { PlanTable } from 'lib/components/plan/PlanTable'
+import { SortOrder } from 'lib/components/table/SortableTable'
 import {
   useAPIPlan,
   useAPIPlanDelete,
@@ -222,6 +223,8 @@ export default function PlanClientPage({
   const contactQ = searchParams?.get('contact')
   const searchQ = searchParams?.get('search')
   const showNumbersQ = searchParams?.get('showNumbers') === 'true'
+  const sortColumnQ = searchParams?.get('sortColumn')
+  const sortDirectionQ = searchParams?.get('sortDirection') as 'asc' | 'desc' | null
 
   // area
   const areas = useMemo(
@@ -255,21 +258,34 @@ export default function PlanClientPage({
   // show numbers checkbox
   const [showNumbers, setShowNumbers] = useState(showNumbersQ)
 
+  // sort order
+  const [sortOrder, setSortOrder] = useState<SortOrder>({
+    columnId: sortColumnQ || 'name',
+    direction: sortDirectionQ || 'asc',
+  })
+
+  const onSortOrderChange = (newSortOrder: SortOrder) => {
+    setSortOrder(newSortOrder)
+  }
+
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(
-      `?${new URLSearchParams({
-        area: selectedArea.id,
-        contact: selectedContact.id,
-        search: filter,
-        showNumbers: showNumbers.toString(),
-      })}`,
-      {
-        scroll: false,
-      }
-    )
-  }, [selectedArea, selectedContact, filter, showNumbers, router])
+    const params = new URLSearchParams({
+      area: selectedArea.id,
+      contact: selectedContact.id,
+      search: filter,
+      showNumbers: showNumbers.toString(),
+    })
+    
+    // Only add sort parameters if they're not defaults
+    if (sortOrder.columnId !== 'name' || sortOrder.direction !== 'asc') {
+      params.append('sortColumn', sortOrder.columnId || 'name')
+      params.append('sortDirection', sortOrder.direction)
+    }
+    
+    router.replace(`?${params}`, { scroll: false })
+  }, [selectedArea, selectedContact, filter, showNumbers, sortOrder, router])
 
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
 
@@ -423,6 +439,8 @@ export default function PlanClientPage({
                     onHover={setWorkerPhotoURL}
                     adorationByWorker={adorationByWorker}
                     showNumbers={showNumbers}
+                    sortOrder={sortOrder}
+                    onSortOrderChange={onSortOrderChange}
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">

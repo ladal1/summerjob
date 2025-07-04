@@ -22,6 +22,8 @@ interface PlanTableProps {
   onHover: (url: string | null) => void
   adorationByWorker?: Map<string, boolean>
   showNumbers?: boolean
+  sortOrder?: SortOrder
+  onSortOrderChange?: (sortOrder: SortOrder) => void
 }
 
 export function PlanTable({
@@ -33,6 +35,8 @@ export function PlanTable({
   onHover,
   adorationByWorker = new Map(),
   showNumbers = false,
+  sortOrder: initialSortOrder,
+  onSortOrderChange,
 }: PlanTableProps) {
   // Create dynamic columns based on showNumbers
   const columns: SortableColumn[] = useMemo(() => {
@@ -94,12 +98,15 @@ export function PlanTable({
     }),
     [showNumbers, jobPositionMap]
   )
-  const [sortOrder, setSortOrder] = useState<SortOrder>({
-    columnId: 'name',
-    direction: 'asc',
-  })
+  const [sortOrder, setSortOrder] = useState<SortOrder>(
+    initialSortOrder || {
+      columnId: 'name',
+      direction: 'asc',
+    }
+  )
   const onSortRequested = (direction: SortOrder) => {
     setSortOrder(direction)
+    onSortOrderChange?.(direction)
   }
   const sortedJobs = useMemo(() => {
     return plan ? sortData(plan.jobs, getSortable, sortOrder) : []
