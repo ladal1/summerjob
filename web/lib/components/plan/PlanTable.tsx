@@ -1,6 +1,6 @@
 import type { Worker } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
-import { PlanComplete } from 'lib/types/plan'
+import { PlanComplete, sortJobsByAreaAndId } from 'lib/types/plan'
 import { RidesForJob } from 'lib/types/ride'
 import { WorkerComplete } from 'lib/types/worker'
 import { useCallback, useMemo, useState } from 'react'
@@ -13,28 +13,6 @@ import { sortData } from '../table/SortData'
 import { PlanJoblessRow } from './PlanJoblessRow'
 import { PlanJobRow } from './PlanJobRow'
 
-const _columns: SortableColumn[] = [
-  {
-    id: 'completed',
-    name: 'Hotovo',
-    style: { maxWidth: '100px' },
-  },
-  { id: 'name', name: 'Práce' },
-  { id: 'workers', name: 'Pracanti' },
-  { id: 'contact', name: 'Kontaktní osoba' },
-  { id: 'area', name: 'Oblast' },
-  { id: 'address', name: 'Adresa' },
-  { id: 'amenities', name: 'Zajištění' },
-  { id: 'priority', name: 'Priorita' },
-  {
-    id: 'actions',
-    name: 'Akce',
-    notSortable: true,
-    stickyRight: true,
-    style: { minWidth: '100px' },
-  },
-]
-
 interface PlanTableProps {
   plan?: PlanComplete
   shouldShowJob: (job: ActiveJobNoPlan) => boolean
@@ -43,6 +21,7 @@ interface PlanTableProps {
   reloadPlan: () => void
   onHover: (url: string | null) => void
   adorationByWorker?: Map<string, boolean>
+  showNumbers?: boolean
 }
 
 export function PlanTable({
@@ -53,7 +32,50 @@ export function PlanTable({
   reloadPlan,
   onHover,
   adorationByWorker = new Map(),
+  showNumbers = false,
 }: PlanTableProps) {
+  // Create dynamic columns based on showNumbers
+  const columns: SortableColumn[] = useMemo(() => {
+    const baseColumns: SortableColumn[] = [
+      {
+        id: 'completed',
+        name: 'Hotovo',
+        style: { maxWidth: '100px' },
+      },
+      { id: 'name', name: 'Práce' },
+      { id: 'workers', name: 'Pracanti' },
+      { id: 'contact', name: 'Kontaktní osoba' },
+      { id: 'area', name: 'Oblast' },
+      { id: 'address', name: 'Adresa' },
+      { id: 'amenities', name: 'Zajištění' },
+      { id: 'priority', name: showNumbers ? 'Číslo' : 'Priorita' },
+      {
+        id: 'actions',
+        name: 'Akce',
+        notSortable: true,
+        stickyRight: true,
+        style: { minWidth: '100px' },
+      },
+    ]
+    return baseColumns
+  }, [showNumbers])
+
+  // Create position mapping based on sortJobsByAreaAndId function
+  const jobPositionMap = useMemo(() => {
+    if (!plan) return new Map<string, number>()
+    
+    const jobsWithPositions = sortJobsByAreaAndId([...plan.jobs])
+    const positionMap = new Map<string, number>()
+    
+    jobsWithPositions.forEach(job => {
+      if (job.seqId) {
+        positionMap.set(job.id, job.seqId)
+      }
+    })
+    
+    return positionMap
+  }, [plan])
+
   //#region Sort
   const getSortable = useMemo(
     () => ({
@@ -67,9 +89,10 @@ export function PlanTable({
       contact: (job: ActiveJobNoPlan) => job.proposedJob.contact,
       workers: (job: ActiveJobNoPlan) =>
         `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers} .. ${job.proposedJob.strongWorkers}`,
-      priority: (job: ActiveJobNoPlan) => job.proposedJob.priority,
+      priority: (job: ActiveJobNoPlan) => 
+        showNumbers ? (jobPositionMap.get(job.id) || 0) : job.proposedJob.priority,
     }),
-    []
+    [showNumbers, jobPositionMap]
   )
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: 'name',
@@ -109,7 +132,7 @@ export function PlanTable({
 
   return (
     <SortableTable
-      columns={_columns}
+      columns={columns}
       currentSort={sortOrder}
       onRequestedSort={onSortRequested}
     >
@@ -126,6 +149,7 @@ export function PlanTable({
             reloadPlan={reload}
             onWorkerHover={onHover}
             adorationByWorker={adorationByWorker}
+            jobPositionMap={showNumbers ? jobPositionMap : new Map()}
           />
         ))}
       {joblessWorkers && plan && (
@@ -134,7 +158,7 @@ export function PlanTable({
           planDay={plan.day}
           jobs={sortedJobs}
           joblessWorkers={joblessWorkers}
-          numColumns={_columns.length}
+          numColumns={columns.length}
           onWorkerDragStart={onWorkerDragStart}
           reloadPlan={reload}
           onWorkerHover={onHover}

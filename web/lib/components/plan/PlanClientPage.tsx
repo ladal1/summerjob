@@ -221,6 +221,7 @@ export default function PlanClientPage({
   const areaIdQ = searchParams?.get('area')
   const contactQ = searchParams?.get('contact')
   const searchQ = searchParams?.get('search')
+  const showNumbersQ = searchParams?.get('showNumbers') === 'true'
 
   // area
   const areas = useMemo(
@@ -251,6 +252,9 @@ export default function PlanClientPage({
   // search
   const [filter, setFilter] = useState(searchQ ?? '')
 
+  // show numbers checkbox
+  const [showNumbers, setShowNumbers] = useState(showNumbersQ)
+
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
@@ -259,12 +263,13 @@ export default function PlanClientPage({
         area: selectedArea.id,
         contact: selectedContact.id,
         search: filter,
+        showNumbers: showNumbers.toString(),
       })}`,
       {
         scroll: false,
       }
     )
-  }, [selectedArea, selectedContact, filter, router])
+  }, [selectedArea, selectedContact, filter, showNumbers, router])
 
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
 
@@ -396,6 +401,14 @@ export default function PlanClientPage({
                         defaultOptionId: 'all',
                       },
                     ]}
+                    checkboxes={[
+                      {
+                        id: 'showNumbers',
+                        label: 'Zobrazit čísla jobů',
+                        checked: showNumbers,
+                        onCheckboxChanged: setShowNumbers,
+                      },
+                    ]}
                   />
                 </div>
               </div>
@@ -409,6 +422,7 @@ export default function PlanClientPage({
                     reloadPlan={reloadPlan}
                     onHover={setWorkerPhotoURL}
                     adorationByWorker={adorationByWorker}
+                    showNumbers={showNumbers}
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">
