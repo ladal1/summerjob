@@ -173,7 +173,6 @@ export async function getMyPlan(
   for (const ride of myJob.rides) {
     if (isInRide(ride)) {
       // log job id and ride id (and endsAtMyJob)
-      console.log(`Job ID: ${myJob.id}, Ride ID: ${ride.id}, Ends at my job: ${ride.job.id === myJob.id}`)
       myRide = rideInfo(ride)
       break
     }
@@ -199,7 +198,7 @@ export async function getMyPlan(
       description: myJob.proposedJob.publicDescription,
       responsibleWorkerName: responsibleWorkerName,
       workerNames: myJob.workers.map(
-        worker => `${worker.firstName} ${worker.lastName}`
+        worker => `${worker.firstName} ${worker.lastName} (${worker.phone})`
       ),
       contact: myJob.proposedJob.contact,
       allergens: myJob.proposedJob.allergens,
