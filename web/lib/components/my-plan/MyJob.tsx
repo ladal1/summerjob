@@ -87,7 +87,7 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                     </div>
                   )}
                   <Label id="worker" label="Pracanti" />
-                  {selectedPlan.job.workerNames
+                  {[...selectedPlan.job.workerNames]
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(worker => (
                       <div key={worker.name}>
