@@ -186,20 +186,18 @@ export async function getMyPlan(
       }
     }
   }
-  const responsibleWorkerName = myJob.responsibleWorker
-    ? `${myJob.responsibleWorker.firstName} ${myJob.responsibleWorker.lastName}`
-    : 'Není'
-
+  
   return {
     day: plan.day,
     job: {
       seqNum: seqNum,
       name: myJob.proposedJob.name,
       description: myJob.proposedJob.publicDescription,
-      responsibleWorkerName: responsibleWorkerName,
-      workerNames: myJob.workers.map(
-        worker => `${worker.firstName} ${worker.lastName} (${worker.phone})`
-      ),
+      workerNames: myJob.workers.map(worker => ({
+        name: `${worker.firstName} ${worker.lastName}`,
+        phone: worker.phone,
+        responsibleWorker: myJob.responsibleWorker?.id === worker.id
+      })),
       contact: myJob.proposedJob.contact,
       allergens: myJob.proposedJob.allergens,
       location: {
