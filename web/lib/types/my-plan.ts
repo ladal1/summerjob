@@ -21,6 +21,13 @@ export const WorkerContactSchema = z.object({
   phone: z.string().min(1),
 })
 
+export const WorkerSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  phone: z.string().min(1),
+  responsibleWorker: z.boolean(),
+})
+
 export const MyPlanSchema = z.object({
   day: z
     .date()
@@ -37,8 +44,7 @@ export const MyPlanSchema = z.object({
       seqNum: z.string().optional(),
       name: z.string().min(1),
       description: z.string().min(1),
-      responsibleWorkerName: z.string().min(1),
-      workerNames: z.array(z.string().min(1)),
+      workerNames: z.array(WorkerSchema),
       contact: z.string().min(1),
       allergens: z.array(z.string().min(1)),
       location: z.object({
