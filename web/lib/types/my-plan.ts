@@ -22,6 +22,7 @@ export const WorkerContactSchema = z.object({
 })
 
 export const WorkerSchema = z.object({
+  id: z.string().min(1),
   name: z.string().min(1),
   phone: z.string().min(1),
   responsibleWorker: z.boolean(),

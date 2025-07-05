@@ -194,6 +194,7 @@ export async function getMyPlan(
       name: myJob.proposedJob.name,
       description: myJob.proposedJob.publicDescription,
       workerNames: myJob.workers.map(worker => ({
+        id: worker.id,
         name: `${worker.firstName} ${worker.lastName}`,
         phone: worker.phone,
         responsibleWorker: myJob.responsibleWorker?.id === worker.id

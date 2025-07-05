@@ -90,7 +90,7 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                   {[...selectedPlan.job.workerNames]
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(worker => (
-                      <div key={worker.name}>
+                      <div key={worker.id}>
                         {worker.name} ({worker.phone})
                         {worker.responsibleWorker && (
                           <span className="text-muted">
