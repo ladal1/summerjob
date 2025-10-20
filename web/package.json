@@ -67,7 +67,7 @@
     "chai": "^5.2.0",
     "chai-exclude": "^3.0.1",
     "encoding": "^0.1.13",
-    "eslint": "^9.28.0",
+    "eslint": "^9.38.0",
     "eslint-config-next": "^15.3.3",
     "lint-staged": "^13.2.2",
     "maildev": "^2.2.1",
