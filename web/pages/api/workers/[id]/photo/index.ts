@@ -57,11 +57,6 @@ const get = async (
       }
     })
 
-    // Handle end of stream
-    readStream.on('end', () => {
-      res.end()
-    })
-
     readStream.pipe(res)
   } catch (error) {
     console.error('Error serving photo:', error)
