@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createReadStream, existsSync, statSync } from 'fs'
+import { createReadStream, statSync } from 'fs'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
@@ -25,14 +25,15 @@ const get = async (
       return
     }
 
-    // Check if file exists before trying to stat it
-    if (!existsSync(workerPhotoPath)) {
-      console.error(`Photo file not found: ${workerPhotoPath}`)
+    // Get file stats - this will throw if file doesn't exist
+    let fileStat
+    try {
+      fileStat = statSync(workerPhotoPath)
+    } catch (error) {
+      console.error(`Photo file not found: ${workerPhotoPath}`, error)
       res.status(404).end()
       return
     }
-
-    const fileStat = statSync(workerPhotoPath)
 
     // Check if file has content
     if (fileStat.size === 0) {
