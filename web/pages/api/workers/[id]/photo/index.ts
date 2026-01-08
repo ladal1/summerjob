@@ -42,11 +42,11 @@ const get = async (
       return
     }
 
-    // Set headers before creating stream
+    // Set status and headers before creating stream
+    res.status(200)
     res.setHeader('Content-Type', `image/${workerPhotoPath.split('.').pop()}`)
     res.setHeader('Content-Length', fileStat.size)
     res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
-    res.status(200)
 
     const readStream = createReadStream(workerPhotoPath)
 
