@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { SafePhotoImage } from './SafePhotoImage'
 
 interface PhotoViewerProps {
   photoURL: string | null
@@ -12,7 +12,7 @@ export const PhotoViewer = ({ photoURL, alt }: PhotoViewerProps) => {
         <h5>Foto</h5>
         <hr />
         {photoURL ? (
-          <Image
+          <SafePhotoImage
             src={photoURL}
             alt={alt}
             style={{
