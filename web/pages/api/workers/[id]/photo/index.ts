@@ -6,6 +6,7 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getWorkerPhotoPathById } from 'lib/data/workers'
 import { WrappedError } from 'lib/types/api-error'
 import { ApiError } from 'next/dist/server/api-utils'
+import { fileTypeFromFile } from 'file-type'
 
 const get = async (
   req: NextApiRequest,
@@ -42,8 +43,27 @@ const get = async (
       return
     }
 
+    // Validate actual MIME type by reading file content
+    const fileType = await fileTypeFromFile(workerPhotoPath)
+    
+    // Whitelist of allowed image MIME types
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/bmp',
+      'image/tiff'
+    ]
+    
+    if (!fileType || !allowedMimeTypes.includes(fileType.mime)) {
+      console.error(`Invalid or unsupported image type: ${fileType?.mime || 'unknown'} for file: ${workerPhotoPath}`)
+      res.status(415).end() // 415 Unsupported Media Type
+      return
+    }
+
     // Set headers before creating stream
-    res.setHeader('Content-Type', `image/${workerPhotoPath.split('.').pop()}`)
+    res.setHeader('Content-Type', fileType.mime)
     res.setHeader('Content-Length', fileStat.size)
     res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
     res.status(200)
