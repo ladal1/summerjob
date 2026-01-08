@@ -37,7 +37,7 @@ const get = async (
     // Check if file has content
     if (fileStat.size === 0) {
       console.error(`Photo file is empty: ${workerPhotoPath}`)
-      res.status(404).end()
+      res.status(500).end()
       return
     }
 
