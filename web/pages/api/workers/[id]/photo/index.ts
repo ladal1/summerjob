@@ -8,6 +8,16 @@ import { WrappedError } from 'lib/types/api-error'
 import { ApiError } from 'next/dist/server/api-utils'
 import { fileTypeFromFile } from 'file-type'
 
+// Whitelist of allowed image MIME types
+const ALLOWED_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/bmp',
+  'image/tiff',
+]
+
 const get = async (
   req: NextApiRequest,
   res: NextApiResponse<string | WrappedError<ApiError>>
@@ -44,19 +54,16 @@ const get = async (
     }
 
     // Validate actual MIME type by reading file content
-    const fileType = await fileTypeFromFile(workerPhotoPath)
+    let fileType
+    try {
+      fileType = await fileTypeFromFile(workerPhotoPath)
+    } catch (error) {
+      console.error(`Error detecting file type for: ${workerPhotoPath}`, error)
+      res.status(500).end()
+      return
+    }
     
-    // Whitelist of allowed image MIME types
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/bmp',
-      'image/tiff'
-    ]
-    
-    if (!fileType || !allowedMimeTypes.includes(fileType.mime)) {
+    if (!fileType || !ALLOWED_IMAGE_MIME_TYPES.includes(fileType.mime)) {
       console.error(`Invalid or unsupported image type: ${fileType?.mime || 'unknown'} for file: ${workerPhotoPath}`)
       res.status(415).end() // 415 Unsupported Media Type
       return
