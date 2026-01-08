@@ -1,12 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createReadStream } from 'fs'
-import { stat } from 'fs/promises'
+import { readFile, stat } from 'fs/promises'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getWorkerPhotoPathById } from 'lib/data/workers'
-import { WrappedError } from 'lib/types/api-error'
-import { ApiError } from 'next/dist/server/api-utils'
 import { fileTypeFromFile } from 'file-type'
 
 // Whitelist of allowed image MIME types
@@ -19,10 +16,7 @@ const ALLOWED_IMAGE_MIME_TYPES = [
   'image/tiff',
 ]
 
-const get = async (
-  req: NextApiRequest,
-  res: NextApiResponse<string | WrappedError<ApiError>>
-) => {
+const get = async (req: NextApiRequest, res: NextApiResponse) => {
   const id = req.query.id as string
   const session = await getSMJSessionAPI(req, res)
   const allowed = await isAllowedToAccessWorkerPhoto(session, res)
@@ -63,31 +57,30 @@ const get = async (
       res.status(500).end()
       return
     }
-    
+
     if (!fileType || !ALLOWED_IMAGE_MIME_TYPES.includes(fileType.mime)) {
-      console.error(`Invalid or unsupported image type: ${fileType?.mime || 'unknown'} for file: ${workerPhotoPath}`)
+      console.error(
+        `Invalid or unsupported image type: ${fileType?.mime || 'unknown'} for file: ${workerPhotoPath}`
+      )
       res.status(415).end() // 415 Unsupported Media Type
       return
     }
 
-    // Set status and headers before creating stream
-    res.status(200)
-    // Set headers before creating stream
-    res.setHeader('Content-Type', fileType.mime)
-    res.setHeader('Content-Length', fileStat.size)
-    res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
-
-    const readStream = createReadStream(workerPhotoPath)
-
-    // Handle stream errors
-    readStream.on('error', error => {
+    // Read the entire file into a buffer
+    let fileBuffer
+    try {
+      fileBuffer = await readFile(workerPhotoPath)
+    } catch (error) {
       console.error('Error reading photo file:', error)
-      if (!res.headersSent) {
-        res.status(500).end()
-      }
-    })
+      res.status(500).end()
+      return
+    }
 
-    readStream.pipe(res)
+    // Set headers and send the complete buffer
+    res.setHeader('Content-Type', fileType.mime)
+    res.setHeader('Content-Length', fileBuffer.length)
+    res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
+    res.status(200).end(fileBuffer)
   } catch (error) {
     console.error('Error serving photo:', error)
     if (!res.headersSent) {
