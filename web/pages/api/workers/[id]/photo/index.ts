@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createReadStream, statSync } from 'fs'
+import { createReadStream } from 'fs'
+import { stat } from 'fs/promises'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
@@ -39,7 +40,7 @@ const get = async (
     // Get file stats - this will throw if file doesn't exist
     let fileStat
     try {
-      fileStat = statSync(workerPhotoPath)
+      fileStat = await stat(workerPhotoPath)
     } catch (error) {
       console.error(`Photo file not found: ${workerPhotoPath}`, error)
       res.status(404).end()
@@ -69,11 +70,12 @@ const get = async (
       return
     }
 
+    // Set status and headers before creating stream
+    res.status(200)
     // Set headers before creating stream
     res.setHeader('Content-Type', fileType.mime)
     res.setHeader('Content-Length', fileStat.size)
     res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
-    res.status(200)
 
     const readStream = createReadStream(workerPhotoPath)
 
