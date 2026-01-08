@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createReadStream, statSync } from 'fs'
+import { createReadStream, existsSync, statSync } from 'fs'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
@@ -18,20 +18,57 @@ const get = async (
     return
   }
 
-  const workerPhotoPath = await getWorkerPhotoPathById(id)
-  if (!workerPhotoPath) {
-    res.status(404).end()
-    return
-  }
+  try {
+    const workerPhotoPath = await getWorkerPhotoPathById(id)
+    if (!workerPhotoPath) {
+      res.status(404).end()
+      return
+    }
 
-  const fileStat = statSync(workerPhotoPath)
-  res.writeHead(200, {
-    'Content-Type': `image/${workerPhotoPath?.split('.').pop()}`,
-    'Content-Length': fileStat.size,
-    'Cache-Control': 'public, max-age=5, must-revalidate',
-  })
-  const readStream = createReadStream(workerPhotoPath)
-  readStream.pipe(res)
+    // Check if file exists before trying to stat it
+    if (!existsSync(workerPhotoPath)) {
+      console.error(`Photo file not found: ${workerPhotoPath}`)
+      res.status(404).end()
+      return
+    }
+
+    const fileStat = statSync(workerPhotoPath)
+
+    // Check if file has content
+    if (fileStat.size === 0) {
+      console.error(`Photo file is empty: ${workerPhotoPath}`)
+      res.status(404).end()
+      return
+    }
+
+    // Set headers before creating stream
+    res.setHeader('Content-Type', `image/${workerPhotoPath?.split('.').pop()}`)
+    res.setHeader('Content-Length', fileStat.size)
+    res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
+    res.status(200)
+
+    const readStream = createReadStream(workerPhotoPath)
+
+    // Handle stream errors
+    readStream.on('error', error => {
+      console.error('Error reading photo file:', error)
+      if (!res.headersSent) {
+        res.status(500).end()
+      }
+    })
+
+    // Handle end of stream
+    readStream.on('end', () => {
+      res.end()
+    })
+
+    readStream.pipe(res)
+  } catch (error) {
+    console.error('Error serving photo:', error)
+    if (!res.headersSent) {
+      res.status(500).end()
+    }
+  }
 }
 
 async function isAllowedToAccessWorkerPhoto(
