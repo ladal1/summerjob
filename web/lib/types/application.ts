@@ -17,18 +17,21 @@ export const ApplicationCreateSchema = z
       .min(1, 'Příjmení je povinné')
       .max(50, 'Příjmení je příliš dlouhé'),
     birthDate: z.coerce
-      .date()
-      .refine(date => date <= minBirthDate, 'Musíte být starší 18 let')
-      .refine(date => date <= today, 'Datum narození nemůže být v budoucnosti'),
+      .date<Date>()
+      .refine(date => date <= minBirthDate, {
+        message: 'Musíte být starší 18 let',
+      })
+      .refine(date => date <= today, {
+        message: 'Datum narození nemůže být v budoucnosti',
+      }),
     gender: z.enum(['Muž', 'Žena']),
     phone: z
       .string()
       .min(9, 'Telefonní číslo je povinné')
       .max(20, 'Telefonní číslo je příliš dlouhé')
-      .refine(
-        value => /^[0-9+ ]+$/.test(value),
-        'Nesprávný formát telefonního čísla'
-      ),
+      .refine(value => /^[0-9+ ]+$/.test(value), {
+        message: 'Nesprávný formát telefonního čísla',
+      }),
     email: z
       .string()
       .email('Neplatný email')
@@ -38,12 +41,12 @@ export const ApplicationCreateSchema = z
       .min(1, 'Adresa je povinná')
       .max(200, 'Adresa je příliš dlouhá'),
     pastParticipation: z.boolean(),
-    arrivalDate: z.coerce
-      .date()
-      .refine(date => date >= today, 'Datum příjezdu nemůže být v minulosti'),
-    departureDate: z.coerce
-      .date()
-      .refine(date => date >= today, 'Datum odjezdu nemůže být v minulosti'),
+    arrivalDate: z.coerce.date<Date>().refine(date => date >= today, {
+      message: 'Datum příjezdu nemůže být v minulosti',
+    }),
+    departureDate: z.coerce.date<Date>().refine(date => date >= today, {
+      message: 'Datum odjezdu nemůže být v minulosti',
+    }),
     foodAllergies: z
       .string()
       .max(200, 'Text je příliš dlouhý, max 200 znaků.')
@@ -79,15 +82,13 @@ export const ApplicationCreateSchema = z
     photo: z.string().optional(),
     photoFile: z
       .any()
-      .refine(file => file instanceof File, 'Neplatný soubor')
-      .refine(
-        file => file.size <= 10 * 1024 * 1024,
-        'Maximální velikost souboru je 10 MB'
-      )
-      .refine(
-        file => file.type.startsWith('image'),
-        'Pouze obrázky jsou povolené'
-      )
+      .refine(file => file instanceof File, { message: 'Neplatný soubor' })
+      .refine(file => file.size <= 10 * 1024 * 1024, {
+        message: 'Maximální velikost souboru je 10 MB',
+      })
+      .refine(file => file.type.startsWith('image'), {
+        message: 'Pouze obrázky jsou povolené',
+      })
       .nullable()
       .optional(),
     photoFileRemoved: z.boolean().optional(),
@@ -103,8 +104,7 @@ export const ApplicationCreateSchema = z
   })
 export type ApplicationCreateDataInput = z.infer<typeof ApplicationCreateSchema>
 
-export const ApplicationUpdateSchema =
-  ApplicationCreateSchema._def.schema.partial()
+export const ApplicationUpdateSchema = ApplicationCreateSchema.clone().partial()
 
 export type ApplicationUpdateDataInput = z.infer<typeof ApplicationUpdateSchema>
 

@@ -1,5 +1,4 @@
 import useZodOpenApi from 'lib/api/useZodOpenApi'
-import { ActiveJob, Plan } from 'lib/prisma/client'
 import { ActiveJobSchema, PlanSchema } from 'lib/prisma/zod'
 import { z } from 'zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
@@ -34,8 +33,11 @@ export const PlanUpdateSchema = z.object({
   published: z.boolean(),
 })
 
-export type PlanWithJobs = Plan & {
-  jobs: ActiveJob[]
+type PlanModel = z.infer<typeof PlanSchema>
+type ActiveJobModel = z.infer<typeof ActiveJobSchema>
+
+export type PlanWithJobs = PlanModel & {
+  jobs: ActiveJobModel[]
 }
 
 export const PlanUpdateMoveWorkerSchema = z.object({
@@ -77,7 +79,7 @@ export function deserializePlans(data: Serialized): PlanWithJobs[] {
   return parsed
 }
 
-export function deserializePlanDate<T extends Plan>(data: T) {
+export function deserializePlanDate<T extends PlanModel>(data: T) {
   data.day = new Date(data.day)
   return data
 }

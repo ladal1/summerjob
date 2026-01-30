@@ -1,15 +1,15 @@
-import chai from 'chai'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { afterAll, describe, expect, it } from 'vitest'
 import {
   Id,
   Tools,
   api,
   createProposedJobData,
   getFileNameAndType,
-} from './common'
+  isEmpty,
+} from './common.js'
 import { statSync } from 'fs'
 import path from 'path'
-
-chai.should()
 
 describe('Proposed Jobs', function () {
   //#region Access
@@ -21,7 +21,7 @@ describe('Proposed Jobs', function () {
         // when
         const resp = await api.get('/api/proposed-jobs', perm)
         // then
-        resp.status.should.equal(200)
+        expect(resp.status).toBe(200)
       }
     })
 
@@ -32,8 +32,8 @@ describe('Proposed Jobs', function () {
         // when
         const resp = await api.get('/api/proposed-jobs', perm)
         // then
-        resp.status.should.equal(403)
-        resp.body.should.be.empty
+        expect(resp.status).toBe(403)
+        expect(isEmpty(resp.body)).toBe(true)
       }
     })
   })
@@ -45,7 +45,7 @@ describe('Proposed Jobs', function () {
       // when
       const resp = await api.get('/api/proposed-jobs/1', Id.JOBS)
       // then
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
     })
 
     it('creates a proposed job', async function () {
@@ -55,9 +55,9 @@ describe('Proposed Jobs', function () {
       // when
       const resp = await api.post('/api/proposed-jobs', Id.JOBS, body)
       // then
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
+      expect(resp.status).toBe(201)
+      expect(resp.body && typeof resp.body).toBe('object')
+      expect(resp.body).toHaveProperty('id')
       // clean
       await api.deleteArea(area.id)
     })
@@ -66,13 +66,13 @@ describe('Proposed Jobs', function () {
       // given
       const area = await api.createArea()
       const body = createProposedJobData(area.id)
-      const job = await api.post('/api/proposed-jobs', Id.JOBS, body)
+      await api.post('/api/proposed-jobs', Id.JOBS, body)
       // when
       const resp = await api.get('/api/proposed-jobs', Id.JOBS)
       // then
-      resp.status.should.equal(200)
-      resp.body.should.be.an('array')
-      resp.body.should.have.lengthOf(1)
+      expect(resp.status).toBe(200)
+      expect(Array.isArray(resp.body)).toBe(true)
+      expect(resp.body).toHaveLength(1)
       // clean
       await api.deleteArea(area.id)
     })
@@ -85,9 +85,9 @@ describe('Proposed Jobs', function () {
       // when
       const resp = await api.get(`/api/proposed-jobs/${job.body.id}`, Id.JOBS)
       // then
-      resp.status.should.equal(200)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
+      expect(resp.status).toBe(200)
+      expect(resp.body && typeof resp.body).toBe('object')
+      expect(resp.body).toHaveProperty('id')
       // clean
       await api.deleteArea(area.id)
     })
@@ -109,14 +109,14 @@ describe('Proposed Jobs', function () {
         payload
       )
       // then
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(
         `/api/proposed-jobs/${selectedProposedJob.id}`,
         Id.JOBS
       )
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
-      resp.body.name.should.equal(payload.name)
+      expect(resp.body && typeof resp.body).toBe('object')
+      expect(resp.body).toHaveProperty('id')
+      expect(resp.body.name).toBe(payload.name)
       // clean
       await api.deleteArea(area.id)
     })
@@ -137,7 +137,7 @@ describe('Proposed Jobs', function () {
         payload
       )
       // then
-      patch.status.should.equal(400)
+      expect(patch.status).toBe(400)
       // clean
       await api.deleteArea(area.id)
     })
@@ -158,27 +158,27 @@ describe('Proposed Jobs', function () {
         '/api/proposed-jobs',
         Id.JOBS
       )
-      proposedJobsAfterAdding.body.should.have.lengthOf(
+      expect(proposedJobsAfterAdding.body).toHaveLength(
         proposedJobsBeforeAdding.body.length + 1
       )
-      ;(proposedJobsAfterAdding.body as any[])
-        .map(w => w.id)
-        .should.include(proposedJobId)
+      expect((proposedJobsAfterAdding.body as any[]).map(w => w.id)).toContain(
+        proposedJobId
+      )
       // when
       const resp = await api.del(`/api/proposed-jobs/${proposedJobId}`, Id.JOBS) // Delete the proposedJob
-      resp.status.should.equal(204)
+      expect(resp.status).toBe(204)
       // then
       // Check that the proposed job was deleted
       const proposedJobsAfterRemoving = await api.get(
         '/api/proposed-jobs',
         Id.JOBS
       )
-      proposedJobsAfterRemoving.body.should.have.lengthOf(
+      expect(proposedJobsAfterRemoving.body).toHaveLength(
         proposedJobsBeforeAdding.body.length
       )
-      ;(proposedJobsAfterRemoving.body as any[])
-        .map(w => w.id)
-        .should.not.include(proposedJobId)
+      expect(
+        (proposedJobsAfterRemoving.body as any[]).map(w => w.id)
+      ).not.toContain(proposedJobId)
       // clean
       await api.deleteArea(area.id)
     })
@@ -197,22 +197,22 @@ describe('Proposed Jobs', function () {
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
         // then
-        resp.status.should.equal(201)
-        resp.body.should.be.an('object')
-        resp.body.should.have.property('id')
+        expect(resp.status).toBe(201)
+        expect(resp.body && typeof resp.body).toBe('object')
+        expect(resp.body).toHaveProperty('id')
         // verify existence of photos
         const proposedJob = await api.get(
           `/api/proposed-jobs/${resp.body.id}`,
           Id.JOBS
         )
-        proposedJob.body.photos.should.be.an('array')
-        proposedJob.body.photos.should.have.lengthOf(1)
+        expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+        expect(proposedJob.body.photos).toHaveLength(1)
         // verify naming of file
         const { fileName, fileType } = getFileNameAndType(
           proposedJob.body.photos.at(0).photoPath
         )
-        fileName.should.equal(proposedJob.body.photos.at(0).id)
-        fileType.should.equal('.ico')
+        expect(fileName).toBe(proposedJob.body.photos.at(0).id)
+        expect(fileType).toBe('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -220,7 +220,7 @@ describe('Proposed Jobs', function () {
             `/proposed-jobs/${resp.body.id}`
           )
         )
-        numOfFiles.should.equal(1)
+        expect(numOfFiles).toBe(1)
       })
 
       it('creates proposed-job with multiple valid photos', async function () {
@@ -237,29 +237,29 @@ describe('Proposed Jobs', function () {
           file1,
         ])
         // then
-        resp.status.should.equal(201)
-        resp.body.should.be.an('object')
-        resp.body.should.have.property('id')
+        expect(resp.status).toBe(201)
+        expect(resp.body && typeof resp.body).toBe('object')
+        expect(resp.body).toHaveProperty('id')
         const proposedJob = await api.get(
           `/api/proposed-jobs/${resp.body.id}`,
           Id.JOBS
         )
         // verify existence of photos
-        proposedJob.body.photos.should.be.an('array')
-        proposedJob.body.photos.should.have.lengthOf(2)
-        proposedJob.body.photos.at(0).should.have.property('photoPath')
+        expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+        expect(proposedJob.body.photos).toHaveLength(2)
+        expect(proposedJob.body.photos.at(0)).toHaveProperty('photoPath')
         // verify that uploaded photos should hold its order and should be named as {photoId}.{formerType}
         const { fileName: fileName0, fileType: fileType0 } = getFileNameAndType(
           proposedJob.body.photos.at(0).photoPath
         )
-        fileName0.should.equal(proposedJob.body.photos.at(0).id)
-        fileType0.should.equal('.png')
+        expect(fileName0).toBe(proposedJob.body.photos.at(0).id)
+        expect(fileType0).toBe('.png')
 
         const { fileName: fileName1, fileType: fileType1 } = getFileNameAndType(
           proposedJob.body.photos.at(1).photoPath
         )
-        fileName1.should.equal(proposedJob.body.photos.at(1).id)
-        fileType1.should.equal('.ico')
+        expect(fileName1).toBe(proposedJob.body.photos.at(1).id)
+        expect(fileType1).toBe('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -267,7 +267,7 @@ describe('Proposed Jobs', function () {
             `/proposed-jobs/${resp.body.id}`
           )
         )
-        numOfFiles.should.equal(2)
+        expect(numOfFiles).toBe(2)
       })
 
       it('creates proposed-job with invalid photo', async function () {
@@ -278,16 +278,16 @@ describe('Proposed Jobs', function () {
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
         // then
-        resp.status.should.equal(400)
+        expect(resp.status).toBe(400)
         // verify non-existence of /proposed-jobs/{id} folder
-        api
-          .pathExists(
+        expect(
+          api.pathExists(
             path.join(
               api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${resp.body.id}`
             )
           )
-          .should.equal(false)
+        ).toBe(false)
       })
 
       it('creates proposed-job with valid and one invalid photos', async function () {
@@ -304,16 +304,16 @@ describe('Proposed Jobs', function () {
           file1,
         ])
         // then
-        resp.status.should.equal(400)
+        expect(resp.status).toBe(400)
         // verify non-existence of /proposed-jobs/{id} folder
-        api
-          .pathExists(
+        expect(
+          api.pathExists(
             path.join(
               api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${resp.body.id}`
             )
           )
-          .should.equal(false)
+        ).toBe(false)
       })
     })
 
@@ -324,7 +324,7 @@ describe('Proposed Jobs', function () {
       // when
       const created = await api.createProposedJobWithPhotos(files)
       // then
-      created.status.should.equal(413)
+      expect(created.status).toBe(413)
     })
 
     //#endregion
@@ -334,7 +334,7 @@ describe('Proposed Jobs', function () {
       it('updates proposed-job with valid photo', async function () {
         // given
         const created = await api.createProposedJobWithPhotos([])
-        created.status.should.equal(201)
+        expect(created.status).toBe(201)
         const file = path.normalize(`${__dirname}/resources/favicon.ico`)
         // when
         const patch = await api.patch(
@@ -344,19 +344,19 @@ describe('Proposed Jobs', function () {
           [file]
         )
         //then
-        patch.status.should.equal(204)
+        expect(patch.status).toBe(204)
         const proposedJob = await api.get(
           `/api/proposed-jobs/${created.body.id}`,
           Id.JOBS
         )
-        proposedJob.body.photos.should.be.an('array')
-        proposedJob.body.photos.should.have.lengthOf(1)
+        expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+        expect(proposedJob.body.photos).toHaveLength(1)
         // verify naming of file
         const { fileName, fileType } = getFileNameAndType(
           proposedJob.body.photos.at(0).photoPath
         )
-        fileName.should.equal(proposedJob.body.photos.at(0).id)
-        fileType.should.equal('.ico')
+        expect(fileName).toBe(proposedJob.body.photos.at(0).id)
+        expect(fileType).toBe('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -364,7 +364,7 @@ describe('Proposed Jobs', function () {
             `/proposed-jobs/${created.body.id}`
           )
         )
-        numOfFiles.should.equal(1)
+        expect(numOfFiles).toBe(1)
       })
 
       it('updates proposed-job with existing photos with valid photo', async function () {
@@ -373,7 +373,7 @@ describe('Proposed Jobs', function () {
           path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
           path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
         ])
-        created.status.should.equal(201)
+        expect(created.status).toBe(201)
         const file = path.normalize(`${__dirname}/resources/favicon.ico`)
         // when
         const patch = await api.patch(
@@ -383,19 +383,19 @@ describe('Proposed Jobs', function () {
           [file]
         )
         //then
-        patch.status.should.equal(204)
+        expect(patch.status).toBe(204)
         const proposedJob = await api.get(
           `/api/proposed-jobs/${created.body.id}`,
           Id.JOBS
         )
-        proposedJob.body.photos.should.be.an('array')
-        proposedJob.body.photos.should.have.lengthOf(3)
+        expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+        expect(proposedJob.body.photos).toHaveLength(3)
         // verify naming of file
         const { fileName, fileType } = getFileNameAndType(
           proposedJob.body.photos.at(2).photoPath
         )
-        fileName.should.equal(proposedJob.body.photos.at(2).id)
-        fileType.should.equal('.ico')
+        expect(fileName).toBe(proposedJob.body.photos.at(2).id)
+        expect(fileType).toBe('.ico')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -403,14 +403,14 @@ describe('Proposed Jobs', function () {
             `/proposed-jobs/${created.body.id}`
           )
         )
-        numOfFiles.should.equal(3)
+        expect(numOfFiles).toBe(3)
       })
     })
 
     it('updates proposed-job with multiple valid photos', async function () {
       // given
       const created = await api.createProposedJobWithPhotos([])
-      created.status.should.equal(201)
+      expect(created.status).toBe(201)
       const file0 = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       const file1 = path.normalize(`${__dirname}/resources/favicon.ico`)
       // when
@@ -421,25 +421,25 @@ describe('Proposed Jobs', function () {
         [file0, file1]
       )
       //then
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const proposedJob = await api.get(
         `/api/proposed-jobs/${created.body.id}`,
         Id.JOBS
       )
-      proposedJob.body.photos.should.be.an('array')
-      proposedJob.body.photos.should.have.lengthOf(2)
+      expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+      expect(proposedJob.body.photos).toHaveLength(2)
       // verify that uploaded photos should hold its order and should be named as {photoId}.{formerType}
       const { fileName: fileName0, fileType: fileType0 } = getFileNameAndType(
         proposedJob.body.photos.at(0).photoPath
       )
-      fileName0.should.equal(proposedJob.body.photos.at(0).id)
-      fileType0.should.equal('.png')
+      expect(fileName0).toBe(proposedJob.body.photos.at(0).id)
+      expect(fileType0).toBe('.png')
 
       const { fileName: fileName1, fileType: fileType1 } = getFileNameAndType(
         proposedJob.body.photos.at(1).photoPath
       )
-      fileName1.should.equal(proposedJob.body.photos.at(1).id)
-      fileType1.should.equal('.ico')
+      expect(fileName1).toBe(proposedJob.body.photos.at(1).id)
+      expect(fileType1).toBe('.ico')
 
       // verify number of files in /proposed-jobs/{id} folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
@@ -448,13 +448,13 @@ describe('Proposed Jobs', function () {
           `/proposed-jobs/${created.body.id}`
         )
       )
-      numOfFiles.should.equal(2)
+      expect(numOfFiles).toBe(2)
     })
 
     it('updates proposed-job with invalid photo', async function () {
       // given
       const created = await api.createProposedJobWithPhotos([])
-      created.status.should.equal(201)
+      expect(created.status).toBe(201)
       const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
       // when
       const patch = await api.patch(
@@ -464,16 +464,16 @@ describe('Proposed Jobs', function () {
         [file]
       )
       //then
-      patch.status.should.equal(400)
+      expect(patch.status).toBe(400)
       // verify non-existence of /proposed-jobs/{id} folder
-      api
-        .pathExists(
+      expect(
+        api.pathExists(
           path.join(
             api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
           )
         )
-        .should.equal(false)
+      ).toBe(false)
     })
 
     it('updates proposed-job including photo with invalid photo', async function () {
@@ -482,7 +482,7 @@ describe('Proposed Jobs', function () {
         `${__dirname}/resources/logo-smj-yellow.png`
       )
       const created = await api.createProposedJobWithPhotos([createdFile])
-      created.status.should.equal(201)
+      expect(created.status).toBe(201)
       const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
       // when
       const patch = await api.patch(
@@ -492,16 +492,16 @@ describe('Proposed Jobs', function () {
         [file]
       )
       //then
-      patch.status.should.equal(400)
+      expect(patch.status).toBe(400)
       // verify existence of /proposed-jobs/{id} folder
-      api
-        .pathExists(
+      expect(
+        api.pathExists(
           path.join(
             api.getUploadDirForImagesForCurrentEvent(),
             `/proposed-jobs/${created.body.id}`
           )
         )
-        .should.equal(true)
+      ).toBe(true)
 
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(
@@ -509,7 +509,7 @@ describe('Proposed Jobs', function () {
           `/proposed-jobs/${created.body.id}`
         )
       )
-      numOfFiles.should.equal(1)
+      expect(numOfFiles).toBe(1)
     })
     //#endregion
 
@@ -520,13 +520,13 @@ describe('Proposed Jobs', function () {
         const created = await api.createProposedJobWithPhotos([
           path.normalize(`${__dirname}/resources/favicon.ico`),
         ])
-        created.status.should.equal(201)
+        expect(created.status).toBe(201)
         const createdProposedJob = await api.get(
           `/api/proposed-jobs/${created.body.id}`,
           Id.JOBS
         )
-        createdProposedJob.body.photos.should.be.an('array')
-        createdProposedJob.body.photos.should.have.lengthOf(1)
+        expect(Array.isArray(createdProposedJob.body.photos)).toBe(true)
+        expect(createdProposedJob.body.photos).toHaveLength(1)
         const photoId = createdProposedJob.body.photos.at(0).id
         const payload = {
           photoIdsDeleted: [photoId],
@@ -538,23 +538,23 @@ describe('Proposed Jobs', function () {
           payload
         )
         // then
-        resp.body.should.be.an('object')
+        expect(resp.body && typeof resp.body).toBe('object')
         const proposedJob = await api.get(
           `/api/proposed-jobs/${created.body.id}`,
           Id.JOBS
         )
         // verify exmpitness of photos
-        proposedJob.body.photos.should.be.an('array')
-        proposedJob.body.photos.should.have.lengthOf(0)
+        expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+        expect(proposedJob.body.photos).toHaveLength(0)
         // verify non-existence of /proposed-jobs/{id} folder
-        api
-          .pathExists(
+        expect(
+          api.pathExists(
             path.join(
               api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${resp.body.id}`
             )
           )
-          .should.equal(false)
+        ).toBe(false)
       })
 
       it("delete proposed-job's non-only photo", async function () {
@@ -563,13 +563,13 @@ describe('Proposed Jobs', function () {
           path.normalize(`${__dirname}/resources/favicon.ico`),
           path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
         ])
-        created.status.should.equal(201)
+        expect(created.status).toBe(201)
         const createdProposedJob = await api.get(
           `/api/proposed-jobs/${created.body.id}`,
           Id.JOBS
         )
-        createdProposedJob.body.photos.should.be.an('array')
-        createdProposedJob.body.photos.should.have.lengthOf(2)
+        expect(Array.isArray(createdProposedJob.body.photos)).toBe(true)
+        expect(createdProposedJob.body.photos).toHaveLength(2)
         const photoId = createdProposedJob.body.photos.at(0).id // delete ico file
         const payload = {
           photoIdsDeleted: [photoId],
@@ -581,29 +581,29 @@ describe('Proposed Jobs', function () {
           payload
         )
         // then
-        resp.body.should.be.an('object')
+        expect(resp.body && typeof resp.body).toBe('object')
         const proposedJob = await api.get(
           `/api/proposed-jobs/${created.body.id}`,
           Id.JOBS
         )
         // verify number of photos
-        proposedJob.body.photos.should.be.an('array')
-        proposedJob.body.photos.should.have.lengthOf(1)
+        expect(Array.isArray(proposedJob.body.photos)).toBe(true)
+        expect(proposedJob.body.photos).toHaveLength(1)
         // verify naming of file
         const { fileName, fileType } = getFileNameAndType(
           proposedJob.body.photos.at(0).photoPath
         )
-        fileName.should.equal(proposedJob.body.photos.at(0).id)
-        fileType.should.equal('.png')
+        expect(fileName).toBe(proposedJob.body.photos.at(0).id)
+        expect(fileType).toBe('.png')
         // verify existence of /proposed-jobs/{id} folder
-        api
-          .pathExists(
+        expect(
+          api.pathExists(
             path.join(
               api.getUploadDirForImagesForCurrentEvent(),
               `/proposed-jobs/${created.body.id}`
             )
           )
-          .should.equal(true)
+        ).toBe(true)
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -611,7 +611,7 @@ describe('Proposed Jobs', function () {
             `/proposed-jobs/${created.body.id}`
           )
         )
-        numOfFiles.should.equal(1)
+        expect(numOfFiles).toBe(1)
       })
     })
     //#endregion
@@ -623,25 +623,25 @@ describe('Proposed Jobs', function () {
       path.normalize(`${__dirname}/resources/favicon.ico`),
       path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
     ])
-    created.status.should.equal(201)
+    expect(created.status).toBe(201)
     const createdProposedJob = await api.get(
       `/api/proposed-jobs/${created.body.id}`,
       Id.JOBS
     )
-    createdProposedJob.body.photos.should.be.an('array')
-    createdProposedJob.body.photos.should.have.lengthOf(2)
+    expect(Array.isArray(createdProposedJob.body.photos)).toBe(true)
+    expect(createdProposedJob.body.photos).toHaveLength(2)
     // when
     const resp = await api.del(`/api/proposed-jobs/${created.body.id}`, Id.JOBS)
     // then
-    resp.status.should.equal(204)
+    expect(resp.status).toBe(204)
     // verify non-existence of /proposed-jobs/{id} folder
     const dir = api.getUploadDirForImagesForCurrentEvent()
-    api
-      .pathExists(dir + '/proposed-jobs/' + created.body.id)
-      .should.equal(false)
+    expect(api.pathExists(dir + '/proposed-jobs/' + created.body.id)).toBe(
+      false
+    )
     // verify of non-existence of each file
     createdProposedJob.body.photos.forEach(photo => {
-      api.pathExists(dir + photo.photoPath).should.equal(false)
+      expect(api.pathExists(dir + photo.photoPath)).toBe(false)
     })
   })
 
@@ -651,14 +651,14 @@ describe('Proposed Jobs', function () {
       //given
       const file = path.normalize(`${__dirname}/resources/favicon.ico`)
       const created = await api.createProposedJobWithPhotos([file])
-      created.status.should.equal(201)
+      expect(created.status).toBe(201)
       const createdProposedJob = await api.get(
         `/api/proposed-jobs/${created.body.id}`,
         Id.JOBS
       )
-      createdProposedJob.body.photos.should.be.an('array')
-      createdProposedJob.body.photos.should.have.lengthOf(1)
-      createdProposedJob.body.photos.at(0).should.have.property('id')
+      expect(Array.isArray(createdProposedJob.body.photos)).toBe(true)
+      expect(createdProposedJob.body.photos).toHaveLength(1)
+      expect(createdProposedJob.body.photos.at(0)).toHaveProperty('id')
       const photoId = createdProposedJob.body.photos.at(0).id
       // when
       const resp = await api.get(
@@ -667,23 +667,23 @@ describe('Proposed Jobs', function () {
       )
       // then
       // verify status code
-      resp.status.should.equal(200)
+      expect(resp.status).toBe(200)
 
       // verify content type
-      resp.headers['content-type'].should.include('image')
+      expect(resp.headers['content-type']).toContain('image')
 
       // verify content length
-      resp.headers['content-length'].should.exist
+      expect(resp.headers['content-length']).toBeDefined()
 
       // verify cache control headers
-      resp.headers['cache-control'].should.include('public')
-      resp.headers['cache-control'].should.include('max-age=5')
-      resp.headers['cache-control'].should.include('must-revalidate')
+      expect(resp.headers['cache-control']).toContain('public')
+      expect(resp.headers['cache-control']).toContain('max-age=5')
+      expect(resp.headers['cache-control']).toContain('must-revalidate')
 
       // verify content by reading the image file
       const fileStat = statSync(file)
       const expectedSize = fileStat.size
-      parseInt(resp.headers['content-length']).should.equal(expectedSize)
+      expect(parseInt(resp.headers['content-length'])).toBe(expectedSize)
     })
 
     it("returns 404 when proposed job's photo does not exist", async function () {
@@ -695,7 +695,7 @@ describe('Proposed Jobs', function () {
         Id.JOBS
       )
       // then
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
     })
   })
   //#endregion
@@ -714,20 +714,22 @@ describe('Proposed Jobs', function () {
       // when
       const resp = await api.post('/api/proposed-jobs', Id.JOBS, payload)
       // then
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
+      expect(resp.status).toBe(201)
+      expect(resp.body && typeof resp.body).toBe('object')
+      expect(resp.body).toHaveProperty('id')
       const get = await api.get(`/api/proposed-jobs/${resp.body.id}`, Id.JOBS)
-      get.status.should.equal(200)
-      get.body.should.be.an('object')
-      get.body.should.have.property('toolsToTakeWith')
-      get.body.toolsToTakeWith.should.be.an('array')
-      get.body.toolsToTakeWith.should.have.lengthOf(1)
-      get.body.toolsToTakeWith.at(0).should.be.an('object')
-      get.body.toolsToTakeWith.at(0).should.have.property('tool')
-      get.body.toolsToTakeWith.at(0).should.have.property('amount')
-      get.body.toolsToTakeWith.at(0).tool.should.equal(tool.tool)
-      get.body.toolsToTakeWith.at(0).amount.should.equal(tool.amount)
+      expect(get.status).toBe(200)
+      expect(get.body && typeof get.body).toBe('object')
+      expect(get.body).toHaveProperty('toolsToTakeWith')
+      expect(Array.isArray(get.body.toolsToTakeWith)).toBe(true)
+      expect(get.body.toolsToTakeWith).toHaveLength(1)
+      expect(
+        get.body.toolsToTakeWith.at(0) && typeof get.body.toolsToTakeWith.at(0)
+      ).toBe('object')
+      expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('tool')
+      expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('amount')
+      expect(get.body.toolsToTakeWith.at(0).tool).toBe(tool.tool)
+      expect(get.body.toolsToTakeWith.at(0).amount).toBe(tool.amount)
       // clean
       await api.deleteArea(area.id)
     })
@@ -743,7 +745,7 @@ describe('Proposed Jobs', function () {
       }
       const resp = await api.post('/api/proposed-jobs', Id.JOBS, payload)
       // then
-      resp.status.should.equal(400)
+      expect(resp.status).toBe(400)
       // clean
       await api.deleteArea(area.id)
     })
@@ -777,21 +779,23 @@ describe('Proposed Jobs', function () {
         payloadUpload
       )
       // then
-      resp.status.should.equal(204)
+      expect(resp.status).toBe(204)
       const get = await api.get(
         `/api/proposed-jobs/${created.body.id}`,
         Id.JOBS
       )
-      get.status.should.equal(200)
-      get.body.should.be.an('object')
-      get.body.should.have.property('toolsToTakeWith')
-      get.body.toolsToTakeWith.should.be.an('array')
-      get.body.toolsToTakeWith.should.have.lengthOf(1)
-      get.body.toolsToTakeWith.at(0).should.be.an('object')
-      get.body.toolsToTakeWith.at(0).should.have.property('tool')
-      get.body.toolsToTakeWith.at(0).should.have.property('amount')
-      get.body.toolsToTakeWith.at(0).tool.should.equal(toolUpload.tool)
-      get.body.toolsToTakeWith.at(0).amount.should.equal(toolUpload.amount)
+      expect(get.status).toBe(200)
+      expect(get.body && typeof get.body).toBe('object')
+      expect(get.body).toHaveProperty('toolsToTakeWith')
+      expect(Array.isArray(get.body.toolsToTakeWith)).toBe(true)
+      expect(get.body.toolsToTakeWith).toHaveLength(1)
+      expect(
+        get.body.toolsToTakeWith.at(0) && typeof get.body.toolsToTakeWith.at(0)
+      ).toBe('object')
+      expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('tool')
+      expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('amount')
+      expect(get.body.toolsToTakeWith.at(0).tool).toBe(toolUpload.tool)
+      expect(get.body.toolsToTakeWith.at(0).amount).toBe(toolUpload.amount)
       // clean
       await api.deleteArea(area.id)
     })
@@ -820,23 +824,23 @@ describe('Proposed Jobs', function () {
         payloadUpload
       )
       // then
-      resp.status.should.equal(204)
+      expect(resp.status).toBe(204)
       const get = await api.get(
         `/api/proposed-jobs/${created.body.id}`,
         Id.JOBS
       )
-      get.status.should.equal(200)
-      get.body.should.be.an('object')
-      get.body.should.have.property('toolsToTakeWith')
-      get.body.toolsToTakeWith.should.be.an('array')
-      get.body.toolsToTakeWith.should.have.lengthOf(0)
+      expect(get.status).toBe(200)
+      expect(get.body && typeof get.body).toBe('object')
+      expect(get.body).toHaveProperty('toolsToTakeWith')
+      expect(Array.isArray(get.body.toolsToTakeWith)).toBe(true)
+      expect(get.body.toolsToTakeWith).toHaveLength(0)
       // clean
       await api.deleteArea(area.id)
     })
   })
   //#endregion
 
-  this.afterAll(api.afterTestBlock)
+  afterAll(api.afterTestBlock)
 })
 
 //#endregion

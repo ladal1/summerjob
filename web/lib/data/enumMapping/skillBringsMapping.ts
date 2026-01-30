@@ -1,4 +1,4 @@
-import { SkillBrings } from 'lib/prisma/client'
+import { SkillBrings } from 'lib/types/enums'
 
 export const skillBringsMapping: Record<SkillBrings, string> = {
   [SkillBrings.AXE]: 'Sekera',

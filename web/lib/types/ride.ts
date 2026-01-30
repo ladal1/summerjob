@@ -1,6 +1,3 @@
- 
-
-import { Car, Ride, Worker } from 'lib/prisma/client'
 import { z } from 'zod'
 import { CarSchema, RideSchema, WorkerSchema } from 'lib/prisma/zod'
 import { ActiveJobWithProposed } from './active-job'
@@ -15,15 +12,19 @@ export const RideWithDriverCarDetailsSchema = RideSchema.extend({
   car: CarSchema,
 })
 
+type RideModel = z.infer<typeof RideSchema>
+type WorkerModel = z.infer<typeof WorkerSchema>
+type CarModel = z.infer<typeof CarSchema>
+
 export type RideWithDriverCarDetails = z.infer<
   typeof RideWithDriverCarDetailsSchema
 >
 
-export type RideComplete = Ride & {
-  driver: Worker
-  car: Car
+export type RideComplete = RideModel & {
+  driver: WorkerModel
+  car: CarModel
   job: ActiveJobWithProposed
-  passengers: Worker[]
+  passengers: WorkerModel[]
 }
 
 export type RidesForJob = {

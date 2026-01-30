@@ -76,9 +76,12 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
   for (const plan of plans) {
     const jobs: ActiveJobNoPlan[] = []
     for (const job of plan.jobs) {
+      const workers = (
+        job.workers as Parameters<typeof databaseWorkerToWorkerComplete>[0][]
+      ).map(databaseWorkerToWorkerComplete)
       jobs.push({
         ...job,
-        workers: job.workers.map(databaseWorkerToWorkerComplete),
+        workers,
       })
     }
     plansComplete.push({ ...plan, jobs })
@@ -142,9 +145,12 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
   }
   const jobs: ActiveJobNoPlan[] = []
   for (const job of plan.jobs) {
+    const workers = (
+      job.workers as Parameters<typeof databaseWorkerToWorkerComplete>[0][]
+    ).map(databaseWorkerToWorkerComplete)
     jobs.push({
       ...job,
-      workers: job.workers.map(databaseWorkerToWorkerComplete),
+      workers,
     })
   }
   return { ...plan, jobs }

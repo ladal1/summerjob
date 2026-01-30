@@ -24,7 +24,7 @@ import {
   WorkAllergy,
   SkillHas,
   SkillBrings,
-} from '../../prisma/client'
+} from 'lib/types/enums'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'

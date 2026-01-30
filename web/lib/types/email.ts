@@ -7,7 +7,7 @@ useZodOpenApi
 export const EmailSchema = z
   .object({
     email: z
-      .string({ required_error: err.emptyEmail })
+      .string({ message: err.emptyEmail })
       .min(1, { message: err.emptyEmail })
       .email({ message: err.invalidEmail })
       .trim(),

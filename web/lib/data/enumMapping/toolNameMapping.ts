@@ -1,7 +1,7 @@
-import { ToolName } from '../../prisma/client'
+import { ToolName } from 'lib/types/enums'
 import { EnumMapping } from './enumMapping'
 
-export const toolNameMapping: EnumMapping<keyof typeof ToolName> = {
+export const toolNameMapping: EnumMapping<ToolName> = {
   AXE: 'Sekera',
   BOW_SAW: 'Luková pila',
   LADDER: 'Žebřík',

@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [25, 50, 98, 100],
   },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false, 'fs/promises': false };
+
+    return config;
+  },
   async redirects() {
     return [
       {

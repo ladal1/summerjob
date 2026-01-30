@@ -1,16 +1,15 @@
-import { Id, api, createSummerJobEventData } from './common'
-import chai from 'chai'
-
-chai.should()
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { afterAll, describe, expect, it } from 'vitest'
+import { Id, api, createSummerJobEventData } from './common.js'
 
 describe('SummerJob Events', function () {
   it('returns a list of events', async function () {
     const resp = await api.get('/api/summerjob-events', Id.ADMIN)
-    resp.status.should.equal(200)
-    resp.body.should.be.an('array')
-    resp.body.should.have.lengthOf(1)
+    expect(resp.status).toBe(200)
+    expect(Array.isArray(resp.body)).toBe(true)
+    expect(resp.body).toHaveLength(1)
     ;(resp.body as any[]).forEach(user => {
-      user.should.have.property('id')
+      expect(user).toHaveProperty('id')
     })
   })
 
@@ -20,9 +19,9 @@ describe('SummerJob Events', function () {
       Id.ADMIN,
       createSummerJobEventData()
     )
-    resp.status.should.equal(201)
-    resp.body.should.be.an('object')
-    resp.body.should.have.property('id')
+    expect(resp.status).toBe(201)
+    expect(resp.body && typeof resp.body).toBe('object')
+    expect(resp.body).toHaveProperty('id')
   })
 
   it('sets event active and unsets others', async function () {
@@ -38,9 +37,9 @@ describe('SummerJob Events', function () {
     const updatedEvents = await api.get('/api/summerjob-events', Id.ADMIN)
     updatedEvents.body.forEach((e: any) => {
       if (event.body.id === e.id) {
-        e.isActive.should.equal(true)
+        expect(e.isActive).toBe(true)
       } else {
-        e.isActive.should.equal(false)
+        expect(e.isActive).toBe(false)
       }
     })
     // Set the previous active event back
@@ -62,23 +61,23 @@ describe('SummerJob Events', function () {
     })
     const users = await api.get('/api/users', Id.ADMIN)
     ;(users.body as any[]).forEach(u => {
-      u.blocked.should.equal(!u.permissions.includes('ADMIN'))
+      expect(u.blocked).toBe(!u.permissions.includes('ADMIN'))
     })
     const adminUserIds = (users.body as any[]).map(u => u.id)
     // Check that only admins are listed in workers
     const workers = await api.get('/api/workers', Id.ADMIN)
     ;(workers.body as any[]).forEach(w => {
-      adminUserIds.should.include(w.id)
+      expect(adminUserIds).toContain(w.id)
     })
     // Set the previous active event back
     await api.patch(`/api/summerjob-events/${activeEventId}`, Id.ADMIN, {
       isActive: true,
     })
     const workersInOriginalEvent = await api.get('/api/workers', Id.ADMIN)
-    ;(workersInOriginalEvent.body as any[])
-      .map(w => w.id)
-      .should.include(worker.id)
+    expect((workersInOriginalEvent.body as any[]).map(w => w.id)).toContain(
+      worker.id
+    )
   })
 
-  this.afterAll(api.afterTestBlock)
+  afterAll(api.afterTestBlock)
 })

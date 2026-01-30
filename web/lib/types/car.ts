@@ -25,29 +25,28 @@ export function deserializeCars(cars: Serialized): CarComplete[] {
 
 const CarBasicSchema = z
   .object({
-    ownerId: z.string({ required_error: err.emptyOwnerOfCar }),
+    ownerId: z.string({ message: err.emptyOwnerOfCar }),
     name: z.string().min(1, { message: err.emptyCarName }),
     description: z.string(),
     seats: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
+      .number({ message: err.invalidTypeNumber })
       .min(1, { message: err.emptyCarSeats })
       .positive({ message: err.nonPositiveNumber })
       .openapi({ example: 4 }),
     odometerStart: z
       .number({
-        invalid_type_error: err.invalidTypeNumber,
-        required_error: err.emptyOdometerStart,
+        message: err.invalidTypeNumber,
       })
       .nonnegative({ message: err.nonNonNegativeNumber })
       .default(0),
     odometerEnd: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
+      .number({ message: err.invalidTypeNumber })
       .nonnegative({ message: err.nonNonNegativeNumber })
       .default(0)
       .optional(),
     reimbursed: z.boolean().optional().openapi({ example: false }),
     reimbursementAmount: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
+      .number({ message: err.invalidTypeNumber })
       .nonnegative({ message: err.nonNonNegativeNumber })
       .default(0)
       .optional(),

@@ -83,7 +83,7 @@ export function DatePickerInput({
             locale={cs}
             placeholderText="Vyberte datum"
             selected={field.value ? parseDate(field.value) : parsedDefaultValue}
-            onChange={date => {
+            onChange={(date: Date | null) => {
               if (!date || isNaN(date.getTime())) {
                 if (mandatory) {
                   setError(id, { message: 'Datum je povinné' })
