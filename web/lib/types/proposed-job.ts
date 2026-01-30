@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { Serialized } from './serialize'
 import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
-import { WorkAllergy, JobType } from '../prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import {
   ToolCompleteSchema,
@@ -11,6 +10,7 @@ import {
 } from 'lib/types/tool'
 import { PhotoCompleteSchema } from './photo'
 import { coordinatesZod } from './coordinates'
+import { JobType, WorkAllergy } from './enums'
 
 useZodOpenApi
 
@@ -42,46 +42,42 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 
 const ProposedJobBasicSchema = z
   .object({
-    areaId: z.string({ required_error: err.emptyAreaId }).nullable(),
+    areaId: z.string({ message: err.emptyAreaId }).nullable(),
     allergens: z.array(z.nativeEnum(WorkAllergy)),
     privateDescription: z.string(),
     publicDescription: z.string(),
     name: z
-      .string({ required_error: err.emptyProposedJobName })
+      .string({ message: err.emptyProposedJobName })
       .min(1, { message: err.emptyProposedJobName }),
     address: z
-      .string({ required_error: err.emptyAdress })
+      .string({ message: err.emptyAdress })
       .min(1, { message: err.emptyAdress }),
     coordinates: coordinatesZod.optional(),
     contact: z.string().min(1, { message: err.emptyContactInformation }),
     maxWorkers: z
       .number({
-        invalid_type_error: err.invalidTypeMaxWorkers,
-        required_error: err.emptyMaxWorkers,
+        message: err.invalidTypeMaxWorkers,
       })
       .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveMaxWorkers })
       .default(1),
     minWorkers: z
       .number({
-        invalid_type_error: err.invalidTypeMinWorkers,
-        required_error: err.emptyMinWorkers,
+        message: err.invalidTypeMinWorkers,
       })
       .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveMinWorkers })
       .default(1),
     strongWorkers: z
       .number({
-        invalid_type_error: err.invalidTypeStrongWorkers,
-        required_error: err.emptyStrongWorkers,
+        message: err.invalidTypeStrongWorkers,
       })
       .int({ message: err.nonInteger })
       .nonnegative({ message: err.nonNonNegativeStrongWorkers })
       .default(0),
     requiredDays: z
       .number({
-        invalid_type_error: err.invalidTypeNumber,
-        required_error: err.emptyRequiredDays,
+        message: err.invalidTypeNumber,
       })
       .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveNumber })
@@ -90,8 +86,12 @@ const ProposedJobBasicSchema = z
     hasShower: z.boolean(),
     photoFiles: z
       .any()
-      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
-      .refine(fileList => fileList.length <= 10, err.maxCountImage + ' 10')
+      .refine(fileList => fileList instanceof FileList, {
+        message: err.invalidTypeFile,
+      })
+      .refine(fileList => fileList.length <= 10, {
+        message: err.maxCountImage + ' 10',
+      })
       .superRefine((fileList, ctx) => {
         for (let i = 0; i < fileList.length; i++) {
           const file = fileList[i]
@@ -122,7 +122,7 @@ const ProposedJobBasicSchema = z
           format: 'date',
         },
       }),
-    jobType: z.nativeEnum(JobType, { required_error: err.emptyJobType }),
+    jobType: z.nativeEnum(JobType, { message: err.emptyJobType }),
     toolsOnSite: ToolsCreateSchema.optional(),
     toolsToTakeWith: ToolsCreateSchema.optional(),
     priority: z.number().default(1).optional(),

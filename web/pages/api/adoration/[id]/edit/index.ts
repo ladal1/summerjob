@@ -40,8 +40,8 @@ export default APIAccessController(
 
       // Check if new capacity is not less than current worker count
       if (data.capacity < existingSlot.workers.length) {
-        return res.status(400).json({ 
-          message: `Kapacita nemůže být menší než aktuální počet přiřazených pracantů (${existingSlot.workers.length})` 
+        return res.status(400).json({
+          message: `Kapacita nemůže být menší než aktuální počet přiřazených pracantů (${existingSlot.workers.length})`,
         })
       }
 
@@ -79,11 +79,11 @@ export default APIAccessController(
       })
     } catch (error) {
       console.error('Error updating adoration slot:', error)
-      
+
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: 'Invalid data format',
-          errors: error.errors 
+          errors: error.issues,
         })
       }
 

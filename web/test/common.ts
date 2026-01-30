@@ -1,11 +1,12 @@
 import { randomBytes } from 'crypto'
 import { PrismaClient } from '../lib/prisma/client'
 import request from 'supertest'
-import { faker } from '@faker-js/faker/locale/cz'
+import { fakerCS_CZ } from '@faker-js/faker'
 import path from 'path'
 import fs, { promises } from 'fs'
 
 const prisma = new PrismaClient()
+const faker = fakerCS_CZ
 
 /**
  * Creates a session for the given user
@@ -29,7 +30,7 @@ async function getSessionCookie(email: string) {
   const token = randomBytes(32).toString('hex')
   const DAYS_TO_EXPIRE = 1
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * DAYS_TO_EXPIRE)
-  const newSession = await prisma.session.create({
+  await prisma.session.create({
     data: {
       sessionToken: token,
       expires: expires,
@@ -368,7 +369,7 @@ class Common {
   post = async (
     url: string,
     identity: string,
-    body: any,
+    body: Record<string, unknown>,
     files: string[] = []
   ) => {
     if (!this._session) await this.setup()
@@ -389,7 +390,7 @@ class Common {
   patch = async (
     url: string,
     identity: string,
-    body: any,
+    body: Record<string, unknown>,
     files: string[] = []
   ) => {
     if (!this._session) await this.setup()
@@ -466,11 +467,11 @@ class Common {
 //#region Generate data
 export function createWorkerData() {
   return {
-    firstName: faker.name.firstName(),
-    lastName: faker.name.lastName(),
-    age: +faker.random.numeric(2, { allowLeadingZeros: false }),
+    firstName: faker.person.firstName(),
+    lastName: faker.person.lastName(),
+    age: faker.number.int({ min: 10, max: 99 }),
     email: faker.internet.email(),
-    phone: faker.phone.number('### ### ###'),
+    phone: faker.phone.number({ style: 'national' }),
     team: Math.random() > 0.5,
     strong: Math.random() > 0.5,
     allergyIds: [],
@@ -498,7 +499,7 @@ export function createCarData(ownerId: string) {
 
 export function createAreaData() {
   return {
-    name: faker.address.city(),
+    name: faker.location.city(),
     requiresCar: true,
     supportsAdoration: true,
   }
@@ -532,7 +533,7 @@ export function createPostData() {
     availability: ['2023-04-24T00:00:00.000Z'],
     timeFrom: '12:00',
     timeTo: '13:00',
-    address: faker.address.streetAddress(),
+    address: faker.location.streetAddress(),
     coordinates: [],
     shortDescription: 'string',
     longDescription: 'string',
@@ -575,6 +576,15 @@ export const Tools = {
 //#endregion
 
 //#region Helpers
+export const isEmpty = (value: unknown) => {
+  if (Array.isArray(value) || typeof value === 'string')
+    return value.length === 0
+  if (value === null || value === undefined) return true
+  if (typeof value === 'object')
+    return Object.keys(value as Record<string, unknown>).length === 0
+  return false
+}
+
 export const getFileNameAndType = (photoPath: string) => {
   const fileType = path.extname(photoPath)
   const fileName = path.basename(photoPath, fileType)

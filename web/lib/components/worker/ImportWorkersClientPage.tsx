@@ -14,7 +14,7 @@ import { useAPIWorkersCreate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { FoodAllergy, WorkAllergy, SkillHas } from '../../prisma/client'
+import { FoodAllergy, WorkAllergy, SkillHas } from '../../prisma/client/enums'
 import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
 import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 

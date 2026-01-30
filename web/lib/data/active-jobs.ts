@@ -64,8 +64,17 @@ export async function getActiveJobById(
   if (!job) {
     return null
   }
-  const workers = job.workers.map(databaseWorkerToWorkerComplete)
-  return { ...job, workers }
+  const workers = (
+    job.workers as Parameters<typeof databaseWorkerToWorkerComplete>[0][]
+  ).map(databaseWorkerToWorkerComplete)
+  const responsibleWorker = job.responsibleWorker
+    ? databaseWorkerToWorkerComplete(
+        job.responsibleWorker as Parameters<
+          typeof databaseWorkerToWorkerComplete
+        >[0]
+      )
+    : null
+  return { ...job, workers, responsibleWorker }
 }
 
 type ActiveJobSimplified = {

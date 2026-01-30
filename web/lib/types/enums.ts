@@ -1,0 +1,102 @@
+// Client-safe enum definitions mirroring Prisma schema values.
+export enum Allergy {
+  DUST = 'DUST',
+  ANIMALS = 'ANIMALS',
+  HAY = 'HAY',
+  POLLEN = 'POLLEN',
+  MITES = 'MITES',
+}
+
+export enum SkillHas {
+  LUMBERJACK = 'LUMBERJACK',
+  ARTIST = 'ARTIST',
+  GARDENER = 'GARDENER',
+  DANGER = 'DANGER',
+  ELECTRICIAN = 'ELECTRICIAN',
+  HEIGHTS = 'HEIGHTS',
+  MASON = 'MASON',
+  OTHER = 'OTHER',
+}
+
+export enum SkillBrings {
+  AXE = 'AXE',
+  SHOVEL = 'SHOVEL',
+  SAW = 'SAW',
+  POWERTOOLS = 'POWERTOOLS',
+  LADDER = 'LADDER',
+  OTHER = 'OTHER',
+}
+
+export enum FoodAllergy {
+  LACTOSE = 'LACTOSE',
+  GLUTEN = 'GLUTEN',
+  NUTS = 'NUTS',
+  SEAFOOD = 'SEAFOOD',
+  EGG = 'EGG',
+  VEGETARIAN = 'VEGETARIAN',
+  VEGAN = 'VEGAN',
+  OTHER = 'OTHER',
+}
+
+export enum WorkAllergy {
+  DUST = 'DUST',
+  ANIMALS = 'ANIMALS',
+  HAY = 'HAY',
+  POLLEN = 'POLLEN',
+  MITES = 'MITES',
+  CHEMICALS = 'CHEMICALS',
+  OTHER = 'OTHER',
+}
+
+export enum JobType {
+  WOOD = 'WOOD',
+  PAINTING = 'PAINTING',
+  HOUSEWORK = 'HOUSEWORK',
+  GARDEN = 'GARDEN',
+  OTHER = 'OTHER',
+}
+
+export enum ToolName {
+  AXE = 'AXE',
+  BOW_SAW = 'BOW_SAW',
+  LADDER = 'LADDER',
+  PAINT = 'PAINT',
+  PAINT_ROLLER = 'PAINT_ROLLER',
+  COVER_SHEET = 'COVER_SHEET',
+  MASKING_TAPE = 'MASKING_TAPE',
+  PAINT_BRUSH = 'PAINT_BRUSH',
+  SCRAPER_GRID = 'SCRAPER_GRID',
+  PAINTER_SPATULA = 'PAINTER_SPATULA',
+  JAPANESE_SPATULA = 'JAPANESE_SPATULA',
+  GYPSUM = 'GYPSUM',
+  BUCKET = 'BUCKET',
+  RAG = 'RAG',
+  BROOM = 'BROOM',
+  SAW = 'SAW',
+  BRUSHCUTTER = 'BRUSHCUTTER',
+  GLOVES = 'GLOVES',
+  RESPIRATOR = 'RESPIRATOR',
+  HEADPHONES = 'HEADPHONES',
+  CHAINSAW = 'CHAINSAW',
+  CIRCULAR_SAW = 'CIRCULAR_SAW',
+  HEDGE_TRIMMER = 'HEDGE_TRIMMER',
+  STRING_TRIMMER = 'STRING_TRIMMER',
+  RAKE = 'RAKE',
+  PITCHFORK = 'PITCHFORK',
+  SHOVEL = 'SHOVEL',
+}
+
+export enum PostTag {
+  EATING = 'EATING',
+  SPORTS = 'SPORTS',
+  CULTURAL = 'CULTURAL',
+  EDUCATIONAL = 'EDUCATIONAL',
+  RELIGIOUS = 'RELIGIOUS',
+  INFORMATIVE = 'INFORMATIVE',
+}
+
+export enum ApplicationStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+}

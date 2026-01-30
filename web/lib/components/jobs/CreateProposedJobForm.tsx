@@ -6,7 +6,7 @@ import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
 import { formatNumber, removeRedundantSpace } from 'lib/helpers/helpers'
-import { Area, JobType, ToolName } from 'lib/prisma/client'
+import { JobType, ToolName } from 'lib/types/enums'
 import { deserializeAreas } from 'lib/types/area'
 import {
   ProposedJobCreateData,
@@ -159,7 +159,9 @@ export default function CreateProposedJobForm({
     setValue('areaId', id, { shouldDirty: true, shouldValidate: true })
   }
 
-  function areaToSelectItem(area: Area): FilterSelectItem {
+  function areaToSelectItem(
+    area: ReturnType<typeof deserializeAreas>[number]
+  ): FilterSelectItem {
     return {
       id: area.id,
       searchable: `${area.name}`,

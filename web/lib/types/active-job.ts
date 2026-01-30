@@ -1,6 +1,4 @@
-import type { Worker } from 'lib/prisma/client'
-import { ActiveJob, Plan } from 'lib/prisma/client'
-import { ActiveJobSchema, ProposedJobSchema } from 'lib/prisma/zod'
+import { ActiveJobSchema, PlanSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import { z } from 'zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
 import {
@@ -13,18 +11,21 @@ import { WorkerComplete } from './worker'
 
 export type ActiveJobNoPlan = z.infer<typeof ActiveJobNoPlanSchema>
 
-export type ActiveJobComplete = ActiveJob & {
+type ActiveJobModel = z.infer<typeof ActiveJobSchema>
+type PlanModel = z.infer<typeof PlanSchema>
+
+export type ActiveJobComplete = ActiveJobModel & {
   workers: WorkerComplete[]
   proposedJob: ProposedJobWithArea
   rides: RideComplete[]
-  responsibleWorker: Worker | null
-  plan: Plan
+  responsibleWorker: WorkerComplete | null
+  plan: PlanModel
 }
 
-export type ActiveJobWorkersAndJobs = ActiveJob & {
+export type ActiveJobWorkersAndJobs = ActiveJobModel & {
   workers: WorkerComplete[]
   proposedJob: ProposedJobWithArea
-  plan: Plan
+  plan: PlanModel
 }
 
 export const ActiveJobWithProposedSchema = ActiveJobSchema.extend({

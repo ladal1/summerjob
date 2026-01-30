@@ -129,7 +129,9 @@ export async function getWorkerById(
     return null
   }
   // Only return availability for the active event
-  return databaseWorkerToWorkerComplete(user)
+  return databaseWorkerToWorkerComplete(
+    user as Parameters<typeof databaseWorkerToWorkerComplete>[0]
+  )
 }
 
 export function databaseWorkerToWorkerComplete(

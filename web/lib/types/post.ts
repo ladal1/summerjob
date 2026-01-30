@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import { PostSchema } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
-import { PostTag } from 'lib/prisma/client'
 import { Serialized } from './serialize'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import { coordinatesZod } from './coordinates'
 import { validateTimeInput } from 'lib/helpers/helpers'
+import { PostTag } from './enums'
 
 useZodOpenApi
 
@@ -71,19 +71,19 @@ const PostBasicSchema = z
     longDescription: z.string(),
     photoFile: z
       .any()
-      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
+      .refine(fileList => fileList instanceof FileList, {
+        message: err.invalidTypeFile,
+      })
       .transform(
         fileList =>
           (fileList && fileList.length > 0 && fileList[0]) || null || undefined
       )
-      .refine(
-        file => !file || (!!file && file.size <= 1024 * 1024 * 10),
-        err.maxCapacityImage + ' - 10 MB'
-      )
-      .refine(
-        file => !file || (!!file && file.type?.startsWith('image')),
-        err.unsuportedTypeImage
-      ) // any image
+      .refine(file => !file || (!!file && file.size <= 1024 * 1024 * 10), {
+        message: err.maxCapacityImage + ' - 10 MB',
+      })
+      .refine(file => !file || (!!file && file.type?.startsWith('image')), {
+        message: err.unsuportedTypeImage,
+      }) // any image
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
       .nullable()
       .optional(),

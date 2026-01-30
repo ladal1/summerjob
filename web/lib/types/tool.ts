@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { ToolSchema } from 'lib/prisma/zod'
-import { ToolName } from 'lib/prisma/client'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
+import { ToolName } from './enums'
 
 useZodOpenApi
 
@@ -16,7 +16,7 @@ export const ToolCreateSchema = z
     id: z.string().optional(),
     tool: z.nativeEnum(ToolName),
     amount: z
-      .number({ invalid_type_error: err.invalidTypeNumber })
+      .number({ message: err.invalidTypeNumber })
       .int({ message: err.nonInteger })
       .positive({ message: err.nonPositiveNumber })
       .default(1),

@@ -27,7 +27,7 @@ import PostType from './PostType'
 import { Sort, SortObject, SortPostsBy } from './SortPostsBy'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { FilterPostsBy } from './FilterPostsBy'
-import { PostTag } from 'lib/prisma/client'
+import { PostTag } from 'lib/types/enums'
 import AdorationBox from '../adoration/AdorationBox'
 
 const sorts: Sort[] = [
@@ -148,7 +148,7 @@ export default function PostsClientPage({
     )
     const tomorrowDate = new Date(todayDate)
     tomorrowDate.setDate(todayDate.getDate() + 1)
-    
+
     const todayDay = {
       id: todayDate.toJSON(),
       day: new Date(todayDate),
@@ -157,16 +157,16 @@ export default function PostsClientPage({
       id: tomorrowDate.toJSON(),
       day: new Date(tomorrowDate),
     }
-    
+
     // Return only today and tomorrow if they exist in the available days
-    const todayAndTomorrow = days.filter(day => 
-      day.id === todayDay.id || day.id === tomorrowDay.id
+    const todayAndTomorrow = days.filter(
+      day => day.id === todayDay.id || day.id === tomorrowDay.id
     )
-    
+
     if (todayAndTomorrow.length > 0) {
       return todayAndTomorrow
     }
-    
+
     // Fallback to all upcoming days if today/tomorrow are not available
     if (days.some(day => day.id === todayDay.id)) {
       return days.filter(day => day.day.getTime() >= todayDay.day.getTime())
@@ -431,22 +431,22 @@ export default function PostsClientPage({
         )}
       </PageHeader>
       <div className="m-3">
-        <div 
+        <div
           style={{
             columnCount: 'auto',
             columnWidth: '450px',
             columnGap: '1.5rem',
-            columnFill: 'balance'
+            columnFill: 'balance',
           }}
         >
           {pinnedPosts.map((item, index) => (
-            <div 
+            <div
               key={index}
               style={{
                 breakInside: 'avoid',
                 marginBottom: '1rem',
                 display: 'inline-block',
-                width: '100%'
+                width: '100%',
               }}
             >
               <PostBubble
@@ -468,7 +468,11 @@ export default function PostsClientPage({
                 <div
                   className="d-inline-flex align-items-baseline cursor-pointer me-2"
                   onClick={() => setShowPast(!showPast)}
-                  title={showPast ? 'Skrýt dokončené akce' : 'Zobrazit dokončené akce'}
+                  title={
+                    showPast
+                      ? 'Skrýt dokončené akce'
+                      : 'Zobrazit dokončené akce'
+                  }
                 >
                   <i className="fas fa-history me-2"></i>
                   <div className="smj-white-bubble p-2 smj-shadow-small">
@@ -524,11 +528,14 @@ export default function PostsClientPage({
                       {item.timeFrom && item.timeTo && (
                         <div className="fw-bold text-center">
                           <div>
-                            {formatDateToDayShort(getMostRelevantDate(item.availability))}
+                            {formatDateToDayShort(
+                              getMostRelevantDate(item.availability)
+                            )}
                           </div>
                           {/* Mobile: single line */}
                           <div className="d-block d-sm-none">
-                            {formateTime(item.timeFrom)} - {formateTime(item.timeTo)}
+                            {formateTime(item.timeFrom)} -{' '}
+                            {formateTime(item.timeTo)}
                           </div>
                           {/* Desktop: multi-line */}
                           <div className="d-none d-sm-block">
@@ -589,7 +596,7 @@ function filterPosts(
   if (!posts) return []
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  
+
   return posts
     .filter(post => {
       // Filter out events that have already passed (unless showPast is true)
@@ -598,28 +605,28 @@ function filterPosts(
         const hasUpcomingDates = post.availability.some(date => {
           const eventDate = new Date(date)
           eventDate.setHours(0, 0, 0, 0)
-          
+
           // If event is in the future, include it
           if (eventDate.getTime() > today.getTime()) {
             return true
           }
-          
+
           // If event is today, check if it has ended
           if (eventDate.getTime() === today.getTime()) {
             // If no end time specified, include it (all-day event)
             if (!post.timeTo) {
               return true
             }
-            
+
             // Check if the event has ended today
             const [endHour, endMinute] = getHourAndMinute(post.timeTo)
             const eventEndTime = new Date(eventDate)
             eventEndTime.setHours(endHour, endMinute, 0, 0)
-            
+
             // Include if event hasn't ended yet
             return eventEndTime.getTime() > now.getTime()
           }
-          
+
           return false
         })
         if (!hasUpcomingDates) {
@@ -768,7 +775,7 @@ function getMostRelevantDate(availability: Date[]): Date {
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  
+
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
 
@@ -782,7 +789,7 @@ function getMostRelevantDate(availability: Date[]): Date {
     return todayAvailable
   }
 
-  // If tomorrow is available, show tomorrow  
+  // If tomorrow is available, show tomorrow
   const tomorrowAvailable = availability.find(date => {
     const availDate = new Date(date)
     availDate.setHours(0, 0, 0, 0)

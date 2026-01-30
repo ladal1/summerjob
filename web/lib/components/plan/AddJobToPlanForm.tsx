@@ -10,7 +10,11 @@ import {
 import { ProposedJobComplete } from 'lib/types/proposed-job'
 import { ReactNode, useMemo } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import Select, { FormatOptionLabelMeta, StylesConfig } from 'react-select'
+import Select, {
+  CSSObjectWithLabel,
+  FormatOptionLabelMeta,
+  StylesConfig,
+} from 'react-select'
 import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
 import { Issue } from './Issue'
@@ -72,7 +76,9 @@ export default function AddJobToPlanForm({
       return a.name.localeCompare(b.name)
     })
 
-    return sorted.map<SelectItem>(job => jobToSelectItem(job, workerId, planDate))
+    return sorted.map<SelectItem>(job =>
+      jobToSelectItem(job, workerId, planDate)
+    )
   }, [data, workerId, planDate])
 
   const itemToFormData = (item: SelectItem) => ({
@@ -115,20 +121,22 @@ export default function AddJobToPlanForm({
   }
 
   const colourStyles: StylesConfig<SelectItem, true> = {
-    control: styles => ({
-      ...styles,
-      backgroundColor: 'white',
-      border: 0,
-      boxShadow: '1px 1px 2px 2px rgba(0, 38, 255, 0.2)',
-    }),
-    option: styles => ({
-      ...styles,
-      backgroundColor: 'white',
-      color: 'black',
-      '&:hover': {
-        backgroundColor: '#ffea9c',
-      },
-    }),
+    control: base =>
+      ({
+        ...base,
+        backgroundColor: 'white',
+        border: 0,
+        boxShadow: '1px 1px 2px 2px rgba(0, 38, 255, 0.2)',
+      }) as CSSObjectWithLabel,
+    option: base =>
+      ({
+        ...base,
+        backgroundColor: 'white',
+        color: 'black',
+        '&:hover': {
+          backgroundColor: '#ffea9c',
+        },
+      }) as CSSObjectWithLabel,
   }
 
   return (
@@ -146,7 +154,11 @@ export default function AddJobToPlanForm({
                 ref={ref}
                 value={value?.map(formDataToItem) || []}
                 options={items}
-                onChange={val => onChange(val?.length > 0 ? val.map(v => itemToFormData(v)) : [])}
+                onChange={val =>
+                  onChange(
+                    val?.length > 0 ? val.map(v => itemToFormData(v)) : []
+                  )
+                }
                 placeholder={'Vyberte joby...'}
                 formatOptionLabel={formatOptionLabel}
                 isMulti
@@ -184,7 +196,7 @@ function AddJobSelectItem({
 }) {
   // Filter availability to only include dates from the plan date onwards
   const availableDaysFromPlanDate = job.availability.filter(
-    (day) => new Date(day) >= planDate
+    day => new Date(day) >= planDate
   )
 
   return (
@@ -238,7 +250,9 @@ function jobToSelectItem(
     ).toLocaleLowerCase(),
     publicDescription: job.publicDescription,
     privateDescription: job.privateDescription,
-    item: <AddJobSelectItem job={job} workerId={workerId} planDate={planDate} />,
+    item: (
+      <AddJobSelectItem job={job} workerId={workerId} planDate={planDate} />
+    ),
   }
 }
 

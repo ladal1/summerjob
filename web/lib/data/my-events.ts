@@ -5,6 +5,7 @@ import {
 } from './internal-error'
 import { getActiveSummerJobEvent } from './summerjob-event'
 import { PostComplete } from 'lib/types/post'
+import { PostTag } from 'lib/types/enums'
 
 export async function getMyEvents(workerId: string): Promise<PostComplete[]> {
   const activeEvent = await getActiveSummerJobEvent()
@@ -50,5 +51,8 @@ export async function getMyEvents(workerId: string): Promise<PostComplete[]> {
     },
   })
 
-  return posts
+  return posts.map(post => ({
+    ...post,
+    tags: post.tags as unknown as PostTag[],
+  }))
 }

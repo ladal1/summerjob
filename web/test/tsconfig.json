@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true
+    "target": "es6",
+    "module": "esnext",
+    "moduleResolution": "classic",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["vitest/globals", "node"]
   }
 }

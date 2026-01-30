@@ -10,6 +10,7 @@ import { getPhotoPath } from 'lib/api/parse-form'
 import prisma from 'lib/prisma/connection'
 import { PostComplete, PostCreateData, PostUpdateData } from 'lib/types/post'
 import { PrismaTransactionClient } from 'lib/types/prisma'
+import { PostTag } from 'lib/types/enums'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import path from 'path'
@@ -39,9 +40,14 @@ export async function getPostsWithAdorationFlag(): Promise<{
     }),
     existsAdorationSlot(),
   ])
-  return { posts, hasAdoration }
+  return {
+    posts: posts.map(post => ({
+      ...post,
+      tags: post.tags as unknown as PostTag[],
+    })),
+    hasAdoration,
+  }
 }
-
 
 export async function getPostById(id: string): Promise<PostComplete | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
@@ -69,7 +75,10 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
   if (!post) {
     return null
   }
-  return post
+  return {
+    ...post,
+    tags: post.tags as unknown as PostTag[],
+  }
 }
 
 export async function getPostPhotoById(

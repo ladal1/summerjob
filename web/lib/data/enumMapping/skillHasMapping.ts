@@ -1,4 +1,4 @@
-import { SkillHas } from 'lib/prisma/client'
+import { SkillHas } from 'lib/types/enums'
 
 export const skillHasMapping: Record<SkillHas, string> = {
   [SkillHas.LUMBERJACK]: 'Dřevorubec',

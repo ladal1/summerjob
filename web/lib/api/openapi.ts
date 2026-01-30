@@ -1,5 +1,5 @@
 import {
-  OpenAPIGenerator,
+  OpenApiGeneratorV3,
   OpenAPIRegistry,
 } from '@asteasolutions/zod-to-openapi'
 import {
@@ -1875,10 +1875,11 @@ registry.registerPath({
 
 //#endregion
 
-const generator = new OpenAPIGenerator(registry.definitions, '3.0.0')
+const generator = new OpenApiGeneratorV3(registry.definitions)
 let openApiDocument = {}
 try {
   openApiDocument = generator.generateDocument({
+    openapi: '3.0.0',
     info: {
       title: 'SummerJob API',
       version: '1.0',

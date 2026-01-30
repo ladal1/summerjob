@@ -1,5 +1,6 @@
-import { Logging } from 'lib/prisma/client'
+import { LoggingSchema } from 'lib/prisma/zod'
 import { Serialized } from './serialize'
+import { z } from 'zod'
 
 export enum APILogEvent {
   WORKER_CREATE = 'WORKER_CREATE',
@@ -50,6 +51,8 @@ export enum APILogEvent {
   APPLICATION_ACCEPTED = 'APPLICATION_ACCEPTED',
   APPLICATION_REJECTED = 'APPLICATION_REJECTED',
 }
+
+export type Logging = z.infer<typeof LoggingSchema>
 
 export type FilteredLogs = {
   logs: Logging[]

@@ -1,4 +1,4 @@
-import { WorkAllergy } from 'lib/prisma/client'
+import { WorkAllergy } from 'lib/types/enums'
 
 export const workAllergyMapping: Record<WorkAllergy, string> = {
   [WorkAllergy.DUST]: 'Prach',

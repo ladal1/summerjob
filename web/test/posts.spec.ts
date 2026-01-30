@@ -1,11 +1,14 @@
-import chai, { expect } from 'chai'
-import chaiExclude from 'chai-exclude'
-import { api, createPostData, getFileNameAndType, Id } from './common'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { afterAll, describe, expect, it } from 'vitest'
+import {
+  api,
+  createPostData,
+  getFileNameAndType,
+  Id,
+  isEmpty,
+} from './common.js'
 import { statSync } from 'fs'
 import path from 'path'
-
-chai.use(chaiExclude)
-chai.should()
 
 describe('Posts', function () {
   //#region Access
@@ -17,7 +20,7 @@ describe('Posts', function () {
         // when
         const resp = await api.get('/api/posts', perm)
         // then
-        resp.status.should.equal(200)
+        expect(resp.status).toBe(200)
       }
     })
 
@@ -28,8 +31,8 @@ describe('Posts', function () {
         // when
         const resp = await api.get('/api/posts', perm)
         // then
-        resp.status.should.equal(403)
-        resp.body.should.be.empty
+        expect(resp.status).toBe(403)
+        expect(isEmpty(resp.body)).toBe(true)
       }
     })
   })
@@ -41,7 +44,7 @@ describe('Posts', function () {
       // when
       const resp = await api.get('/api/posts/1', Id.POSTS)
       // then
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
     })
 
     it('creates a proposed post', async function () {
@@ -50,9 +53,9 @@ describe('Posts', function () {
       // when
       const resp = await api.post('/api/posts', Id.POSTS, body)
       // then
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
+      expect(resp.status).toBe(201)
+      expect(resp.body && typeof resp.body).toBe('object')
+      expect(resp.body).toHaveProperty('id')
     })
   })
 
@@ -63,9 +66,9 @@ describe('Posts', function () {
     // when
     const resp = await api.get('/api/posts', Id.POSTS)
     // then
-    resp.status.should.equal(200)
-    resp.body.should.be.an('array')
-    resp.body.should.have.lengthOf(1)
+    expect(resp.status).toBe(200)
+    expect(Array.isArray(resp.body)).toBe(true)
+    expect(resp.body).toHaveLength(1)
   })
 
   it('returns a proposed post by id', async function () {
@@ -75,10 +78,10 @@ describe('Posts', function () {
     // when
     const resp = await api.get(`/api/posts/${post.body.id}`, Id.POSTS)
     // then
-    resp.status.should.equal(200)
-    resp.body.should.be.an('object')
-    resp.body.should.have.property('id')
-    resp.body.id.should.equal(post.body.id)
+    expect(resp.status).toBe(200)
+    expect(resp.body && typeof resp.body).toBe('object')
+    expect(resp.body).toHaveProperty('id')
+    expect(resp.body.id).toBe(post.body.id)
   })
 
   it('updates a post', async function () {
@@ -96,12 +99,12 @@ describe('Posts', function () {
       body
     )
     // then
-    patch.status.should.equal(204)
+    expect(patch.status).toBe(204)
     const resp = await api.get(`/api/posts/${selectedPost.id}`, Id.POSTS)
-    resp.body.should.be.an('object')
-    resp.body.should.have.property('id')
-    resp.body.tags.should.have.members(body.tags)
-    resp.body.name.should.equal(body.name)
+    expect(resp.body && typeof resp.body).toBe('object')
+    expect(resp.body).toHaveProperty('id')
+    expect(resp.body.tags).toEqual(expect.arrayContaining(body.tags))
+    expect(resp.body.name).toBe(body.name)
   })
 
   it("can't update a post - wrong parameter", async function () {
@@ -118,10 +121,10 @@ describe('Posts', function () {
       body
     )
     // then
-    patch.status.should.equal(400)
+    expect(patch.status).toBe(400)
     const updatedPost = await api.get(`/api/posts/${selectedPost.id}`, Id.POSTS)
     // verify no changes were made
-    expect(updatedPost.body).to.deep.equal(selectedPost)
+    expect(updatedPost.body).toStrictEqual(selectedPost)
   })
 
   it('deletes a post', async function () {
@@ -133,21 +136,21 @@ describe('Posts', function () {
     const postId = post.body.id
     // Check that the post was added
     const postsAfterAdding = await api.get('/api/posts', Id.POSTS)
-    postsAfterAdding.body.should.have.lengthOf(
+    expect(postsAfterAdding.body).toHaveLength(
       postsBeforeAdding.body.length + 1
     )
-    ;(postsAfterAdding.body as any[]).map(w => w.id).should.include(postId)
+    expect((postsAfterAdding.body as any[]).map(w => w.id)).toContain(postId)
     // when
     // Delete the post
     const resp = await api.del(`/api/posts/${postId}`, Id.POSTS)
     // then
-    resp.status.should.equal(204)
+    expect(resp.status).toBe(204)
     // Check that the post was deleted
     const postsAfterRemoving = await api.get('/api/posts', Id.POSTS)
-    postsAfterRemoving.body.should.have.lengthOf(postsBeforeAdding.body.length)
-    ;(postsAfterRemoving.body as any[])
-      .map(w => w.id)
-      .should.not.include(postId)
+    expect(postsAfterRemoving.body).toHaveLength(postsBeforeAdding.body.length)
+    expect((postsAfterRemoving.body as any[]).map(w => w.id)).not.toContain(
+      postId
+    )
   })
 
   //#region Photo
@@ -160,31 +163,31 @@ describe('Posts', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFilesBef.should.equal(0)
+      expect(numOfFilesBef).toBe(0)
       const resp = await api.post('/api/posts', Id.POSTS, body, [filePath])
       // then
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
+      expect(resp.status).toBe(201)
+      expect(resp.body && typeof resp.body).toBe('object')
       // verify exitence of photo path
-      resp.body.should.have.property('photoPath')
-      resp.body.photoPath.should.not.be.empty
+      expect(resp.body).toHaveProperty('photoPath')
+      expect(resp.body.photoPath).not.toBe('')
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
-      api.pathExists(absolutePath).should.equal(true)
+      expect(api.pathExists(absolutePath)).toBe(true)
       // verify content by reading the image file
       const fileStat = statSync(filePath)
       const expectedSize = fileStat.size
       const fileStatUploaded = statSync(absolutePath)
       const uploadedSize = fileStatUploaded.size
-      expectedSize.should.equal(uploadedSize)
+      expect(expectedSize).toBe(uploadedSize)
       // verify naming of file
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
-      fileName.should.equal(resp.body.id)
-      fileType.should.equal('.ico')
+      expect(fileName).toBe(resp.body.id)
+      expect(fileType).toBe('.ico')
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFiles.should.equal(1)
+      expect(numOfFiles).toBe(1)
     })
 
     it('creates post with invalid photo file', async function () {
@@ -194,12 +197,12 @@ describe('Posts', function () {
       // when
       const resp = await api.post('/api/posts', Id.POSTS, body, [file])
       // then
-      resp.status.should.equal(400)
+      expect(resp.status).toBe(400)
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFiles.should.equal(1) // one because prev test
+      expect(numOfFiles).toBe(1) // one because prev test
     })
 
     it('creates post with too many photos', async function () {
@@ -209,12 +212,12 @@ describe('Posts', function () {
       // when
       const resp = await api.post('/api/posts', Id.POSTS, body, [file, file])
       // then
-      resp.status.should.equal(413)
+      expect(resp.status).toBe(413)
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFiles.should.equal(1) // one because prev test
+      expect(numOfFiles).toBe(1) // one because prev test
     })
 
     it('update photo of post', async function () {
@@ -228,7 +231,7 @@ describe('Posts', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFilesBef.should.equal(1)
+      expect(numOfFilesBef).toBe(1)
       const patch = await api.patch(
         `/api/posts/${selectedPost.body.id}`,
         Id.POSTS,
@@ -236,29 +239,29 @@ describe('Posts', function () {
         [filePath]
       )
       // then
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(`/api/posts/${selectedPost.body.id}`, Id.POSTS)
-      resp.body.should.be.an('object')
+      expect(resp.body && typeof resp.body).toBe('object')
       // verify existence of photo path
-      resp.body.should.have.property('photoPath')
-      resp.body.photoPath.should.not.be.empty
+      expect(resp.body).toHaveProperty('photoPath')
+      expect(resp.body.photoPath).not.toBe('')
       // verify content by reading the image file
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
       const fileStat = statSync(filePath)
       const expectedSize = fileStat.size
       const fileStatUploaded = statSync(absolutePath)
       const uploadedSize = fileStatUploaded.size
-      expectedSize.should.equal(uploadedSize)
+      expect(expectedSize).toBe(uploadedSize)
       // verify naming of file
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
-      fileName.should.equal(resp.body.id)
-      fileName.should.equal(selectedPost.body.id)
-      fileType.should.equal('.png')
+      expect(fileName).toBe(resp.body.id)
+      expect(fileName).toBe(selectedPost.body.id)
+      expect(fileType).toBe('.png')
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFiles.should.equal(2) // this and other test before
+      expect(numOfFiles).toBe(2) // this and other test before
     })
 
     it('remove photo of post', async function () {
@@ -276,7 +279,7 @@ describe('Posts', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFilesBef.should.equal(3)
+      expect(numOfFilesBef).toBe(3)
       // when
       const patch = await api.patch(
         `/api/posts/${newPostRes.body.id}`,
@@ -284,17 +287,17 @@ describe('Posts', function () {
         body
       )
       // then
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(`/api/posts/${newPostRes.body.id}`, Id.POSTS)
-      resp.body.should.be.an('object')
+      expect(resp.body && typeof resp.body).toBe('object')
       // verify emptiness of photo path
-      resp.body.should.have.property('photoPath')
-      resp.body.photoPath.should.be.empty
+      expect(resp.body).toHaveProperty('photoPath')
+      expect(resp.body.photoPath).toBe('')
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFiles.should.equal(2)
+      expect(numOfFiles).toBe(2)
     })
 
     it("get post's photo", async function () {
@@ -309,23 +312,23 @@ describe('Posts', function () {
       )
       // then
       // verify status code
-      resp.status.should.equal(200)
+      expect(resp.status).toBe(200)
 
       // verify content type
-      resp.headers['content-type'].should.include('image')
+      expect(resp.headers['content-type']).toContain('image')
 
       // verify content length
-      resp.headers['content-length'].should.exist
+      expect(resp.headers['content-length']).toBeDefined()
 
       // verify cache control headers
-      resp.headers['cache-control'].should.include('public')
-      resp.headers['cache-control'].should.include('max-age=5')
-      resp.headers['cache-control'].should.include('must-revalidate')
+      expect(resp.headers['cache-control']).toContain('public')
+      expect(resp.headers['cache-control']).toContain('max-age=5')
+      expect(resp.headers['cache-control']).toContain('must-revalidate')
 
       // verify content by reading the image file
       const fileStat = statSync(file)
       const expectedSize = fileStat.size
-      parseInt(resp.headers['content-length']).should.equal(expectedSize)
+      expect(parseInt(resp.headers['content-length'])).toBe(expectedSize)
     })
 
     it("return 404 if post doesn't have photo", async function () {
@@ -338,7 +341,7 @@ describe('Posts', function () {
         Id.POSTS
       )
       // then
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
     })
 
     it('deletation of post will delete his photo', async function () {
@@ -353,20 +356,20 @@ describe('Posts', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFilesBef.should.equal(4)
+      expect(numOfFilesBef).toBe(4)
       // when
       const del = await api.del(`/api/posts/${newPostRes.body.id}`, Id.POSTS)
       // then
-      del.status.should.equal(204)
+      expect(del.status).toBe(204)
       const resp = await api.get(`/api/posts/${newPostRes.body.id}`, Id.POSTS)
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
       )
-      numOfFiles.should.equal(3)
+      expect(numOfFiles).toBe(3)
     })
   })
   //#endregion
-  this.afterAll(api.afterTestBlock)
+  afterAll(api.afterTestBlock)
 })
