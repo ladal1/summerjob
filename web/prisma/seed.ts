@@ -337,8 +337,6 @@ async function seedAdorationSlots(
         slotTime.setHours(8 + i, 0, 0, 0) // 8:00 - 17:00
 
         return {
-          date: slotTime,
-          hour: 8 + i,
           location: `Kaple ${i + 1}`,
           eventId,
           dateStart: slotTime,
