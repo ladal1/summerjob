@@ -74,10 +74,10 @@ export const WorkerCreateSchema = z
         fileList =>
           (fileList && fileList.length > 0 && fileList[0]) || null || undefined
       )
-      .refine(file => !file || (!!file && file.size <= 1024 * 1024 * 10), {
+      .refine(file => !file || file.size <= 1024 * 1024 * 10, {
         message: err.maxCapacityImage + ' - 10 MB',
       })
-      .refine(file => !file || (!!file && file.type?.startsWith('image')), {
+      .refine(file => !file || file.type?.startsWith('image'), {
         message: err.unsuportedTypeImage,
       }) // any image
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
