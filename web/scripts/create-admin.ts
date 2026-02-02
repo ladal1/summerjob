@@ -1,5 +1,9 @@
+import dotenv from 'dotenv'
 import { PrismaClient } from '../lib/prisma/client'
-const readline = require('readline')
+import readline from 'readline'
+
+// Load environment variables
+dotenv.config()
 
 const prisma = new PrismaClient()
 
@@ -22,7 +26,7 @@ async function createAccount(
   email: string
 ) {
   email = email.toLowerCase()
-  const worker = await prisma.worker.create({
+  await prisma.worker.create({
     data: {
       firstName,
       lastName,

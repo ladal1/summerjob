@@ -1,6 +1,10 @@
+import dotenv from 'dotenv'
 import { randomBytes } from 'crypto'
 import { PrismaClient } from '../lib/prisma/client'
-const readline = require('readline')
+import readline from 'readline'
+
+// Load environment variables
+dotenv.config()
 
 const prisma = new PrismaClient()
 
@@ -52,7 +56,7 @@ async function createSession(email: string) {
   const token = randomBytes(32).toString('hex')
   const DAYS_TO_EXPIRE = 7
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * DAYS_TO_EXPIRE)
-  const newSession = await prisma.session.create({
+  await prisma.session.create({
     data: {
       sessionToken: token,
       expires: expires,

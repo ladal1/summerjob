@@ -1,3 +1,4 @@
+import dotenv from 'dotenv'
 import {
   FoodAllergy,
   WorkAllergy,
@@ -13,6 +14,10 @@ import {
 } from '../lib/prisma/client'
 import { faker as faker } from '@faker-js/faker'
 import { Prisma } from '../lib/prisma/client'
+import { AdorationSlotCreateManyInput } from '../lib/prisma/client/models'
+
+// Load environment variables
+dotenv.config()
 
 const prisma = new PrismaClient()
 
@@ -318,22 +323,29 @@ async function setEventAsInactive() {
   })
 }
 
-async function seedAdorationSlots(eventId: string, startDate: Date, endDate: Date) {
+async function seedAdorationSlots(
+  eventId: string,
+  startDate: Date,
+  endDate: Date
+) {
   const eventDates = datesBetween(startDate, endDate)
 
-  const allSlots = eventDates.flatMap(date => {
-    return Array.from({ length: 10 }, (_, i) => {
-      const slotTime = new Date(date)
-      slotTime.setHours(8 + i, 0, 0, 0) // 8:00 - 17:00
+  const allSlots = eventDates.flatMap(
+    (date): AdorationSlotCreateManyInput[] => {
+      return Array.from({ length: 10 }, (_, i) => {
+        const slotTime = new Date(date)
+        slotTime.setHours(8 + i, 0, 0, 0) // 8:00 - 17:00
 
-      return {
-        date: slotTime,
-        hour: 8 + i,
-        location: `Kaple ${i + 1}`,
-        eventId,
-      }
-    })
-  })
+        return {
+          date: slotTime,
+          hour: 8 + i,
+          location: `Kaple ${i + 1}`,
+          eventId,
+          dateStart: slotTime,
+        }
+      })
+    }
+  )
 
   await prisma.adorationSlot.createMany({ data: allSlots })
 }
@@ -374,7 +386,11 @@ async function main() {
     mini ? 5 : 30
   )
   console.log('Creating adoration slots...')
-  await seedAdorationSlots(yearlyEvent.id, yearlyEvent.startDate, yearlyEvent.endDate)
+  await seedAdorationSlots(
+    yearlyEvent.id,
+    yearlyEvent.startDate,
+    yearlyEvent.endDate
+  )
 }
 
 main()
