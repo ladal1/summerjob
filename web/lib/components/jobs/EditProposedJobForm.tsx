@@ -17,8 +17,7 @@ import { useState } from 'react'
 import { useForm, FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
 import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
-import { JobType, ToolName } from '../../prisma/client'
-import { Area } from '../../prisma/zod'
+import { JobType, ToolName, WorkAllergy } from 'lib/types/enums'
 import { deserializeAreas } from '../../types/area'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { PillSelectItem } from '../filter-select/PillSelect'
@@ -66,7 +65,7 @@ export default function EditProposedJobForm({
       name: job.name,
       publicDescription: job.publicDescription,
       privateDescription: job.privateDescription,
-      allergens: job.allergens,
+      allergens: job.allergens as WorkAllergy[],
       address: job.address,
       coordinates: job.coordinates,
       contact: job.contact,
@@ -77,9 +76,19 @@ export default function EditProposedJobForm({
       hasFood: job.hasFood,
       hasShower: job.hasShower,
       availability: job.availability.map(day => day.toJSON()),
-      jobType: job.jobType,
-      toolsOnSite: { tools: job.toolsOnSite },
-      toolsToTakeWith: { tools: job.toolsToTakeWith },
+      jobType: job.jobType as JobType,
+      toolsOnSite: {
+        tools: job.toolsOnSite.map(tool => ({
+          ...tool,
+          tool: tool.tool as ToolName,
+        })),
+      },
+      toolsToTakeWith: {
+        tools: job.toolsToTakeWith.map(tool => ({
+          ...tool,
+          tool: tool.tool as ToolName,
+        })),
+      },
       areaId: job.areaId,
       priority: job.priority,
     },
@@ -107,7 +116,7 @@ export default function EditProposedJobForm({
   //#region JobType
 
   const selectJobType = (id: string) => {
-    setValue('jobType', id as JobType, {
+    setValue('jobType', (id as JobType) || JobType.OTHER, {
       shouldDirty: true,
       shouldValidate: true,
     })
@@ -196,7 +205,7 @@ export default function EditProposedJobForm({
 
   const manageToolSelectItems = (): PillSelectItem[][] => {
     const allTools = toolSelectItems
-    const currentJobType = getValues('jobType') || JobType.OTHER
+    const currentJobType = (getValues('jobType') as JobType) || JobType.OTHER
     const sortedToolsByCurrentJobType = allTools
       .filter(tool => mapToolNameToJobType(tool.id).includes(currentJobType))
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -247,7 +256,9 @@ export default function EditProposedJobForm({
 
   const areaSelectItems = areas.map(areaToSelectItem)
 
-  function areaToSelectItem(area: Area): FilterSelectItem {
+  function areaToSelectItem(
+    area: ReturnType<typeof deserializeAreas>[number]
+  ): FilterSelectItem {
     return {
       id: area.id,
       name: area.name,

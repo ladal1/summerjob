@@ -1,35 +1,35 @@
-import { JobType } from 'lib/prisma/client'
+import { JobType } from 'lib/types/enums'
 
-const toolToJobTypeMapping: Record<string, (keyof typeof JobType)[]> = {
-  AXE: ['WOOD'],
-  BOW_SAW: ['WOOD'],
-  LADDER: ['GARDEN', 'HOUSEWORK', 'PAINTING'],
-  PAINT: ['PAINTING'],
-  PAINT_ROLLER: ['PAINTING'],
-  COVER_SHEET: ['PAINTING'],
-  MASKING_TAPE: ['PAINTING'],
-  PAINT_BRUSH: ['PAINTING'],
-  SCRAPER_GRID: ['PAINTING'],
-  PAINTER_SPATULA: ['PAINTING'],
-  JAPANESE_SPATULA: ['PAINTING'],
-  GYPSUM: ['PAINTING'],
-  BUCKET: ['HOUSEWORK'],
-  RAG: ['HOUSEWORK'],
-  BROOM: ['HOUSEWORK'],
-  SAW: ['WOOD'],
-  BRUSHCUTTER: ['GARDEN'],
-  GLOVES: ['GARDEN', 'HOUSEWORK', 'WOOD'],
-  RESPIRATOR: ['HOUSEWORK', 'PAINTING', 'WOOD'],
-  HEADPHONES: ['GARDEN', 'WOOD'],
-  CHAINSAW: ['WOOD'],
-  CIRCULAR_SAW: ['WOOD'],
-  PITCHFORK: ['GARDEN'],
-  RAKE: ['GARDEN'],
-  SHOVEL: ['GARDEN', 'HOUSEWORK'],
-  HEDGE_TRIMMER: ['GARDEN', 'WOOD'],
-  STRING_TRIMMER: ['GARDEN'],
+const toolToJobTypeMapping: Record<string, JobType[]> = {
+  AXE: [JobType.WOOD],
+  BOW_SAW: [JobType.WOOD],
+  LADDER: [JobType.GARDEN, JobType.HOUSEWORK, JobType.PAINTING],
+  PAINT: [JobType.PAINTING],
+  PAINT_ROLLER: [JobType.PAINTING],
+  COVER_SHEET: [JobType.PAINTING],
+  MASKING_TAPE: [JobType.PAINTING],
+  PAINT_BRUSH: [JobType.PAINTING],
+  SCRAPER_GRID: [JobType.PAINTING],
+  PAINTER_SPATULA: [JobType.PAINTING],
+  JAPANESE_SPATULA: [JobType.PAINTING],
+  GYPSUM: [JobType.PAINTING],
+  BUCKET: [JobType.HOUSEWORK],
+  RAG: [JobType.HOUSEWORK],
+  BROOM: [JobType.HOUSEWORK],
+  SAW: [JobType.WOOD],
+  BRUSHCUTTER: [JobType.GARDEN],
+  GLOVES: [JobType.GARDEN, JobType.HOUSEWORK, JobType.WOOD],
+  RESPIRATOR: [JobType.HOUSEWORK, JobType.PAINTING, JobType.WOOD],
+  HEADPHONES: [JobType.GARDEN, JobType.WOOD],
+  CHAINSAW: [JobType.WOOD],
+  CIRCULAR_SAW: [JobType.WOOD],
+  PITCHFORK: [JobType.GARDEN],
+  RAKE: [JobType.GARDEN],
+  SHOVEL: [JobType.GARDEN, JobType.HOUSEWORK],
+  HEDGE_TRIMMER: [JobType.GARDEN, JobType.WOOD],
+  STRING_TRIMMER: [JobType.GARDEN],
 }
 
-export const mapToolNameToJobType = (id: string) => {
-  return toolToJobTypeMapping[id] || ['OTHER']
+export const mapToolNameToJobType = (id: string): JobType[] => {
+  return toolToJobTypeMapping[id] || [JobType.OTHER]
 }

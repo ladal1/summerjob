@@ -1,4 +1,4 @@
-import { FoodAllergy } from 'lib/prisma/client'
+import { FoodAllergy } from 'lib/types/enums'
 
 export const foodAllergyMapping: Record<FoodAllergy, string> = {
   [FoodAllergy.LACTOSE]: 'Laktóza',

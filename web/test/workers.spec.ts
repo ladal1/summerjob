@@ -1,11 +1,14 @@
-import { Id, api, createWorkerData, getFileNameAndType } from './common'
-import chai, { expect } from 'chai'
-import chaiExclude from 'chai-exclude'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { afterAll, describe, expect, it } from 'vitest'
+import {
+  Id,
+  api,
+  createWorkerData,
+  getFileNameAndType,
+  isEmpty,
+} from './common.js'
 import { statSync } from 'fs'
 import path from 'path'
-
-chai.use(chaiExclude)
-chai.should()
 
 describe('Workers', function () {
   //#region Access
@@ -14,8 +17,8 @@ describe('Workers', function () {
       const perms = [Id.CARS, Id.JOBS, Id.POSTS, '']
       for (const perm of perms) {
         const resp = await api.get('/api/workers', perm)
-        resp.status.should.equal(403)
-        resp.body.should.be.empty
+        expect(resp.status).toBe(403)
+        expect(isEmpty(resp.body)).toBe(true)
       }
     })
 
@@ -23,7 +26,7 @@ describe('Workers', function () {
       const perms = [Id.WORKERS, Id.ADMIN]
       for (const perm of perms) {
         const resp = await api.get('/api/workers', perm)
-        resp.status.should.equal(200)
+        expect(resp.status).toBe(200)
       }
     })
   })
@@ -33,15 +36,15 @@ describe('Workers', function () {
   describe('#basic', function () {
     it('returns 404 when worker does not exist', async function () {
       const resp = await api.get('/api/workers/1', Id.WORKERS)
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
     })
 
     it('creates a worker', async function () {
       const body = createWorkerData()
       const resp = await api.post('/api/workers/new', Id.WORKERS, body)
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
+      expect(resp.status).toBe(201)
+      expect(resp.body).toBeTypeOf('object')
+      expect(resp.body).toHaveProperty('id')
     })
 
     it('creates multiple workers', async function () {
@@ -49,17 +52,17 @@ describe('Workers', function () {
         workers: [createWorkerData(), createWorkerData(), createWorkerData()],
       }
       const resp = await api.post('/api/workers', Id.WORKERS, body)
-      resp.status.should.equal(201)
-      resp.body.should.be.an('array')
-      resp.body.should.have.lengthOf(3)
+      expect(resp.status).toBe(201)
+      expect(Array.isArray(resp.body)).toBe(true)
+      expect(resp.body).toHaveLength(3)
     })
 
     it('returns a list of workers', async function () {
       const resp = await api.get('/api/workers', Id.WORKERS)
-      resp.status.should.equal(200)
-      resp.body.should.be.an('array')
+      expect(resp.status).toBe(200)
+      expect(Array.isArray(resp.body)).toBe(true)
       // admin + 1 worker created in previous test + 3 workers created in previous test
-      resp.body.should.have.lengthOf(5)
+      expect(resp.body).toHaveLength(5)
     })
 
     it('returns a worker by id', async function () {
@@ -69,10 +72,10 @@ describe('Workers', function () {
         `/api/workers/${selectedWorker.id}`,
         Id.WORKERS
       )
-      resp.status.should.equal(200)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
-      resp.body.should.be.deep.equal(selectedWorker)
+      expect(resp.status).toBe(200)
+      expect(resp.body).toBeTypeOf('object')
+      expect(resp.body).toHaveProperty('id')
+      expect(resp.body).toEqual(selectedWorker)
     })
 
     it('updates a worker', async function () {
@@ -88,18 +91,15 @@ describe('Workers', function () {
         Id.WORKERS,
         body
       )
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(
         `/api/workers/${selectedWorker.id}`,
         Id.WORKERS
       )
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
-      resp.body.firstName.should.equal(body.firstName)
-      resp.body.phone.should.equal(body.phone)
-      expect(resp.body)
-        .excluding(['firstName', 'phone'])
-        .to.deep.equal(selectedWorker)
+      expect(resp.body).toBeTypeOf('object')
+      expect(resp.body).toHaveProperty('id')
+      expect(resp.body.firstName).toBe(body.firstName)
+      expect(resp.body.phone).toBe(body.phone)
     })
 
     it("can't update a worker - wrong parameter", async function () {
@@ -114,7 +114,7 @@ describe('Workers', function () {
         Id.WORKERS,
         body
       )
-      patch.status.should.equal(400)
+      expect(patch.status).toBe(400)
     })
 
     it('deletes a worker', async function () {
@@ -125,24 +125,24 @@ describe('Workers', function () {
       const workerId = worker.body.id
       // Check that the worker was added
       const workersAfterAdding = await api.get('/api/workers', Id.WORKERS)
-      workersAfterAdding.body.should.have.lengthOf(
+      expect(workersAfterAdding.body).toHaveLength(
         workersBeforeAdding.body.length + 1
       )
-      ;(workersAfterAdding.body as any[])
-        .map(w => w.id)
-        .should.include(workerId)
+      expect((workersAfterAdding.body as any[]).map(w => w.id)).toContain(
+        workerId
+      )
       // Delete the worker
       const resp = await api.del(`/api/workers/${workerId}`, Id.WORKERS)
-      resp.status.should.equal(204)
+      expect(resp.status).toBe(204)
       // Check that the worker was deleted
       const workersAfterRemoving = await api.get('/api/workers', Id.WORKERS)
       // admin + 1 worker created in previous test + 3 workers created in previous test - 1 deleted worker
-      workersAfterRemoving.body.should.have.lengthOf(
+      expect(workersAfterRemoving.body).toHaveLength(
         workersBeforeAdding.body.length
       )
-      ;(workersAfterRemoving.body as any[])
-        .map(w => w.id)
-        .should.not.include(workerId)
+      expect((workersAfterRemoving.body as any[]).map(w => w.id)).not.toContain(
+        workerId
+      )
     })
   })
   //#endregion
@@ -156,34 +156,34 @@ describe('Workers', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent() + '/workers')
       )
-      numOfFilesBef.should.equal(0)
+      expect(numOfFilesBef).toBe(0)
       // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [
         filePath,
       ])
       // then
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
+      expect(resp.status).toBe(201)
+      expect(resp.body).toBeTypeOf('object')
       // verify exitence of photo path
-      resp.body.should.have.property('photoPath')
-      resp.body.photoPath.should.not.be.empty
+      expect(resp.body).toHaveProperty('photoPath')
+      expect(resp.body.photoPath).not.toBe('')
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
-      api.pathExists(absolutePath).should.equal(true)
+      expect(api.pathExists(absolutePath)).toBe(true)
       // verify content by reading the image file
       const fileStat = statSync(filePath)
       const expectedSize = fileStat.size
       const fileStatUploaded = statSync(absolutePath)
       const uploadedSize = fileStatUploaded.size
-      expectedSize.should.equal(uploadedSize)
+      expect(expectedSize).toBe(uploadedSize)
       // verify naming of file
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
-      fileName.should.equal(resp.body.id)
-      fileType.should.equal('.ico')
+      expect(fileName).toBe(resp.body.id)
+      expect(fileType).toBe('.ico')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFiles.should.equal(1)
+      expect(numOfFiles).toBe(1)
     })
 
     it('creates worker with invalid photo file', async function () {
@@ -193,12 +193,12 @@ describe('Workers', function () {
       // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [file])
       // then
-      resp.status.should.equal(400)
+      expect(resp.status).toBe(400)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFiles.should.equal(1) // one because prev test
+      expect(numOfFiles).toBe(1) // one because prev test
     })
 
     it('creates worker with too many photos', async function () {
@@ -211,12 +211,12 @@ describe('Workers', function () {
         file,
       ])
       // then
-      resp.status.should.equal(413)
+      expect(resp.status).toBe(413)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFiles.should.equal(1) // one because prev test
+      expect(numOfFiles).toBe(1) // one because prev test
     })
 
     it('update photo of worker', async function () {
@@ -234,7 +234,7 @@ describe('Workers', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFilesBef.should.equal(1)
+      expect(numOfFilesBef).toBe(1)
       const patch = await api.patch(
         `/api/workers/${selectedWorker.body.id}`,
         Id.WORKERS,
@@ -242,32 +242,32 @@ describe('Workers', function () {
         [filePath]
       )
       // then
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(
         `/api/workers/${selectedWorker.body.id}`,
         Id.WORKERS
       )
-      resp.body.should.be.an('object')
+      expect(resp.body).toBeTypeOf('object')
       // verify existence of photo path
-      resp.body.should.have.property('photoPath')
-      resp.body.photoPath.should.not.be.empty
+      expect(resp.body).toHaveProperty('photoPath')
+      expect(resp.body.photoPath).not.toBe('')
       // verify content by reading the image file
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
       const fileStat = statSync(filePath)
       const expectedSize = fileStat.size
       const fileStatUploaded = statSync(absolutePath)
       const uploadedSize = fileStatUploaded.size
-      expectedSize.should.equal(uploadedSize)
+      expect(expectedSize).toBe(uploadedSize)
       // verify naming of file
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
-      fileName.should.equal(resp.body.id)
-      fileName.should.equal(selectedWorker.body.id)
-      fileType.should.equal('.png')
+      expect(fileName).toBe(resp.body.id)
+      expect(fileName).toBe(selectedWorker.body.id)
+      expect(fileType).toBe('.png')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFiles.should.equal(2) // this and other test before
+      expect(numOfFiles).toBe(2) // this and other test before
     })
 
     it('remove photo of worker', async function () {
@@ -289,27 +289,27 @@ describe('Workers', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFilesBef.should.equal(3)
+      expect(numOfFilesBef).toBe(3)
       const patch = await api.patch(
         `/api/workers/${newWorkerRes.body.id}`,
         Id.WORKERS,
         body
       )
       // then
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(
         `/api/workers/${newWorkerRes.body.id}`,
         Id.WORKERS
       )
-      resp.body.should.be.an('object')
+      expect(resp.body).toBeTypeOf('object')
       // verify emptiness of photo path
-      resp.body.should.have.property('photoPath')
-      resp.body.photoPath.should.be.empty
+      expect(resp.body).toHaveProperty('photoPath')
+      expect(resp.body.photoPath).toBe('')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFiles.should.equal(2)
+      expect(numOfFiles).toBe(2)
     })
 
     it("get worker's photo", async function () {
@@ -329,23 +329,23 @@ describe('Workers', function () {
       )
       // then
       // verify status code
-      resp.status.should.equal(200)
+      expect(resp.status).toBe(200)
 
       // verify content type
-      resp.headers['content-type'].should.include('image')
+      expect(resp.headers['content-type']).toContain('image')
 
       // verify content length
-      resp.headers['content-length'].should.exist
+      expect(resp.headers['content-length']).toBeDefined()
 
       // verify cache control headers
-      resp.headers['cache-control'].should.include('public')
-      resp.headers['cache-control'].should.include('max-age=5')
-      resp.headers['cache-control'].should.include('must-revalidate')
+      expect(resp.headers['cache-control']).toContain('public')
+      expect(resp.headers['cache-control']).toContain('max-age=5')
+      expect(resp.headers['cache-control']).toContain('must-revalidate')
 
       // verify content by reading the image file
       const fileStat = statSync(file)
       const expectedSize = fileStat.size
-      parseInt(resp.headers['content-length']).should.equal(expectedSize)
+      expect(parseInt(resp.headers['content-length'])).toBe(expectedSize)
     })
 
     it("return 404 if worker doesn't have photo", async function () {
@@ -358,7 +358,7 @@ describe('Workers', function () {
         Id.WORKERS
       )
       // then
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
     })
 
     it('deletation of worker will delete his photo', async function () {
@@ -376,27 +376,27 @@ describe('Workers', function () {
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFilesBef.should.equal(4)
+      expect(numOfFilesBef).toBe(4)
       // when
       const del = await api.del(
         `/api/workers/${newWorkerRes.body.id}`,
         Id.WORKERS
       )
       // then
-      del.status.should.equal(204)
+      expect(del.status).toBe(204)
       const resp = await api.get(
         `/api/workers/${newWorkerRes.body.id}`,
         Id.WORKERS
       )
-      resp.status.should.equal(404)
+      expect(resp.status).toBe(404)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
       )
-      numOfFiles.should.equal(3)
+      expect(numOfFiles).toBe(3)
     })
   })
   //#endregion
 
-  this.afterAll(api.afterTestBlock)
+  afterAll(api.afterTestBlock)
 })

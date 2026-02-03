@@ -1,15 +1,14 @@
-import { Id, api } from './common'
-import chai from 'chai'
-
-chai.should()
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { afterAll, describe, expect, it } from 'vitest'
+import { Id, api } from './common.js'
 
 describe('Users', function () {
   it('returns a list of users', async function () {
     const resp = await api.get('/api/users', Id.ADMIN)
-    resp.status.should.equal(200)
-    resp.body.should.be.an('array')
+    expect(resp.status).toBe(200)
+    expect(Array.isArray(resp.body)).toBe(true)
     ;(resp.body as any[]).forEach(user => {
-      user.should.have.property('id')
+      expect(user).toHaveProperty('id')
     })
   })
 
@@ -17,7 +16,7 @@ describe('Users', function () {
     const worker = await api.createWorker()
     const users = await api.get('/api/users', Id.ADMIN)
     const selectedUser = (users.body as any[]).find(u => u.id === worker.id)
-    selectedUser.permissions.should.have.lengthOf(0)
+    expect(selectedUser.permissions).toHaveLength(0)
     const userUpdateData = {
       permissions: ['JOBS', 'CARS'],
     }
@@ -26,22 +25,22 @@ describe('Users', function () {
       Id.ADMIN,
       userUpdateData
     )
-    resp.status.should.equal(204)
+    expect(resp.status).toBe(204)
 
     const updatedUsers = await api.get('/api/users', Id.ADMIN)
     const updatedUser = (updatedUsers.body as any[]).find(
       u => u.id === worker.id
     )
-    updatedUser.permissions.should.have.lengthOf(2)
-    updatedUser.permissions.should.include('JOBS')
-    updatedUser.permissions.should.include('CARS')
+    expect(updatedUser.permissions).toHaveLength(2)
+    expect(updatedUser.permissions).toContain('JOBS')
+    expect(updatedUser.permissions).toContain('CARS')
   })
 
   it('blocks a user', async function () {
     const worker = await api.createWorker()
     const users = await api.get('/api/users', Id.ADMIN)
     const selectedUser = (users.body as any[]).find(u => u.id === worker.id)
-    selectedUser.permissions.should.have.lengthOf(0)
+    expect(selectedUser.permissions).toHaveLength(0)
     const userUpdateData = {
       blocked: true,
     }
@@ -50,14 +49,14 @@ describe('Users', function () {
       Id.ADMIN,
       userUpdateData
     )
-    resp.status.should.equal(204)
+    expect(resp.status).toBe(204)
 
     const updatedUsers = await api.get('/api/users', Id.ADMIN)
     const updatedUser = (updatedUsers.body as any[]).find(
       u => u.id === worker.id
     )
-    updatedUser.blocked.should.equal(true)
+    expect(updatedUser.blocked).toBe(true)
   })
 
-  this.afterAll(api.afterTestBlock)
+  afterAll(api.afterTestBlock)
 })

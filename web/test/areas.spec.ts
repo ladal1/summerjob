@@ -1,10 +1,8 @@
-import chai from 'chai'
-import { Id, api, createAreaData } from './common'
-
-chai.should()
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { Id, api, createAreaData, isEmpty } from './common.js'
 
 describe('Areas', function () {
-  this.beforeAll(api.beforeTestBlock)
+  beforeAll(api.beforeTestBlock)
 
   //#region Access
   describe('#access', function () {
@@ -16,7 +14,7 @@ describe('Areas', function () {
           `/api/summerjob-events/${eventId}/areas`,
           perm
         )
-        resp.status.should.equal(200)
+        expect(resp.status).toBe(200)
       }
     })
     it('should not be accessible without permission', async function () {
@@ -27,8 +25,8 @@ describe('Areas', function () {
           `/api/summerjob-events/${eventId}/areas`,
           perm
         )
-        resp.status.should.equal(403)
-        resp.body.should.be.empty
+        expect(resp.status).toBe(403)
+        expect(isEmpty(resp.body)).toBe(true)
       }
     })
   })
@@ -43,9 +41,9 @@ describe('Areas', function () {
         Id.ADMIN,
         createAreaData()
       )
-      resp.status.should.equal(201)
-      resp.body.should.be.an('object')
-      resp.body.should.have.property('id')
+      expect(resp.status).toBe(201)
+      expect(resp.body).toBeTypeOf('object')
+      expect(resp.body).toHaveProperty('id')
     })
 
     it('returns a list of areas', async function () {
@@ -54,9 +52,9 @@ describe('Areas', function () {
         `/api/summerjob-events/${eventId}/areas`,
         Id.ADMIN
       )
-      resp.status.should.equal(200)
-      resp.body.should.be.an('array')
-      resp.body.should.have.lengthOf(1)
+      expect(resp.status).toBe(200)
+      expect(Array.isArray(resp.body)).toBe(true)
+      expect(resp.body).toHaveLength(1)
     })
 
     it('updates a area', async function () {
@@ -76,16 +74,14 @@ describe('Areas', function () {
         Id.ADMIN,
         payload
       )
-      patch.status.should.equal(204)
+      expect(patch.status).toBe(204)
       const resp = await api.get(
         `/api/summerjob-events/${eventId}/areas`,
         Id.ADMIN
       )
-      resp.body.should.be.an('array')
-      const modifiedArea = (resp.body as any[]).find(
-        a => a.id === selectedArea.id
-      )
-      modifiedArea.name.should.equal(payload.name)
+      expect(Array.isArray(resp.body)).toBe(true)
+      const modifiedArea = resp.body.find(a => a.id === selectedArea.id)
+      expect(modifiedArea.name).toBe(payload.name)
     })
 
     it('deletes a area', async function () {
@@ -107,30 +103,28 @@ describe('Areas', function () {
         `/api/summerjob-events/${eventId}/areas`,
         Id.ADMIN
       )
-      areasAfterAdding.body.should.have.lengthOf(
+      expect(areasAfterAdding.body).toHaveLength(
         areasBeforeAdding.body.length + 1
       )
-      ;(areasAfterAdding.body as any[]).map(a => a.id).should.include(areaId)
+      expect(areasAfterAdding.body.map(a => a.id)).toContain(areaId)
       // Delete the area
       const resp = await api.del(
         `/api/summerjob-events/${eventId}/areas/${areaId}`,
         Id.ADMIN
       )
-      resp.status.should.equal(204)
+      expect(resp.status).toBe(204)
       // Check that the area was deleted
       const areasAfterRemoving = await api.get(
         `/api/summerjob-events/${eventId}/areas`,
         Id.ADMIN
       )
-      areasAfterRemoving.body.should.have.lengthOf(
+      expect(areasAfterRemoving.body).toHaveLength(
         areasBeforeAdding.body.length
       )
-      ;(areasAfterRemoving.body as any[])
-        .map(w => w.id)
-        .should.not.include(areaId)
+      expect(areasAfterRemoving.body.map(w => w.id)).not.toContain(areaId)
     })
   })
   //#endregion
 
-  this.afterAll(api.afterTestBlock)
+  afterAll(api.afterTestBlock)
 })

@@ -1,20 +1,13 @@
 import { z } from 'zod'
-import type { Worker } from '../../lib/prisma/client'
-import { Serialized } from './serialize'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
-
 import {
   CarSchema,
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
-import {
-  FoodAllergy,
-  WorkAllergy,
-  SkillHas,
-  SkillBrings,
-} from '../../lib/prisma/client'
+import { Serialized } from './serialize'
+import { FoodAllergy, WorkAllergy, SkillHas, SkillBrings } from './enums'
 
 useZodOpenApi
 
@@ -29,19 +22,19 @@ export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 export const WorkerCreateSchema = z
   .object({
     firstName: z
-      .string({ required_error: err.emptyFirstName })
+      .string({ message: err.emptyFirstName })
       .min(1, { message: err.emptyFirstName })
       .trim(),
     lastName: z
-      .string({ required_error: err.emptyLastName })
+      .string({ message: err.emptyLastName })
       .min(1, { message: err.emptyLastName })
       .trim(),
     email: z
-      .string({ required_error: err.emptyEmail })
+      .string({ message: err.emptyEmail })
       .min(1, { message: err.emptyEmail })
       .email({ message: err.invalidEmail }),
     phone: z
-      .string({ required_error: err.emptyPhone })
+      .string({ message: err.emptyPhone })
       .min(1, { message: err.emptyPhone })
       .refine(
         phone =>
@@ -62,7 +55,7 @@ export const WorkerCreateSchema = z
     age: z
       .union([
         z
-          .number({ invalid_type_error: err.invalidTypeNumber })
+          .number({ message: err.invalidTypeNumber })
           .int({ message: err.nonInt })
           .positive({ message: err.nonPositiveNumber }),
         z.nan(),
@@ -74,19 +67,19 @@ export const WorkerCreateSchema = z
       .optional(),
     photoFile: z
       .any()
-      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
+      .refine(fileList => fileList instanceof FileList, {
+        message: err.invalidTypeFile,
+      })
       .transform(
         fileList =>
           (fileList && fileList.length > 0 && fileList[0]) || null || undefined
       )
-      .refine(
-        file => !file || (!!file && file.size <= 1024 * 1024 * 10),
-        err.maxCapacityImage + ' - 10 MB'
-      )
-      .refine(
-        file => !file || (!!file && file.type?.startsWith('image')),
-        err.unsuportedTypeImage
-      ) // any image
+      .refine(file => !file || file.size <= 1024 * 1024 * 10, {
+        message: err.maxCapacityImage + ' - 10 MB',
+      })
+      .refine(file => !file || file.type?.startsWith('image'), {
+        message: err.unsuportedTypeImage,
+      }) // any image
       .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
       .nullable()
       .optional(),
@@ -123,7 +116,11 @@ export const WorkerUpdateSchema = WorkerCreateSchema.partial().strict()
 export type WorkerUpdateDataInput = z.input<typeof WorkerUpdateSchema>
 export type WorkerUpdateData = z.infer<typeof WorkerUpdateSchema>
 
-export type WorkerBasicInfo = Pick<Worker, 'id' | 'firstName' | 'lastName'>
+export type WorkerBasicInfo = {
+  id: string
+  firstName: string
+  lastName: string
+}
 
 export function serializeWorker(data: WorkerComplete): Serialized {
   return {
