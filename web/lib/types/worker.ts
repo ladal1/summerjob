@@ -15,7 +15,12 @@ export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
   skills: z.array(z.nativeEnum(SkillHas)),
-  foodAllergies: z.array(z.string()),
+  foodAllergies: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>

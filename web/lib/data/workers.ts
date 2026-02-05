@@ -123,6 +123,7 @@ export async function getWorkerById(
         },
         take: 1,
       },
+      foodAllergies: true
     },
   })
   if (!user) {

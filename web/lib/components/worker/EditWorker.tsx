@@ -2,7 +2,9 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+//import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+import { useAPIFoodAllergies } from 'lib/fetcher/food-allergies'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
 import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
 import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
@@ -20,7 +22,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import {
-  FoodAllergy,
   WorkAllergy,
   SkillHas,
   SkillBrings,
@@ -71,7 +72,7 @@ export default function EditWorker({
       strong: worker.isStrong,
       team: worker.isTeam,
       note: worker.note,
-      foodAllergies: worker.foodAllergies as FoodAllergy[],
+      foodAllergies: worker.foodAllergies.map(fa => fa.id),
       workAllergies: worker.workAllergies as WorkAllergy[],
       skills: worker.skills as SkillHas[],
       tools: worker.tools as SkillBrings[],
@@ -140,6 +141,12 @@ export default function EditWorker({
   }
 
   //#endregion
+
+  const { data: foodAllergies = [] } = useAPIFoodAllergies()
+  const foodAllergyOptions = foodAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
 
   return (
     <>
@@ -234,10 +241,10 @@ export default function EditWorker({
               disableAfter={isProfilePage ? 18 : undefined}
             />
           </div>
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="foodAllergies"
             label="Potravinové alergie"
-            mapping={foodAllergyMapping}
+            options={foodAllergyOptions}
             register={() => register('foodAllergies')}
           />
           <GroupButtonsInput
