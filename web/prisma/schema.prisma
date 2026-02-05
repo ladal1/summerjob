@@ -46,15 +46,22 @@ enum SkillBrings {
   OTHER
 }
 
-enum FoodAllergy {
-  LACTOSE
-  GLUTEN
-  NUTS
-  SEAFOOD
-  EGG
-  VEGETARIAN
-  VEGAN
-  OTHER
+// enum FoodAllergy {
+//   LACTOSE
+//   GLUTEN
+//   NUTS
+//   SEAFOOD
+//   EGG
+//   VEGETARIAN
+//   VEGAN
+//   OTHER
+// }
+
+model FoodAllergy {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  workers   Worker[]
+  createdAt DateTime @default(now())
 }
 
 enum WorkAllergy {

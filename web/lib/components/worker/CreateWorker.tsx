@@ -1,7 +1,9 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+//import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
+import { useAPIFoodAllergies } from 'lib/fetcher/food-allergies'
+import { getFoodAllergies } from 'lib/data/food-allergies'
 import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
 import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
@@ -24,6 +26,7 @@ import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -101,6 +104,12 @@ export default function CreateWorker({
   }
 
   //#endregion
+
+  const { data: foodAllergies = [] } = useAPIFoodAllergies()
+  const foodAllergyMapping = foodAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
 
   return (
     <>
@@ -190,10 +199,10 @@ export default function CreateWorker({
             </div>
           </div>
 
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="foodAllergies"
             label="Potravinové alergie"
-            mapping={foodAllergyMapping}
+            options={foodAllergyMapping}
             register={() => register('foodAllergies')}
           />
           <GroupButtonsInput

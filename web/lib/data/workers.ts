@@ -252,7 +252,7 @@ async function internal_createWorker(
       lastName: data.lastName,
       phone: data.phone,
       foodAllergies: {
-        set: data.foodAllergies ?? [],
+        connect: data.foodAllergies?.map(id => ({ id })) ?? [],
       },
       workAllergies: {
         set: data.workAllergies ?? [],
@@ -285,7 +285,7 @@ async function internal_createWorker(
       isTeam: data.team,
       note: data.note,
       foodAllergies: {
-        set: data.foodAllergies ?? [],
+        connect: data.foodAllergies?.map(id => ({ id })) ?? [],
       },
       workAllergies: {
         set: data.workAllergies ?? [],
@@ -403,7 +403,9 @@ export async function internal_updateWorker(
   }
 
   const allergyUpdate = {
-    ...(data.foodAllergies && { foodAllergies: { set: data.foodAllergies } }),
+    ...(data.foodAllergies && {
+      foodAllergies: { connect: data.foodAllergies.map(id => ({ id })) },
+    }),
     ...(data.workAllergies && { workAllergies: { set: data.workAllergies } }),
   }
 
