@@ -1,6 +1,5 @@
 import dotenv from 'dotenv'
 import {
-  FoodAllergy,
   WorkAllergy,
   SkillHas,
   SkillBrings,
@@ -43,6 +42,23 @@ function chooseWithProbability<T>(array: T[], probability: number): T[] {
   return array.filter(() => Math.random() < probability)
 }
 
+const FOOD_ALLERGY_NAMES = [
+  'Laktóza',
+  'Lepek',
+  'Ořechy',
+  'Mořské plody',
+  'Vejce',
+  'Vegetarián',
+  'Vegan',
+] as const
+
+async function createFoodAllergies() {
+  await prisma.foodAllergy.createMany({
+    data: FOOD_ALLERGY_NAMES.map(name => ({ name })),
+    skipDuplicates: true,
+  })
+}
+
 async function createWorkers(eventId: string, days: Date[], count = 100) {
   const HAS_CAR_PERCENTAGE = 0.25
   const WORKERS_COUNT = count
@@ -52,6 +68,7 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
     const firstName = faker.person.firstName(sex)
     const lastName = faker.person.lastName(sex)
     const workDays = choose(days, between(4, days.length))
+    const foodAllergies = choose([...FOOD_ALLERGY_NAMES], between(0, 2))
 
     return Prisma.validator<Prisma.WorkerCreateInput>()({
       firstName,
@@ -60,7 +77,7 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
       email: faker.internet.email({ firstName, lastName }).toLocaleLowerCase(),
       isStrong: Math.random() > 0.75,
       ownsCar: false,
-      foodAllergies: { set: choose(Object.values(FoodAllergy), between(0, 2)) },
+      foodAllergies: { connect: foodAllergies.map(name => ({ name })) },
       workAllergies: { set: choose(Object.values(WorkAllergy), between(0, 2)) },
       skills: { set: choose(Object.values(SkillHas), between(1, 3)) },
       tools: { set: choose(Object.values(SkillBrings), between(1, 2)) },
@@ -354,6 +371,8 @@ async function main() {
   const mini = process.argv[2] === 'mini'
   console.log('Creating yearly event...')
   const yearlyEvent = await createYearlyEvent()
+  console.log('Creating food allergies')
+  await createFoodAllergies()
   const workAllergies = Object.values(WorkAllergy)
   console.log('Creating workers, cars...')
   const workers = await createWorkers(
