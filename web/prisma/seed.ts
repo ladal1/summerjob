@@ -59,6 +59,22 @@ async function createFoodAllergies() {
   })
 }
 
+const WORK_ALLERGY_NAMES = [
+  'Pyl',
+  'Prach',
+  'Chemikálie',
+  'Zvířata',
+  'Seno',
+  'Roztoči',
+] as const
+
+async function createWorkAllergies() {
+  await prisma.workAllergy.createMany({
+    data: WORK_ALLERGY_NAMES.map(name => ({ name })),
+    skipDuplicates: true,
+  })
+}
+
 async function createWorkers(eventId: string, days: Date[], count = 100) {
   const HAS_CAR_PERCENTAGE = 0.25
   const WORKERS_COUNT = count
@@ -69,6 +85,7 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
     const lastName = faker.person.lastName(sex)
     const workDays = choose(days, between(4, days.length))
     const foodAllergies = choose([...FOOD_ALLERGY_NAMES], between(0, 2))
+    const workAllergies = choose([...WORK_ALLERGY_NAMES], between(0, 2))
 
     return Prisma.validator<Prisma.WorkerCreateInput>()({
       firstName,
@@ -78,7 +95,7 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
       isStrong: Math.random() > 0.75,
       ownsCar: false,
       foodAllergies: { connect: foodAllergies.map(name => ({ name })) },
-      workAllergies: { set: choose(Object.values(WorkAllergy), between(0, 2)) },
+      workAllergies: { connect: workAllergies.map(name => ({ name })) },
       skills: { set: choose(Object.values(SkillHas), between(1, 3)) },
       tools: { set: choose(Object.values(SkillBrings), between(1, 2)) },
       availability: {
@@ -176,7 +193,6 @@ async function createProposedJobs(
   areaIds: string[],
   eventId: string,
   days: Date[],
-  workAllergies: WorkAllergy[],
   count = 70
 ) {
   let titles = [
@@ -209,12 +225,14 @@ async function createProposedJobs(
   }
 
   for (const title of titles) {
+    const workAllergies = choose([...WORK_ALLERGY_NAMES], between(0, 2))
+
     await prisma.proposedJob.create({
       data: {
         ...createProposedJob(title),
         availability: chooseWithProbability(days, 0.5),
         allergens: {
-          set: choose(workAllergies, between(0, 2)),
+          connect: workAllergies.map(name => ({ name })),
         },
       },
     })
@@ -373,7 +391,8 @@ async function main() {
   const yearlyEvent = await createYearlyEvent()
   console.log('Creating food allergies')
   await createFoodAllergies()
-  const workAllergies = Object.values(WorkAllergy)
+  console.log('Creating work allergies')
+  await createWorkAllergies()
   console.log('Creating workers, cars...')
   const workers = await createWorkers(
     yearlyEvent.id,
@@ -387,7 +406,6 @@ async function main() {
     areas.map(area => area.id),
     yearlyEvent.id,
     datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
-    workAllergies,
     mini ? 5 : 70
   )
   console.log('Creating plan...')

@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { useAPIFoodAllergies } from 'lib/fetcher/food-allergy'
 import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
 import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
@@ -20,7 +19,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { WorkAllergy, SkillHas, SkillBrings } from 'lib/types/enums'
+import { SkillHas, SkillBrings } from 'lib/types/enums'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
@@ -30,6 +29,7 @@ import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -68,7 +68,7 @@ export default function EditWorker({
       team: worker.isTeam,
       note: worker.note,
       foodAllergies: worker.foodAllergies.map(fa => fa.id),
-      workAllergies: worker.workAllergies as WorkAllergy[],
+      workAllergies: worker.workAllergies.map(wa => wa.id),
       skills: worker.skills as SkillHas[],
       tools: worker.tools as SkillBrings[],
       age: worker.age,
@@ -139,6 +139,12 @@ export default function EditWorker({
 
   const { data: foodAllergies = [] } = useAPIFoodAllergies()
   const foodAllergyOptions = foodAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyMapping = workAllergies.map(a => ({
     value: a.id,
     label: a.name,
   }))
@@ -242,10 +248,10 @@ export default function EditWorker({
             options={foodAllergyOptions}
             register={() => register('foodAllergies')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="workAllergies"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyMapping}
             register={() => register('workAllergies')}
           />
           {!isProfilePage && (

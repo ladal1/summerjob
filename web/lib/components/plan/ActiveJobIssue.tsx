@@ -192,13 +192,19 @@ function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
 }
 
 function allergies(job: ActiveJobNoPlan) {
-  const jobAllergenIds = job.proposedJob.allergens
+  const jobAllergenIds = job.proposedJob.allergens.map(a => a.id)
   return job.workers.some(worker =>
-    worker.workAllergies.some(allergyId => jobAllergenIds.includes(allergyId))
+    worker.workAllergies.some(allergyId =>
+      jobAllergenIds.includes(allergyId.id)
+    )
   )
 }
 
-function adorations(job: ActiveJobNoPlan, day: Date, adorationByWorker: Map<string, boolean>) {
+function adorations(
+  job: ActiveJobNoPlan,
+  day: Date,
+  adorationByWorker: Map<string, boolean>
+) {
   if (job.proposedJob.area?.supportsAdoration) {
     return false
   }

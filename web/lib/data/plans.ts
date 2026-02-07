@@ -46,6 +46,8 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
                 },
                 take: 1,
               },
+              foodAllergies: true,
+              workAllergies: true,
             },
           },
           proposedJob: {
@@ -53,6 +55,7 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
               area: true,
               toolsOnSite: true,
               toolsToTakeWith: true,
+              allergens: true,
             },
           },
           rides: {
@@ -114,6 +117,8 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
                 },
                 take: 1,
               },
+              foodAllergies: true,
+              workAllergies: true,
             },
           },
           proposedJob: {
@@ -121,6 +126,7 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
               area: true,
               toolsOnSite: true,
               toolsToTakeWith: true,
+              allergens: true,
             },
           },
           rides: {

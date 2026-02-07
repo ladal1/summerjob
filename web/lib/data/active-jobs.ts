@@ -36,6 +36,8 @@ export async function getActiveJobById(
             },
             take: 1,
           },
+          foodAllergies: true,
+          workAllergies: true,
         },
       },
       proposedJob: {
@@ -43,6 +45,7 @@ export async function getActiveJobById(
           area: true,
           toolsOnSite: true,
           toolsToTakeWith: true,
+          allergens: true,
         },
       },
       responsibleWorker: true,

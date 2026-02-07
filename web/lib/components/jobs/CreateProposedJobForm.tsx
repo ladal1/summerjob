@@ -1,7 +1,6 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
@@ -33,6 +32,8 @@ import { Label } from '../forms/Label'
 import { Form } from '../forms/Form'
 import { z } from 'zod'
 import { ScaleInput } from '../forms/input/ScaleInput'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 
 const schema = ProposedJobCreateSchema
 type PostForm = z.input<typeof schema>
@@ -225,6 +226,12 @@ export default function CreateProposedJobForm({
   }
 
   //#endregion
+
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyMapping = workAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
 
   return (
     <>
@@ -424,10 +431,10 @@ export default function CreateProposedJobForm({
             register={selectToolsToTakeWith}
             errors={errors}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="allergens"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyMapping}
             register={() => register('allergens')}
           />
           <OtherAttributesInput

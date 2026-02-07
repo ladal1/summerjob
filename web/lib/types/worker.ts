@@ -7,7 +7,7 @@ import {
   WorkerSchema,
 } from 'lib/prisma/zod'
 import { Serialized } from './serialize'
-import { WorkAllergy, SkillHas, SkillBrings } from './enums'
+import { SkillHas, SkillBrings } from './enums'
 
 useZodOpenApi
 
@@ -16,6 +16,12 @@ export const WorkerCompleteSchema = WorkerSchema.extend({
   availability: WorkerAvailabilitySchema,
   skills: z.array(z.nativeEnum(SkillHas)),
   foodAllergies: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
+  workAllergies: z.array(
     z.object({
       name: z.string(),
       id: z.uuid(),
@@ -56,7 +62,7 @@ export const WorkerCreateSchema = z
     skills: z.array(z.nativeEnum(SkillHas)),
     tools: z.array(z.nativeEnum(SkillBrings)),
     foodAllergies: z.array(z.string().uuid()),
-    workAllergies: z.array(z.nativeEnum(WorkAllergy)),
+    workAllergies: z.array(z.string().uuid()),
     note: z.string().optional(),
     age: z
       .union([

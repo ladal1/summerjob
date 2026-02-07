@@ -1,7 +1,6 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
 import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobUpdate } from 'lib/fetcher/proposed-job'
@@ -34,6 +33,8 @@ import { ScaleInput } from '../forms/input/ScaleInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { Form } from '../forms/Form'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -65,7 +66,7 @@ export default function EditProposedJobForm({
       name: job.name,
       publicDescription: job.publicDescription,
       privateDescription: job.privateDescription,
-      allergens: job.allergens as WorkAllergy[],
+      allergens: job.allergens.map(wa => wa.id),
       address: job.address,
       coordinates: job.coordinates,
       contact: job.contact,
@@ -347,6 +348,12 @@ export default function EditProposedJobForm({
 
   //#endregion
 
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyMapping = workAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+
   return (
     <>
       <Form
@@ -552,10 +559,10 @@ export default function EditProposedJobForm({
             registerUpdated={selectToolsToTakeWithUpdated}
             errors={errors}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="allergens"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyMapping}
             register={() => register('allergens')}
           />
           <OtherAttributesInput

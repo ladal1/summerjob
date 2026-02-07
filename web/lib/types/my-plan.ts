@@ -46,7 +46,12 @@ export const MyPlanSchema = z.object({
       description: z.string().min(1),
       workerNames: z.array(WorkerSchema),
       contact: z.string().min(1),
-      allergens: z.array(z.string().min(1)),
+      allergens: z.array(
+        z.object({
+          name: z.string(),
+          id: z.uuid(),
+        })
+      ),
       location: z.object({
         name: z.string().min(1),
         address: z.string().min(1),
@@ -83,18 +88,32 @@ export function deserializeMyPlan(serialized: Serialized): MyPlan {
   const myPlan = JSON.parse(serialized.data)
   myPlan.day = new Date(myPlan.day)
   if (myPlan.adorations) {
-    myPlan.adorations = myPlan.adorations.map((adoration: {
-      startTime: string;
-      endTime: string;
-      location: string;
-      previousWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
-      nextWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
-      sameTimeWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
-    }) => ({
-      ...adoration,
-      startTime: new Date(adoration.startTime),
-      endTime: new Date(adoration.endTime),
-    }))
+    myPlan.adorations = myPlan.adorations.map(
+      (adoration: {
+        startTime: string
+        endTime: string
+        location: string
+        previousWorkers?: Array<{
+          firstName: string
+          lastName: string
+          phone: string
+        }>
+        nextWorkers?: Array<{
+          firstName: string
+          lastName: string
+          phone: string
+        }>
+        sameTimeWorkers?: Array<{
+          firstName: string
+          lastName: string
+          phone: string
+        }>
+      }) => ({
+        ...adoration,
+        startTime: new Date(adoration.startTime),
+        endTime: new Date(adoration.endTime),
+      })
+    )
   }
   return myPlan
 }
@@ -110,18 +129,32 @@ export function deserializeMyPlans(serialized: Serialized): MyPlan[] {
   for (const myPlan of myPlans) {
     myPlan.day = new Date(myPlan.day)
     if (myPlan.adorations) {
-      myPlan.adorations = myPlan.adorations.map((adoration: {
-        startTime: string;
-        endTime: string;
-        location: string;
-        previousWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
-        nextWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
-        sameTimeWorkers?: Array<{ firstName: string; lastName: string; phone: string }>;
-      }) => ({
-        ...adoration,
-        startTime: new Date(adoration.startTime),
-        endTime: new Date(adoration.endTime),
-      }))
+      myPlan.adorations = myPlan.adorations.map(
+        (adoration: {
+          startTime: string
+          endTime: string
+          location: string
+          previousWorkers?: Array<{
+            firstName: string
+            lastName: string
+            phone: string
+          }>
+          nextWorkers?: Array<{
+            firstName: string
+            lastName: string
+            phone: string
+          }>
+          sameTimeWorkers?: Array<{
+            firstName: string
+            lastName: string
+            phone: string
+          }>
+        }) => ({
+          ...adoration,
+          startTime: new Date(adoration.startTime),
+          endTime: new Date(adoration.endTime),
+        })
+      )
     }
   }
   return myPlans

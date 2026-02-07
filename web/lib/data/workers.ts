@@ -60,6 +60,8 @@ export async function getWorkers(
         },
         take: 1,
       },
+      foodAllergies: true,
+      workAllergies: true,
     },
     orderBy: [
       {
@@ -123,7 +125,8 @@ export async function getWorkerById(
         },
         take: 1,
       },
-      foodAllergies: true
+      foodAllergies: true,
+      workAllergies: true,
     },
   })
   if (!user) {
@@ -256,7 +259,7 @@ async function internal_createWorker(
         connect: data.foodAllergies?.map(id => ({ id })) ?? [],
       },
       workAllergies: {
-        set: data.workAllergies ?? [],
+        connect: data.workAllergies?.map(id => ({ id })) ?? [],
       },
       skills: {
         set: data.skills ?? [],
@@ -289,7 +292,7 @@ async function internal_createWorker(
         connect: data.foodAllergies?.map(id => ({ id })) ?? [],
       },
       workAllergies: {
-        set: data.workAllergies ?? [],
+        connect: data.workAllergies?.map(id => ({ id })) ?? [],
       },
       skills: {
         set: data.skills ?? [],
@@ -407,7 +410,9 @@ export async function internal_updateWorker(
     ...(data.foodAllergies && {
       foodAllergies: { connect: data.foodAllergies.map(id => ({ id })) },
     }),
-    ...(data.workAllergies && { workAllergies: { set: data.workAllergies } }),
+    ...(data.workAllergies && {
+      workAllergies: { connect: data.workAllergies.map(id => ({ id })) },
+    }),
   }
 
   const skillsUpdate = {

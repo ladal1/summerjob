@@ -35,6 +35,7 @@ export async function getProposedJobById(
           workerId: true,
         },
       },
+      allergens: true,
     },
   })
   return job
@@ -87,6 +88,7 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
           workerId: true,
         },
       },
+      allergens: true,
     },
     orderBy: [
       {
@@ -139,6 +141,7 @@ export async function getProposedJobsAssignableTo(
           workerId: true,
         },
       },
+      allergens: true,
     },
     orderBy: [
       {
@@ -170,7 +173,12 @@ export async function updateProposedJob(
     photoIdsDeleted,
     ...rest
   } = proposedJobData
-  const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
+  const allergyUpdate =
+    allergens !== undefined
+      ? {
+          allergens: { set: allergens.map(id => ({ id })) },
+        }
+      : {}
 
   const updated = await prisma.$transaction(async tx => {
     // Update pinned
@@ -230,12 +238,16 @@ export async function createProposedJob(
   data: ProposedJobCreateData,
   files: formidable.Files
 ) {
-  const { toolsOnSite, toolsToTakeWith, ...rest } = data
+  const { toolsOnSite, toolsToTakeWith, allergens, ...rest } = data
 
   const created = await prisma.$transaction(async tx => {
-    // Create job
     const proposedJob = await tx.proposedJob.create({
-      data: { ...rest },
+      data: {
+        ...rest,
+        allergens: {
+          connect: (allergens ?? []).map(id => ({ id })),
+        },
+      },
     })
     // Create job's tools
     await registerTools(

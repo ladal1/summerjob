@@ -18,13 +18,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Allergy {
-  DUST
-  ANIMALS
-  HAY
-  POLLEN
-  MITES
+enum PostTag {
+  EATING
+  SPORTS
+  CULTURAL
+  EDUCATIONAL
+  RELIGIOUS
+  INFORMATIVE
 }
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// enum Allergy {
+//   DUST
+//   ANIMALS
+//   HAY
+//   POLLEN
+//   MITES
+// }
 
 enum SkillHas {
   LUMBERJACK
@@ -43,30 +58,6 @@ enum SkillBrings {
   SAW
   POWERTOOLS
   LADDER
-  OTHER
-}
-
-model FoodAllergy {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  workers   Worker[]
-}
-
-enum WorkAllergy {
-  DUST
-  ANIMALS
-  HAY
-  POLLEN
-  MITES
-  CHEMICALS
-  OTHER
-}
-
-enum JobType {
-  WOOD
-  PAINTING
-  HOUSEWORK
-  GARDEN
   OTHER
 }
 
@@ -100,19 +91,25 @@ enum ToolName {
   SHOVEL
 }
 
-enum PostTag {
-  EATING
-  SPORTS
-  CULTURAL
-  EDUCATIONAL
-  RELIGIOUS
-  INFORMATIVE
+enum JobType {
+  WOOD
+  PAINTING
+  HOUSEWORK
+  GARDEN
+  OTHER
 }
 
-enum ApplicationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+model WorkAllergy {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  workers   Worker[]
+  jobs      ProposedJob[]
+}
+
+model FoodAllergy {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  workers   Worker[]
 }
 
 model Tool {

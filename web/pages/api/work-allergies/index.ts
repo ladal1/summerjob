@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { createFoodAllergy, getFoodAllergies } from 'lib/data/food-allergies'
+import { createWorkAllergy, getWorkAllergies } from 'lib/data/work-allergies'
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { WrappedError, ApiError } from 'lib/types/api-error'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import {
-  FoodAllergyCreateData,
-  FoodAllergyCreateSchema,
-} from 'lib/types/food-allergy'
+  WorkAllergyCreateData,
+  WorkAllergyCreateSchema,
+} from 'lib/types/work-allergy'
 import { parseForm } from 'lib/api/parse-form'
 import {
   getActiveEventOrSendError,
@@ -17,25 +17,25 @@ import logger from 'lib/logger/logger'
 import { APILogEvent } from 'lib/types/logger'
 import { isAccessAllowed } from 'lib/auth/auth'
 
-export type FoodAllergiesAPIGetResponse = Awaited<
-  ReturnType<typeof getFoodAllergies>
+export type WorkAllergiesAPIGetResponse = Awaited<
+  ReturnType<typeof getWorkAllergies>
 >
 
 async function get(
   req: NextApiRequest,
-  res: NextApiResponse<FoodAllergiesAPIGetResponse | WrappedError<ApiError>>
+  res: NextApiResponse<WorkAllergiesAPIGetResponse | WrappedError<ApiError>>
 ) {
-  const foodAllergies = await getFoodAllergies()
-  res.status(200).json(foodAllergies)
+  const workAllergies = await getWorkAllergies()
+  res.status(200).json(workAllergies)
 }
 
-export type FoodAllergiesAPIPostData = FoodAllergyCreateData
-export type FoodAllergiesAPIPostResponse = Awaited<
-  ReturnType<typeof createFoodAllergy>
+export type WorkAllergiesAPIPostData = WorkAllergyCreateData
+export type WorkAllergiesAPIPostResponse = Awaited<
+  ReturnType<typeof createWorkAllergy>
 >
 async function post(
   req: NextApiRequest,
-  res: NextApiResponse<FoodAllergiesAPIPostResponse | WrappedError<ApiError>>,
+  res: NextApiResponse<WorkAllergiesAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
   if (!isAccessAllowed([Permission.ADMIN], session)) {
@@ -47,18 +47,18 @@ async function post(
     return
   }
   const { json } = await parseForm(req)
-  const data = validateOrSendError(FoodAllergyCreateSchema, json, res)
+  const data = validateOrSendError(WorkAllergyCreateSchema, json, res)
   if (!data) {
     return
   }
   await logger.apiRequest(
-    APILogEvent.FOOD_ALLERGY_CREATE,
-    'food-allergies',
+    APILogEvent.WORK_ALLERGY_CREATE,
+    'work-allergies',
     json,
     session
   )
-  const foodAllergy = await createFoodAllergy(data)
-  res.status(201).json(foodAllergy)
+  const workAllergy = await createWorkAllergy(data)
+  res.status(201).json(workAllergy)
 }
 
 export default APIAccessController([], APIMethodHandler({ get, post }))
