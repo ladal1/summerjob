@@ -1,16 +1,13 @@
-'use client'
 import { FoodAllergyComplete } from 'lib/types/food-allergy'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MessageRow } from '../table/MessageRow'
-import { SimpleRow } from '../table/SimpleRow'
 import {
   SortOrder,
   SortableColumn,
   SortableTable,
 } from '../table/SortableTable'
 import { sortData } from '../table/SortData'
-import { useAPIFoodAllergyDeleteDynamic } from 'lib/fetcher/food-allergy'
-import Link from 'next/link'
+import FoodAllergyRow from './FoodAllergyRow'
 
 const _columns: SortableColumn[] = [
   { id: 'name', name: 'Název' },
@@ -28,37 +25,6 @@ interface FoodAllergyTableProps {
 }
 
 export function FoodAllergiesTable({ data, reload }: FoodAllergyTableProps) {
-  const [deletingFoodAllergyId, setDeletingFoodAllergyId] = useState<
-    string | undefined
-  >(undefined)
-  const { trigger, isMutating } = useAPIFoodAllergyDeleteDynamic(
-    () => deletingFoodAllergyId
-  )
-
-  useEffect(() => {
-    if (deletingFoodAllergyId) {
-      trigger(null, {
-        onSuccess: () => {
-          setDeletingFoodAllergyId(undefined)
-          reload(
-            data?.filter(
-              foodAllergy => foodAllergy.id !== deletingFoodAllergyId
-            ) ?? []
-          )
-        },
-        onError: () => {
-          setDeletingFoodAllergyId(undefined)
-        },
-      })
-    }
-  }, [setDeletingFoodAllergyId, deletingFoodAllergyId, trigger, data, reload])
-
-  const deleteFoodAllergy = (foodAllergyId: string) => {
-    if (!isMutating) {
-      setDeletingFoodAllergyId(foodAllergyId)
-    }
-  }
-
   //#region Sort
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: undefined,
@@ -95,59 +61,14 @@ export function FoodAllergiesTable({ data, reload }: FoodAllergyTableProps) {
       )}
       {data !== undefined &&
         sortedData.map(foodAllergy => (
-          <SimpleRow
+          <FoodAllergyRow
             key={foodAllergy.id}
-            {...{
-              data: formatFoodAllergyRow(
-                foodAllergy,
-                foodAllergy.id === deletingFoodAllergyId,
-                deleteFoodAllergy
-              ),
-            }}
+            foodAllergy={foodAllergy}
+            onUpdated={() =>
+              reload(data.filter(fa => fa.id !== foodAllergy.id))
+            }
           />
         ))}
     </SortableTable>
   )
-}
-
-function formatFoodAllergyRow(
-  foodAllergy: FoodAllergyComplete,
-  isBeingDeleted: boolean,
-  deleteFoodAllergy: (foodAllergyId: string) => void
-) {
-  return [
-    { content: foodAllergy.name },
-    {
-      content: (
-        <span key={foodAllergy.id} className="d-flex align-items-center gap-3">
-          <Link
-            key={foodAllergy.id}
-            href={`/admin/lists/food-allergies/${foodAllergy.id}`}
-            onClick={e => e.stopPropagation()}
-            className="smj-action-edit"
-          >
-            <i className="fas fa-edit" title="Upravit"></i>
-          </Link>
-          {!isBeingDeleted && (
-            <>
-              <i
-                className="fas fa-trash-alt smj-action-delete cursor-pointer"
-                title="Smazat"
-                onClick={() => deleteFoodAllergy(foodAllergy.id)}
-              ></i>
-              <span style={{ width: '0px' }}></span>
-            </>
-          )}
-
-          {isBeingDeleted && (
-            <i
-              className="fas fa-spinner smj-action-delete spinning"
-              title="Odstraňování..."
-            ></i>
-          )}
-        </span>
-      ),
-      stickyRight: true,
-    },
-  ]
 }

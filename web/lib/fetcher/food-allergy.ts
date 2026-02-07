@@ -1,5 +1,3 @@
- 
-
 import {
   FoodAllergiesAPIGetResponse,
   FoodAllergiesAPIPostData,
@@ -7,6 +5,7 @@ import {
 import {
   useData,
   useDataCreate,
+  useDataDelete,
   useDataDeleteDynamic,
   useDataPartialUpdate,
 } from './fetcher'
@@ -25,6 +24,10 @@ export function useAPIFoodAllergyUpdate(foodAllergyId: string, options?: any) {
 
 export function useAPIFoodAllergyCreate(options?: any) {
   return useDataCreate<FoodAllergiesAPIPostData>('/api/food-allergies', options)
+}
+
+export function useAPIFoodAllergyDelete(id: string, options?: any) {
+  return useDataDelete(`/api/food-allergies/${id}`, options)
 }
 
 export function useAPIFoodAllergyDeleteDynamic(
