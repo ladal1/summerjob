@@ -48,7 +48,14 @@ export async function getActiveJobById(
           allergens: true,
         },
       },
-      responsibleWorker: true,
+      responsibleWorker: {
+        include: {
+          availability: {
+            where: { eventId: activeEventId },
+            take: 1,
+          },
+        },
+      },
       rides: {
         include: {
           car: true,

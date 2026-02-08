@@ -33,70 +33,28 @@ enum ApplicationStatus {
   REJECTED
 }
 
-// enum Allergy {
-//   DUST
-//   ANIMALS
-//   HAY
-//   POLLEN
-//   MITES
-// }
-
-enum SkillHas {
-  LUMBERJACK
-  ARTIST
-  GARDENER
-  DANGER
-  ELECTRICIAN
-  HEIGHTS
-  MASON
-  OTHER
+model SkillHas {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  workers Worker[]
+  tools ToolName[]
 }
 
-enum SkillBrings {
-  AXE
-  SHOVEL
-  SAW
-  POWERTOOLS
-  LADDER
-  OTHER
+model JobType {
+  id    String   @id @default(uuid())
+  name  String   @unique
+  jobs  ProposedJob[]
+  tools ToolName[]
 }
 
-enum ToolName {
-  AXE
-  BOW_SAW
-  LADDER
-  PAINT
-  PAINT_ROLLER
-  COVER_SHEET
-  MASKING_TAPE
-  PAINT_BRUSH
-  SCRAPER_GRID
-  PAINTER_SPATULA
-  JAPANESE_SPATULA
-  GYPSUM
-  BUCKET
-  RAG
-  BROOM   
-  SAW         
-  BRUSHCUTTER 
-  GLOVES      
-  RESPIRATOR  
-  HEADPHONES  
-  CHAINSAW    
-  CIRCULAR_SAW
-  HEDGE_TRIMMER
-  STRING_TRIMMER
-  RAKE
-  PITCHFORK
-  SHOVEL
-}
-
-enum JobType {
-  WOOD
-  PAINTING
-  HOUSEWORK
-  GARDEN
-  OTHER
+// this model combines SkillBrings and ToolName enums that were previously there
+model ToolName {
+  id       String   @id @default(uuid())
+  name     String   @unique
+  workers  Worker[]
+  tools    Tool[]
+  jobTypes JobType[]  // ToolName -> JobType mapping
+  skills   SkillHas[] // ToolName -> Skill mapping
 }
 
 model WorkAllergy {
@@ -114,7 +72,8 @@ model FoodAllergy {
 
 model Tool {
   id                      String       @id @default(uuid())
-  tool                    ToolName     
+  tool                    ToolName     @relation(fields: [toolNameId], references: [id])
+  toolNameId              String
   amount                  Int          @default(1)
   proposedJobOnSite       ProposedJob? @relation("ToolOnSite", fields: [proposedJobOnSiteId], references: [id])
   proposedJobOnSiteId     String?      
@@ -172,7 +131,7 @@ model Worker {
   foodAllergies      FoodAllergy[]
   workAllergies      WorkAllergy[]
   skills             SkillHas[]
-  tools              SkillBrings[]
+  tools              ToolName[]
   ownsCar            Boolean                     @default(false)
   canBeMedic         Boolean                     @default(false)      
   jobs               ActiveJob[]       
@@ -251,7 +210,8 @@ model ProposedJob {
   activeJobs         ActiveJob[]                 
   allergens          WorkAllergy[]              
   availability       DateTime[]                  @db.Date
-  jobType            JobType                     @default(OTHER)
+  jobType            JobType?                    @relation(fields: [jobTypeId], references: [id])
+  jobTypeId          String?
   toolsOnSite        Tool[]                      @relation("ToolOnSite")  
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
   photos             JobPhoto[]                  @relation("PhotoProposedJob")
