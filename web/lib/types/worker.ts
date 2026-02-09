@@ -61,8 +61,8 @@ export const WorkerCreateSchema = z
     team: z.boolean().default(false),
     skills: z.array(z.nativeEnum(SkillHas)),
     tools: z.array(z.nativeEnum(SkillBrings)),
-    foodAllergies: z.array(z.string().uuid()),
-    workAllergies: z.array(z.string().uuid()),
+    foodAllergies: z.array(z.uuid()),
+    workAllergies: z.array(z.uuid()),
     note: z.string().optional(),
     age: z
       .union([

@@ -11,6 +11,9 @@ import { serializeSkills } from 'lib/types/skill'
 import JobTypesClientPage from 'lib/components/job-type/JobTypesClientPage'
 import { getJobTypes } from 'lib/data/job-types'
 import { serializeJobTypes } from 'lib/types/job-type'
+import ToolNamesClientPage from 'lib/components/tool-name/ToolNamesClientPage'
+import { getToolNames } from 'lib/data/tool-names'
+import { serializeToolNames } from 'lib/types/tool-name'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -27,6 +30,9 @@ export default async function ListsPage() {
 
   const jobTypes = await getJobTypes()
   const serializedJobTypes = serializeJobTypes(jobTypes)
+
+  const toolNames = await getToolNames()
+  const serializedToolNames = serializeToolNames(toolNames)
   return (
     <>
       <PageHeader title={'Seznamy'}>
@@ -70,6 +76,7 @@ export default async function ListsPage() {
       <WorkAllergiesClientPage initialData={serializedWorkAllergies} />
       <SkillsClientPage initialData={serializedSkills} />
       <JobTypesClientPage initialData={serializedJobTypes} />
+      <ToolNamesClientPage initialData={serializedToolNames} />
     </>
   )
 }

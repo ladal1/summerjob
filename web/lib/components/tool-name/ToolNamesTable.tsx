@@ -1,4 +1,4 @@
-import { JobTypeComplete } from 'lib/types/job-type'
+import { ToolNameComplete } from 'lib/types/tool-name'
 import { useMemo, useState } from 'react'
 import { MessageRow } from '../table/MessageRow'
 import {
@@ -7,10 +7,12 @@ import {
   SortableTable,
 } from '../table/SortableTable'
 import { sortData } from '../table/SortData'
-import JobTypeRow from './JobTypeRow'
+import ToolNameRow from './ToolNameRow'
 
 const _columns: SortableColumn[] = [
   { id: 'name', name: 'Název' },
+  { id: 'skills', name: 'Dovednosti', notSortable: true },
+  { id: 'jobTypes', name: 'Typy práce', notSortable: true },
   {
     id: 'actions',
     name: 'Akce',
@@ -19,12 +21,12 @@ const _columns: SortableColumn[] = [
   },
 ]
 
-interface JobTypeTableProps {
-  data?: JobTypeComplete[]
-  reload: (expectedResult: JobTypeComplete[]) => void
+interface ToolNameTableProps {
+  data?: ToolNameComplete[]
+  reload: (expectedResult: ToolNameComplete[]) => void
 }
 
-export function JobTypesTable({ data, reload }: JobTypeTableProps) {
+export function ToolNamesTable({ data, reload }: ToolNameTableProps) {
   //#region Sort
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: undefined,
@@ -37,7 +39,7 @@ export function JobTypesTable({ data, reload }: JobTypeTableProps) {
   // names have to be same as collumns ids
   const getSortable = useMemo(
     () => ({
-      name: (jobType: JobTypeComplete) => jobType.name,
+      name: (toolName: ToolNameComplete) => toolName.name,
     }),
     []
   )
@@ -54,14 +56,14 @@ export function JobTypesTable({ data, reload }: JobTypeTableProps) {
       onRequestedSort={onSortRequested}
     >
       {data !== undefined && data.length === 0 && (
-        <MessageRow message="Žádné typy práce" colspan={_columns.length} />
+        <MessageRow message="Žádné nástroje" colspan={_columns.length} />
       )}
       {data !== undefined &&
-        sortedData.map(jobType => (
-          <JobTypeRow
-            key={jobType.id}
-            jobType={jobType}
-            onUpdated={() => reload(data.filter(fa => fa.id !== jobType.id))}
+        sortedData.map(toolName => (
+          <ToolNameRow
+            key={toolName.id}
+            toolName={toolName}
+            onUpdated={() => reload(data.filter(fa => fa.id !== toolName.id))}
           />
         ))}
     </SortableTable>

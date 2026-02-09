@@ -144,7 +144,7 @@ export default function EditWorker({
   }))
 
   const { data: workAllergies = [] } = useAPIWorkAllergies()
-  const workAllergyMapping = workAllergies.map(a => ({
+  const workAllergyOptions = workAllergies.map(a => ({
     value: a.id,
     label: a.name,
   }))
@@ -251,7 +251,7 @@ export default function EditWorker({
           <DynamicGroupButtonsInput
             id="workAllergies"
             label="Pracovní alergie"
-            options={workAllergyMapping}
+            options={workAllergyOptions}
             register={() => register('workAllergies')}
           />
           {!isProfilePage && (

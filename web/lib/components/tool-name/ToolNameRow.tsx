@@ -1,31 +1,31 @@
 import Link from 'next/link'
-import { JobTypeComplete } from 'lib/types/job-type'
-import { useAPIJobTypeDelete } from 'lib/fetcher/job-type'
+import { ToolNameComplete } from 'lib/types/tool-name'
+import { useAPIToolNameDelete } from 'lib/fetcher/tool-name'
 import { SimpleRow } from '../table/SimpleRow'
 import DeleteIcon from '../table/icons/DeleteIcon'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 
-interface JobTypeRowProps {
-  jobType: JobTypeComplete
+interface ToolNameRowProps {
+  toolName: ToolNameComplete
   onUpdated: () => void
 }
 
-export default function JobTypeRow({ jobType, onUpdated }: JobTypeRowProps) {
-  const { trigger, isMutating, error, reset } = useAPIJobTypeDelete(
-    jobType.id,
+export default function ToolNameRow({ toolName, onUpdated }: ToolNameRowProps) {
+  const { trigger, isMutating, error, reset } = useAPIToolNameDelete(
+    toolName.id,
     { onSuccess: onUpdated }
   )
 
   return (
     <SimpleRow
-      key={jobType.id}
-      data={formatJobTypeRow(jobType, trigger, isMutating, error, reset)}
+      key={toolName.id}
+      data={formatToolNameRow(toolName, trigger, isMutating, error, reset)}
     />
   )
 }
 
-function formatJobTypeRow(
-  jobType: JobTypeComplete,
+function formatToolNameRow(
+  toolName: ToolNameComplete,
   onRequestDelete: () => void,
   isBeingDeleted: boolean,
 
@@ -34,21 +34,23 @@ function formatJobTypeRow(
 ) {
   const confirmationText = () => (
     <>
-      <div>Opravdu chcete smazat typ práce „{jobType.name}“?</div>
-      Pokud je přiřazen jobům nebo nástrojům, bude z nich odstraněn.
+      <div>Opravdu chcete smazat nástroj „{toolName.name}“?</div>
+      Pokud je přiřazen k jobům, bude z nich smazán.
     </>
   )
 
   return [
-    { content: jobType.name },
+    { content: toolName.name },
+    { content: toolName.skills.map(s => s.name).join(', ') },
+    { content: toolName.jobTypes.map(jt => jt.name).join(', ') },
     {
       content: (
         <span
-          key={`actions-${jobType.id}`}
+          key={`actions-${toolName.id}`}
           className="d-flex align-items-center gap-3"
         >
           <Link
-            href={`/admin/lists/job-types/${jobType.id}`}
+            href={`/admin/lists/tool-names/${toolName.id}`}
             onClick={e => e.stopPropagation()}
             className="smj-action-edit"
           >
@@ -65,7 +67,7 @@ function formatJobTypeRow(
           {deletingError && (
             <ErrorMessageModal
               onClose={resetError}
-              mainMessage={'Nepodařilo se odstranit typ práce.'}
+              mainMessage={'Nepodařilo se odstranit nástroj.'}
             />
           )}
         </span>
