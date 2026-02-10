@@ -48,6 +48,10 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
       id: z.uuid(),
     })
   ),
+  jobType: z.object({
+    name: z.string(),
+    id: z.uuid(),
+  }),
 })
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
@@ -55,7 +59,7 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 const ProposedJobBasicSchema = z
   .object({
     areaId: z.string({ message: err.emptyAreaId }).nullable(),
-    allergens: z.array(z.string().uuid()),
+    allergens: z.array(z.uuid()),
     privateDescription: z.string(),
     publicDescription: z.string(),
     name: z
@@ -134,7 +138,7 @@ const ProposedJobBasicSchema = z
           format: 'date',
         },
       }),
-    jobType: z.nativeEnum(JobType, { message: err.emptyJobType }),
+    jobType: z.uuid({ message: err.emptyJobType }),
     toolsOnSite: ToolsCreateSchema.optional(),
     toolsToTakeWith: ToolsCreateSchema.optional(),
     priority: z.number().default(1).optional(),

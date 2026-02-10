@@ -30,6 +30,8 @@ import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPISkills } from 'lib/fetcher/skill'
+import { useAPIToolNames } from 'lib/fetcher/tool-name'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -69,8 +71,8 @@ export default function EditWorker({
       note: worker.note,
       foodAllergies: worker.foodAllergies.map(fa => fa.id),
       workAllergies: worker.workAllergies.map(wa => wa.id),
-      skills: worker.skills as SkillHas[],
-      tools: worker.tools as SkillBrings[],
+      skills: worker.skills.map(s => s.id),
+      tools: worker.tools.map(t => t.id),
       age: worker.age,
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
@@ -147,6 +149,18 @@ export default function EditWorker({
   const workAllergyOptions = workAllergies.map(a => ({
     value: a.id,
     label: a.name,
+  }))
+
+  const { data: skills = [] } = useAPISkills()
+  const skillOptions = skills.map(s => ({
+    value: s.id,
+    label: s.name,
+  }))
+
+  const { data: tools = [] } = useAPIToolNames()
+  const toolOptions = tools.map(t => ({
+    value: t.id,
+    label: t.name,
   }))
 
   return (
@@ -256,17 +270,17 @@ export default function EditWorker({
           />
           {!isProfilePage && (
             <>
-              <GroupButtonsInput
+              <DynamicGroupButtonsInput
                 id="skills"
                 label="Dovednosti (umí)"
-                mapping={skillHasMapping}
+                options={skillOptions}
                 register={() => register('skills')}
               />
 
-              <GroupButtonsInput
+              <DynamicGroupButtonsInput
                 id="tools"
                 label="Nářadí (přiveze)"
-                mapping={skillBringsMapping}
+                options={toolOptions}
                 register={() => register('tools')}
               />
             </>

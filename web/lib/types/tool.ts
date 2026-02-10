@@ -2,11 +2,15 @@ import { z } from 'zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { ToolSchema } from 'lib/prisma/zod'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
-import { ToolName } from './enums'
 
 useZodOpenApi
 
-export const ToolCompleteSchema = ToolSchema
+export const ToolCompleteSchema = ToolSchema.extend({
+  tool: z.object({
+    id: z.uuid(),
+    name: z.string(),
+  }),
+})
 
 export type ToolComplete = z.infer<typeof ToolCompleteSchema>
 export type ToolCompleteData = z.infer<typeof ToolCompleteSchema>
@@ -14,7 +18,7 @@ export type ToolCompleteData = z.infer<typeof ToolCompleteSchema>
 export const ToolCreateSchema = z
   .object({
     id: z.string().optional(),
-    tool: z.nativeEnum(ToolName),
+    toolNameId: z.uuid(),
     amount: z
       .number({ message: err.invalidTypeNumber })
       .int({ message: err.nonInteger })

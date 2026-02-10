@@ -12,6 +12,7 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import { deleteAllPhotos, registerPhotos } from './jobPhoto'
 import { registerTools, ToolType } from './tools'
+import { truncateSync } from 'fs'
 
 export async function getProposedJobById(
   id: string
@@ -27,8 +28,16 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
-      toolsOnSite: true,
-      toolsToTakeWith: true,
+      toolsOnSite: {
+        include: {
+          tool: true,
+        },
+      },
+      toolsToTakeWith: {
+        include: {
+          tool: true,
+        },
+      },
       photos: true,
       pinnedBy: {
         select: {
@@ -36,6 +45,7 @@ export async function getProposedJobById(
         },
       },
       allergens: true,
+      jobType: true,
     },
   })
   return job
@@ -80,8 +90,17 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
-      toolsOnSite: true,
-      toolsToTakeWith: true,
+      jobType: true,
+      toolsOnSite: {
+        include: {
+          tool: true,
+        },
+      },
+      toolsToTakeWith: {
+        include: {
+          tool: true,
+        },
+      },
       photos: true,
       pinnedBy: {
         select: {
@@ -133,8 +152,17 @@ export async function getProposedJobsAssignableTo(
     include: {
       area: true,
       activeJobs: true,
-      toolsOnSite: true,
-      toolsToTakeWith: true,
+      jobType: true,
+      toolsOnSite: {
+        include: {
+          tool: true,
+        },
+      },
+      toolsToTakeWith: {
+        include: {
+          tool: true,
+        },
+      },
       photos: true,
       pinnedBy: {
         select: {
@@ -171,14 +199,25 @@ export async function updateProposedJob(
     toolsToTakeWithIdsDeleted,
     toolsToTakeWithUpdated,
     photoIdsDeleted,
+    areaId,
+    jobType,
     ...rest
   } = proposedJobData
+
   const allergyUpdate =
     allergens !== undefined
       ? {
           allergens: { set: allergens.map(id => ({ id })) },
         }
       : {}
+  const areaUpdate =
+    areaId !== undefined
+      ? areaId === null
+        ? { area: { disconnect: true } }
+        : { area: { connect: { id: areaId } } }
+      : {}
+  const jobTypeUpdate =
+    jobType !== undefined ? { jobType: { connect: { id: jobType } } } : {}
 
   const updated = await prisma.$transaction(async tx => {
     // Update pinned
@@ -208,6 +247,8 @@ export async function updateProposedJob(
         },
         ...rest,
         ...allergyUpdate,
+        ...areaUpdate,
+        ...jobTypeUpdate,
       },
     })
     // Update job's tools
@@ -238,12 +279,15 @@ export async function createProposedJob(
   data: ProposedJobCreateData,
   files: formidable.Files
 ) {
-  const { toolsOnSite, toolsToTakeWith, allergens, ...rest } = data
+  const { toolsOnSite, toolsToTakeWith, allergens, areaId, jobType, ...rest } =
+    data
 
   const created = await prisma.$transaction(async tx => {
     const proposedJob = await tx.proposedJob.create({
       data: {
         ...rest,
+        jobType: { connect: { id: jobType } },
+        ...(areaId ? { area: { connect: { id: areaId } } } : {}),
         allergens: {
           connect: (allergens ?? []).map(id => ({ id })),
         },

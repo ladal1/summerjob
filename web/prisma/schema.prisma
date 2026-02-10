@@ -210,8 +210,8 @@ model ProposedJob {
   activeJobs         ActiveJob[]                 
   allergens          WorkAllergy[]              
   availability       DateTime[]                  @db.Date
-  jobType            JobType?                    @relation(fields: [jobTypeId], references: [id])
-  jobTypeId          String?
+  jobType            JobType                     @relation(fields: [jobTypeId], references: [id])
+  jobTypeId          String
   toolsOnSite        Tool[]                      @relation("ToolOnSite")  
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
   photos             JobPhoto[]                  @relation("PhotoProposedJob")

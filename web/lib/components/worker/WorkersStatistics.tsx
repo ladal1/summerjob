@@ -1,4 +1,3 @@
-import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
 import { SkillHas } from 'lib/prisma/client'
 import { WorkerComplete } from 'lib/types/worker'
 import { useMemo } from 'react'
@@ -35,12 +34,12 @@ export const WorkersStatistics = ({ data }: WorkersStatisticsProps) => {
     () =>
       (data || []).reduce((accumulator: SkillsList, worker) => {
         const sortedSkills = worker.skills.sort((a, b) =>
-          skillHasMapping[a].localeCompare(skillHasMapping[b])
+          a.name.localeCompare(b.name)
         )
         sortedSkills.forEach(skill => {
-          accumulator[skill] = {
+          accumulator[skill.name] = {
             name: skill,
-            amount: (accumulator[skill]?.amount || 0) + 1,
+            amount: (accumulator[skill.name]?.amount || 0) + 1,
           }
         })
         return accumulator
@@ -72,7 +71,7 @@ export const WorkersStatistics = ({ data }: WorkersStatisticsProps) => {
               <tbody>
                 {Object.entries(skillsList).map(([key, skill]) => (
                   <tr key={key} className="text-end">
-                    <td>{skillHasMapping[skill.name]}</td>
+                    <td>{skill.name.name}</td>
                     <td>{skill.amount}</td>
                   </tr>
                 ))}

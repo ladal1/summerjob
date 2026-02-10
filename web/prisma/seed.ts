@@ -98,6 +98,7 @@ const JOB_TYPE_NAMES = [
   'Malování',
   'Pomoc doma',
   'Práce na zahradě',
+  'Ostatní',
 ] as const
 
 async function createJobTypes() {
@@ -312,7 +313,6 @@ async function createProposedJobs(
       name: name,
       publicDescription: faker.lorem.paragraph(),
       privateDescription: faker.lorem.paragraph(),
-      areaId: choose(areaIds, 1)[0],
       requiredDays: between(1, 3),
       minWorkers: between(2, 3),
       maxWorkers: between(4, 6),
@@ -326,13 +326,19 @@ async function createProposedJobs(
 
   for (const title of titles) {
     const workAllergies = choose([...WORK_ALLERGY_NAMES], between(0, 2))
+    const jobType =
+      JOB_TYPE_NAMES[Math.floor(Math.random() * JOB_TYPE_NAMES.length)]
 
     await prisma.proposedJob.create({
       data: {
         ...createProposedJob(title),
+        area: { connect: { id: choose(areaIds, 1)[0] } },
         availability: chooseWithProbability(days, 0.5),
         allergens: {
           connect: workAllergies.map(name => ({ name })),
+        },
+        jobType: {
+          connect: { name: jobType },
         },
       },
     })
