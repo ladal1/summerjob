@@ -1,5 +1,4 @@
 'use client'
-import { mapToolNameToSkill } from 'lib/data/enumMapping/mapToolNameToSkill'
 import { SkillHas } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
@@ -217,25 +216,24 @@ function adorations(
 }
 
 function lowSkilledWorkers(job: ActiveJobNoPlan) {
-  const requiredSkills: Set<keyof typeof SkillHas> = new Set()
+  const requiredSkillIds: Set<string> = new Set()
 
   // Iterate over toolsOnSite to collect required skills
   job.proposedJob.toolsOnSite.forEach(tool => {
-    const skills = mapToolNameToSkill(tool.tool)
-    skills.forEach(skill => requiredSkills.add(skill))
+    tool.tool.skills.forEach(skill => requiredSkillIds.add(skill.id))
   })
 
-  const workersSkills: Set<keyof typeof SkillHas> = new Set()
+  const workersSkillIds: Set<string> = new Set()
 
   // Sum all workers skills
   job.workers.forEach(worker => {
-    worker.skills.forEach(skill => workersSkills.add(skill))
+    worker.skills.forEach(skill => workersSkillIds.add(skill.id))
   })
 
   // Check if needs for skills are met
   let allRequiredSkillsPresent = true
-  requiredSkills.forEach(skill => {
-    if (!workersSkills.has(skill)) allRequiredSkillsPresent = false
+  requiredSkillIds.forEach(skill => {
+    if (!workersSkillIds.has(skill)) allRequiredSkillsPresent = false
     return
   })
 

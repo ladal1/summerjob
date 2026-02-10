@@ -1,6 +1,4 @@
 import { hasWorkerAdorationOnDay } from 'lib/helpers/adoration'
-import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import {
   useAPIActiveJobDelete,
   useAPIActiveJobs,
@@ -368,14 +366,8 @@ function formatAllergens(job: ActiveJobNoPlan) {
 function formatTools(tools: ToolCompleteData[]) {
   if (tools.length == 0) return 'Žádné'
   return [...tools]
-    .sort((a, b) =>
-      toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool])
-    )
-    .map(
-      tool =>
-        toolNameMapping[tool.tool] +
-        (tool.amount > 1 ? ' - ' + tool.amount : '')
-    )
+    .sort((a, b) => a.tool.name.localeCompare(b.tool.name))
+    .map(tool => tool.tool.name + (tool.amount > 1 ? ' - ' + tool.amount : ''))
     .join(', ')
 }
 
@@ -496,7 +488,7 @@ function formatWorkerData(
   if (worker.isStrong) abilities.push('Silák')
   if (worker.skills) {
     worker.skills.map(skill => {
-      abilities.push(skillHasMapping[skill])
+      abilities.push(skill.name)
     })
   }
   const allergies = [...worker.workAllergies.map(wa => wa.name)]

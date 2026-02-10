@@ -1,4 +1,3 @@
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { ToolName } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { WorkerComplete } from 'lib/types/worker'
@@ -26,7 +25,7 @@ export const PlanStatistics = ({
     () =>
       data?.reduce((accumulator: ToolsList, job) => {
         const sortedTools = job.proposedJob.toolsToTakeWith.sort((a, b) =>
-          toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool])
+          a.tool.name.localeCompare(b.tool.name)
         )
         sortedTools.forEach(({ tool: name, amount }) => {
           accumulator[name] = {
@@ -76,14 +75,16 @@ export const PlanStatistics = ({
                 {Object.entries(toolsToTakeWithList)
                   .sort(([, areanameA], [, areanameB]) => {
                     if (areanameA.amount === areanameB.amount)
-                      return areanameA.name.localeCompare(areanameB.name)
+                      return areanameA.name.name.localeCompare(
+                        areanameB.name.name
+                      )
                     if (areanameA.amount < areanameB.amount) return -1
                     if (areanameA.amount > areanameB.amount) return 1
                     return 0
                   })
                   .map(([key, tool]) => (
                     <tr key={key} className="text-end">
-                      <td>{toolNameMapping[tool.name]}</td>
+                      <td>{tool.name.name}</td>
                       <td>{tool.amount}</td>
                     </tr>
                   ))}

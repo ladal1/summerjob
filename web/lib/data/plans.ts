@@ -119,13 +119,31 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
               },
               foodAllergies: true,
               workAllergies: true,
+              skills: true,
+              tools: true,
             },
           },
           proposedJob: {
             include: {
               area: true,
-              toolsOnSite: true,
-              toolsToTakeWith: true,
+              toolsOnSite: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              toolsToTakeWith: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
               allergens: true,
             },
           },
