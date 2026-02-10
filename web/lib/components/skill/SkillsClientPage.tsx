@@ -24,8 +24,6 @@ export default function SkillsClientPage({
     <>
       <section>
         <div className="container-fluid">
-          <h3>Dovednosti</h3>
-          <div className="row gx-3"></div>
           <div className="row gx-3">
             <div className="col-lg-10 pb-2">
               <SkillsTable data={data} reload={requestReload} />
