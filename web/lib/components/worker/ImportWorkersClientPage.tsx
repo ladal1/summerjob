@@ -14,9 +14,11 @@ import { useAPIWorkersCreate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { FoodAllergy, WorkAllergy, SkillHas } from '../../prisma/client/enums'
 import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
 import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
+import { useAPIFoodAllergies } from 'lib/fetcher/food-allergy'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPISkills } from 'lib/fetcher/skill'
 
 interface ImportWorkersClientPageProps {
   eventName: string
@@ -35,13 +37,61 @@ export default function ImportWorkersClientPage({
   const [importData, setImportData] = useState('')
   const [saved, setSaved] = useState(false)
 
+  const { data: foodAllergies = [] } = useAPIFoodAllergies()
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const { data: skills = [] } = useAPISkills()
+
+  const foodAllergyNameToId = useMemo(
+    () =>
+      new Map(foodAllergies.map(fa => [fa.name.trim().toLowerCase(), fa.id])),
+    [foodAllergies]
+  )
+  const workAllergyNameToId = useMemo(
+    () =>
+      new Map(workAllergies.map(wa => [wa.name.trim().toLowerCase(), wa.id])),
+    [workAllergies]
+  )
+  const SkillNameToId = useMemo(
+    () => new Map(skills.map(s => [s.name.trim().toLowerCase(), s.id])),
+    [skills]
+  )
+
+  const foodAllergyIdToName = useMemo(
+    () => new Map(foodAllergies.map(fa => [fa.id, fa.name])),
+    [foodAllergies]
+  )
+  const workAllergyIdToName = useMemo(
+    () => new Map(workAllergies.map(wa => [wa.id, wa.name])),
+    [workAllergies]
+  )
+  const skillIdToName = useMemo(
+    () => new Map(skills.map(s => [s.id, s.name])),
+    [skills]
+  )
+
   const workers = useMemo(() => {
     const startDate = new Date(eventStartDate)
     const endDate = new Date(eventEndDate)
     const lines = importData.split('\n').filter(line => line.length > 0)
-    const workers = lines.map(l => getWorkerInfo(l, startDate, endDate))
+    const workers = lines.map(l =>
+      getWorkerInfo(
+        l,
+        startDate,
+        endDate,
+        foodAllergyNameToId,
+        workAllergyNameToId,
+        SkillNameToId
+      )
+    )
     return workers
-  }, [importData, eventStartDate, eventEndDate])
+  }, [
+    importData,
+    eventStartDate,
+    eventEndDate,
+    foodAllergyNameToId,
+    workAllergyNameToId,
+    SkillNameToId,
+  ])
 
   const isImportAllowed = useMemo(() => {
     return !isMutating && workers.every(w => w.success) && workers.length > 0
@@ -97,22 +147,23 @@ export default function ImportWorkersClientPage({
             <div>
               Import akceptuje data oddělená středníkem v následujícím formátu:
               <pre>
-                Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Alergie;Dovednosti;Dny
-                práce
+                Jméno;Příjmení;Věk;E-mail;Telefonní číslo;Potravinové
+                alergie;Pracovní alergie;Dovednosti;Dny práce
               </pre>
               Příklad:
               <pre>
-                {`Jan;Novák;19;jan.novak@gmail.com;+420123456789;DUST,ANIMALS;LUMBERJACK;${datesExample()}`}
+                {`Jan;Novák;19;jan.novak@gmail.com;+420123456789;Lepek,Vejce;Prach;Dřevorubec;${datesExample()}`}
               </pre>
             </div>
             <p>
               Seznam potravinových alergií:{' '}
-              {Object.values(FoodAllergy).join(', ')}
+              {foodAllergies.map(a => a.name).join(', ')}
               <br />
-              Seznam pracovních alergií: {Object.values(WorkAllergy).join(', ')}
+              Seznam pracovních alergií:{' '}
+              {workAllergies.map(a => a.name).join(', ')}
               <br />
               Seznam evidovaných dovedností:{' '}
-              {Object.values(SkillHas).join(', ')}
+              {skills.map(s => s.name).join(', ')}
               <br />
               Datum je možné zadat i v jiném formátu. Před importem zkontrolujte
               níže, že se data naimportují správně.
@@ -136,7 +187,14 @@ export default function ImportWorkersClientPage({
             </div>
             <ul className="list-group">
               {workers.map((worker, i) => (
-                <ResultBox key={i} result={worker} index={i + 1} />
+                <ResultBox
+                  key={i}
+                  result={worker}
+                  index={i + 1}
+                  foodAllergyIdToName={foodAllergyIdToName}
+                  workAllergyIdToName={workAllergyIdToName}
+                  skillIdToName={skillIdToName}
+                />
               ))}
             </ul>
             <div className="d-flex justify-content-end">
@@ -161,9 +219,15 @@ export default function ImportWorkersClientPage({
 function ResultBox({
   result,
   index,
+  foodAllergyIdToName,
+  workAllergyIdToName,
+  skillIdToName,
 }: {
   result: WorkerParsingResult
   index: number
+  foodAllergyIdToName: Map<string, string>
+  workAllergyIdToName: Map<string, string>
+  skillIdToName: Map<string, string>
 }) {
   return (
     <li
@@ -188,7 +252,7 @@ function ResultBox({
             Potravinové alergie:{' '}
             {result.data.foodAllergies.length > 0
               ? result.data.foodAllergies
-                  .map(a => foodAllergyMapping[a])
+                  .map(a => foodAllergyIdToName.get(a))
                   .join(', ')
               : 'Žádné'}
           </small>
@@ -197,13 +261,16 @@ function ResultBox({
             Pracovní alergie:{' '}
             {result.data.workAllergies.length > 0
               ? result.data.workAllergies
-                  .map(a => workAllergyMapping[a])
+                  .map(a => workAllergyIdToName.get(a))
                   .join(', ')
               : 'Žádné'}
           </small>
           <br />
           <small className="text-muted">
-            Dovednosti: {result.data.skills.join(', ')}
+            Dovednosti:{' '}
+            {result.data.skills.length > 0
+              ? result.data.skills.map(s => skillIdToName.get(s)).join(', ')
+              : 'Žádné'}
           </small>
           <br />
           <small className="text-muted">
@@ -235,7 +302,10 @@ type WorkerParsingResult =
 function getWorkerInfo(
   line: string,
   eventStart: Date,
-  eventEnd: Date
+  eventEnd: Date,
+  foodAllergyNameToId: Map<string, string>,
+  workAllergyNameToId: Map<string, string>,
+  skillNameToId: Map<string, string>
 ): WorkerParsingResult {
   const lineWithError = (error: string) =>
     [line.length > 40 ? line.substring(0, 37) + '...' : line, error].join(': ')
@@ -245,7 +315,8 @@ function getWorkerInfo(
     age,
     email,
     phone,
-    allergiesStr,
+    foodAllergiesStr,
+    workAllergiesStr,
     skillsStr,
     workDaysStr,
   ] = line.split(';')
@@ -253,32 +324,63 @@ function getWorkerInfo(
     return { success: false, error: 'Missing data' }
   }
   const formatedPhone = formatPhoneNumber(phone)
-  const parsedAllergies = allergiesStr
+
+  const parsedFoodAllergies = foodAllergiesStr
     .split(',')
-    .map(a => a.trim())
+    .map(a => a.trim().toLowerCase())
+    .filter(a => a !== '')
+  const parsedWorkAllergies = workAllergiesStr
+    .split(',')
+    .map(a => a.trim().toLowerCase())
+    .filter(a => a !== '')
+  const parsedSkills = skillsStr
+    .split(',')
+    .map(a => a.trim().toLowerCase())
     .filter(a => a !== '')
 
-  const foodAllergies = parsedAllergies.filter(a =>
-    Object.keys(FoodAllergy).includes(a)
-  ) as FoodAllergy[]
-  const workAllergies = parsedAllergies.filter(a =>
-    Object.keys(WorkAllergy).includes(a)
-  ) as WorkAllergy[]
+  const foodAllergies = parsedFoodAllergies
+    .filter(fa => foodAllergyNameToId.get(fa))
+    .map(fa => foodAllergyNameToId.get(fa))
+  const workAllergies = parsedWorkAllergies
+    .filter(wa => workAllergyNameToId.get(wa))
+    .map(wa => workAllergyNameToId.get(wa))
+  const skills = parsedSkills
+    .filter(s => skillNameToId.get(s))
+    .map(s => skillNameToId.get(s))
+  console.log('skills ids', skills)
+  console.log('workAllergies ids', workAllergies)
 
-  const unknownAllergies = parsedAllergies.filter(
-    a =>
-      !Object.keys(FoodAllergy).includes(a) &&
-      !Object.keys(WorkAllergy).includes(a)
+  const unknownFoodAllergies = parsedFoodAllergies.filter(
+    fa => !foodAllergyNameToId.get(fa)
   )
+  const unknownWorkAllergies = parsedWorkAllergies.filter(
+    wa => !workAllergyNameToId.get(wa)
+  )
+  const unknownSkills = parsedSkills.filter(s => !skillNameToId.get(s))
 
-  if (unknownAllergies.length > 0) {
+  if (unknownFoodAllergies.length > 0) {
     return {
       success: false,
-      error: lineWithError(`Neznámé alergie: ${unknownAllergies.join(', ')}`),
+      error: lineWithError(
+        `Neznámé alergie na jídlo: ${unknownFoodAllergies.join(', ')}`
+      ),
+    }
+  }
+  if (unknownWorkAllergies.length > 0) {
+    return {
+      success: false,
+      error: lineWithError(
+        `Neznámé pracovní alergie: ${unknownWorkAllergies.join(', ')}`
+      ),
+    }
+  }
+  if (unknownSkills.length > 0) {
+    return {
+      success: false,
+      error: lineWithError(`Neznámé dovednosti: ${unknownSkills.join(', ')}`),
     }
   }
 
-  const skills = skillsStr.split(',').filter(a => a.trim() !== '')
   const workDays = workDaysStr
     .split(',')
     .filter(a => a.trim() !== '')
@@ -294,6 +396,7 @@ function getWorkerInfo(
     foodAllergies,
     workAllergies,
     skills,
+    tools: [],
     availability: {
       workDays,
     },
