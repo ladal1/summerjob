@@ -104,7 +104,7 @@ export const ApplicationCreateSchema = z
   })
 export type ApplicationCreateDataInput = z.infer<typeof ApplicationCreateSchema>
 
-export const ApplicationUpdateSchema = ApplicationCreateSchema.clone().partial()
+export const ApplicationUpdateSchema = ApplicationCreateSchema.clone() //.partial()
 
 export type ApplicationUpdateDataInput = z.infer<typeof ApplicationUpdateSchema>
 

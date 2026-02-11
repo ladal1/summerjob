@@ -53,8 +53,24 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
           proposedJob: {
             include: {
               area: true,
-              toolsOnSite: true,
-              toolsToTakeWith: true,
+              toolsOnSite: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              toolsToTakeWith: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
               allergens: true,
             },
           },

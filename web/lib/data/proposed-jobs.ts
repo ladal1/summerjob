@@ -30,12 +30,20 @@ export async function getProposedJobById(
       activeJobs: true,
       toolsOnSite: {
         include: {
-          tool: true,
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
         },
       },
       toolsToTakeWith: {
         include: {
-          tool: true,
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
         },
       },
       photos: true,
@@ -93,12 +101,20 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
       jobType: true,
       toolsOnSite: {
         include: {
-          tool: true,
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
         },
       },
       toolsToTakeWith: {
         include: {
-          tool: true,
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
         },
       },
       photos: true,
@@ -155,12 +171,20 @@ export async function getProposedJobsAssignableTo(
       jobType: true,
       toolsOnSite: {
         include: {
-          tool: true,
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
         },
       },
       toolsToTakeWith: {
         include: {
-          tool: true,
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
         },
       },
       photos: true,

@@ -224,6 +224,7 @@ export async function getFoodDeliveriesWithPlanByPlanId(planId: string) {
                 },
                 take: 1,
               },
+              foodAllergies: true,
             },
           },
           responsibleWorker: true,

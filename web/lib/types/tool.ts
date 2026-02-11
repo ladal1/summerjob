@@ -9,6 +9,12 @@ export const ToolCompleteSchema = ToolSchema.extend({
   tool: z.object({
     id: z.uuid(),
     name: z.string(),
+    skills: z.array(
+      z.object({
+        id: z.uuid(),
+        name: z.string(),
+      })
+    ),
   }),
 })
 

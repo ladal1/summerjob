@@ -10,7 +10,6 @@ import {
 } from 'lib/types/tool'
 import { PhotoCompleteSchema } from './photo'
 import { coordinatesZod } from './coordinates'
-import { JobType } from './enums'
 
 useZodOpenApi
 
