@@ -103,7 +103,10 @@ export async function createFoodDelivery(data: FoodDeliveryCreateData) {
   return delivery
 }
 
-export async function updateFoodDelivery(deliveryId: string, data: FoodDeliveryUpdateData) {
+export async function updateFoodDelivery(
+  deliveryId: string,
+  data: FoodDeliveryUpdateData
+) {
   // Delete existing job orders for this delivery
   await prisma.foodDeliveryJobOrder.deleteMany({
     where: {
@@ -275,6 +278,7 @@ export async function getFoodDeliveryWithPlanById(deliveryId: string) {
                 },
                 take: 1,
               },
+              foodAllergies: true,
             },
           },
           responsibleWorker: true,
@@ -305,7 +309,10 @@ export async function deleteFoodDelivery(deliveryId: string) {
   })
 }
 
-export async function updateJobDeliveryStatus(jobOrderId: string, completed: boolean) {
+export async function updateJobDeliveryStatus(
+  jobOrderId: string,
+  completed: boolean
+) {
   const jobOrder = await prisma.foodDeliveryJobOrder.update({
     where: {
       id: jobOrderId,
@@ -319,13 +326,16 @@ export async function updateJobDeliveryStatus(jobOrderId: string, completed: boo
   return jobOrder
 }
 
-export async function replaceAllFoodDeliveries(planId: string, deliveries: FoodDeliveryCreateData[]) {
+export async function replaceAllFoodDeliveries(
+  planId: string,
+  deliveries: FoodDeliveryCreateData[]
+) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new Error('No active summer job event found')
   }
 
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async tx => {
     // Delete all existing food deliveries for this plan
     await tx.foodDelivery.deleteMany({
       where: {
