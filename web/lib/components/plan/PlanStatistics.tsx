@@ -28,9 +28,9 @@ export const PlanStatistics = ({
           a.tool.name.localeCompare(b.tool.name)
         )
         sortedTools.forEach(({ tool: name, amount }) => {
-          accumulator[name] = {
+          accumulator[name.name] = {
             name,
-            amount: (accumulator[name]?.amount || 0) + amount,
+            amount: (accumulator[name.name]?.amount || 0) + amount,
           }
         })
         return accumulator

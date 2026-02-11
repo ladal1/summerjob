@@ -14,8 +14,6 @@ import { useAPIWorkersCreate } from 'lib/fetcher/worker'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { useRouter } from 'next/navigation'
 import SuccessProceedModal from '../modal/SuccessProceedModal'
-import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { useAPIFoodAllergies } from 'lib/fetcher/food-allergy'
 import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 import { useAPISkills } from 'lib/fetcher/skill'
@@ -347,8 +345,6 @@ function getWorkerInfo(
   const skills = parsedSkills
     .filter(s => skillNameToId.get(s))
     .map(s => skillNameToId.get(s))
-  console.log('skills ids', skills)
-  console.log('workAllergies ids', workAllergies)
 
   const unknownFoodAllergies = parsedFoodAllergies.filter(
     fa => !foodAllergyNameToId.get(fa)

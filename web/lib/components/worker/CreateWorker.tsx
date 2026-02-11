@@ -2,8 +2,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
 import { useAPIFoodAllergies } from 'lib/fetcher/food-allergy'
-import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
-import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import {
   formatNumber,
@@ -25,6 +23,8 @@ import { TextInput } from '../forms/input/TextInput'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
 import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPISkills } from 'lib/fetcher/skill'
+import { useAPIToolNames } from 'lib/fetcher/tool-name'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -113,6 +113,18 @@ export default function CreateWorker({
   const workAllergyMapping = workAllergies.map(a => ({
     value: a.id,
     label: a.name,
+  }))
+
+  const { data: skills = [] } = useAPISkills()
+  const skillOptions = skills.map(s => ({
+    value: s.id,
+    label: s.name,
+  }))
+
+  const { data: tools = [] } = useAPIToolNames()
+  const toolOptions = tools.map(t => ({
+    value: t.id,
+    label: t.name,
   }))
 
   return (
@@ -215,16 +227,16 @@ export default function CreateWorker({
             options={workAllergyMapping}
             register={() => register('workAllergies')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="skills"
             label="Dovednosti (umí)"
-            mapping={skillHasMapping}
+            options={skillOptions}
             register={() => register('skills')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="tools"
             label="Nářadí (přiveze)"
-            mapping={skillBringsMapping}
+            options={toolOptions}
             register={() => register('tools')}
           />
 

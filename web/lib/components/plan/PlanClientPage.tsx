@@ -1,6 +1,5 @@
 'use client'
 import ErrorPage from 'lib/components/error-page/ErrorPage'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { Modal, ModalSize } from 'lib/components/modal/Modal'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import AddJobToPlanForm from 'lib/components/plan/AddJobToPlanForm'
@@ -63,7 +62,9 @@ export default function PlanClientPage({
   const reloadPlan = useCallback(() => mutate(), [mutate])
 
   //#region Adoration data
-  const [adorationByWorker, setAdorationByWorker] = useState<Map<string, boolean>>(new Map())
+  const [adorationByWorker, setAdorationByWorker] = useState<
+    Map<string, boolean>
+  >(new Map())
 
   useEffect(() => {
     if (!planData) return
@@ -71,29 +72,39 @@ export default function PlanClientPage({
     const fetchAdorationData = async () => {
       try {
         // Fetch all adoration slots for the plan day
-        const response = await fetch(`/api/adoration/admin?date=${planData.day.toISOString().slice(0, 10)}&eventId=${planData.summerJobEventId}`)
+        const response = await fetch(
+          `/api/adoration/admin?date=${planData.day.toISOString().slice(0, 10)}&eventId=${planData.summerJobEventId}`
+        )
         if (!response.ok) return
 
         const slots = await response.json()
         const workerAdorationMap = new Map<string, boolean>()
 
         // Process slots to find workers with adoration during work hours (8:00-18:00)
-        slots.forEach((slot: { dateStart: string; length: number; workers: { id: string }[] }) => {
-          const slotStart = new Date(slot.dateStart)
-          const slotEnd = new Date(slotStart.getTime() + slot.length * 60 * 1000)
-          
-          const dayStart = new Date(planData.day)
-          dayStart.setHours(8, 0, 0, 0)
-          const dayEnd = new Date(planData.day)
-          dayEnd.setHours(18, 0, 0, 0)
+        slots.forEach(
+          (slot: {
+            dateStart: string
+            length: number
+            workers: { id: string }[]
+          }) => {
+            const slotStart = new Date(slot.dateStart)
+            const slotEnd = new Date(
+              slotStart.getTime() + slot.length * 60 * 1000
+            )
 
-          // Check if slot overlaps with working hours
-          if (slotStart < dayEnd && slotEnd > dayStart) {
-            slot.workers.forEach((worker: { id: string }) => {
-              workerAdorationMap.set(worker.id, true)
-            })
+            const dayStart = new Date(planData.day)
+            dayStart.setHours(8, 0, 0, 0)
+            const dayEnd = new Date(planData.day)
+            dayEnd.setHours(18, 0, 0, 0)
+
+            // Check if slot overlaps with working hours
+            if (slotStart < dayEnd && slotEnd > dayStart) {
+              slot.workers.forEach((worker: { id: string }) => {
+                workerAdorationMap.set(worker.id, true)
+              })
+            }
           }
-        })
+        )
 
         setAdorationByWorker(workerAdorationMap)
       } catch (error) {
@@ -179,8 +190,8 @@ export default function PlanClientPage({
 
   const switchPublish = () => {
     if (!planData) return
-    planData.published = !planData.published
-    triggerPublish({ published: planData.published })
+    const switchedPublished = !planData.published
+    triggerPublish({ published: switchedPublished })
   }
 
   //#endregion Publish plan
@@ -194,8 +205,8 @@ export default function PlanClientPage({
         .map(w => `${w.firstName} ${w.lastName}`)
         .join(' ')
       const toolsToTakeWith = [...job.proposedJob.toolsToTakeWith]
-        .sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
-        .map(tool => toolNameMapping[tool.tool])
+        .sort((a, b) => a.tool.name.localeCompare(b.tool.name))
+        .map(tool => tool.tool.name)
         .join(' ')
       map.set(
         job.id,
@@ -224,7 +235,10 @@ export default function PlanClientPage({
   const searchQ = searchParams?.get('search')
   const showNumbersQ = searchParams?.get('showNumbers') === 'true'
   const sortColumnQ = searchParams?.get('sortColumn')
-  const sortDirectionQ = searchParams?.get('sortDirection') as 'asc' | 'desc' | null
+  const sortDirectionQ = searchParams?.get('sortDirection') as
+    | 'asc'
+    | 'desc'
+    | null
 
   // area
   const areas = useMemo(
@@ -277,13 +291,13 @@ export default function PlanClientPage({
       search: filter,
       showNumbers: showNumbers.toString(),
     })
-    
+
     // Only add sort parameters if they're not defaults
     if (sortOrder.columnId !== 'name' || sortOrder.direction !== 'asc') {
       params.append('sortColumn', sortOrder.columnId || 'name')
       params.append('sortDirection', sortOrder.direction)
     }
-    
+
     router.replace(`?${params}`, { scroll: false })
   }, [selectedArea, selectedContact, filter, showNumbers, sortOrder, router])
 
@@ -553,7 +567,7 @@ function isWorkerAvailable(worker: WorkerComplete, day: Date) {
   const isWorkDay = worker.availability.workDays
     .map(d => d.getTime())
     .includes(day.getTime())
-  
+
   // Workers with adoration are still available for work, they just get a visual indicator
   return isWorkDay
 }
