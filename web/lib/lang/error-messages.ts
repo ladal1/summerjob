@@ -59,4 +59,6 @@ export const customErrorMessages = {
   bothTimes: 'Zadejte buď oba časy nebo žádný',
   moreThan: 'Zadejte číslo menší nebo rovno',
   lessThanOrEqual: 'Zadejte číslo větší než',
+
+  emptyName: 'Zadejte název',
 }

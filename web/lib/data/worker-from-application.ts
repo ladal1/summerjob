@@ -1,48 +1,7 @@
-import {
-  Application,
-  FoodAllergy,
-  WorkAllergy,
-  SkillHas,
-  SkillBrings,
-} from 'lib/prisma/client'
+import type { Application } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import { eachDayOfInterval } from 'date-fns/eachDayOfInterval'
-
-const foodAllergyMapping: Record<string, FoodAllergy> = {
-  laktóza: FoodAllergy.LACTOSE,
-  lepek: FoodAllergy.GLUTEN,
-  ořechy: FoodAllergy.NUTS,
-  'mořské plody': FoodAllergy.SEAFOOD,
-  vejce: FoodAllergy.EGG,
-}
-
-const workAllergyMapping: Record<string, WorkAllergy> = {
-  prach: WorkAllergy.DUST,
-  zvířata: WorkAllergy.ANIMALS,
-  seno: WorkAllergy.HAY,
-  pyl: WorkAllergy.POLLEN,
-  roztoči: WorkAllergy.MITES,
-  chemikálie: WorkAllergy.CHEMICALS,
-}
-
-const skillHasMapping: Record<string, SkillHas> = {
-  dřevorubec: SkillHas.LUMBERJACK,
-  umělec: SkillHas.ARTIST,
-  zahradník: SkillHas.GARDENER,
-  'nebezpečné práce': SkillHas.DANGER,
-  elektrikář: SkillHas.ELECTRICIAN,
-  výšky: SkillHas.HEIGHTS,
-  zedník: SkillHas.MASON,
-}
-
-const skillBringsMapping: Record<string, SkillBrings> = {
-  sekera: SkillBrings.AXE,
-  lopata: SkillBrings.SHOVEL,
-  pila: SkillBrings.SAW,
-  nářadí: SkillBrings.POWERTOOLS,
-  žebřík: SkillBrings.LADDER,
-}
 
 function buildWorkerNote(application: Application): string {
   const noteParts: string[] = []
@@ -78,32 +37,27 @@ function buildWorkerNote(application: Application): string {
   return noteParts.join('\n')
 }
 
-function extractMapped<T>(
+function matchExisting(
   text: string | null | undefined,
-  mapping: Record<string, T>
-): { matched: T[]; unmatched: string[] } {
-  const result: T[] = []
-  const unmatched: string[] = []
-
+  dbList: { name: string; id: string }[]
+): { matchedNames: string[]; unmatchedNames: string[] } {
   if (!text) {
-    return { matched: [], unmatched: [] }
+    return { matchedNames: [], unmatchedNames: [] }
   }
 
-  const lower = text.toLowerCase()
-  const foundKeys = Object.keys(mapping).filter(k => lower.includes(k))
+  const dbListNames = dbList.map(item => item.name)
+  const split = text.split(/[,;\n]+/).map(s => s.trim().toLowerCase())
 
-  for (const key of foundKeys) {
-    result.push(mapping[key])
-  }
+  const matchedNames = dbListNames.filter(name =>
+    split.includes(name.toLowerCase())
+  )
+  const matchedNamesLower = matchedNames.map(name => name.toLowerCase())
+  const unmatchedNames = split.filter(
+    name => !matchedNamesLower.includes(name.toLowerCase())
+  )
 
-  const words = text.split(/[,;\n]+/).map(s => s.trim())
-  for (const word of words) {
-    if (word && !foundKeys.some(k => word.toLowerCase().includes(k))) {
-      unmatched.push(word)
-    }
-  }
-
-  return { matched: result, unmatched }
+  // matchedNames includes names from db that are present in the application (names in db are unique)
+  return { matchedNames, unmatchedNames }
 }
 
 function calculateAge(birthDate: Date): number {
@@ -124,27 +78,29 @@ export async function createWorkerFromApplication(application: Application) {
     throw new Error('No active event found')
   }
 
+  const foodAllergies = await prisma.foodAllergy.findMany()
+  const workAllergies = await prisma.workAllergy.findMany()
+  const skills = await prisma.skillHas.findMany()
+  const toolNames = await prisma.toolName.findMany()
+
+  const applicationFoodAllergies = matchExisting(
+    application.foodAllergies,
+    foodAllergies
+  )
+  const applicationWorkAllergies = matchExisting(
+    application.workAllergies,
+    workAllergies
+  )
+  const applicationSkillsHas = matchExisting(application.toolsSkills, skills)
+  const applicationToolsBrings = matchExisting(
+    application.toolsBringing,
+    toolNames
+  )
+
   const workDays = eachDayOfInterval({
     start: new Date(application.arrivalDate),
     end: new Date(application.departureDate),
   })
-
-  const ApplicationFoodAllergies = extractMapped(
-    application.foodAllergies,
-    foodAllergyMapping
-  )
-  const ApplicationWorkAllergies = extractMapped(
-    application.workAllergies,
-    workAllergyMapping
-  )
-  const ApplicationSkillHas = extractMapped(
-    application.toolsSkills,
-    skillHasMapping
-  )
-  const ApplicationToolsBrings = extractMapped(
-    application.toolsBringing,
-    skillBringsMapping
-  )
 
   const note = buildWorkerNote(application)
 
@@ -166,10 +122,18 @@ export async function createWorkerFromApplication(application: Application) {
         phone: application.phone,
         ownsCar: application.ownsCar,
         canBeMedic: application.canBeMedic,
-        foodAllergies: { set: ApplicationFoodAllergies.matched },
-        workAllergies: { set: ApplicationWorkAllergies.matched },
-        skills: { set: ApplicationSkillHas.matched },
-        tools: { set: ApplicationToolsBrings.matched },
+        foodAllergies: {
+          set: applicationFoodAllergies.matchedNames.map(name => ({ name })),
+        },
+        workAllergies: {
+          set: applicationWorkAllergies.matchedNames.map(name => ({ name })),
+        },
+        skills: {
+          set: applicationSkillsHas.matchedNames.map(name => ({ name })),
+        },
+        tools: {
+          set: applicationToolsBrings.matchedNames.map(name => ({ name })),
+        },
         photoPath: application.photo || undefined,
         age: calculateAge(application.birthDate),
         note: combinedNote,
@@ -207,10 +171,18 @@ export async function createWorkerFromApplication(application: Application) {
       isTeam: false,
       ownsCar: application.ownsCar,
       canBeMedic: application.canBeMedic,
-      foodAllergies: { set: ApplicationFoodAllergies.matched },
-      workAllergies: { set: ApplicationWorkAllergies.matched },
-      skills: { set: ApplicationSkillHas.matched },
-      tools: { set: ApplicationToolsBrings.matched },
+      foodAllergies: {
+        connect: applicationFoodAllergies.matchedNames.map(name => ({ name })),
+      },
+      workAllergies: {
+        connect: applicationWorkAllergies.matchedNames.map(name => ({ name })),
+      },
+      skills: {
+        connect: applicationSkillsHas.matchedNames.map(name => ({ name })),
+      },
+      tools: {
+        connect: applicationToolsBrings.matchedNames.map(name => ({ name })),
+      },
       photoPath: application.photo || undefined,
       age: calculateAge(application.birthDate),
       note,

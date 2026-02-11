@@ -64,12 +64,12 @@ async function get(
 ) {
   const planId = req.query.planId as string
   const rawData = await getFoodDeliveriesWithPlanByPlanId(planId)
-  
+
   if (!rawData) {
     res.status(404).end()
     return
   }
-  
+
   // Transform the data to match the expected types
   const transformedData: CourierDeliveryAPIGetResponse = {
     plan: {
@@ -83,33 +83,42 @@ async function get(
           lastName: worker.lastName,
           phone: worker.phone,
           age: worker.age,
-          foodAllergies: worker.foodAllergies
+          foodAllergies: worker.foodAllergies.map(fa => fa.name),
         })),
         proposedJob: {
           id: job.proposedJob.id,
           name: job.proposedJob.name,
           address: job.proposedJob.address,
-          coordinates: job.proposedJob.coordinates && job.proposedJob.coordinates.length >= 2 
-            ? [job.proposedJob.coordinates[0], job.proposedJob.coordinates[1]] as [number, number]
-            : null,
+          coordinates:
+            job.proposedJob.coordinates &&
+            job.proposedJob.coordinates.length >= 2
+              ? ([
+                  job.proposedJob.coordinates[0],
+                  job.proposedJob.coordinates[1],
+                ] as [number, number])
+              : null,
           hasFood: job.proposedJob.hasFood,
-          area: job.proposedJob.area ? {
-            id: job.proposedJob.area.id,
-            name: job.proposedJob.area.name
-          } : null
+          area: job.proposedJob.area
+            ? {
+                id: job.proposedJob.area.id,
+                name: job.proposedJob.area.name,
+              }
+            : null,
         },
-        responsibleWorker: job.responsibleWorker ? {
-          id: job.responsibleWorker.id,
-          firstName: job.responsibleWorker.firstName,
-          lastName: job.responsibleWorker.lastName,
-          phone: job.responsibleWorker.phone
-        } : null,
-        completed: false // This comes from the delivery jobs, not the plan jobs
-      }))
+        responsibleWorker: job.responsibleWorker
+          ? {
+              id: job.responsibleWorker.id,
+              firstName: job.responsibleWorker.firstName,
+              lastName: job.responsibleWorker.lastName,
+              phone: job.responsibleWorker.phone,
+            }
+          : null,
+        completed: false, // This comes from the delivery jobs, not the plan jobs
+      })),
     },
-    deliveries: rawData.deliveries
+    deliveries: rawData.deliveries,
   }
-  
+
   res.status(200).json(transformedData)
 }
 

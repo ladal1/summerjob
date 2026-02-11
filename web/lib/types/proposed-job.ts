@@ -10,7 +10,6 @@ import {
 } from 'lib/types/tool'
 import { PhotoCompleteSchema } from './photo'
 import { coordinatesZod } from './coordinates'
-import { JobType, WorkAllergy } from './enums'
 
 useZodOpenApi
 
@@ -24,6 +23,12 @@ export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
   area: AreaSchema.nullable(),
   toolsOnSite: z.array(ToolCompleteSchema),
   toolsToTakeWith: z.array(ToolCompleteSchema),
+  allergens: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+  ),
 })
 
 export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>
@@ -36,6 +41,16 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   toolsToTakeWith: z.array(ToolCompleteSchema),
   photos: z.array(PhotoCompleteSchema),
   pinnedBy: z.array(z.object({ workerId: z.string() })),
+  allergens: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
+  jobType: z.object({
+    name: z.string(),
+    id: z.uuid(),
+  }),
 })
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
@@ -43,7 +58,7 @@ export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>
 const ProposedJobBasicSchema = z
   .object({
     areaId: z.string({ message: err.emptyAreaId }).nullable(),
-    allergens: z.array(z.nativeEnum(WorkAllergy)),
+    allergens: z.array(z.uuid()),
     privateDescription: z.string(),
     publicDescription: z.string(),
     name: z
@@ -122,7 +137,7 @@ const ProposedJobBasicSchema = z
           format: 'date',
         },
       }),
-    jobType: z.nativeEnum(JobType, { message: err.emptyJobType }),
+    jobType: z.uuid({ message: err.emptyJobType }),
     toolsOnSite: ToolsCreateSchema.optional(),
     toolsToTakeWith: ToolsCreateSchema.optional(),
     priority: z.number().default(1).optional(),

@@ -3,7 +3,6 @@
 import ErrorPage from 'lib/components/error-page/ErrorPage'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import { formatDateLong } from 'lib/helpers/helpers'
-import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
 import Link from 'next/link'
 import { useMemo, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
@@ -26,13 +25,12 @@ export default function CourierDeliveryClientPage({
   hasDeliveryManagementAccess,
   initialDataPlan,
 }: CourierDeliveryClientPageProps) {
-  
   // Get delivery data with plan data
   const {
     data: deliveryData,
     error,
     mutate: mutateDeliveryData,
-    isLoading
+    isLoading,
   } = useFoodDeliveryDetail(planId, courierId, {
     fallbackData: initialDataPlan,
   })
@@ -47,12 +45,12 @@ export default function CourierDeliveryClientPage({
   // Get jobs for this courier with their order
   const courierJobs = useMemo(() => {
     if (!courierDelivery || !planData) return []
-    
+
     return courierDelivery.jobs
       .map(jobOrder => {
         const job = planData.jobs.find(j => j.id === jobOrder.activeJobId)
         if (!job) return null
-        
+
         return {
           job,
           order: jobOrder.order,
@@ -66,10 +64,12 @@ export default function CourierDeliveryClientPage({
               lastName: worker.lastName,
               phone: worker.phone,
               age: worker.age || undefined,
-              allergies: worker.foodAllergies.map(allergy => foodAllergyMapping[allergy])
+              allergies: worker.foodAllergies.map(allergy => allergy.name),
             })),
           needsFoodDelivery: !job.proposedJob.hasFood,
-          hasWorkersWithAllergies: job.workers.some(worker => worker.foodAllergies.length > 0)
+          hasWorkersWithAllergies: job.workers.some(
+            worker => worker.foodAllergies.length > 0
+          ),
         }
       })
       .filter(item => item !== null)
@@ -79,55 +79,64 @@ export default function CourierDeliveryClientPage({
   const [showMap, setShowMap] = useState(false)
 
   // Function to mark job delivery as complete/incomplete
-  const toggleJobCompletion = useCallback(async (jobOrderId: string, currentStatus: boolean) => {
-    try {
-      const response = await fetch(`/api/plans/${planId}/food-deliveries/job-orders/${jobOrderId}/complete`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          completed: !currentStatus
-        }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to update job completion status')
-      }
-      
-      // Optimistically update the local data instead of revalidating
-      await mutateDeliveryData((current) => {
-        if (!current) return current
-        
-        // Create a deep copy and update the specific job's completion status
-        const updatedData = { ...current }
-        updatedData.delivery = { ...current.delivery }
-        updatedData.delivery.jobs = current.delivery.jobs.map(job => 
-          job.id === jobOrderId 
-            ? { ...job, completed: !currentStatus }
-            : job
+  const toggleJobCompletion = useCallback(
+    async (jobOrderId: string, currentStatus: boolean) => {
+      try {
+        const response = await fetch(
+          `/api/plans/${planId}/food-deliveries/job-orders/${jobOrderId}/complete`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              completed: !currentStatus,
+            }),
+          }
         )
-        
-        return updatedData
-      }, false) // false = don't revalidate immediately
-      
-    } catch (error) {
-      console.error('Failed to update job completion:', error)
-      
-      // On error, revalidate to get the correct state
-      mutateDeliveryData()
-    }
-  }, [planId, mutateDeliveryData])
+
+        if (!response.ok) {
+          throw new Error('Failed to update job completion status')
+        }
+
+        // Optimistically update the local data instead of revalidating
+        await mutateDeliveryData(current => {
+          if (!current) return current
+
+          // Create a deep copy and update the specific job's completion status
+          const updatedData = { ...current }
+          updatedData.delivery = { ...current.delivery }
+          updatedData.delivery.jobs = current.delivery.jobs.map(job =>
+            job.id === jobOrderId ? { ...job, completed: !currentStatus } : job
+          )
+
+          return updatedData
+        }, false) // false = don't revalidate immediately
+      } catch (error) {
+        console.error('Failed to update job completion:', error)
+
+        // On error, revalidate to get the correct state
+        mutateDeliveryData()
+      }
+    },
+    [planId, mutateDeliveryData]
+  )
 
   // Function to generate Google Maps link
-  const getGoogleMapsLink = useCallback((job: { proposedJob: { coordinates: number[] | null } }) => {
-    if (!job.proposedJob.coordinates || job.proposedJob.coordinates.length < 2) {
-      return null
-    }
-    
-    const [lat, lng] = job.proposedJob.coordinates
-    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
-  }, [])
+  const getGoogleMapsLink = useCallback(
+    (job: { proposedJob: { coordinates: number[] | null } }) => {
+      if (
+        !job.proposedJob.coordinates ||
+        job.proposedJob.coordinates.length < 2
+      ) {
+        return null
+      }
+
+      const [lat, lng] = job.proposedJob.coordinates
+      return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+    },
+    []
+  )
 
   // Show loading state while data is being fetched
   if (isLoading && !deliveryData) {
@@ -148,7 +157,11 @@ export default function CourierDeliveryClientPage({
 
   // Show 404 if delivery data is loaded but courier not found
   if (deliveryData !== undefined && !courierDelivery) {
-    return <ErrorPage404 message={`Rozvozník s ID ${courierId} nebyl nalezen v tomto plánu.`} />
+    return (
+      <ErrorPage404
+        message={`Rozvozník s ID ${courierId} nebyl nalezen v tomto plánu.`}
+      />
+    )
   }
 
   // Show 404 if delivery data is loaded but plan not found
@@ -163,8 +176,15 @@ export default function CourierDeliveryClientPage({
       >
         <div className="d-flex flex-column flex-md-row gap-2">
           {hasDeliveryManagementAccess && (
-            <Link href={`/plan/${planId}/food-delivery`} className="flex-md-shrink-0">
-              <button className="btn btn-secondary btn-with-icon w-100" type="button" style={{ minWidth: '220px' }}>
+            <Link
+              href={`/plan/${planId}/food-delivery`}
+              className="flex-md-shrink-0"
+            >
+              <button
+                className="btn btn-secondary btn-with-icon w-100"
+                type="button"
+                style={{ minWidth: '220px' }}
+              >
                 <i className="fas fa-arrow-left"></i>
                 <span>Zpět na správu rozvozu</span>
               </button>
@@ -175,11 +195,11 @@ export default function CourierDeliveryClientPage({
               className="btn btn-with-icon w-100"
               type="button"
               onClick={() => setShowMap(!showMap)}
-              style={{ 
-                backgroundColor: 'var(--primary)', 
+              style={{
+                backgroundColor: 'var(--primary)',
                 color: 'var(--text)',
                 borderColor: 'var(--primary)',
-                minWidth: '180px'
+                minWidth: '180px',
               }}
             >
               <i className="fas fa-map"></i>
@@ -216,264 +236,361 @@ export default function CourierDeliveryClientPage({
             <>
               {/* Map View */}
               {showMap && planData && (
-                    <div className="row mb-4">
-                      <div className="col-12">
-                        <div className="card">
-                          <div className="card-header">
-                            <h5 className="mb-0">
-                              <i className="fas fa-map me-2"></i>
-                              Mapa všech dodávek rozvozníka {courierNum}
-                            </h5>
-                          </div>
-                          <div className="card-body p-3" style={{ height: 'calc(100% - 40px)', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ flex: 1, width: '100%' }}>
+                <div className="row mb-4">
+                  <div className="col-12">
+                    <div className="card">
+                      <div className="card-header">
+                        <h5 className="mb-0">
+                          <i className="fas fa-map me-2"></i>
+                          Mapa všech dodávek rozvozníka {courierNum}
+                        </h5>
+                      </div>
+                      <div
+                        className="card-body p-3"
+                        style={{
+                          height: 'calc(100% - 40px)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        <div style={{ flex: 1, width: '100%' }}>
+                          {(() => {
+                            const jobOrder: { [jobId: string]: number } = {}
+                            courierJobs.forEach(({ job, order }) => {
+                              jobOrder[job.id] = order
+                            })
+
+                            return (
+                              <JobsMapView
+                                jobs={
+                                  courierJobs.map(
+                                    ({ job }) => job
+                                  ) as unknown as ActiveJobNoPlan[]
+                                }
+                                jobOrder={jobOrder}
+                                height={420}
+                              />
+                            )
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Delivery Summary */}
+              <div className="row mb-4">
+                <div className="col">
+                  <div
+                    className="card"
+                    style={{ borderColor: 'var(--primary)' }}
+                  >
+                    <div
+                      className="card-header"
+                      style={{
+                        backgroundColor: 'var(--primary)',
+                        color: 'var(--text)',
+                      }}
+                    >
+                      <h5 className="card-title mb-0">
+                        <i className="fas fa-truck me-2"></i>
+                        Přehled dodávek - Rozvozník {courierNum}
+                      </h5>
+                    </div>
+                    <div className="card-body">
+                      <div className="row text-center g-2">
+                        <div className="col-6 col-md-3">
+                          <div className="border rounded p-2 p-md-3">
+                            <div className="h3 h2-md mb-1 text-danger">
                               {(() => {
-                                const jobOrder: { [jobId: string]: number } = {}
-                                courierJobs.forEach(({ job, order }) => {
-                                  jobOrder[job.id] = order
-                                })
-                                
-                                return (
-                                  <JobsMapView 
-                                    jobs={courierJobs.map(({ job }) => job) as unknown as ActiveJobNoPlan[]}
-                                    jobOrder={jobOrder}
-                                    height={420}
-                                  />
+                                let allergenFreeMeals = 0
+
+                                courierJobs.forEach(
+                                  ({
+                                    workersWithAllergies,
+                                    needsFoodDelivery,
+                                  }) => {
+                                    const allergicWorkersCount =
+                                      workersWithAllergies.length
+
+                                    if (needsFoodDelivery) {
+                                      allergenFreeMeals += allergicWorkersCount
+                                    } else {
+                                      allergenFreeMeals += allergicWorkersCount
+                                    }
+                                  }
                                 )
+
+                                return allergenFreeMeals
                               })()}
                             </div>
+                            <div className="small text-muted">
+                              Bezalergenní jídla
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  )}
+                        <div className="col-6 col-md-3">
+                          <div className="border rounded p-2 p-md-3">
+                            <div className="h3 h2-md mb-1 text-success">
+                              {(() => {
+                                let standardMeals = 0
 
-                  {/* Delivery Summary */}
-                  <div className="row mb-4">
-                    <div className="col">
-                      <div className="card" style={{ borderColor: 'var(--primary)' }}>
-                        <div className="card-header" style={{ backgroundColor: 'var(--primary)', color: 'var(--text)' }}>
-                          <h5 className="card-title mb-0">
-                            <i className="fas fa-truck me-2"></i>
-                            Přehled dodávek - Rozvozník {courierNum}
-                          </h5>
+                                courierJobs.forEach(
+                                  ({
+                                    job,
+                                    workersWithAllergies,
+                                    needsFoodDelivery,
+                                  }) => {
+                                    const allergicWorkersCount =
+                                      workersWithAllergies.length
+                                    const totalWorkersCount = job.workers.length
+                                    const nonAllergicWorkersCount =
+                                      totalWorkersCount - allergicWorkersCount
+
+                                    if (needsFoodDelivery) {
+                                      standardMeals += nonAllergicWorkersCount
+                                    }
+                                  }
+                                )
+
+                                return standardMeals
+                              })()}
+                            </div>
+                            <div className="small text-muted">Běžná jídla</div>
+                          </div>
                         </div>
-                        <div className="card-body">
-                          <div className="row text-center g-2">
-                            <div className="col-6 col-md-3">
-                              <div className="border rounded p-2 p-md-3">
-                                <div className="h3 h2-md mb-1 text-danger">
-                                  {(() => {
-                                    let allergenFreeMeals = 0
-                                    
-                                    courierJobs.forEach(({ workersWithAllergies, needsFoodDelivery }) => {
-                                      const allergicWorkersCount = workersWithAllergies.length
-                                      
-                                      if (needsFoodDelivery) {
-                                        allergenFreeMeals += allergicWorkersCount
-                                      } else {
-                                        allergenFreeMeals += allergicWorkersCount
-                                      }
-                                    })
-                                    
-                                    return allergenFreeMeals
-                                  })()}
-                                </div>
-                                <div className="small text-muted">Bezalergenní jídla</div>
-                              </div>
+                        <div className="col-6 col-md-3">
+                          <div className="border rounded p-2 p-md-3">
+                            <div className="h3 h2-md mb-1 text-success">
+                              {courierJobs.filter(job => job.completed).length}
                             </div>
-                            <div className="col-6 col-md-3">
-                              <div className="border rounded p-2 p-md-3">
-                                <div className="h3 h2-md mb-1 text-success">
-                                  {(() => {
-                                    let standardMeals = 0
-                                    
-                                    courierJobs.forEach(({ job, workersWithAllergies, needsFoodDelivery }) => {
-                                      const allergicWorkersCount = workersWithAllergies.length
-                                      const totalWorkersCount = job.workers.length
-                                      const nonAllergicWorkersCount = totalWorkersCount - allergicWorkersCount
-                                      
-                                      if (needsFoodDelivery) {
-                                        standardMeals += nonAllergicWorkersCount
-                                      }
-                                    })
-                                    
-                                    return standardMeals
-                                  })()}
-                                </div>
-                                <div className="small text-muted">Běžná jídla</div>
-                              </div>
+                            <div className="small text-muted">Dokončeno</div>
+                          </div>
+                        </div>
+                        <div className="col-6 col-md-3">
+                          <div className="border rounded p-2 p-md-3">
+                            <div className="h3 h2-md mb-1 text-warning">
+                              {courierJobs.filter(job => !job.completed).length}
                             </div>
-                            <div className="col-6 col-md-3">
-                              <div className="border rounded p-2 p-md-3">
-                                <div className="h3 h2-md mb-1 text-success">{courierJobs.filter(job => job.completed).length}</div>
-                                <div className="small text-muted">Dokončeno</div>
-                              </div>
-                            </div>
-                            <div className="col-6 col-md-3">
-                              <div className="border rounded p-2 p-md-3">
-                                <div className="h3 h2-md mb-1 text-warning">{courierJobs.filter(job => !job.completed).length}</div>
-                                <div className="small text-muted">Zbývá</div>
-                              </div>
-                            </div>
+                            <div className="small text-muted">Zbývá</div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Job List */}
-                  <div className="row mb-4">
-                    <div className="col">
-                      <div className="card">
-                        <div className="card-header">
-                          <h5 className="card-title mb-0">
-                            <i className="fas fa-list me-2"></i>
-                            Seznam dodávek v pořadí
-                          </h5>
-                        </div>
-                        <div className="card-body p-0">
-                          <div className="list-group list-group-flush">
-                            {courierJobs.map(({ job, order, completed, jobOrderId, workersWithAllergies, needsFoodDelivery }) => {
-                              const googleMapsLink = getGoogleMapsLink(job)
-                              
-                              return (
-                                <div key={job.id} className={`list-group-item ${completed ? 'bg-light' : ''}`}>
-                                  <div className="d-flex flex-column d-md-flex flex-md-row justify-content-between align-items-start">
-                                    <div className="flex-grow-1 w-100">
-                                      <div className="d-flex align-items-center mb-2">
-                                        <span className={`badge me-3 job-order-badge ${completed ? 'bg-success' : 'bg-secondary'}`} style={{ fontSize: '1.1em', padding: '0.5rem 0.75rem' }}>
-                                          {order}
-                                        </span>
-                                        <div className="flex-grow-1">
-                                          <h6 className={`mb-1 ${completed ? 'text-decoration-line-through text-muted' : ''}`}>
-                                            <strong>{job.proposedJob.name}</strong>
-                                            {completed && (
-                                              <span className="badge bg-success ms-2">
-                                                <i className="fas fa-check me-1"></i>
-                                                Hotovo
-                                              </span>
-                                            )}
-                                          </h6>
-                                          <div className="d-flex flex-column d-md-flex flex-md-row gap-1 gap-md-3 small text-muted">
-                                            <span>
-                                              <i className="fas fa-map-marker-alt me-1"></i>
-                                              {job.proposedJob.area?.name || 'Nezadaná oblast'}
+              {/* Job List */}
+              <div className="row mb-4">
+                <div className="col">
+                  <div className="card">
+                    <div className="card-header">
+                      <h5 className="card-title mb-0">
+                        <i className="fas fa-list me-2"></i>
+                        Seznam dodávek v pořadí
+                      </h5>
+                    </div>
+                    <div className="card-body p-0">
+                      <div className="list-group list-group-flush">
+                        {courierJobs.map(
+                          ({
+                            job,
+                            order,
+                            completed,
+                            jobOrderId,
+                            workersWithAllergies,
+                            needsFoodDelivery,
+                          }) => {
+                            const googleMapsLink = getGoogleMapsLink(job)
+
+                            return (
+                              <div
+                                key={job.id}
+                                className={`list-group-item ${completed ? 'bg-light' : ''}`}
+                              >
+                                <div className="d-flex flex-column d-md-flex flex-md-row justify-content-between align-items-start">
+                                  <div className="flex-grow-1 w-100">
+                                    <div className="d-flex align-items-center mb-2">
+                                      <span
+                                        className={`badge me-3 job-order-badge ${completed ? 'bg-success' : 'bg-secondary'}`}
+                                        style={{
+                                          fontSize: '1.1em',
+                                          padding: '0.5rem 0.75rem',
+                                        }}
+                                      >
+                                        {order}
+                                      </span>
+                                      <div className="flex-grow-1">
+                                        <h6
+                                          className={`mb-1 ${completed ? 'text-decoration-line-through text-muted' : ''}`}
+                                        >
+                                          <strong>
+                                            {job.proposedJob.name}
+                                          </strong>
+                                          {completed && (
+                                            <span className="badge bg-success ms-2">
+                                              <i className="fas fa-check me-1"></i>
+                                              Hotovo
                                             </span>
+                                          )}
+                                        </h6>
+                                        <div className="d-flex flex-column d-md-flex flex-md-row gap-1 gap-md-3 small text-muted">
+                                          <span>
+                                            <i className="fas fa-map-marker-alt me-1"></i>
+                                            {job.proposedJob.area?.name ||
+                                              'Nezadaná oblast'}
+                                          </span>
+                                          <span>
+                                            <i className="fas fa-home me-1"></i>
+                                            {job.proposedJob.address ||
+                                              'Nezadaná adresa'}
+                                          </span>
+                                          {job.responsibleWorker && (
                                             <span>
-                                              <i className="fas fa-home me-1"></i>
-                                              {job.proposedJob.address || 'Nezadaná adresa'}
+                                              <i className="fas fa-user-tie me-1"></i>
+                                              {job.responsibleWorker.firstName}{' '}
+                                              {job.responsibleWorker.lastName}
+                                              <a
+                                                href={`tel:${job.responsibleWorker.phone}`}
+                                                className="text-decoration-none ms-2"
+                                              >
+                                                <i className="fas fa-phone me-1"></i>
+                                                {job.responsibleWorker.phone}
+                                              </a>
                                             </span>
-                                            {job.responsibleWorker && (
-                                              <span>
-                                                <i className="fas fa-user-tie me-1"></i>
-                                                {job.responsibleWorker.firstName} {job.responsibleWorker.lastName}
-                                                <a href={`tel:${job.responsibleWorker.phone}`} className="text-decoration-none ms-2">
-                                                  <i className="fas fa-phone me-1"></i>
-                                                  {job.responsibleWorker.phone}
-                                                </a>
-                                              </span>
-                                            )}
-                                          </div>
+                                          )}
                                         </div>
                                       </div>
+                                    </div>
 
-                                      {/* Worker allergies */}
-                                      {workersWithAllergies.length > 0 && (
-                                        <div className="mb-2">
-                                          <div className="small text-muted mb-1">Pracanti s alergiemi:</div>
-                                          <div className="d-flex flex-column d-sm-flex flex-sm-row flex-wrap gap-1">
-                                            {workersWithAllergies.map((worker) => (
-                                              <div key={worker.id} className="worker-allergies-box">
-                                                <div className="small fw-bold text-dark">
-                                                  {worker.firstName} {worker.lastName}
-                                                  <a href={`tel:${worker.phone}`} className="text-decoration-none ms-2">
-                                                    <i className="fas fa-phone me-1"></i>
-                                                    {worker.phone}
-                                                  </a>
-                                                </div>
-                                                <div className="d-flex flex-wrap gap-1 mt-1">
-                                                  {worker.allergies.map((allergy, allergyIndex) => (
-                                                    <span key={allergyIndex} className="badge bg-danger allergen-badge">
+                                    {/* Worker allergies */}
+                                    {workersWithAllergies.length > 0 && (
+                                      <div className="mb-2">
+                                        <div className="small text-muted mb-1">
+                                          Pracanti s alergiemi:
+                                        </div>
+                                        <div className="d-flex flex-column d-sm-flex flex-sm-row flex-wrap gap-1">
+                                          {workersWithAllergies.map(worker => (
+                                            <div
+                                              key={worker.id}
+                                              className="worker-allergies-box"
+                                            >
+                                              <div className="small fw-bold text-dark">
+                                                {worker.firstName}{' '}
+                                                {worker.lastName}
+                                                <a
+                                                  href={`tel:${worker.phone}`}
+                                                  className="text-decoration-none ms-2"
+                                                >
+                                                  <i className="fas fa-phone me-1"></i>
+                                                  {worker.phone}
+                                                </a>
+                                              </div>
+                                              <div className="d-flex flex-wrap gap-1 mt-1">
+                                                {worker.allergies.map(
+                                                  (allergy, allergyIndex) => (
+                                                    <span
+                                                      key={allergyIndex}
+                                                      className="badge bg-danger allergen-badge"
+                                                    >
                                                       {allergy}
                                                     </span>
-                                                  ))}
-                                                </div>
+                                                  )
+                                                )}
                                               </div>
-                                            ))}
-                                          </div>
+                                            </div>
+                                          ))}
                                         </div>
-                                      )}
-
-                                      {/* Meal count */}
-                                      <div className="small text-muted mb-2">
-                                        <i className="fas fa-utensils me-1"></i>
-                                        {(() => {
-                                          const allergicWorkers = job.workers.filter(w => w.foodAllergies.length > 0).length
-                                          const totalWorkers = job.workers.length
-                                          const nonAllergicWorkers = totalWorkers - allergicWorkers
-                                          
-                                          if (!job.proposedJob.hasFood) {
-                                            return `${allergicWorkers} bezalergenních, ${nonAllergicWorkers} běžných jídel`
-                                          } else {
-                                            return `${allergicWorkers} bezalergenních jídel (jídlo na místě pro ostatní)`
-                                          }
-                                        })()}
                                       </div>
+                                    )}
 
-                                      {/* Badges */}
-                                      {needsFoodDelivery && (
-                                        <div>
-                                          <span className="badge bg-warning text-dark">
-                                            <i className="fas fa-utensils me-1"></i>
-                                            Nemá jídlo na místě
-                                          </span>
-                                        </div>
-                                      )}
+                                    {/* Meal count */}
+                                    <div className="small text-muted mb-2">
+                                      <i className="fas fa-utensils me-1"></i>
+                                      {(() => {
+                                        const allergicWorkers =
+                                          job.workers.filter(
+                                            w => w.foodAllergies.length > 0
+                                          ).length
+                                        const totalWorkers = job.workers.length
+                                        const nonAllergicWorkers =
+                                          totalWorkers - allergicWorkers
+
+                                        if (!job.proposedJob.hasFood) {
+                                          return `${allergicWorkers} bezalergenních, ${nonAllergicWorkers} běžných jídel`
+                                        } else {
+                                          return `${allergicWorkers} bezalergenních jídel (jídlo na místě pro ostatní)`
+                                        }
+                                      })()}
                                     </div>
 
-                                    {/* Action buttons */}
-                                    <div className="d-flex flex-row d-md-flex flex-md-column gap-2 mt-3 mt-md-0 ms-md-3 w-100 w-md-auto">
-                                      <button
-                                        className={`btn flex-fill flex-md-fill-none ${completed ? 'btn-warning' : 'btn-success'}`}
-                                        onClick={() => toggleJobCompletion(jobOrderId, completed)}
-                                        title={completed ? 'Označit jako nedokončeno' : 'Označit jako hotovo'}
+                                    {/* Badges */}
+                                    {needsFoodDelivery && (
+                                      <div>
+                                        <span className="badge bg-warning text-dark">
+                                          <i className="fas fa-utensils me-1"></i>
+                                          Nemá jídlo na místě
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Action buttons */}
+                                  <div className="d-flex flex-row d-md-flex flex-md-column gap-2 mt-3 mt-md-0 ms-md-3 w-100 w-md-auto">
+                                    <button
+                                      className={`btn flex-fill flex-md-fill-none ${completed ? 'btn-warning' : 'btn-success'}`}
+                                      onClick={() =>
+                                        toggleJobCompletion(
+                                          jobOrderId,
+                                          completed
+                                        )
+                                      }
+                                      title={
+                                        completed
+                                          ? 'Označit jako nedokončeno'
+                                          : 'Označit jako hotovo'
+                                      }
+                                    >
+                                      <i
+                                        className={`fas ${completed ? 'fa-undo' : 'fa-check'} me-2`}
+                                      ></i>
+                                      {completed ? 'Zrušit' : 'Hotovo'}
+                                    </button>
+
+                                    {googleMapsLink && (
+                                      <a
+                                        href={googleMapsLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn flex-fill flex-md-fill-none"
+                                        title="Otevřít v Google Maps"
+                                        style={{
+                                          backgroundColor: 'var(--primary)',
+                                          color: 'var(--text)',
+                                          borderColor: 'var(--primary)',
+                                        }}
                                       >
-                                        <i className={`fas ${completed ? 'fa-undo' : 'fa-check'} me-2`}></i>
-                                        {completed ? 'Zrušit' : 'Hotovo'}
-                                      </button>
-                                      
-                                      {googleMapsLink && (
-                                        <a
-                                          href={googleMapsLink}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="btn flex-fill flex-md-fill-none"
-                                          title="Otevřít v Google Maps"
-                                          style={{ 
-                                            backgroundColor: 'var(--primary)', 
-                                            color: 'var(--text)',
-                                            borderColor: 'var(--primary)'
-                                          }}
-                                        >
-                                          <i className="fas fa-map-marked-alt me-2"></i>
-                                          Navigace
-                                        </a>
-                                      )}
-                                    </div>
+                                        <i className="fas fa-map-marked-alt me-2"></i>
+                                        Navigace
+                                      </a>
+                                    )}
                                   </div>
                                 </div>
-                              )
-                            })}
-                          </div>
-                        </div>
+                              </div>
+                            )
+                          }
+                        )}
                       </div>
                     </div>
                   </div>
-                </>
-              )}
-            </div>
-          </section>
-        </>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+    </>
   )
 }

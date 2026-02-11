@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react'
 import { ExpandableRow } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
 import MoveWorkerModal from './MoveWorkerModal'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 
 const NO_JOB = 'NO_JOB'
 
@@ -122,7 +121,12 @@ export function PlanJoblessRow({
             <tbody>
               {joblessWorkers.map(worker => (
                 <SimpleRow
-                  data={formatWorkerData(worker, planDay, setWorkerToMove, adorationByWorker)}
+                  data={formatWorkerData(
+                    worker,
+                    planDay,
+                    setWorkerToMove,
+                    adorationByWorker
+                  )}
                   key={worker.id}
                   draggable={true}
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
@@ -160,9 +164,7 @@ function formatWorkerData(
     worker.age ? `, ${worker.age}` : ''
   }`
 
-  const allergies = [
-    ...worker.workAllergies.map(key => workAllergyMapping[key]),
-  ]
+  const allergies = [...worker.workAllergies.map(wa => wa.name)]
 
   return [
     { content: name },

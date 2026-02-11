@@ -2,7 +2,6 @@
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
 import { WorkAllergy } from 'lib/prisma/client'
 import { MyPlan } from 'lib/types/my-plan'
 import EditBox from '../forms/EditBox'
@@ -80,8 +79,8 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                   ) : (
                     <div className="d-flex flex-wrap justify-content-start allign-items-center text-muted gap-1">
                       {selectedPlan.job.allergens.map(allergen => (
-                        <span key={allergen} className="pill-static">
-                          {workAllergyMapping[allergen as WorkAllergy]}
+                        <span key={allergen.id} className="pill-static">
+                          {allergen.name}
                         </span>
                       ))}
                     </div>
