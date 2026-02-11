@@ -94,6 +94,7 @@ export default function EditProposedJobForm({
       priority: job.priority,
     },
   })
+
   const { data: workAllergies = [] } = useAPIWorkAllergies()
   const workAllergyOptions = workAllergies.map(a => ({
     value: a.id,
