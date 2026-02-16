@@ -2,6 +2,7 @@
 
 import { signIn } from 'next-auth/react'
 import { Label } from '../forms/Label'
+import ButtonWithSvg from './ButtonWithSvg'
 
 interface OAuthConnectionsProps {
   id?: string
@@ -21,31 +22,31 @@ export default function OAuthConnections({
   }
 
   return (
-    <div className="d-flex flex-column m-0">
+    <div className="d-inline-flex flex-column m-0">
       <Label id={id} label={label} margin={margin} />
 
-      <div className="d-flex flex-column gap-2 w-25">
-        <button
-          type="button"
-          className="btn btn-light p-2"
-          disabled={oauthLinks?.google}
+      <div className="d-inline-flex flex-column gap-2">
+        <ButtonWithSvg
+          disabled={oauthLinks?.google ?? false}
           onClick={() => handleClick('google')}
+          iconSrc="/icons/google.svg"
+          type="button"
         >
           {oauthLinks?.google
             ? 'Google účet je propojen'
             : 'Propojit Google účet'}
-        </button>
+        </ButtonWithSvg>
 
-        <button
-          type="button"
-          className="btn btn-light p-2"
-          disabled={oauthLinks?.seznam}
+        <ButtonWithSvg
+          disabled={oauthLinks?.seznam ?? false}
           onClick={() => handleClick('seznam')}
+          iconSrc="/icons/seznam.svg"
+          type="button"
         >
           {oauthLinks?.seznam
             ? 'Seznam účet je propojen'
             : 'Propojit Seznam účet'}
-        </button>
+        </ButtonWithSvg>
       </div>
     </div>
   )

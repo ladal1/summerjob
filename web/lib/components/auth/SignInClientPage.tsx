@@ -6,6 +6,7 @@ import logoImage from 'public/logo-smj-yellow.png'
 import { useForm } from 'react-hook-form'
 import { TextInput } from '../forms/input/TextInput'
 import { zodResolver } from '@hookform/resolvers/zod'
+import ButtonWithSvg from './ButtonWithSvg'
 
 interface SignInClientPageProps {
   errorMessage?: string
@@ -80,20 +81,22 @@ export default function SignInClientPage({
           </div>
 
           <div className="mt-4 d-flex flex-column gap-2">
-            <button
+            <ButtonWithSvg
               type="button"
-              className="w-100 btn btn-light p-2"
+              disabled={false}
+              iconSrc="/icons/google.svg"
               onClick={onGoogleSignIn}
             >
-              Pokračovat přes Google
-            </button>
-            <button
+              Přihlásit se přes Google
+            </ButtonWithSvg>
+            <ButtonWithSvg
               type="button"
-              className="w-100 btn btn-light p-2"
+              disabled={false}
+              iconSrc="/icons/seznam.svg"
               onClick={onSeznamSignIn}
             >
-              Pokračovat přes Seznam
-            </button>
+              Přihlásit se přes Seznam
+            </ButtonWithSvg>
           </div>
         </div>
       </div>
