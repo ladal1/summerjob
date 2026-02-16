@@ -8,7 +8,7 @@ type Props = {
 }
 
 export default async function SignInPage(props: Props) {
-  const searchParams = await props.searchParams;
+  const searchParams = await props.searchParams
   const session = await getSMJSession()
   if (searchParams?.callbackUrl && session) {
     if (typeof searchParams.callbackUrl === 'string') {
@@ -32,6 +32,10 @@ const ErrorReason = new Map<string, string>([
   [
     'EmailSignin',
     'Nepodařilo se odeslat přihlašovací e-mail. Zkuste to později. Pokud problém přetrvává, kontaktujte správce.',
+  ],
+  [
+    'OAuthAccountNotLinked',
+    'Váš účet není s touto službou propojen. Přihlašte se prosím pomocí e-mailu a v profilu si následně účet propojte.',
   ],
   ['Default', 'Nastala chyba. Zkuste to znovu.'],
 ])

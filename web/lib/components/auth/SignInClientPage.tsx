@@ -30,6 +30,10 @@ export default function SignInClientPage({
     signIn('google')
   }
 
+  const onSeznamSignIn = () => {
+    signIn('seznam')
+  }
+
   return (
     <div className="container maxwidth-500">
       <div className="row mb-4">
@@ -68,13 +72,29 @@ export default function SignInClientPage({
               value="Přihlásit se"
             />
           </form>
-          <button
-            type="button"
-            className="w-100 btn btn-light p-2 mt-4"
-            onClick={onGoogleSignIn}
-          >
-            Pokračovat přes Google
-          </button>
+
+          <div className="mt-4 d-flex align-items-center text-muted">
+            <div className="flex-grow-1 border-top" />
+            <span className="px-3">Nebo</span>
+            <div className="flex-grow-1 border-top" />
+          </div>
+
+          <div className="mt-4 d-flex flex-column gap-2">
+            <button
+              type="button"
+              className="w-100 btn btn-light p-2"
+              onClick={onGoogleSignIn}
+            >
+              Pokračovat přes Google
+            </button>
+            <button
+              type="button"
+              className="w-100 btn btn-light p-2"
+              onClick={onSeznamSignIn}
+            >
+              Pokračovat přes Seznam
+            </button>
+          </div>
         </div>
       </div>
     </div>

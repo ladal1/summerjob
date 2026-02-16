@@ -34,6 +34,7 @@ import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
+import OAuthConnections from '../auth/OAuthConnections'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -44,6 +45,7 @@ interface EditWorkerProps {
   isProfilePage: boolean
   carAccess: boolean
   label: string
+  oauthLinks?: { google: boolean; seznam: boolean }
 }
 
 export default function EditWorker({
@@ -52,6 +54,7 @@ export default function EditWorker({
   isProfilePage,
   carAccess,
   label,
+  oauthLinks,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker)
 
@@ -350,6 +353,10 @@ export default function EditWorker({
                 <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
               </p>
             )
+          )}
+
+          {isProfilePage && (
+            <OAuthConnections label="Propojené účty" oauthLinks={oauthLinks} />
           )}
 
           {!isProfilePage && (
