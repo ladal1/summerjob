@@ -26,6 +26,10 @@ export default function SignInClientPage({
     signIn('email', dataForm)
   }
 
+  const onGoogleSignIn = () => {
+    signIn('google')
+  }
+
   return (
     <div className="container maxwidth-500">
       <div className="row mb-4">
@@ -64,6 +68,13 @@ export default function SignInClientPage({
               value="Přihlásit se"
             />
           </form>
+          <button
+            type="button"
+            className="w-100 btn btn-light p-2 mt-4"
+            onClick={onGoogleSignIn}
+          >
+            Pokračovat přes Google
+          </button>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import EmailProvider from 'next-auth/providers/email'
+import Google from 'next-auth/providers/google'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import prisma from 'lib/prisma/connection'
 import { createTransport } from 'nodemailer'
@@ -41,6 +42,12 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
+    }),
   ],
   callbacks: {
     // Check if user is allowed to sign in
@@ -48,6 +55,10 @@ export const authOptions: NextAuthOptions = {
       if (!params.user.email) return false
       const user = await getUserByEmail(params.user.email)
       if (!user) return false
+      if (params.account?.provider === 'google') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!(params.profile as any)?.email_verified) return false
+      }
       const isAdmin = user.permissions.includes(Permission.ADMIN)
       // Admins can sign in even if they are blocked to prevent accidental self-lockout
       if (isAdmin) return true
