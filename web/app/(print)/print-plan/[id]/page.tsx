@@ -11,7 +11,6 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import '/styles/print.css'
 import { ToolCompleteData } from 'lib/types/tool'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 
 type PathProps = {
   params: Promise<{
@@ -22,16 +21,12 @@ type PathProps = {
 function formatTools(tools: ToolCompleteData[]) {
   if (tools.length == 0) return 'Žádné'
   return tools
-    .map(
-      tool =>
-        toolNameMapping[tool.tool] +
-        (tool.amount > 1 ? ' - ' + tool.amount : '')
-    )
+    .map(tool => tool.tool.name + (tool.amount > 1 ? ' - ' + tool.amount : ''))
     .join(', ')
 }
 
 export default async function PrintPlanPage(props: PathProps) {
-  const params = await props.params;
+  const params = await props.params
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
   const sortedJobs = sortJobsByAreaAndId(plan.jobs)
@@ -77,7 +72,10 @@ function JobInfo({
               {job.proposedJob.publicDescription}
             </ReactMarkdown>
           </div>
-          <div className="mb-2" style={{ fontSize: '1.1em', fontWeight: 'bold', color: '#d63384' }}>
+          <div
+            className="mb-2"
+            style={{ fontSize: '1.1em', fontWeight: 'bold', color: '#d63384' }}
+          >
             <i className="fas fa-user-nurse me-1"></i>
             Zdravotník: 732 403 990
           </div>

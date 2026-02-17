@@ -1,7 +1,4 @@
 import { hasWorkerAdorationOnDay } from 'lib/helpers/adoration'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
-import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import {
   useAPIActiveJobDelete,
   useAPIActiveJobs,
@@ -363,20 +360,14 @@ function formatAmenities(job: ActiveJobNoPlan) {
 
 function formatAllergens(job: ActiveJobNoPlan) {
   if (job.proposedJob.allergens.length == 0) return 'Žádné'
-  return job.proposedJob.allergens
-    .map(allergen => workAllergyMapping[allergen])
-    .join(', ')
+  return job.proposedJob.allergens.map(allergen => allergen.name).join(', ')
 }
 
 function formatTools(tools: ToolCompleteData[]) {
   if (tools.length == 0) return 'Žádné'
   return [...tools]
-    .sort((a, b) => toolNameMapping[a.tool].localeCompare(toolNameMapping[b.tool]))
-    .map(
-      tool =>
-        toolNameMapping[tool.tool] +
-        (tool.amount > 1 ? ' - ' + tool.amount : '')
-    )
+    .sort((a, b) => a.tool.name.localeCompare(b.tool.name))
+    .map(tool => tool.tool.name + (tool.amount > 1 ? ' - ' + tool.amount : ''))
     .join(', ')
 }
 
@@ -497,12 +488,10 @@ function formatWorkerData(
   if (worker.isStrong) abilities.push('Silák')
   if (worker.skills) {
     worker.skills.map(skill => {
-      abilities.push(skillHasMapping[skill])
+      abilities.push(skill.name)
     })
   }
-  const allergies = [
-    ...worker.workAllergies.map(key => workAllergyMapping[key]),
-  ]
+  const allergies = [...worker.workAllergies.map(wa => wa.name)]
   const workerSameWork = sameWork(worker.id, job, day, plannedJobs)
   const workerSameCoworker = sameCoworker(worker.id, job, day, plannedJobs)
 
@@ -545,7 +534,8 @@ function formatWorkerData(
           className="d-flex align-items-center gap-3"
         >
           <span style={{ width: '16px', textAlign: 'center' }}>
-            {!isResponsible && promoteWorkerIcon(() => promoteWorker(worker.id))}
+            {!isResponsible &&
+              promoteWorkerIcon(() => promoteWorker(worker.id))}
           </span>
           {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
           {removeWorkerIcon(() => removeWorker(worker.id))}

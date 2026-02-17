@@ -1,9 +1,6 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
-import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobUpdate } from 'lib/fetcher/proposed-job'
 import { formatNumber, pick, removeRedundantSpace } from 'lib/helpers/helpers'
 import {
@@ -16,8 +13,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm, FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
-import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
-import { JobType, ToolName, WorkAllergy } from 'lib/types/enums'
 import { deserializeAreas } from '../../types/area'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { PillSelectItem } from '../filter-select/PillSelect'
@@ -25,7 +20,6 @@ import FormWarning from '../forms/FormWarning'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { MapInput } from '../forms/input/MapInput'
 import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
@@ -34,6 +28,10 @@ import { ScaleInput } from '../forms/input/ScaleInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { Form } from '../forms/Form'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPIJobTypes } from 'lib/fetcher/job-type'
+import { useAPIToolNames } from 'lib/fetcher/tool-name'
 
 interface EditProposedJobProps {
   serializedJob: Serialized
@@ -65,7 +63,7 @@ export default function EditProposedJobForm({
       name: job.name,
       publicDescription: job.publicDescription,
       privateDescription: job.privateDescription,
-      allergens: job.allergens as WorkAllergy[],
+      allergens: job.allergens.map(wa => wa.id),
       address: job.address,
       coordinates: job.coordinates,
       contact: job.contact,
@@ -76,23 +74,33 @@ export default function EditProposedJobForm({
       hasFood: job.hasFood,
       hasShower: job.hasShower,
       availability: job.availability.map(day => day.toJSON()),
-      jobType: job.jobType as JobType,
+      jobType: job.jobType.id,
       toolsOnSite: {
         tools: job.toolsOnSite.map(tool => ({
-          ...tool,
-          tool: tool.tool as ToolName,
+          id: tool.id,
+          toolNameId: tool.toolNameId,
+          amount: tool.amount,
         })),
       },
       toolsToTakeWith: {
         tools: job.toolsToTakeWith.map(tool => ({
-          ...tool,
-          tool: tool.tool as ToolName,
+          id: tool.id,
+          toolNameId: tool.toolNameId,
+          amount: tool.amount,
         })),
       },
       areaId: job.areaId,
       priority: job.priority,
     },
   })
+
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyOptions = workAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+  const { data: jobTypes = [] } = useAPIJobTypes()
+  const { data: toolNames = [] } = useAPIToolNames()
 
   const router = useRouter()
 
@@ -116,27 +124,20 @@ export default function EditProposedJobForm({
   //#region JobType
 
   const selectJobType = (id: string) => {
-    setValue('jobType', (id as JobType) || JobType.OTHER, {
+    setValue('jobType', id, {
       shouldDirty: true,
       shouldValidate: true,
     })
   }
 
-  const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
-    ([jobTypeKey, jobTypeToSelectName]) => ({
-      id: jobTypeKey,
-      name: jobTypeToSelectName,
-      searchable: jobTypeToSelectName,
-    })
-  )
+  const jobTypeSelectItems = jobTypes.map(jt => ({
+    id: jt.id,
+    name: jt.name,
+    searchable: jt.name,
+  }))
 
   const defaultJobType = (): FilterSelectItem | undefined => {
-    const typed = jobTypeSelectItems.find(item => item.id === job.jobType)
-    if (typed !== undefined) {
-      return typed
-    } else {
-      return jobTypeSelectItems.find(item => item.id === JobType.OTHER)
-    }
+    return jobTypeSelectItems.find(item => item.id === job.jobType.id)
   }
 
   //#endregion
@@ -146,7 +147,7 @@ export default function EditProposedJobForm({
   const selectToolsOnSite = (items: PillSelectItem[]) => {
     const tools = items.map(item => ({
       id: item.databaseId,
-      tool: item.id as ToolName,
+      toolNameId: item.id,
       amount: item.amount ?? 1,
     }))
     setValue(
@@ -159,7 +160,7 @@ export default function EditProposedJobForm({
   const selectToolsToTakeWith = (items: PillSelectItem[]) => {
     const tools = items.map(item => ({
       id: item.databaseId,
-      tool: item.id as ToolName,
+      toolNameId: item.id,
       amount: item.amount ?? 1,
     }))
     setValue(
@@ -172,7 +173,7 @@ export default function EditProposedJobForm({
   const selectToolsOnSiteUpdated = (items: PillSelectItem[]) => {
     const tools = items.map(item => ({
       id: item.databaseId,
-      tool: item.id as ToolName,
+      toolNameId: item.id,
       amount: item.amount ?? 1,
     }))
     setValue(
@@ -185,7 +186,7 @@ export default function EditProposedJobForm({
   const selectToolsToTakeWithUpdated = (items: PillSelectItem[]) => {
     const tools = items.map(item => ({
       id: item.databaseId,
-      tool: item.id as ToolName,
+      toolNameId: item.id,
       amount: item.amount ?? 1,
     }))
     setValue(
@@ -195,21 +196,26 @@ export default function EditProposedJobForm({
     )
   }
 
-  const toolSelectItems = Object.entries(toolNameMapping).map(
-    ([key, name]) => ({
-      id: key,
-      name: name,
-      searchable: name,
-    })
-  )
+  const toolSelectItems = toolNames.map(tn => ({
+    id: tn.id,
+    name: tn.name,
+    searchable: tn.name,
+  }))
 
   const manageToolSelectItems = (): PillSelectItem[][] => {
-    const allTools = toolSelectItems
-    const currentJobType = (getValues('jobType') as JobType) || JobType.OTHER
-    const sortedToolsByCurrentJobType = allTools
-      .filter(tool => mapToolNameToJobType(tool.id).includes(currentJobType))
+    const currentJobTypeId = getValues('jobType')
+    if (!currentJobTypeId) {
+      return [[], toolSelectItems]
+    }
+
+    const sortedToolsByCurrentJobType = toolSelectItems
+      .filter(tool => {
+        const toolName = toolNames.find(t => t.id === tool.id)
+        return toolName?.jobTypes?.some(jt => jt.id === currentJobTypeId)
+      })
       .sort((a, b) => a.name.localeCompare(b.name))
-    const sortedToolsOthers = allTools
+
+    const sortedToolsOthers = toolSelectItems
       .filter(tool => !sortedToolsByCurrentJobType.some(t => t.id === tool.id))
       .sort((a, b) => a.name.localeCompare(b.name))
     return [sortedToolsByCurrentJobType, sortedToolsOthers]
@@ -217,13 +223,13 @@ export default function EditProposedJobForm({
 
   const fetchToolSelectItems = (tools: ToolComplete[]): PillSelectItem[] => {
     const selectItems: PillSelectItem[] = tools.map(toolItem => {
-      const { id, tool, amount } = toolItem
+      const name = toolItem.tool?.name ?? ''
       return {
-        databaseId: id,
-        id: tool,
-        name: toolNameMapping[tool],
-        searchable: toolNameMapping[tool],
-        amount,
+        databaseId: toolItem.id,
+        id: toolItem.toolNameId,
+        name,
+        searchable: name,
+        amount: toolItem.amount,
       }
     })
     return selectItems
@@ -522,7 +528,7 @@ export default function EditProposedJobForm({
           <FilterSelectInput
             id="jobType"
             label="Typ práce"
-            placeholder={jobTypeMapping[job.jobType] ?? 'Vyberte typ práce'}
+            placeholder={job.jobType.name ?? 'Vyberte typ práce'}
             items={jobTypeSelectItems}
             onSelected={selectJobType}
             defaultSelected={defaultJobType()}
@@ -552,10 +558,10 @@ export default function EditProposedJobForm({
             registerUpdated={selectToolsToTakeWithUpdated}
             errors={errors}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="allergens"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyOptions}
             register={() => register('allergens')}
           />
           <OtherAttributesInput

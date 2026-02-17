@@ -18,93 +18,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Allergy {
-  DUST
-  ANIMALS
-  HAY
-  POLLEN
-  MITES
-}
-
-enum SkillHas {
-  LUMBERJACK
-  ARTIST
-  GARDENER
-  DANGER
-  ELECTRICIAN
-  HEIGHTS
-  MASON
-  OTHER
-}
-
-enum SkillBrings {
-  AXE
-  SHOVEL
-  SAW
-  POWERTOOLS
-  LADDER
-  OTHER
-}
-
-enum FoodAllergy {
-  LACTOSE
-  GLUTEN
-  NUTS
-  SEAFOOD
-  EGG
-  VEGETARIAN
-  VEGAN
-  OTHER
-}
-
-enum WorkAllergy {
-  DUST
-  ANIMALS
-  HAY
-  POLLEN
-  MITES
-  CHEMICALS
-  OTHER
-}
-
-enum JobType {
-  WOOD
-  PAINTING
-  HOUSEWORK
-  GARDEN
-  OTHER
-}
-
-enum ToolName {
-  AXE
-  BOW_SAW
-  LADDER
-  PAINT
-  PAINT_ROLLER
-  COVER_SHEET
-  MASKING_TAPE
-  PAINT_BRUSH
-  SCRAPER_GRID
-  PAINTER_SPATULA
-  JAPANESE_SPATULA
-  GYPSUM
-  BUCKET
-  RAG
-  BROOM   
-  SAW         
-  BRUSHCUTTER 
-  GLOVES      
-  RESPIRATOR  
-  HEADPHONES  
-  CHAINSAW    
-  CIRCULAR_SAW
-  HEDGE_TRIMMER
-  STRING_TRIMMER
-  RAKE
-  PITCHFORK
-  SHOVEL
-}
-
 enum PostTag {
   EATING
   SPORTS
@@ -120,9 +33,47 @@ enum ApplicationStatus {
   REJECTED
 }
 
+model SkillHas {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  workers Worker[]
+  tools ToolName[]
+}
+
+model JobType {
+  id    String   @id @default(uuid())
+  name  String   @unique
+  jobs  ProposedJob[]
+  tools ToolName[]
+}
+
+// this model combines SkillBrings and ToolName enums that were previously there
+model ToolName {
+  id       String   @id @default(uuid())
+  name     String   @unique
+  workers  Worker[]
+  tools    Tool[]
+  jobTypes JobType[]  // ToolName -> JobType mapping
+  skills   SkillHas[] // ToolName -> Skill mapping
+}
+
+model WorkAllergy {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  workers   Worker[]
+  jobs      ProposedJob[]
+}
+
+model FoodAllergy {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  workers   Worker[]
+}
+
 model Tool {
   id                      String       @id @default(uuid())
-  tool                    ToolName     
+  tool                    ToolName     @relation(fields: [toolNameId], references: [id])
+  toolNameId              String
   amount                  Int          @default(1)
   proposedJobOnSite       ProposedJob? @relation("ToolOnSite", fields: [proposedJobOnSiteId], references: [id])
   proposedJobOnSiteId     String?      
@@ -180,7 +131,7 @@ model Worker {
   foodAllergies      FoodAllergy[]
   workAllergies      WorkAllergy[]
   skills             SkillHas[]
-  tools              SkillBrings[]
+  tools              ToolName[]
   ownsCar            Boolean                     @default(false)
   canBeMedic         Boolean                     @default(false)      
   jobs               ActiveJob[]       
@@ -259,7 +210,8 @@ model ProposedJob {
   activeJobs         ActiveJob[]                 
   allergens          WorkAllergy[]              
   availability       DateTime[]                  @db.Date
-  jobType            JobType                     @default(OTHER)
+  jobType            JobType                     @relation(fields: [jobTypeId], references: [id])
+  jobTypeId          String
   toolsOnSite        Tool[]                      @relation("ToolOnSite")  
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
   photos             JobPhoto[]                  @relation("PhotoProposedJob")

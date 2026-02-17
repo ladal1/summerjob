@@ -1,9 +1,5 @@
 import dotenv from 'dotenv'
 import {
-  FoodAllergy,
-  WorkAllergy,
-  SkillHas,
-  SkillBrings,
   Car,
   Plan,
   PostTag,
@@ -43,6 +39,141 @@ function chooseWithProbability<T>(array: T[], probability: number): T[] {
   return array.filter(() => Math.random() < probability)
 }
 
+// Food allergies
+const FOOD_ALLERGY_NAMES = [
+  'Laktóza',
+  'Lepek',
+  'Ořechy',
+  'Mořské plody',
+  'Vejce',
+  'Vegetarián',
+  'Vegan',
+] as const
+
+async function createFoodAllergies() {
+  await prisma.foodAllergy.createMany({
+    data: FOOD_ALLERGY_NAMES.map(name => ({ name })),
+    skipDuplicates: true,
+  })
+}
+
+// Work allergies
+const WORK_ALLERGY_NAMES = [
+  'Pyl',
+  'Prach',
+  'Chemikálie',
+  'Zvířata',
+  'Seno',
+  'Roztoči',
+] as const
+
+async function createWorkAllergies() {
+  await prisma.workAllergy.createMany({
+    data: WORK_ALLERGY_NAMES.map(name => ({ name })),
+    skipDuplicates: true,
+  })
+}
+
+// Skills
+const SKILL_NAMES = [
+  'Dřevorubec',
+  'Zahradník',
+  'Umělec',
+  'Nebezpečné práce',
+  'Elektrikář',
+  'Práce ve výškách',
+  'Zedník',
+] as const
+
+async function createSkills() {
+  await prisma.skillHas.createMany({
+    data: SKILL_NAMES.map(name => ({ name })),
+    skipDuplicates: true,
+  })
+}
+
+// Job types
+const JOB_TYPE_NAMES = [
+  'Dřevo',
+  'Malování',
+  'Pomoc doma',
+  'Práce na zahradě',
+  'Ostatní',
+] as const
+
+async function createJobTypes() {
+  await prisma.jobType.createMany({
+    data: JOB_TYPE_NAMES.map(name => ({ name })),
+    skipDuplicates: true,
+  })
+}
+
+// ToolsNames
+const TOOLS = [
+  {
+    name: 'Sekera',
+    jobTypes: ['Dřevo'],
+    skills: ['Dřevorubec'],
+  },
+  {
+    name: 'Žebřík',
+    jobTypes: ['Práce na zahradě', 'Pomoc doma', 'Malování'],
+    skills: ['Práce ve výškách'],
+  },
+  {
+    name: 'Barva',
+    jobTypes: ['Malování'],
+    skills: ['Umělec'],
+  },
+  {
+    name: 'Sluchátka',
+    jobTypes: ['Dřevo', 'Práce na zahradě'],
+    skills: [],
+  },
+]
+
+async function createToolNames() {
+  await prisma.toolName.createMany({
+    data: TOOLS.map(tool => ({ name: tool.name })),
+    skipDuplicates: true,
+  })
+
+  // Add jobTypes and skills
+  const [jobTypes, skills] = await Promise.all([
+    prisma.jobType.findMany({ select: { id: true, name: true } }),
+    prisma.skillHas.findMany({ select: { id: true, name: true } }),
+  ])
+  const jobTypeIdByName = new Map(jobTypes.map(j => [j.name, j.id]))
+  const skillIdByName = new Map(skills.map(s => [s.name, s.id]))
+
+  await prisma.$transaction(
+    TOOLS.map(t => {
+      const jobTypeConnect = t.jobTypes.map(jtName => {
+        const id = jobTypeIdByName.get(jtName)
+        if (!id)
+          throw new Error(`JobType not found: "${jtName}" (tool "${t.name}")`)
+        return { id }
+      })
+      const skillConnect = t.skills.map(skillName => {
+        const id = skillIdByName.get(skillName)
+        if (!id)
+          throw new Error(
+            `SkillHas not found: "${skillName}" (tool "${t.name}")`
+          )
+        return { id }
+      })
+
+      return prisma.toolName.update({
+        where: { name: t.name },
+        data: {
+          jobTypes: { connect: jobTypeConnect },
+          skills: { connect: skillConnect },
+        },
+      })
+    })
+  )
+}
+
 async function createWorkers(eventId: string, days: Date[], count = 100) {
   const HAS_CAR_PERCENTAGE = 0.25
   const WORKERS_COUNT = count
@@ -52,6 +183,10 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
     const firstName = faker.person.firstName(sex)
     const lastName = faker.person.lastName(sex)
     const workDays = choose(days, between(4, days.length))
+    const foodAllergies = choose([...FOOD_ALLERGY_NAMES], between(0, 2))
+    const workAllergies = choose([...WORK_ALLERGY_NAMES], between(0, 2))
+    const skills = choose([...SKILL_NAMES], between(1, 3))
+    const tools = choose([...TOOLS.map(t => t.name)], between(1, 2))
 
     return Prisma.validator<Prisma.WorkerCreateInput>()({
       firstName,
@@ -60,10 +195,10 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
       email: faker.internet.email({ firstName, lastName }).toLocaleLowerCase(),
       isStrong: Math.random() > 0.75,
       ownsCar: false,
-      foodAllergies: { set: choose(Object.values(FoodAllergy), between(0, 2)) },
-      workAllergies: { set: choose(Object.values(WorkAllergy), between(0, 2)) },
-      skills: { set: choose(Object.values(SkillHas), between(1, 3)) },
-      tools: { set: choose(Object.values(SkillBrings), between(1, 2)) },
+      foodAllergies: { connect: foodAllergies.map(name => ({ name })) },
+      workAllergies: { connect: workAllergies.map(name => ({ name })) },
+      skills: { connect: skills.map(name => ({ name })) },
+      tools: { connect: tools.map(name => ({ name })) },
       availability: {
         create: {
           eventId,
@@ -159,7 +294,6 @@ async function createProposedJobs(
   areaIds: string[],
   eventId: string,
   days: Date[],
-  workAllergies: WorkAllergy[],
   count = 70
 ) {
   let titles = [
@@ -179,7 +313,6 @@ async function createProposedJobs(
       name: name,
       publicDescription: faker.lorem.paragraph(),
       privateDescription: faker.lorem.paragraph(),
-      areaId: choose(areaIds, 1)[0],
       requiredDays: between(1, 3),
       minWorkers: between(2, 3),
       maxWorkers: between(4, 6),
@@ -192,12 +325,20 @@ async function createProposedJobs(
   }
 
   for (const title of titles) {
+    const workAllergies = choose([...WORK_ALLERGY_NAMES], between(0, 2))
+    const jobType =
+      JOB_TYPE_NAMES[Math.floor(Math.random() * JOB_TYPE_NAMES.length)]
+
     await prisma.proposedJob.create({
       data: {
         ...createProposedJob(title),
+        area: { connect: { id: choose(areaIds, 1)[0] } },
         availability: chooseWithProbability(days, 0.5),
         allergens: {
-          set: choose(workAllergies, between(0, 2)),
+          connect: workAllergies.map(name => ({ name })),
+        },
+        jobType: {
+          connect: { name: jobType },
         },
       },
     })
@@ -354,7 +495,16 @@ async function main() {
   const mini = process.argv[2] === 'mini'
   console.log('Creating yearly event...')
   const yearlyEvent = await createYearlyEvent()
-  const workAllergies = Object.values(WorkAllergy)
+  console.log('Creating food allergies')
+  await createFoodAllergies()
+  console.log('Creating work allergies')
+  await createWorkAllergies()
+  console.log('Creating skills')
+  await createSkills()
+  console.log('Creating job types')
+  await createJobTypes()
+  console.log('Creating tool names')
+  await createToolNames()
   console.log('Creating workers, cars...')
   const workers = await createWorkers(
     yearlyEvent.id,
@@ -368,7 +518,6 @@ async function main() {
     areas.map(area => area.id),
     yearlyEvent.id,
     datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
-    workAllergies,
     mini ? 5 : 70
   )
   console.log('Creating plan...')

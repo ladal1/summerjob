@@ -1,12 +1,8 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
-import { mapToolNameToJobType } from 'lib/data/enumMapping/mapToolNameToJobType'
-import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 import { useAPIProposedJobCreate } from 'lib/fetcher/proposed-job'
 import { formatNumber, removeRedundantSpace } from 'lib/helpers/helpers'
-import { JobType, ToolName } from 'lib/types/enums'
 import { deserializeAreas } from 'lib/types/area'
 import {
   ProposedJobCreateData,
@@ -16,14 +12,12 @@ import { Serialized } from 'lib/types/serialize'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm, FieldErrors } from 'react-hook-form'
-import { jobTypeMapping } from '../../data/enumMapping/jobTypeMapping'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { PillSelectItem } from '../filter-select/PillSelect'
 import FormWarning from '../forms/FormWarning'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { MapInput } from '../forms/input/MapInput'
 import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
@@ -33,6 +27,10 @@ import { Label } from '../forms/Label'
 import { Form } from '../forms/Form'
 import { z } from 'zod'
 import { ScaleInput } from '../forms/input/ScaleInput'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPIJobTypes } from 'lib/fetcher/job-type'
+import { useAPIToolNames } from 'lib/fetcher/tool-name'
 
 const schema = ProposedJobCreateSchema
 type PostForm = z.input<typeof schema>
@@ -61,9 +59,17 @@ export default function CreateProposedJobForm({
       availability: [],
       allergens: [],
       areaId: undefined,
-      jobType: JobType.OTHER,
+      jobType: undefined,
     },
   })
+
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyMapping = workAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+  const { data: jobTypes = [] } = useAPIJobTypes()
+  const { data: toolNames = [] } = useAPIToolNames()
 
   const router = useRouter()
 
@@ -87,19 +93,17 @@ export default function CreateProposedJobForm({
   //#region JobType
 
   const selectJobType = (id: string) => {
-    setValue('jobType', id as JobType, {
+    setValue('jobType', id, {
       shouldDirty: true,
       shouldValidate: true,
     })
   }
 
-  const jobTypeSelectItems = Object.entries(jobTypeMapping).map(
-    ([jobTypeKey, jobTypeToSelectName]) => ({
-      id: jobTypeKey,
-      name: jobTypeToSelectName,
-      searchable: jobTypeToSelectName,
-    })
-  )
+  const jobTypeSelectItems = jobTypes.map(jt => ({
+    id: jt.id,
+    name: jt.name,
+    searchable: jt.name,
+  }))
 
   //#endregion
 
@@ -108,7 +112,7 @@ export default function CreateProposedJobForm({
   const selectToolsOnSite = (items: PillSelectItem[]) => {
     const tools = items.map(item => ({
       id: item.databaseId,
-      tool: item.id as ToolName,
+      toolNameId: item.id,
       amount: item.amount ?? 1,
     }))
     setValue(
@@ -121,7 +125,7 @@ export default function CreateProposedJobForm({
   const selectToolsToTakeWith = (items: PillSelectItem[]) => {
     const tools = items.map(item => ({
       id: item.databaseId,
-      tool: item.id as ToolName,
+      toolNameId: item.id,
       amount: item.amount ?? 1,
     }))
     setValue(
@@ -131,21 +135,26 @@ export default function CreateProposedJobForm({
     )
   }
 
-  const toolSelectItems = Object.entries(toolNameMapping).map(
-    ([key, name]) => ({
-      id: key,
-      name: name,
-      searchable: name,
-    })
-  )
+  const toolSelectItems = toolNames.map(tn => ({
+    id: tn.id,
+    name: tn.name,
+    searchable: tn.name,
+  }))
 
   const manageToolSelectItems = (): PillSelectItem[][] => {
-    const allTools = toolSelectItems
-    const currentJobType = getValues('jobType') || JobType.OTHER
-    const sortedToolsByCurrentJobType = allTools
-      .filter(tool => mapToolNameToJobType(tool.id).includes(currentJobType))
+    const currentJobTypeId = getValues('jobType')
+    if (!currentJobTypeId) {
+      return [[], toolSelectItems]
+    }
+
+    const sortedToolsByCurrentJobType = toolSelectItems
+      .filter(tool => {
+        const toolName = toolNames.find(t => t.id === tool.id)
+        return toolName?.jobTypes?.some(jt => jt.id === currentJobTypeId)
+      })
       .sort((a, b) => a.name.localeCompare(b.name))
-    const sortedToolsOthers = allTools
+
+    const sortedToolsOthers = toolSelectItems
       .filter(tool => !sortedToolsByCurrentJobType.some(t => t.id === tool.id))
       .sort((a, b) => a.name.localeCompare(b.name))
     return [sortedToolsByCurrentJobType, sortedToolsOthers]
@@ -401,10 +410,8 @@ export default function CreateProposedJobForm({
             placeholder="Vyberte typ práce"
             items={jobTypeSelectItems}
             onSelected={selectJobType}
-            defaultSelected={jobTypeSelectItems.find(
-              item => item.id === JobType.OTHER
-            )}
             errors={errors}
+            mandatory
           />
           <PillSelectInput
             id="toolsOnSite"
@@ -424,10 +431,10 @@ export default function CreateProposedJobForm({
             register={selectToolsToTakeWith}
             errors={errors}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="allergens"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyMapping}
             register={() => register('allergens')}
           />
           <OtherAttributesInput

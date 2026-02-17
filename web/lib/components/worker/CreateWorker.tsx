@@ -1,10 +1,7 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
-import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
-import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
+import { useAPIFoodAllergies } from 'lib/fetcher/food-allergy'
 import { useAPIWorkerCreate } from 'lib/fetcher/worker'
 import {
   formatNumber,
@@ -19,11 +16,14 @@ import { z } from 'zod'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPISkills } from 'lib/fetcher/skill'
+import { useAPIToolNames } from 'lib/fetcher/tool-name'
 
 const schema = WorkerCreateSchema
 type WorkerForm = z.input<typeof schema>
@@ -101,6 +101,30 @@ export default function CreateWorker({
   }
 
   //#endregion
+
+  const { data: foodAllergies = [] } = useAPIFoodAllergies()
+  const foodAllergyMapping = foodAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyMapping = workAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+
+  const { data: skills = [] } = useAPISkills()
+  const skillOptions = skills.map(s => ({
+    value: s.id,
+    label: s.name,
+  }))
+
+  const { data: tools = [] } = useAPIToolNames()
+  const toolOptions = tools.map(t => ({
+    value: t.id,
+    label: t.name,
+  }))
 
   return (
     <>
@@ -190,28 +214,28 @@ export default function CreateWorker({
             </div>
           </div>
 
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="foodAllergies"
             label="Potravinové alergie"
-            mapping={foodAllergyMapping}
+            options={foodAllergyMapping}
             register={() => register('foodAllergies')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="workAllergies"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyMapping}
             register={() => register('workAllergies')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="skills"
             label="Dovednosti (umí)"
-            mapping={skillHasMapping}
+            options={skillOptions}
             register={() => register('skills')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="tools"
             label="Nářadí (přiveze)"
-            mapping={skillBringsMapping}
+            options={toolOptions}
             register={() => register('tools')}
           />
 

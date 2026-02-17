@@ -36,16 +36,42 @@ export async function getActiveJobById(
             },
             take: 1,
           },
+          foodAllergies: true,
+          workAllergies: true,
         },
       },
       proposedJob: {
         include: {
           area: true,
-          toolsOnSite: true,
-          toolsToTakeWith: true,
+          toolsOnSite: {
+            include: {
+              tool: {
+                include: {
+                  skills: true,
+                },
+              },
+            },
+          },
+          toolsToTakeWith: {
+            include: {
+              tool: {
+                include: {
+                  skills: true,
+                },
+              },
+            },
+          },
+          allergens: true,
         },
       },
-      responsibleWorker: true,
+      responsibleWorker: {
+        include: {
+          availability: {
+            where: { eventId: activeEventId },
+            take: 1,
+          },
+        },
+      },
       rides: {
         include: {
           car: true,

@@ -2,10 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { DateBool } from 'lib/data/dateSelectionType'
-import { foodAllergyMapping } from 'lib/data/enumMapping/foodAllergyMapping'
-import { workAllergyMapping } from 'lib/data/enumMapping/workAllergyMapping'
-import { skillHasMapping } from 'lib/data/enumMapping/skillHasMapping'
-import { skillBringsMapping } from 'lib/data/enumMapping/skillBringsMapping'
+import { useAPIFoodAllergies } from 'lib/fetcher/food-allergy'
+import { DynamicGroupButtonsInput } from '../forms/input/DynamicGroupButtonsInput'
 import { useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import {
   formatNumber,
@@ -19,21 +17,17 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import {
-  FoodAllergy,
-  WorkAllergy,
-  SkillHas,
-  SkillBrings,
-} from 'lib/types/enums'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
-import { GroupButtonsInput } from '../forms/input/GroupButtonsInput'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Label } from '../forms/Label'
 import { LinkToOtherForm } from '../forms/LinkToOtherForm'
+import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
+import { useAPISkills } from 'lib/fetcher/skill'
+import { useAPIToolNames } from 'lib/fetcher/tool-name'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -71,10 +65,10 @@ export default function EditWorker({
       strong: worker.isStrong,
       team: worker.isTeam,
       note: worker.note,
-      foodAllergies: worker.foodAllergies as FoodAllergy[],
-      workAllergies: worker.workAllergies as WorkAllergy[],
-      skills: worker.skills as SkillHas[],
-      tools: worker.tools as SkillBrings[],
+      foodAllergies: worker.foodAllergies.map(fa => fa.id),
+      workAllergies: worker.workAllergies.map(wa => wa.id),
+      skills: worker.skills.map(s => s.id),
+      tools: worker.tools.map(t => t.id),
       age: worker.age,
       availability: {
         workDays: worker.availability.workDays.map(day => day.toJSON()),
@@ -140,6 +134,30 @@ export default function EditWorker({
   }
 
   //#endregion
+
+  const { data: foodAllergies = [] } = useAPIFoodAllergies()
+  const foodAllergyOptions = foodAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+
+  const { data: workAllergies = [] } = useAPIWorkAllergies()
+  const workAllergyOptions = workAllergies.map(a => ({
+    value: a.id,
+    label: a.name,
+  }))
+
+  const { data: skills = [] } = useAPISkills()
+  const skillOptions = skills.map(s => ({
+    value: s.id,
+    label: s.name,
+  }))
+
+  const { data: tools = [] } = useAPIToolNames()
+  const toolOptions = tools.map(t => ({
+    value: t.id,
+    label: t.name,
+  }))
 
   return (
     <>
@@ -234,31 +252,31 @@ export default function EditWorker({
               disableAfter={isProfilePage ? 18 : undefined}
             />
           </div>
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="foodAllergies"
             label="Potravinové alergie"
-            mapping={foodAllergyMapping}
+            options={foodAllergyOptions}
             register={() => register('foodAllergies')}
           />
-          <GroupButtonsInput
+          <DynamicGroupButtonsInput
             id="workAllergies"
             label="Pracovní alergie"
-            mapping={workAllergyMapping}
+            options={workAllergyOptions}
             register={() => register('workAllergies')}
           />
           {!isProfilePage && (
             <>
-              <GroupButtonsInput
+              <DynamicGroupButtonsInput
                 id="skills"
                 label="Dovednosti (umí)"
-                mapping={skillHasMapping}
+                options={skillOptions}
                 register={() => register('skills')}
               />
 
-              <GroupButtonsInput
+              <DynamicGroupButtonsInput
                 id="tools"
                 label="Nářadí (přiveze)"
-                mapping={skillBringsMapping}
+                options={toolOptions}
                 register={() => register('tools')}
               />
             </>

@@ -7,14 +7,36 @@ import {
   WorkerSchema,
 } from 'lib/prisma/zod'
 import { Serialized } from './serialize'
-import { FoodAllergy, WorkAllergy, SkillHas, SkillBrings } from './enums'
 
 useZodOpenApi
 
 export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
-  skills: z.array(z.nativeEnum(SkillHas)),
+  tools: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
+  skills: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
+  foodAllergies: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
+  workAllergies: z.array(
+    z.object({
+      name: z.string(),
+      id: z.uuid(),
+    })
+  ),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
@@ -47,10 +69,10 @@ export const WorkerCreateSchema = z
       ),
     strong: z.boolean().default(false),
     team: z.boolean().default(false),
-    skills: z.array(z.nativeEnum(SkillHas)),
-    tools: z.array(z.nativeEnum(SkillBrings)),
-    foodAllergies: z.array(z.nativeEnum(FoodAllergy)),
-    workAllergies: z.array(z.nativeEnum(WorkAllergy)),
+    skills: z.array(z.uuid()),
+    tools: z.array(z.uuid()),
+    foodAllergies: z.array(z.uuid()),
+    workAllergies: z.array(z.uuid()),
     note: z.string().optional(),
     age: z
       .union([
