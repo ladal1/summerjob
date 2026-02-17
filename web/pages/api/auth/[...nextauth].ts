@@ -94,6 +94,18 @@ const SeznamProvider: OAuthConfig<SeznamProfile> = {
   },
 }
 
+async function hasLoggedInWithEmail(email: string) {
+  // Check if user has logged in with their email before, this makes the user
+  // have to sign in with email first and link oauth accounts once signed in
+  // It is important to have automatic account linking turned off in oauth providers
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { emailVerified: true },
+  })
+  if (user?.emailVerified) return true
+  return false
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -139,6 +151,16 @@ export const authOptions: NextAuthOptions = {
     // Check if user is allowed to sign in
     async signIn(params) {
       if (!params.user.email) return false
+      if (
+        params.account?.provider === 'google' ||
+        params.account?.provider === 'seznam'
+      ) {
+        // User has to sign in with email first and then link their account to oauth
+        const hasVerifiedEmail = await hasLoggedInWithEmail(params.user.email)
+        if (!hasVerifiedEmail) {
+          return '/auth/signIn?error=OAuthAccountNotLinked'
+        }
+      }
       if (params.account?.provider === 'seznam') {
         if (!params.profile?.email) return false
       }
