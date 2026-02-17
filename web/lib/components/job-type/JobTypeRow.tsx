@@ -29,6 +29,7 @@ function formatJobTypeRow(
   onRequestDelete: () => void,
   isBeingDeleted: boolean,
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deletingError: any,
   resetError: () => void
 ) {

@@ -1,8 +1,6 @@
 'use client'
-import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { WorkAllergy } from 'lib/prisma/client'
 import { MyPlan } from 'lib/types/my-plan'
 import EditBox from '../forms/EditBox'
 import { FormHeader } from '../forms/FormHeader'

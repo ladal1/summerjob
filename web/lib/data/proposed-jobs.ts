@@ -12,7 +12,6 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import { deleteAllPhotos, registerPhotos } from './jobPhoto'
 import { registerTools, ToolType } from './tools'
-import { truncateSync } from 'fs'
 
 export async function getProposedJobById(
   id: string

@@ -1,5 +1,4 @@
 'use client'
-import { SkillHas } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { useMemo } from 'react'
