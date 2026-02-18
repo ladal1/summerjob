@@ -113,7 +113,9 @@ export default function ProposedJobRow({
     {
       label: 'Alergeny',
       content: `${
-        job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'
+        job.allergens.length > 0
+          ? job.allergens.map(a => a.name).join(', ')
+          : 'Žádné'
       }`,
     },
     {

@@ -98,6 +98,13 @@ export default function WorkersClientPage({
             <span>Přidat pracanta</span>
           </button>
         </Link>
+        <Link
+          href="/api/workers/export-contacts"
+          className="btn btn-secondary btn-with-icon"
+        >
+          <i className="fas fa-address-book"></i>
+          <span>Export kontaktů</span>
+        </Link>
         <Link href={`/print-workers`} prefetch={false}>
           <button className="btn btn-secondary btn-with-icon" type="button">
             <i className="fas fa-print"></i>

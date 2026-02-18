@@ -46,13 +46,32 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
                 },
                 take: 1,
               },
+              foodAllergies: true,
+              workAllergies: true,
             },
           },
           proposedJob: {
             include: {
               area: true,
-              toolsOnSite: true,
-              toolsToTakeWith: true,
+              toolsOnSite: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              toolsToTakeWith: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              allergens: true,
             },
           },
           rides: {
@@ -114,13 +133,34 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
                 },
                 take: 1,
               },
+              foodAllergies: true,
+              workAllergies: true,
+              skills: true,
+              tools: true,
             },
           },
           proposedJob: {
             include: {
               area: true,
-              toolsOnSite: true,
-              toolsToTakeWith: true,
+              toolsOnSite: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              toolsToTakeWith: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              allergens: true,
             },
           },
           rides: {

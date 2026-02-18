@@ -27,14 +27,32 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
-      toolsOnSite: true,
-      toolsToTakeWith: true,
+      toolsOnSite: {
+        include: {
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
+        },
+      },
+      toolsToTakeWith: {
+        include: {
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
+        },
+      },
       photos: true,
       pinnedBy: {
         select: {
           workerId: true,
         },
       },
+      allergens: true,
+      jobType: true,
     },
   })
   return job
@@ -79,14 +97,32 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
-      toolsOnSite: true,
-      toolsToTakeWith: true,
+      jobType: true,
+      toolsOnSite: {
+        include: {
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
+        },
+      },
+      toolsToTakeWith: {
+        include: {
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
+        },
+      },
       photos: true,
       pinnedBy: {
         select: {
           workerId: true,
         },
       },
+      allergens: true,
     },
     orderBy: [
       {
@@ -131,14 +167,32 @@ export async function getProposedJobsAssignableTo(
     include: {
       area: true,
       activeJobs: true,
-      toolsOnSite: true,
-      toolsToTakeWith: true,
+      jobType: true,
+      toolsOnSite: {
+        include: {
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
+        },
+      },
+      toolsToTakeWith: {
+        include: {
+          tool: {
+            include: {
+              skills: true,
+            },
+          },
+        },
+      },
       photos: true,
       pinnedBy: {
         select: {
           workerId: true,
         },
       },
+      allergens: true,
     },
     orderBy: [
       {
@@ -168,9 +222,25 @@ export async function updateProposedJob(
     toolsToTakeWithIdsDeleted,
     toolsToTakeWithUpdated,
     photoIdsDeleted,
+    areaId,
+    jobType,
     ...rest
   } = proposedJobData
-  const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
+
+  const allergyUpdate =
+    allergens !== undefined
+      ? {
+          allergens: { set: allergens.map(id => ({ id })) },
+        }
+      : {}
+  const areaUpdate =
+    areaId !== undefined
+      ? areaId === null
+        ? { area: { disconnect: true } }
+        : { area: { connect: { id: areaId } } }
+      : {}
+  const jobTypeUpdate =
+    jobType !== undefined ? { jobType: { connect: { id: jobType } } } : {}
 
   const updated = await prisma.$transaction(async tx => {
     // Update pinned
@@ -200,6 +270,8 @@ export async function updateProposedJob(
         },
         ...rest,
         ...allergyUpdate,
+        ...areaUpdate,
+        ...jobTypeUpdate,
       },
     })
     // Update job's tools
@@ -230,12 +302,19 @@ export async function createProposedJob(
   data: ProposedJobCreateData,
   files: formidable.Files
 ) {
-  const { toolsOnSite, toolsToTakeWith, ...rest } = data
+  const { toolsOnSite, toolsToTakeWith, allergens, areaId, jobType, ...rest } =
+    data
 
   const created = await prisma.$transaction(async tx => {
-    // Create job
     const proposedJob = await tx.proposedJob.create({
-      data: { ...rest },
+      data: {
+        ...rest,
+        jobType: { connect: { id: jobType } },
+        ...(areaId ? { area: { connect: { id: areaId } } } : {}),
+        allergens: {
+          connect: (allergens ?? []).map(id => ({ id })),
+        },
+      },
     })
     // Create job's tools
     await registerTools(

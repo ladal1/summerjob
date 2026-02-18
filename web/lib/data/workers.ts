@@ -60,6 +60,9 @@ export async function getWorkers(
         },
         take: 1,
       },
+      foodAllergies: true,
+      workAllergies: true,
+      skills: true,
     },
     orderBy: [
       {
@@ -123,6 +126,10 @@ export async function getWorkerById(
         },
         take: 1,
       },
+      foodAllergies: true,
+      workAllergies: true,
+      skills: true,
+      tools: true,
     },
   })
   if (!user) {
@@ -252,16 +259,16 @@ async function internal_createWorker(
       lastName: data.lastName,
       phone: data.phone,
       foodAllergies: {
-        set: data.foodAllergies ?? [],
+        connect: data.foodAllergies?.map(id => ({ id })) ?? [],
       },
       workAllergies: {
-        set: data.workAllergies ?? [],
+        connect: data.workAllergies?.map(id => ({ id })) ?? [],
       },
       skills: {
-        set: data.skills ?? [],
+        connect: data.skills?.map(id => ({ id })) ?? [],
       },
       tools: {
-        set: data.tools ?? [],
+        connect: data.tools?.map(id => ({ id })) ?? [],
       },
       age: data.age,
       blocked: false,
@@ -285,16 +292,16 @@ async function internal_createWorker(
       isTeam: data.team,
       note: data.note,
       foodAllergies: {
-        set: data.foodAllergies ?? [],
+        connect: data.foodAllergies?.map(id => ({ id })) ?? [],
       },
       workAllergies: {
-        set: data.workAllergies ?? [],
+        connect: data.workAllergies?.map(id => ({ id })) ?? [],
       },
       skills: {
-        set: data.skills ?? [],
+        connect: data.skills?.map(id => ({ id })) ?? [],
       },
       tools: {
-        set: data.tools ?? [],
+        connect: data.tools?.map(id => ({ id })) ?? [],
       },
       age: data.age,
       availability: {
@@ -403,13 +410,24 @@ export async function internal_updateWorker(
   }
 
   const allergyUpdate = {
-    ...(data.foodAllergies && { foodAllergies: { set: data.foodAllergies } }),
-    ...(data.workAllergies && { workAllergies: { set: data.workAllergies } }),
+    ...(data.foodAllergies && {
+      foodAllergies: { set: data.foodAllergies.map(id => ({ id })) },
+    }),
+    ...(data.workAllergies && {
+      workAllergies: { set: data.workAllergies.map(id => ({ id })) },
+    }),
   }
 
   const skillsUpdate = {
-    ...(data.skills && { skills: { set: data.skills } }),
-    ...(data.tools && { tools: { set: data.tools } }),
+    ...(data.skills && {
+      skills: { set: data.skills.map(id => ({ id })) },
+    }),
+  }
+
+  const toolsUpdate = {
+    ...(data.tools && {
+      tools: { set: data.tools.map(id => ({ id })) },
+    }),
   }
 
   // Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted.
@@ -451,6 +469,7 @@ export async function internal_updateWorker(
       ...allergyUpdate,
       age: data.age,
       ...skillsUpdate,
+      ...toolsUpdate,
       availability: {
         update: {
           where: {
