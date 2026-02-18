@@ -16,8 +16,12 @@ export const dynamic = 'force-dynamic'
 
 export default async function MyPlanPage() {
   const session = await getSMJSession()
+  
+  if (!session) {
+    return <ErrorPage404 message="Uživatel není přihlášen." />
+  }
    
-  const userId = session!.userID
+  const userId = session.userID
   const worker = await getWorkerById(userId)
   if (!worker || !worker.availability) {
     return <ErrorPage404 message="Pracant nenalezen." />
