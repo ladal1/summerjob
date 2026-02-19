@@ -332,7 +332,8 @@ model SummerJobEvent {
   workerAvailability WorkerAvailability[]
   cars               Car[]
   posts              Post[]
-  adorationSlots     AdorationSlot[] 
+  adorationSlots     AdorationSlot[]
+  applications       Application[]
 }
 
 model Logging {
@@ -396,14 +397,14 @@ model Application {
   id             String   @id @default(uuid())
   firstName      String
   lastName       String
-  birthDate      DateTime
+  birthDate      DateTime @db.Date
   gender         String
   phone          String
-  email          String   @unique
+  email          String
   address        String
   pastParticipation Boolean
-  arrivalDate    DateTime
-  departureDate  DateTime
+  arrivalDate    DateTime @db.Date
+  departureDate  DateTime @db.Date
   foodAllergies  String?  // Alergie na jídlo
   workAllergies  String?  // Alergie na práci
   toolsSkills    String   // Nářadí, se kterým umí zacházet
@@ -418,7 +419,11 @@ model Application {
   canBeMedic     Boolean  @default(false)
   createdAt      DateTime @default(now())
   status         ApplicationStatus @default(PENDING)
+  forEvent       SummerJobEvent @relation(fields: [forEventId], references: [id])
+  forEventId     String
   worker Worker? @relation
+
+  @@unique([email, forEventId])
 }
 
 model AdorationSlot {
