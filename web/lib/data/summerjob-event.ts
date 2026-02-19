@@ -233,3 +233,41 @@ export async function isApplicationPasswordProtected(
 
   return event.isPasswordProtected
 }
+
+export async function setReceptionPassword(id: string, password: string) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Event not found')
+  }
+  if (password.length === 0) {
+    throw new InvalidDataError('Password cannot be empty')
+  }
+
+  const receptionPasswordHash = await hash(password, 10)
+  await prisma.summerJobEvent.update({
+    where: { id },
+    data: {
+      receptionPasswordHash,
+    },
+  })
+}
+
+export async function unsetReceptionPassword(id: string) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Event not found')
+  }
+
+  await prisma.summerJobEvent.update({
+    where: { id },
+    data: {
+      receptionPasswordHash: null,
+    },
+  })
+}

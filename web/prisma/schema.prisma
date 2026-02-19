@@ -289,6 +289,7 @@ model SummerJobEvent {
   cars               Car[]
   posts              Post[]
   adorationSlots     AdorationSlot[] 
+  receptionPasswordHash String?
 }
 
 model Logging {

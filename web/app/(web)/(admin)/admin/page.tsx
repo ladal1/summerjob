@@ -127,6 +127,23 @@ export default async function AdminPage() {
                 </div>
               </Link>
             )}
+
+            {hasAdminPermission && (
+              <Link
+                className="list-group-item list-group-item-action"
+                href="/admin/reception"
+              >
+                <div className="row">
+                  <div className="col">
+                    <h5>Recepce</h5>
+                    <p>Nastavit heslo pro recepci.</p>
+                  </div>
+                  <div className="col d-flex justify-content-end align-items-center gap-3">
+                    <i className="fas fa-chevron-right"></i>
+                  </div>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
       </section>
