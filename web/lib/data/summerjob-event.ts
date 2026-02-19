@@ -271,3 +271,19 @@ export async function unsetReceptionPassword(id: string) {
     },
   })
 }
+
+export async function checkReceptionPassword(password: string) {
+  const event = await getActiveSummerJobEvent()
+
+  if (!event) {
+    throw new Error('Není aktivní žádný ročník')
+  }
+
+  if (event.receptionPasswordHash === null) {
+    throw new Error('Přihlášení k recepci není k dispozici')
+  }
+
+  const isMatch = await compare(password, event.receptionPasswordHash)
+
+  return isMatch
+}
