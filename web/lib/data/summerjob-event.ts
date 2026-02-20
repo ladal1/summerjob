@@ -17,6 +17,7 @@ import {
 } from './users'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 import { hash, compare } from 'bcryptjs'
+import { Permission } from 'lib/types/auth'
 
 export async function getSummerJobEventById(
   id: string
@@ -234,6 +235,30 @@ export async function isApplicationPasswordProtected(
   return event.isPasswordProtected
 }
 
+async function signoutReception() {
+  const receptionUsers = await prisma.worker.findMany({
+    where: {
+      permissions: {
+        permissions: {
+          has: Permission.RECEPTION,
+        },
+      },
+    },
+    select: {
+      email: true,
+    },
+  })
+
+  const emails = receptionUsers.map(ru => ru.email)
+  await prisma.session.deleteMany({
+    where: {
+      user: {
+        email: { in: emails },
+      },
+    },
+  })
+}
+
 export async function setReceptionPassword(id: string, password: string) {
   const event = await prisma.summerJobEvent.findUnique({
     where: { id },
@@ -245,6 +270,8 @@ export async function setReceptionPassword(id: string, password: string) {
   if (password.length === 0) {
     throw new InvalidDataError('Password cannot be empty')
   }
+
+  await signoutReception()
 
   const receptionPasswordHash = await hash(password, 10)
   await prisma.summerJobEvent.update({
@@ -264,6 +291,8 @@ export async function unsetReceptionPassword(id: string) {
     throw new InvalidDataError('Event not found')
   }
 
+  await signoutReception()
+
   await prisma.summerJobEvent.update({
     where: { id },
     data: {
@@ -276,11 +305,11 @@ export async function checkReceptionPassword(password: string) {
   const event = await getActiveSummerJobEvent()
 
   if (!event) {
-    throw new Error('Není aktivní žádný ročník')
+    return false
   }
 
   if (event.receptionPasswordHash === null) {
-    throw new Error('Přihlášení k recepci není k dispozici')
+    return false
   }
 
   const isMatch = await compare(password, event.receptionPasswordHash)

@@ -9,27 +9,33 @@ const prisma = new PrismaClient()
 async function createReceptionAccount() {
   const firstName = 'Recepce'
   const lastName = 'Recepce'
-  const email = ''
-  await prisma.worker.create({
-    data: {
-      firstName,
-      lastName,
-      email,
-      note: '',
-      phone: '000 000 000',
-      permissions: {
-        create: {
-          permissions: ['RECEPTION'],
+  const email = process.env.RECEPTION_EMAIL!
+  try {
+    await prisma.worker.create({
+      data: {
+        firstName,
+        lastName,
+        email,
+        note: '',
+        phone: '000 000 000',
+        permissions: {
+          create: {
+            permissions: ['RECEPTION'],
+          },
         },
       },
-    },
-  })
+    })
+    console.log('Účet recepce byl úspěšně vytvořen.')
+  } catch (e: unknown) {
+    console.log(
+      '[ERROR] Účet recepce se napodařilo vytvořit. Ujistěte se, zda-li již neexistuje.'
+    )
+  }
 }
 
 async function main() {
   console.log('Vytvoření účtu recepce.')
   await createReceptionAccount()
-  console.log('Účet recepce byl úspěšně vytvořen.')
 }
 
 main()

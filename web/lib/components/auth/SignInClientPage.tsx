@@ -27,23 +27,8 @@ export default function SignInClientPage({
 
   const [receptionLogin, setReceptionLogin] = useState(false)
   const [receptionPassword, setReceptionPassword] = useState('')
-  const [receptionLoginError, setReceptionLoginError] = useState('')
   const toggleReceptionLogin = () => {
     setReceptionLogin(!receptionLogin)
-  }
-
-  const onReceptionLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const res = await fetch(`/api/summerjob-events/check-reception-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: receptionPassword }),
-    })
-    if (!res.ok) {
-      const data = await res.json()
-      setReceptionLoginError(data.message)
-    }
   }
 
   const onSubmit = (dataForm: EmailData) => {
@@ -56,6 +41,13 @@ export default function SignInClientPage({
 
   const onSeznamSignIn = () => {
     signIn('seznam')
+  }
+
+  const onReceptionSignIn = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    await signIn('reception', {
+      password: receptionPassword,
+    })
   }
 
   return (
@@ -136,7 +128,7 @@ export default function SignInClientPage({
 
           {receptionLogin && (
             <div>
-              <form action="#" onSubmit={onReceptionLogin}>
+              <form onSubmit={onReceptionSignIn}>
                 <Label
                   id="reception-password"
                   label="Kód k recepci"
@@ -149,9 +141,6 @@ export default function SignInClientPage({
                   placeholder="Zadejte kód k recepci"
                   onChange={e => setReceptionPassword(e.target.value)}
                 />
-                {receptionLoginError && (
-                  <span className="text-danger">{receptionLoginError}</span>
-                )}
                 <button
                   type="submit"
                   className="mt-4 p-2 w-100 btn btn-primary"
