@@ -14,6 +14,7 @@
     "delete-db": "tsx prisma/drop-tables.ts",
     "create-session": "tsx scripts/create-session.ts",
     "create-admin": "tsx scripts/create-admin.ts",
+    "create-reception": "tsx scripts/create-reception.ts",
     "test": "vitest run",
     "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prettier:fix": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",

@@ -9,7 +9,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import ButtonWithSvg from './ButtonWithSvg'
 import { useState } from 'react'
 import { Label } from '../forms/Label'
-import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 
 interface SignInClientPageProps {
   errorMessage?: string
