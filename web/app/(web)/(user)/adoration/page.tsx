@@ -1,10 +1,23 @@
+import { getSMJSession } from 'lib/auth/auth'
 import AdorationSlotsTable from 'lib/components/adoration/AdorationSlotsTable'
 import { getActiveSummerJobEvent } from 'lib/data/summerjob-event'
+import { Permission } from 'lib/types/auth'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdorationPageServer() {
   const event = await getActiveSummerJobEvent()
+
+  const session = await getSMJSession()
+  const isReception = session?.permissions.includes(Permission.RECEPTION)
+
+  if (isReception) {
+    return (
+      <p className="text-center mt-5 font-semibold">
+        Za recepci se není možné přihlásit na adorace
+      </p>
+    )
+  }
 
   if (!event) {
     return (

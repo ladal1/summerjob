@@ -42,7 +42,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/workers',
       name: 'Pracanti',
       icon: 'far fa-user',
-      permissions: [Permission.WORKERS],
+      permissions: [Permission.WORKERS, Permission.RECEPTION],
     },
     {
       path: '/admin',
@@ -52,6 +52,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
         Permission.ADMIN,
         Permission.ADORATION,
         Permission.APPLICATIONS,
+        Permission.RECEPTION,
       ],
     },
     {

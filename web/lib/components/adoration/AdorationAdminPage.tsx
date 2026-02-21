@@ -6,7 +6,7 @@ import { format, parseISO } from 'date-fns'
 import {
   apiAdorationDeleteBulk,
   apiAdorationUpdateLocationBulk,
-  useAPIAdorationSlotsAdmin
+  useAPIAdorationSlotsAdmin,
 } from 'lib/fetcher/adoration'
 import AdminCreateAdorationModal from './AdorationAdminCreateModal'
 import AdorationWorkerAssignModal from './AdorationWorkerAssignModal'
@@ -21,9 +21,14 @@ interface Props {
     endDate: string
   }
   canDeleteSlots: boolean
+  canModifyAdorations: boolean
 }
 
-export default function AdminAdorationManager({ event, canDeleteSlots }: Props) {
+export default function AdminAdorationManager({
+  event,
+  canDeleteSlots,
+  canModifyAdorations,
+}: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -42,8 +47,10 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showBulkLocationModal, setShowBulkLocationModal] = useState(false)
-  const [selectedSlotForAssignment, setSelectedSlotForAssignment] = useState<FrontendAdorationSlot | null>(null)
-  const [selectedSlotForEdit, setSelectedSlotForEdit] = useState<FrontendAdorationSlot | null>(null)
+  const [selectedSlotForAssignment, setSelectedSlotForAssignment] =
+    useState<FrontendAdorationSlot | null>(null)
+  const [selectedSlotForEdit, setSelectedSlotForEdit] =
+    useState<FrontendAdorationSlot | null>(null)
   const [showOnlyUnfilled, setShowOnlyUnfilled] = useState(false)
 
   const {
@@ -126,53 +133,60 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
   // Helper function to get slot status styling
   const getSlotStatusInfo = (slot: FrontendAdorationSlot) => {
     const { workerCount, capacity } = slot
-    
+
     if (workerCount === 0) {
       return {
         badgeClass: 'bg-danger',
         badgeText: 'Prázdný',
         icon: 'fas fa-exclamation-triangle',
-        rowClass: 'table-danger'
+        rowClass: 'table-danger',
       }
     } else if (workerCount < capacity) {
       return {
         badgeClass: 'bg-warning text-dark',
         badgeText: 'Částečně obsazen',
         icon: 'fas fa-clock',
-        rowClass: 'table-warning'
+        rowClass: 'table-warning',
       }
     } else if (workerCount === capacity) {
       return {
         badgeClass: 'bg-success',
         badgeText: 'Obsazen',
         icon: 'fas fa-check-circle',
-        rowClass: ''
+        rowClass: '',
       }
     } else {
       return {
         badgeClass: 'bg-dark',
         badgeText: 'Přeplněn',
         icon: 'fas fa-exclamation-circle',
-        rowClass: ''
+        rowClass: '',
       }
     }
   }
 
   // Filter slots but keep original time order
   const sortedSlots = [...slots]
-    .filter(slot => showOnlyUnfilled ? slot.workerCount < slot.capacity : true)
+    .filter(slot =>
+      showOnlyUnfilled ? slot.workerCount < slot.capacity : true
+    )
     .sort((a, b) => a.localDateStart.getTime() - b.localDateStart.getTime())
 
   // Statistics for the current day (from all slots, not filtered)
   const emptySlots = slots.filter(s => s.workerCount === 0).length
-  const partiallyFilledSlots = slots.filter(s => s.workerCount > 0 && s.workerCount < s.capacity).length
+  const partiallyFilledSlots = slots.filter(
+    s => s.workerCount > 0 && s.workerCount < s.capacity
+  ).length
   const fullSlots = slots.filter(s => s.workerCount === s.capacity).length
 
   // Get unfilled slots for the bubble indicator
-  const unfilledSlots = slots.filter(s => s.workerCount < s.capacity).sort((a, b) => a.localDateStart.getTime() - b.localDateStart.getTime())
+  const unfilledSlots = slots
+    .filter(s => s.workerCount < s.capacity)
+    .sort((a, b) => a.localDateStart.getTime() - b.localDateStart.getTime())
 
   const isAllSelected =
-    sortedSlots.length > 0 && sortedSlots.every(slot => selectedIds.includes(slot.id))
+    sortedSlots.length > 0 &&
+    sortedSlots.every(slot => selectedIds.includes(slot.id))
 
   return (
     <div className="container mt-2">
@@ -212,12 +226,12 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
           <div className="row mb-3">
             <div className="col-12">
               <div className="form-check form-switch">
-                <input 
-                  className="form-check-input" 
-                  type="checkbox" 
+                <input
+                  className="form-check-input"
+                  type="checkbox"
                   id="showOnlyUnfilled"
                   checked={showOnlyUnfilled}
-                  onChange={(e) => setShowOnlyUnfilled(e.target.checked)}
+                  onChange={e => setShowOnlyUnfilled(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="showOnlyUnfilled">
                   <i className="fas fa-filter me-1"></i>
@@ -241,7 +255,9 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
                   <small className="text-muted">Prázdné sloty</small>
                 </div>
                 <div className="d-flex align-items-center">
-                  <span className="badge bg-warning text-dark me-2">{partiallyFilledSlots}</span>
+                  <span className="badge bg-warning text-dark me-2">
+                    {partiallyFilledSlots}
+                  </span>
                   <small className="text-muted">Částečně obsazené</small>
                 </div>
                 <div className="d-flex align-items-center">
@@ -252,7 +268,8 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
                   <div className="d-flex align-items-center ms-auto">
                     <div className="badge bg-info text-white me-2">
                       <i className="fas fa-clock me-1"></i>
-                      Volné sloty: {unfilledSlots.map((slot, index) => (
+                      Volné sloty:{' '}
+                      {unfilledSlots.map((slot, index) => (
                         <span key={slot.id}>
                           {format(slot.localDateStart, 'HH:mm')}
                           {index < unfilledSlots.length - 1 ? ', ' : ''}
@@ -265,90 +282,123 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
             </div>
           </div>
 
-          <div className="d-flex gap-2 align-items-center mb-3">
-            <button
-              className="btn btn-sm btn-outline-primary"
-              disabled={selectedIds.length === 0}
-              onClick={() => setShowBulkLocationModal(true)}
-            >
-              <i className="fas fa-map-marker-alt me-1"></i>
-              Změnit lokaci vybraným ({selectedIds.length})
-            </button>
-            {canDeleteSlots && (
+          {canModifyAdorations && (
+            <div className="d-flex gap-2 align-items-center mb-3">
               <button
-                className="btn btn-sm btn-outline-danger"
+                className="btn btn-sm btn-outline-primary"
                 disabled={selectedIds.length === 0}
-                onClick={deleteSelectedSlots}
+                onClick={() => setShowBulkLocationModal(true)}
               >
-                <i className="fas fa-trash me-1"></i>
-                Smazat vybrané ({selectedIds.length})
+                <i className="fas fa-map-marker-alt me-1"></i>
+                Změnit lokaci vybraným ({selectedIds.length})
               </button>
-            )}
-            <button
-              className="btn btn-sm btn-outline-success"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <i className="fas fa-plus me-1"></i>
-              Vytvořit sloty
-            </button>
-          </div>
+              {canDeleteSlots && (
+                <button
+                  className="btn btn-sm btn-outline-danger"
+                  disabled={selectedIds.length === 0}
+                  onClick={deleteSelectedSlots}
+                >
+                  <i className="fas fa-trash me-1"></i>
+                  Smazat vybrané ({selectedIds.length})
+                </button>
+              )}
+              <button
+                className="btn btn-sm btn-outline-success"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <i className="fas fa-plus me-1"></i>
+                Vytvořit sloty
+              </button>
+            </div>
+          )}
 
-          <div className="form-check mb-2">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="selectAllCheckbox"
-              checked={isAllSelected}
-              onChange={toggleSelectAll}
-            />
-            <label className="form-check-label" htmlFor="selectAllCheckbox">
-              Vybrat všechny sloty
-            </label>
-          </div>
+          {canModifyAdorations && (
+            <div className="form-check mb-2">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="selectAllCheckbox"
+                checked={isAllSelected}
+                onChange={toggleSelectAll}
+              />
+              <label className="form-check-label" htmlFor="selectAllCheckbox">
+                Vybrat všechny sloty
+              </label>
+            </div>
+          )}
 
           <table className="table table-bordered table-sm mt-3">
             <thead className="table-primary">
               <tr>
-                <th style={{ width: '40px' }}>
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={isAllSelected}
-                    onChange={toggleSelectAll}
-                  />
+                {canModifyAdorations && (
+                  <th style={{ width: '40px' }}>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={isAllSelected}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                )}
+                <th
+                  style={{ width: '120px' }}
+                  className="text-center d-none d-md-table-cell"
+                >
+                  Čas
                 </th>
-                <th style={{ width: '120px' }} className="text-center d-none d-md-table-cell">Čas</th>
-                <th style={{ width: '80px' }} className="text-center d-md-none">Čas</th>
+                <th style={{ width: '80px' }} className="text-center d-md-none">
+                  Čas
+                </th>
                 <th>Lokace</th>
                 <th>Pracanti</th>
-                <th style={{ width: '120px' }} className="d-none d-md-table-cell">Akce</th>
-                <th style={{ width: '60px' }} className="d-md-none">Akce</th>
+                <th
+                  style={{ width: '120px' }}
+                  className="d-none d-md-table-cell"
+                >
+                  Akce
+                </th>
+                <th style={{ width: '60px' }} className="d-md-none">
+                  Akce
+                </th>
               </tr>
             </thead>
             <tbody>
               {sortedSlots.map(slot => {
-                const endTime = new Date(slot.localDateStart.getTime() + slot.length * 60000)
+                const endTime = new Date(
+                  slot.localDateStart.getTime() + slot.length * 60000
+                )
                 const startTimeStr = format(slot.localDateStart, 'HH:mm')
                 const endTimeStr = format(endTime, 'HH:mm')
                 const statusInfo = getSlotStatusInfo(slot)
-                
+
                 return (
                   <tr key={slot.id} className={statusInfo.rowClass}>
-                    <td className="align-middle">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        checked={selectedIds.includes(slot.id)}
-                        onChange={() => toggleSelectOne(slot.id)}
-                      />
-                    </td>
+                    {canModifyAdorations && (
+                      <td className="align-middle">
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={selectedIds.includes(slot.id)}
+                          onChange={() => toggleSelectOne(slot.id)}
+                        />
+                      </td>
+                    )}
                     <td className="text-center align-middle d-none d-md-table-cell">
-                      <strong>{startTimeStr} - {endTimeStr}</strong>
+                      <strong>
+                        {startTimeStr} - {endTimeStr}
+                      </strong>
                       <br />
                       <small className="text-muted">{slot.length} min</small>
                     </td>
-                    <td className="text-center align-middle d-md-none" style={{ width: '80px' }}>
-                      <strong>{startTimeStr}<br/>-<br/>{endTimeStr}</strong>
+                    <td
+                      className="text-center align-middle d-md-none"
+                      style={{ width: '80px' }}
+                    >
+                      <strong>
+                        {startTimeStr}
+                        <br />-<br />
+                        {endTimeStr}
+                      </strong>
                       <br />
                       <small className="text-muted">{slot.length}min</small>
                     </td>
@@ -359,7 +409,9 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
                           <i className={`${statusInfo.icon} me-1`}></i>
                           {slot.workerCount}/{slot.capacity}
                         </span>
-                        <small className={`badge ${statusInfo.badgeClass} opacity-75`}>
+                        <small
+                          className={`badge ${statusInfo.badgeClass} opacity-75`}
+                        >
                           {statusInfo.badgeText}
                         </small>
                       </div>
@@ -367,7 +419,11 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
                         <div className="mt-1">
                           <small className="text-muted me-2">Přiřazení:</small>
                           {slot.workers.map((w, index) => (
-                            <span key={index} className="badge bg-light text-dark me-1 mb-1 d-inline-block" style={{ fontSize: '0.75rem' }}>
+                            <span
+                              key={index}
+                              className="badge bg-light text-dark me-1 mb-1 d-inline-block"
+                              style={{ fontSize: '0.75rem' }}
+                            >
                               {w.firstName} {w.lastName} ({w.phone})
                             </span>
                           ))}
@@ -376,13 +432,15 @@ export default function AdminAdorationManager({ event, canDeleteSlots }: Props) 
                     </td>
                     <td className="align-middle">
                       <div className="d-flex gap-1 d-none d-md-flex">
-                        <button
-                          className="btn btn-sm btn-outline-dark"
-                          onClick={() => openEditModal(slot)}
-                          title="Upravit slot"
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
+                        {canModifyAdorations && (
+                          <button
+                            className="btn btn-sm btn-outline-dark"
+                            onClick={() => openEditModal(slot)}
+                            title="Upravit slot"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                        )}
                         <button
                           className="btn btn-sm btn-outline-primary"
                           onClick={() => openAssignModal(slot)}

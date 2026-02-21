@@ -17,6 +17,7 @@ export default async function AdminPage() {
     hasAdminPermission || hasPermission(Permission.APPLICATIONS)
   const hasAdorationPermission =
     hasAdminPermission || hasPermission(Permission.ADORATION)
+  const hasReceptionPermission = hasPermission(Permission.RECEPTION)
   return (
     <>
       <PageHeader title="Administrace" isFluid={false}>
@@ -94,7 +95,7 @@ export default async function AdminPage() {
               </Link>
             )}
 
-            {hasAdorationPermission && (
+            {(hasAdorationPermission || hasReceptionPermission) && (
               <Link
                 className="list-group-item list-group-item-action"
                 href="/admin/adoration"

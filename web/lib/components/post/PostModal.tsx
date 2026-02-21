@@ -17,6 +17,7 @@ interface PostModalProps {
   onClose: () => void
   onUpdated?: () => void
   userId: string
+  accessedFromReception: boolean
 }
 
 export const PostModal = ({
@@ -24,6 +25,7 @@ export const PostModal = ({
   onClose,
   onUpdated,
   userId,
+  accessedFromReception,
 }: PostModalProps) => {
   const getCoordinates = (
     coordinates: number[] | null
@@ -129,7 +131,13 @@ export const PostModal = ({
                   )}
                 </div>
               )}
-              <Participate post={item} onUpdated={onUpdated} userId={userId} />
+              {!accessedFromReception && (
+                <Participate
+                  post={item}
+                  onUpdated={onUpdated}
+                  userId={userId}
+                />
+              )}
             </div>
           </>
         )}

@@ -1,4 +1,4 @@
-import { withPermissions } from 'lib/auth/auth'
+import { getSMJSession, isAccessAllowed, withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
@@ -15,24 +15,32 @@ type Params = {
 }
 
 export default async function EditPostPage(props: Params) {
-  const params = await props.params;
+  const params = await props.params
   const post = await getPostById(params.id)
   if (!post) {
     return <ErrorPage404 message="Příspěvek nenalezen." />
   }
   const serializedPost = serializePost(post)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-   
+
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
 
   const isAdvancedAccessAllowed = await withPermissions([Permission.POSTS])
 
+  const session = await getSMJSession()
+  const accessedFromReception =
+    session?.permissions.includes(Permission.RECEPTION) ?? false
+
   return (
     <>
-      {isAdvancedAccessAllowed.success ? (
-        <EditPost serializedPost={serializedPost} allDates={allDates} />
+      {isAdvancedAccessAllowed.success || accessedFromReception ? (
+        <EditPost
+          serializedPost={serializedPost}
+          allDates={allDates}
+          accessedFromReception={accessedFromReception}
+        />
       ) : (
         <AccessDeniedPage />
       )}

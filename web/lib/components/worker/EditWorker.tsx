@@ -37,6 +37,7 @@ interface EditWorkerProps {
   serializedWorker: Serialized
   allDates: DateBool[][]
   isProfilePage: boolean
+  accessedFromReception: boolean
   carAccess: boolean
   label: string
   oauthLinks?: { google: boolean; seznam: boolean }
@@ -46,6 +47,7 @@ export default function EditWorker({
   serializedWorker,
   allDates,
   isProfilePage,
+  accessedFromReception,
   carAccess,
   label,
   oauthLinks,

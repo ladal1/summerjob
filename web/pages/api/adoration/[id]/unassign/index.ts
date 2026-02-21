@@ -4,11 +4,8 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { logoutFromAdorationSlot } from 'lib/data/adoration'
 
 export default APIAccessController(
-  [Permission.ADMIN, Permission.ADORATION],
-  async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse,
-  ) {
+  [Permission.ADMIN, Permission.ADORATION, Permission.RECEPTION],
+  async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'PATCH') {
       return res.status(405).json({ message: 'Method not allowed' })
     }
@@ -25,7 +22,9 @@ export default APIAccessController(
       res.status(200).json(updated)
     } catch (error) {
       console.error('Error unassigning worker from adoration slot:', error)
-      res.status(500).json({ message: 'Chyba při odebírání pracanta z adoračního slotu.' })
+      res
+        .status(500)
+        .json({ message: 'Chyba při odebírání pracanta z adoračního slotu.' })
     }
   }
 )

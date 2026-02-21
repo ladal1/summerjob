@@ -33,8 +33,13 @@ type PostForm = z.input<typeof schema>
 interface EditPostProps {
   serializedPost: Serialized
   allDates: DateBool[][]
+  accessedFromReception: boolean
 }
-export default function EditPost({ serializedPost, allDates }: EditPostProps) {
+export default function EditPost({
+  serializedPost,
+  allDates,
+  accessedFromReception,
+}: EditPostProps) {
   const post = deserializePost(serializedPost)
   const { data: workers } = useAPIWorkers()
   const {
@@ -314,130 +319,134 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
       }
     >
       <form id="edit-post" onSubmit={handleSubmit(onSubmit)}>
-        <TextInput
-          id="name"
-          label="Název"
-          placeholder="Název"
-          register={() =>
-            register('name', {
-              onChange: e => {
-                e.target.value = removeRedundantSpace(e.target.value)
-              },
-            })
-          }
-          errors={errors}
-          mandatory
-          margin={false}
-        />
-        <MarkdownEditor
-          id="shortDescription"
-          label="Krátký popis"
-          placeholder="Popis příspěvku... (podporuje Markdown formátování)"
-          rows={3}
-          register={() => register('shortDescription')}
-          errors={errors as FieldErrors<Record<string, unknown>>}
-          mandatory
-        />
-        <MarkdownEditor
-          id="longDescription"
-          label="Dlouhý popis"
-          placeholder="Detailní popis příspěvku... (podporuje Markdown formátování)"
-          rows={6}
-          register={() => register('longDescription')}
-          errors={errors as FieldErrors<Record<string, unknown>>}
-        />
-        <div className="d-flex flex-row">
-          <DateSelectionInput
-            id="availability"
-            label="Platné pro dny"
-            register={() => register('availability')}
-            days={allDates}
-          />
-        </div>
-        <TimeInput
-          label="Čas"
-          register={register}
-          errors={errors}
-          setValue={setValue}
-          timeFromId="timeFrom"
-          timeToId="timeTo"
-        />
-        <MapInput
-          address={{
-            id: 'address',
-            label: 'Adresa',
-            placeholder: 'Adresa',
-            init: post.address ?? '',
-            register: registerAdress,
-          }}
-          coordinates={{
-            id: 'coordinates',
-            label: 'Souřadnice',
-            placeholder: '0, 0',
-            init: getCoordinates(),
-            register: registerCoordinates,
-          }}
-          errors={errors}
-        />
-        <ImageUploader
-          id="photoFile"
-          label="Fotografie"
-          secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-          photoInit={
-            post.photoPath
-              ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
-              : null
-          }
-          errors={errors}
-          registerPhoto={registerPhoto}
-          removeNewPhoto={removeNewPhoto}
-          removeExistingPhoto={removeExistingPhoto}
-        />
-        <PillSelectInput
-          id="tags"
-          label="Tagy"
-          placeholder={'Vyberte tagy'}
-          items={manageTagSelectItems()}
-          init={fetchTagSelectItems(post.tags)}
-          removeExisting={removeExistingTag}
-          register={selectTags}
-          errors={errors}
-        />
-        {isOpenForParticipants && !isMandatory && (
+        {!accessedFromReception && (
           <>
             <TextInput
-              id="maxParticipants"
-              type="number"
-              label="Maximální počet účastníků"
-              placeholder="Maximální počet účastníků"
-              min={1}
+              id="name"
+              label="Název"
+              placeholder="Název"
               register={() =>
-                register('maxParticipants', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
+                register('name', {
+                  onChange: e => {
+                    e.target.value = removeRedundantSpace(e.target.value)
+                  },
                 })
               }
               errors={errors}
+              mandatory
+              margin={false}
             />
+            <MarkdownEditor
+              id="shortDescription"
+              label="Krátký popis"
+              placeholder="Popis příspěvku... (podporuje Markdown formátování)"
+              rows={3}
+              register={() => register('shortDescription')}
+              errors={errors as FieldErrors<Record<string, unknown>>}
+              mandatory
+            />
+            <MarkdownEditor
+              id="longDescription"
+              label="Dlouhý popis"
+              placeholder="Detailní popis příspěvku... (podporuje Markdown formátování)"
+              rows={6}
+              register={() => register('longDescription')}
+              errors={errors as FieldErrors<Record<string, unknown>>}
+            />
+            <div className="d-flex flex-row">
+              <DateSelectionInput
+                id="availability"
+                label="Platné pro dny"
+                register={() => register('availability')}
+                days={allDates}
+              />
+            </div>
+            <TimeInput
+              label="Čas"
+              register={register}
+              errors={errors}
+              setValue={setValue}
+              timeFromId="timeFrom"
+              timeToId="timeTo"
+            />
+            <MapInput
+              address={{
+                id: 'address',
+                label: 'Adresa',
+                placeholder: 'Adresa',
+                init: post.address ?? '',
+                register: registerAdress,
+              }}
+              coordinates={{
+                id: 'coordinates',
+                label: 'Souřadnice',
+                placeholder: '0, 0',
+                init: getCoordinates(),
+                register: registerCoordinates,
+              }}
+              errors={errors}
+            />
+            <ImageUploader
+              id="photoFile"
+              label="Fotografie"
+              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+              photoInit={
+                post.photoPath
+                  ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
+                  : null
+              }
+              errors={errors}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
+              removeExistingPhoto={removeExistingPhoto}
+            />
+            <PillSelectInput
+              id="tags"
+              label="Tagy"
+              placeholder={'Vyberte tagy'}
+              items={manageTagSelectItems()}
+              init={fetchTagSelectItems(post.tags)}
+              removeExisting={removeExistingTag}
+              register={selectTags}
+              errors={errors}
+            />
+            {isOpenForParticipants && !isMandatory && (
+              <>
+                <TextInput
+                  id="maxParticipants"
+                  type="number"
+                  label="Maximální počet účastníků"
+                  placeholder="Maximální počet účastníků"
+                  min={1}
+                  register={() =>
+                    register('maxParticipants', {
+                      valueAsNumber: true,
+                      onChange: e =>
+                        (e.target.value = formatNumber(e.target.value)),
+                    })
+                  }
+                  errors={errors}
+                />
+              </>
+            )}
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+              objects={[
+                {
+                  id: 'isMandatory',
+                  icon: 'fas fa-people-pulling',
+                  label: 'Povinná účast pro všechny',
+                },
+                {
+                  id: 'isOpenForParticipants',
+                  icon: 'fas fa-door-open',
+                  label: 'Otevřeno pro zapsání účastníky',
+                },
+              ]}
+            />{' '}
           </>
         )}
-        <OtherAttributesInput
-          label="Další vlastnosti"
-          register={register}
-          objects={[
-            {
-              id: 'isMandatory',
-              icon: 'fas fa-people-pulling',
-              label: 'Povinná účast pro všechny',
-            },
-            {
-              id: 'isOpenForParticipants',
-              icon: 'fas fa-door-open',
-              label: 'Otevřeno pro zapsání účastníky',
-            },
-          ]}
-        />{' '}
         <Label id={'participants'} label="Zapsaní účastníci" />
         {/* Add new participants */}
         <div className="mb-3">

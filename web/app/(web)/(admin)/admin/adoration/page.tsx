@@ -1,5 +1,5 @@
 import { getActiveSummerJobEvent } from 'lib/data/summerjob-event'
-import { getSMJSession } from 'lib/auth/auth'
+import { getSMJSession, isAccessAllowed } from 'lib/auth/auth'
 import { Permission } from 'lib/types/auth'
 import AdminAdorationManager from 'lib/components/adoration/AdorationAdminPage'
 
@@ -13,7 +13,13 @@ export default async function AdminAdorationPage() {
     return <p className="mt-5 text-center">Žádný aktivní ročník</p>
   }
 
-  const canDeleteSlots = session?.permissions.includes(Permission.ADMIN) ?? false
+  const canDeleteSlots =
+    session?.permissions.includes(Permission.ADMIN) ?? false
+
+  const canModifyAdorations = isAccessAllowed(
+    [Permission.ADMIN, Permission.ADORATION],
+    session
+  )
 
   return (
     <div className="container mt-4">
@@ -21,9 +27,10 @@ export default async function AdminAdorationPage() {
         event={{
           id: event.id,
           startDate: event.startDate.toISOString(),
-          endDate: event.endDate.toISOString()
+          endDate: event.endDate.toISOString(),
         }}
         canDeleteSlots={canDeleteSlots}
+        canModifyAdorations={canModifyAdorations}
       />
     </div>
   )

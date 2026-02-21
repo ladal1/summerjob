@@ -1,4 +1,4 @@
-import { getSMJSession, withPermissions } from 'lib/auth/auth'
+import { getSMJSession, isAccessAllowed, withPermissions } from 'lib/auth/auth'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import PostsClientPage from 'lib/components/post/PostsClientPage'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
@@ -7,7 +7,7 @@ import { Permission } from 'lib/types/auth'
 import { serializePosts } from 'lib/types/post'
 
 export const metadata = {
-  title: 'Nástěnka'
+  title: 'Nástěnka',
 }
 
 export const dynamic = 'force-dynamic'
@@ -18,11 +18,14 @@ export default async function PostsPage() {
 
   const isAdvancedAccessAllowed = await withPermissions([Permission.POSTS])
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-   
+
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
   const session = await getSMJSession()
+
+  const accessedFromReception =
+    session?.permissions.includes(Permission.RECEPTION) ?? false
   return (
     <PostsClientPage
       sPosts={sPosts}
@@ -30,7 +33,7 @@ export default async function PostsPage() {
       endDate={endDate.toJSON()}
       allDates={allDates}
       advancedAccess={isAdvancedAccessAllowed.success}
-       
+      accessedFromReception={accessedFromReception}
       userId={session!.userID}
     />
   )

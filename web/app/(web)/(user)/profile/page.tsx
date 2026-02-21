@@ -44,6 +44,7 @@ export default async function MyProfilePage() {
         serializedWorker={serializedWorker}
         allDates={allDates}
         isProfilePage={true}
+        accessedFromReception={false}
         carAccess={isCarAccessAllowed.success}
         label="Upravit profil"
         oauthLinks={oauthLinks}
