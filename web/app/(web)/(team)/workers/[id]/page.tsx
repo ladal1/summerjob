@@ -40,7 +40,11 @@ export default async function EditWorkerPage(props: Params) {
         isProfilePage={false}
         accessedFromReception={accessedFromReception}
         carAccess={isCarAccessAllowed.success}
-        label="Upravit pracanta"
+        label={
+          accessedFromReception
+            ? `Upravit pracanta - ${worker.firstName} ${worker.lastName}`
+            : 'Upravit pracanta'
+        }
       />
     </>
   )
