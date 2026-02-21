@@ -24,7 +24,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/plans',
       name: 'Plány',
       icon: 'fas fa-calendar-days',
-      permissions: [Permission.PLANS],
+      permissions: [Permission.PLANS, Permission.RECEPTION],
     },
     {
       path: '/jobs',

@@ -3,7 +3,7 @@ import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import { Permission } from 'lib/types/auth'
 
 export const metadata = {
-  title: 'Plány'
+  title: 'Plány',
 }
 
 export default async function PlansLayout({
@@ -11,7 +11,10 @@ export default async function PlansLayout({
 }: {
   children: React.ReactNode
 }) {
-  const isAllowed = await withPermissions([Permission.PLANS])
+  const isAllowed = await withPermissions([
+    Permission.PLANS,
+    Permission.RECEPTION,
+  ])
   if (!isAllowed.success) {
     return <AccessDeniedPage />
   }

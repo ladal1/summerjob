@@ -24,6 +24,7 @@ interface PlanTableProps {
   showNumbers?: boolean
   sortOrder?: SortOrder
   onSortOrderChange?: (sortOrder: SortOrder) => void
+  accessedFromReception: boolean
 }
 
 export function PlanTable({
@@ -37,6 +38,7 @@ export function PlanTable({
   showNumbers = false,
   sortOrder: initialSortOrder,
   onSortOrderChange,
+  accessedFromReception,
 }: PlanTableProps) {
   // Create dynamic columns based on showNumbers
   const columns: SortableColumn[] = useMemo(() => {
@@ -53,30 +55,32 @@ export function PlanTable({
       { id: 'address', name: 'Adresa' },
       { id: 'amenities', name: 'Zajištění' },
       { id: 'priority', name: showNumbers ? 'Číslo' : 'Priorita' },
-      {
+    ]
+    if (!accessedFromReception) {
+      baseColumns.push({
         id: 'actions',
         name: 'Akce',
         notSortable: true,
         stickyRight: true,
         style: { minWidth: '100px' },
-      },
-    ]
+      })
+    }
     return baseColumns
   }, [showNumbers])
 
   // Create position mapping based on sortJobsByAreaAndId function
   const jobPositionMap = useMemo(() => {
     if (!plan) return new Map<string, number>()
-    
+
     const jobsWithPositions = sortJobsByAreaAndId([...plan.jobs])
     const positionMap = new Map<string, number>()
-    
+
     jobsWithPositions.forEach(job => {
       if (job.seqId) {
         positionMap.set(job.id, job.seqId)
       }
     })
-    
+
     return positionMap
   }, [plan])
 
@@ -93,8 +97,10 @@ export function PlanTable({
       contact: (job: ActiveJobNoPlan) => job.proposedJob.contact,
       workers: (job: ActiveJobNoPlan) =>
         `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers} .. ${job.proposedJob.strongWorkers}`,
-      priority: (job: ActiveJobNoPlan) => 
-        showNumbers ? (jobPositionMap.get(job.id) || 0) : job.proposedJob.priority,
+      priority: (job: ActiveJobNoPlan) =>
+        showNumbers
+          ? jobPositionMap.get(job.id) || 0
+          : job.proposedJob.priority,
     }),
     [showNumbers, jobPositionMap]
   )
@@ -157,6 +163,7 @@ export function PlanTable({
             onWorkerHover={onHover}
             adorationByWorker={adorationByWorker}
             jobPositionMap={showNumbers ? jobPositionMap : new Map()}
+            accessedFromReception={accessedFromReception}
           />
         ))}
       {joblessWorkers && plan && (
@@ -170,6 +177,7 @@ export function PlanTable({
           reloadPlan={reload}
           onWorkerHover={onHover}
           adorationByWorker={adorationByWorker}
+          accessedFromReception={accessedFromReception}
         />
       )}
     </SortableTable>
