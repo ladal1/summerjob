@@ -1,3 +1,4 @@
+import { JobInfo } from 'app/(print)/print-plan/[id]/page'
 import PostType from 'lib/components/post/PostType'
 import AdorationSlotTable from 'lib/components/status-page/AdorationSlotTable'
 import AutoRefresh from 'lib/components/status-page/AutoRefresh'
@@ -28,9 +29,9 @@ export default async function StatusPage() {
   const plan = await getPlanByDate(date)
 
   return (
-    <>
+    <div className="mb-5">
       <AutoRefresh seconds={60} />
-      <AutoScroll intervalMs={20} stepPx={1}>
+      <AutoScroll intervalMs={20} stepPx={2}>
         <section>
           <h2 className="mb-4 fs-1">Dnešní události</h2>
 
@@ -92,12 +93,16 @@ export default async function StatusPage() {
         <section>
           {plan !== null ? (
             <>
-              <h2 className="fs-1">
-                Plán na {`${plan.day.getDate()}. ${plan.day.getMonth() + 1}. `}
+              <h2 className="fs-1 mb-4">
+                Plán - {formatDateLong(plan.day, false)}
               </h2>
-              <ol>
+              <ol className="list-unstyled w-75">
                 {plan.jobs.map(job => {
-                  return <li key={job.id}>{job.proposedJob.name}</li>
+                  return (
+                    <li key={job.id}>
+                      <JobInfo job={job} jobs={plan.jobs}></JobInfo>
+                    </li>
+                  )
                 })}
               </ol>
             </>
@@ -109,7 +114,7 @@ export default async function StatusPage() {
           )}
         </section>
       </AutoScroll>
-    </>
+    </div>
   )
 }
 

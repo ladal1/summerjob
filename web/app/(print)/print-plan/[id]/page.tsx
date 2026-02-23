@@ -53,7 +53,7 @@ export default async function PrintPlanPage(props: PathProps) {
   )
 }
 
-function JobInfo({
+export function JobInfo({
   job,
   jobs,
 }: {
