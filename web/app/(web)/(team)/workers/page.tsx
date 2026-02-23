@@ -11,9 +11,8 @@ export default async function WorkersPage() {
   const sWorkers = serializeWorkers(workers)
 
   const session = await getSMJSession()
-  const accessedFromReception = session?.permissions.includes(
-    Permission.RECEPTION
-  )
+  const accessedFromReception =
+    session?.permissions.includes(Permission.RECEPTION) ?? false
 
   return (
     <WorkersClientPage

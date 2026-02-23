@@ -3,6 +3,8 @@ import prisma from 'lib/prisma/connection'
 import type { PrismaTransactionClient } from 'lib/types/prisma'
 import { startOfDay, endOfDay, addDays, format } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
+import { cache_getActiveSummerJobEventId } from './cache'
+import { NoActiveEventError } from './internal-error'
 
 // CEST timezone identifier
 const CEST_TZ = 'Europe/Prague'
@@ -12,16 +14,24 @@ function cestDateToUtc(date: Date): { startUTC: Date; endUTC: Date } {
   // Convert CEST date to start and end of day in UTC
   const cestStart = startOfDay(date)
   const cestEnd = endOfDay(date)
-  
+
   return {
     startUTC: fromZonedTime(cestStart, CEST_TZ),
-    endUTC: fromZonedTime(cestEnd, CEST_TZ)
+    endUTC: fromZonedTime(cestEnd, CEST_TZ),
   }
 }
 
 function createSlotTimeUtc(date: Date, hour: number, minute: number): Date {
   // Create a CEST time and convert to UTC
-  const cestTime = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour, minute, 0, 0)
+  const cestTime = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    hour,
+    minute,
+    0,
+    0
+  )
   return fromZonedTime(cestTime, CEST_TZ)
 }
 
@@ -61,7 +71,7 @@ export async function getAdorationSlotsForDayUser(
   prismaClient: PrismaTransactionClient = prisma
 ) {
   const { startUTC, endUTC } = cestDateToUtc(date)
-  
+
   const all = await prismaClient.adorationSlot.findMany({
     where: {
       eventId,
@@ -173,6 +183,37 @@ export async function getAllAdorationSlotsForEventUser(
     })
 }
 
+export async function getFreeUpcomingAdorationSlots(limit: number) {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+
+  const now = new Date()
+  const adorationSlots = await prisma.adorationSlot.findMany({
+    where: {
+      eventId: activeEventId,
+      dateStart: {
+        gte: now,
+      },
+    },
+    include: {
+      workers: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      dateStart: 'asc',
+    },
+  })
+
+  return adorationSlots
+    .filter(slot => slot.workers.length < slot.capacity)
+    .slice(0, limit)
+}
+
 export async function signUpForAdorationSlot(
   slotId: string,
   workerId: string,
@@ -212,25 +253,31 @@ export async function createAdorationSlotsBulk(
   // Calculate total start and end minutes
   const startTotalMinutes = fromHour * 60 + fromMinute
   const endTotalMinutes = toHour * 60 + toMinute
-  
+
   // Check if this is a cross-day time range (e.g., 23:00 to 07:00)
   const isCrossDay = startTotalMinutes >= endTotalMinutes
 
   let currentDate = new Date(dateFrom)
-  
+
   if (isCrossDay) {
     // For cross-day time ranges, we only want to create one continuous block
     // from startDate+startTime to endDate+endTime, not multiple daily blocks
-    
+
     // Calculate the total duration in days
-    const daysDiff = Math.floor((dateTo.getTime() - dateFrom.getTime()) / (24 * 60 * 60 * 1000))
-    
+    const daysDiff = Math.floor(
+      (dateTo.getTime() - dateFrom.getTime()) / (24 * 60 * 60 * 1000)
+    )
+
     if (daysDiff <= 1) {
       // Special case: same day or exactly 2 consecutive days selected
       // Create one continuous block from startDate+startTime to endDate+endTime (or next day if same day)
-      
+
       // First part: from start time to end of first day
-      for (let totalMinutes = startTotalMinutes; totalMinutes < 24 * 60; totalMinutes += length) {
+      for (
+        let totalMinutes = startTotalMinutes;
+        totalMinutes < 24 * 60;
+        totalMinutes += length
+      ) {
         const hour = Math.floor(totalMinutes / 60)
         const minute = totalMinutes % 60
 
@@ -249,7 +296,11 @@ export async function createAdorationSlotsBulk(
       // Second part: from start of next day to end time
       // For same-day selection with cross-midnight, we still create the next day part
       const nextDay = addDays(currentDate, 1)
-      for (let totalMinutes = 0; totalMinutes < endTotalMinutes; totalMinutes += length) {
+      for (
+        let totalMinutes = 0;
+        totalMinutes < endTotalMinutes;
+        totalMinutes += length
+      ) {
         const hour = Math.floor(totalMinutes / 60)
         const minute = totalMinutes % 60
 
@@ -266,7 +317,11 @@ export async function createAdorationSlotsBulk(
       // For multi-day ranges with cross-day times, create daily blocks as before
       while (currentDate <= dateTo) {
         // First part: from start time to end of day (23:59)
-        for (let totalMinutes = startTotalMinutes; totalMinutes < 24 * 60; totalMinutes += length) {
+        for (
+          let totalMinutes = startTotalMinutes;
+          totalMinutes < 24 * 60;
+          totalMinutes += length
+        ) {
           const hour = Math.floor(totalMinutes / 60)
           const minute = totalMinutes % 60
 
@@ -284,10 +339,14 @@ export async function createAdorationSlotsBulk(
 
         // Second part: from start of next day (00:00) to end time
         const nextDay = addDays(currentDate, 1)
-        
+
         // Only create next day slots if we're not on the last day of the range
         if (nextDay <= dateTo) {
-          for (let totalMinutes = 0; totalMinutes < endTotalMinutes; totalMinutes += length) {
+          for (
+            let totalMinutes = 0;
+            totalMinutes < endTotalMinutes;
+            totalMinutes += length
+          ) {
             const hour = Math.floor(totalMinutes / 60)
             const minute = totalMinutes % 60
 
@@ -308,7 +367,11 @@ export async function createAdorationSlotsBulk(
   } else {
     // Handle normal same-day time range (e.g., 08:00 to 17:00)
     while (currentDate <= dateTo) {
-      for (let totalMinutes = startTotalMinutes; totalMinutes < endTotalMinutes; totalMinutes += length) {
+      for (
+        let totalMinutes = startTotalMinutes;
+        totalMinutes < endTotalMinutes;
+        totalMinutes += length
+      ) {
         const hour = Math.floor(totalMinutes / 60)
         const minute = totalMinutes % 60
 

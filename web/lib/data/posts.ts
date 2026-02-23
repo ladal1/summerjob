@@ -81,6 +81,43 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
   }
 }
 
+export async function getPostsByDate(
+  date: Date
+): Promise<PostComplete[] | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const posts = await prisma.post.findMany({
+    where: {
+      forEventId: activeEventId,
+      availability: {
+        has: date,
+      },
+    },
+    include: {
+      participants: {
+        select: {
+          workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+  })
+  if (!posts) {
+    return null
+  }
+  return posts.map(post => ({
+    ...post,
+    tags: post.tags as unknown as PostTag[],
+  }))
+}
+
 export async function getPostPhotoById(
   id: string,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
