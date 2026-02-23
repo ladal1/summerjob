@@ -46,8 +46,14 @@ export default async function PostCard({ post }: PostCardProps) {
         )}
 
         {post.isMandatory && (
-          <div className="bg-danger text-light rounded px-2 align-self-start">
+          <div className="bg-danger text-light rounded px-2 my-1 align-self-start">
             POVINNÁ ÚČAST
+          </div>
+        )}
+
+        {post.isOpenForParticipants && (
+          <div className="bg-success text-light rounded px-2 my-1 align-self-start">
+            MOŽNOST ZAPSÁNÍ
           </div>
         )}
       </div>

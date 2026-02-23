@@ -30,7 +30,7 @@ export default async function StatusPage() {
 
   return (
     <div className="mb-5">
-      <AutoRefresh seconds={60} />
+      <AutoRefresh seconds={15} />
       <AutoScroll intervalMs={20} stepPx={2}>
         <section>
           <h2 className="mb-4 fs-1">Dnešní události</h2>
@@ -121,7 +121,7 @@ export default async function StatusPage() {
 function getPlanDate() {
   // Show today's plan if it is before 15:00, show tomorrow's plan otherwise
   const date = new Date()
-  if (date.getHours() >= 16) {
+  if (date.getHours() + 1 >= 15) {
     date.setDate(date.getDate() + 1)
   }
   return getDateMidnight(date)

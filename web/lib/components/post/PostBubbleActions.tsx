@@ -41,7 +41,7 @@ export const PostBubbleActions = ({
     triggerUpdate({ isPinned: pinned })
   }
 
-  if (accessedFromReception) {
+  if (accessedFromReception && post.isOpenForParticipants) {
     return (
       <span>
         <Link

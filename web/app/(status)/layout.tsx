@@ -8,7 +8,7 @@ export default async function WebLayout({
 }) {
   return (
     <>
-      <main className="px-5 py-3">{children}</main>
+      <main className="px-5 pt-3 pb-5">{children}</main>
     </>
   )
 }
