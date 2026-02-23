@@ -2,11 +2,11 @@ import { PostComplete } from 'lib/types/post'
 import { IconAndLabel } from '../forms/IconAndLabel'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 
-interface PostBubbleProps {
+interface PostCardProps {
   post: PostComplete
 }
 
-export default async function PostBubble({ post }: PostBubbleProps) {
+export default async function PostCard({ post }: PostCardProps) {
   const hasTime = post.timeFrom !== null && post.timeTo !== null
   const hasAddress = post.address !== null
   const hasDescription =
@@ -53,8 +53,4 @@ export default async function PostBubble({ post }: PostBubbleProps) {
       </div>
     </div>
   )
-}
-
-function formatPostTime(from: string, to: string) {
-  return `${from} - ${to}`
 }

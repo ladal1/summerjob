@@ -5,7 +5,6 @@ import { useEffect } from 'react'
 interface AutoScrollProps {
   intervalMs: number
   stepPx: number
-  pauseMs: number
   children: React.ReactNode
 }
 

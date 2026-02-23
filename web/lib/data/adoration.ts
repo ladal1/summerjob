@@ -5,6 +5,7 @@ import { startOfDay, endOfDay, addDays, format } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
+import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 
 // CEST timezone identifier
 const CEST_TZ = 'Europe/Prague'
@@ -183,7 +184,9 @@ export async function getAllAdorationSlotsForEventUser(
     })
 }
 
-export async function getFreeUpcomingAdorationSlots(limit: number) {
+export async function getFreeUpcomingAdorationSlots(
+  limit: number
+): Promise<AdorationSlotWithWorkerIds[]> {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
