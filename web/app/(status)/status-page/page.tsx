@@ -120,10 +120,10 @@ export default async function StatusPage() {
               <h2 className="fs-1 mb-4">
                 Plán - {formatDateLong(plan.day, false)}
               </h2>
-              <ol className="list-unstyled w-75">
+              <ol className="list-unstyled d-flex flex-wrap">
                 {plan.jobs.map(job => {
                   return (
-                    <li key={job.id}>
+                    <li key={job.id} className="w-50">
                       <JobInfo job={job} jobs={plan.jobs}></JobInfo>
                     </li>
                   )
