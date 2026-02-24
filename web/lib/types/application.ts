@@ -1,10 +1,16 @@
 import { z } from 'zod'
 
-const today = new Date()
-today.setHours(0, 0, 0, 0)
+function getToday() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
 
-const minBirthDate = new Date()
-minBirthDate.setFullYear(minBirthDate.getFullYear() - 18)
+function getMinBirthDate() {
+  const minBirthDate = new Date()
+  minBirthDate.setFullYear(minBirthDate.getFullYear() - 18)
+  return minBirthDate
+}
 
 export const ApplicationCreateSchema = z
   .object({
@@ -17,13 +23,12 @@ export const ApplicationCreateSchema = z
       .min(1, 'Příjmení je povinné')
       .max(50, 'Příjmení je příliš dlouhé'),
     birthDate: z.coerce
-      .date<Date>()
-      .refine(date => date <= minBirthDate, {
-        message: 'Musíte být starší 18 let',
-      })
-      .refine(date => date <= today, {
-        message: 'Datum narození nemůže být v budoucnosti',
-      }),
+      .date()
+      .refine(date => date <= getMinBirthDate(), 'Musíte být starší 18 let')
+      .refine(
+        date => date <= getToday(),
+        'Datum narození nemůže být v budoucnosti'
+      ),
     gender: z.enum(['Muž', 'Žena']),
     phone: z
       .string()
@@ -41,12 +46,18 @@ export const ApplicationCreateSchema = z
       .min(1, 'Adresa je povinná')
       .max(200, 'Adresa je příliš dlouhá'),
     pastParticipation: z.boolean(),
-    arrivalDate: z.coerce.date<Date>().refine(date => date >= today, {
-      message: 'Datum příjezdu nemůže být v minulosti',
-    }),
-    departureDate: z.coerce.date<Date>().refine(date => date >= today, {
-      message: 'Datum odjezdu nemůže být v minulosti',
-    }),
+    arrivalDate: z.coerce
+      .date()
+      .refine(
+        date => date >= getToday(),
+        'Datum příjezdu nemůže být v minulosti'
+      ),
+    departureDate: z.coerce
+      .date()
+      .refine(
+        date => date >= getToday(),
+        'Datum odjezdu nemůže být v minulosti'
+      ),
     foodAllergies: z
       .string()
       .max(200, 'Text je příliš dlouhý, max 200 znaků.')
