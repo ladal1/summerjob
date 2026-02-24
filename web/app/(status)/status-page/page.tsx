@@ -37,7 +37,7 @@ export default async function StatusPage() {
   return (
     <div className="mb-5">
       <AutoRefresh seconds={15} />
-      <AutoScroll intervalMs={20} stepPx={0}>
+      <AutoScroll intervalMs={20} stepPx={2}>
         <section>
           <h2 className="mb-4 fs-1">Nadcházející události</h2>
           <section className="mb-5">
