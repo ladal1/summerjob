@@ -11,6 +11,8 @@ import { compareTimes, formatDateLong } from 'lib/helpers/helpers'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 import { PostComplete } from 'lib/types/post'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StatusPage() {
   const date = getPlanDate()
 
