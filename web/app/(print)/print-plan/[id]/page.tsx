@@ -46,7 +46,12 @@ export default async function PrintPlanPage(props: PathProps) {
         </div>
 
         {sortedJobs.map(job => (
-          <JobInfo job={job} jobs={sortedJobs} key={job.id}></JobInfo>
+          <JobInfo
+            job={job}
+            jobs={sortedJobs}
+            isPrintPage={true}
+            key={job.id}
+          ></JobInfo>
         ))}
       </div>
     </>
@@ -56,9 +61,11 @@ export default async function PrintPlanPage(props: PathProps) {
 export function JobInfo({
   job,
   jobs,
+  isPrintPage,
 }: {
   job: ActiveJobNoPlan
   jobs: ActiveJobNoPlan[]
+  isPrintPage: boolean
 }) {
   const otherJobs = jobs.filter(j => j.id !== job.id)
   return (
@@ -72,13 +79,19 @@ export function JobInfo({
               {job.proposedJob.publicDescription}
             </ReactMarkdown>
           </div>
-          <div
-            className="mb-2"
-            style={{ fontSize: '1.1em', fontWeight: 'bold', color: '#d63384' }}
-          >
-            <i className="fas fa-user-nurse me-1"></i>
-            Zdravotník: 732 403 990
-          </div>
+          {isPrintPage && (
+            <div
+              className="mb-2"
+              style={{
+                fontSize: '1.1em',
+                fontWeight: 'bold',
+                color: '#d63384',
+              }}
+            >
+              <i className="fas fa-user-nurse me-1"></i>
+              Zdravotník: 732 403 990
+            </div>
+          )}
           <div>
             <i className="fas fa-user-group me-1"></i>
             {job.workers.length == 0 && 'Nikdo'}

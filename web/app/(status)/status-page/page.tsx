@@ -37,11 +37,11 @@ export default async function StatusPage() {
   return (
     <div className="mb-5">
       <AutoRefresh seconds={15} />
-      <AutoScroll intervalMs={20} stepPx={2}>
+      <AutoScroll intervalMs={20} stepPx={0}>
         <section>
           <h2 className="mb-4 fs-1">Nadcházející události</h2>
-          <section className="mb-5">
-            <h3>Obecné</h3>
+          <section className="">
+            <h4>Dnešní</h4>
             {generalPosts && generalPosts.length > 0 ? (
               <>
                 <section className="flex-grow-1">
@@ -61,10 +61,8 @@ export default async function StatusPage() {
             )}
           </section>
 
-          <h3>Časové</h3>
           {todayTimePosts && todayTimePosts.length > 0 && (
             <div className="mb-5">
-              <h4>Dnešní</h4>
               <ol className="list-unstyled d-flex flex-wrap gap-2">
                 {todayTimePosts?.map(post => {
                   return (
@@ -124,7 +122,11 @@ export default async function StatusPage() {
                 {plan.jobs.map(job => {
                   return (
                     <li key={job.id} className="w-50">
-                      <JobInfo job={job} jobs={plan.jobs}></JobInfo>
+                      <JobInfo
+                        job={job}
+                        jobs={plan.jobs}
+                        isPrintPage={false}
+                      ></JobInfo>
                     </li>
                   )
                 })}
