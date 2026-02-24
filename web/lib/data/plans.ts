@@ -202,7 +202,7 @@ export async function getPlanByDate(date: Date): Promise<PlanComplete | null> {
     throw new NoActiveEventError()
   }
   const plan = await prisma.plan.findUnique({
-    where: { day: date, published: true },
+    where: { day: date, published: true, summerJobEventId: activeEventId },
     include: {
       jobs: {
         include: {

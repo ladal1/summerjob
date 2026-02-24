@@ -19,8 +19,8 @@ export default async function AdorationSlotTable({
       <table className="table table-striped align-middle mb-4">
         <thead className="table-primary">
           <tr>
-            <th scope="col">Čas</th>
-            <th scope="col">Místo</th>
+            <th scope="col w-25">Čas</th>
+            <th scope="col w-50">Místo</th>
             <th scope="col">Zaplněnost</th>
           </tr>
         </thead>
@@ -33,10 +33,10 @@ export default async function AdorationSlotTable({
             const endTimeStr = format(endTime, 'HH:mm')
             return (
               <tr key={slot.id}>
-                <td>
+                <td className="w-25">
                   {startTimeStr} - {endTimeStr}
                 </td>
-                <td>{slot.location}</td>
+                <td className="w-50">{slot.location}</td>
                 <td>
                   {slot.workers.length} / {slot.capacity}
                 </td>
