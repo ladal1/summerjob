@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { format, differenceInCalendarDays } from 'date-fns'
+import { format, differenceInCalendarDays, parseISO } from 'date-fns'
 import Link from 'next/link'
 import { PhotoOnClickModal } from '../photo/PhotoOnClickModal'
 import { IconAndLabel } from '../forms/IconAndLabel'
@@ -103,8 +103,8 @@ export default function ApplicationAdminDetailPage() {
 
   const workingDays =
     differenceInCalendarDays(
-      new Date(application.departureDate),
-      new Date(application.arrivalDate)
+      parseISO(application.departureDate),
+      parseISO(application.arrivalDate)
     ) + 1
 
   return (
@@ -121,15 +121,15 @@ export default function ApplicationAdminDetailPage() {
               application.status === 'PENDING'
                 ? 'text-warning'
                 : application.status === 'ACCEPTED'
-                ? 'text-success'
-                : 'text-danger'
+                  ? 'text-success'
+                  : 'text-danger'
             }
           >
             {application.status === 'PENDING'
               ? 'Čeká na schválení'
               : application.status === 'ACCEPTED'
-              ? 'Přijato'
-              : 'Zamítnuto'}
+                ? 'Přijato'
+                : 'Zamítnuto'}
           </span>
         </span>
 
@@ -173,7 +173,7 @@ export default function ApplicationAdminDetailPage() {
               </tr>
               <tr>
                 <th scope="row">Datum narození</th>
-                <td>{format(new Date(application.birthDate), 'd. M. yyyy')}</td>
+                <td>{format(parseISO(application.birthDate), 'd. M. yyyy')}</td>
               </tr>
               <tr>
                 <th scope="row">Pohlaví</th>
@@ -206,13 +206,13 @@ export default function ApplicationAdminDetailPage() {
               <tr>
                 <th scope="row">Datum příjezdu</th>
                 <td>
-                  {format(new Date(application.arrivalDate), 'd. M. yyyy')}
+                  {format(parseISO(application.arrivalDate), 'd. M. yyyy')}
                 </td>
               </tr>
               <tr>
                 <th scope="row">Datum odjezdu</th>
                 <td>
-                  {format(new Date(application.departureDate), 'd. M. yyyy')}
+                  {format(parseISO(application.departureDate), 'd. M. yyyy')}
                 </td>
               </tr>
               <tr>

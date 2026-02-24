@@ -30,7 +30,10 @@ const fieldLabels: Partial<Record<keyof ApplicationCreateDataInput, string>> = {
 
 const formatValue = (value: unknown): string => {
   if (value instanceof Date) {
-    return value.toLocaleDateString('cs-CZ')
+    return value.toLocaleDateString('cs-CZ', { timeZone: 'UTC' })
+  }
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}(T|\s)/.test(value)) {
+    return new Date(value).toLocaleDateString('cs-CZ', { timeZone: 'UTC' })
   }
   if (typeof value === 'boolean') {
     return value ? 'Ano' : 'Ne'

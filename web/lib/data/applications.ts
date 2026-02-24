@@ -13,9 +13,12 @@ import {
 } from 'lib/types/application'
 import { getApplicationsUploadDir } from 'lib/api/fileManager'
 import type { Prisma } from 'lib/prisma/client'
+import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 
 export async function getApplications() {
+  const activeEventId = await cache_getActiveSummerJobEventId()
   return prisma.application.findMany({
+    where: activeEventId ? { forEventId: activeEventId } : undefined,
     orderBy: { createdAt: 'desc' },
   })
 }
@@ -28,6 +31,7 @@ export async function getApplicationById(id: string) {
 
 export async function createApplication(
   data: ApplicationCreateDataInput,
+  eventId: string,
   file: formidable.File | undefined = undefined,
   prismaClient: PrismaTransactionClient = prisma
 ) {
@@ -58,6 +62,7 @@ export async function createApplication(
         ownsCar: data.ownsCar,
         canBeMedic: data.canBeMedic,
         photo: '',
+        forEventId: eventId,
       },
     })
   } catch (error) {
@@ -173,8 +178,13 @@ export async function getApplicationsPaginated(
   search?: string
 ) {
   const skip = (page - 1) * perPage
+  const activeEventId = await cache_getActiveSummerJobEventId()
 
   let where: Prisma.ApplicationFindManyArgs['where'] = {}
+
+  if (activeEventId) {
+    where.forEventId = activeEventId
+  }
 
   if (status) {
     where.status = status

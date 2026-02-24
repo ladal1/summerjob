@@ -65,7 +65,7 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
       ? files.photoFile[0]
       : files.photoFile
     : undefined
-  const application = await createApplication(applicationData, file)
+  const application = await createApplication(applicationData, eventId, file)
 
   try {
     await sendApplicationSummaryEmail(applicationData.email, applicationData)
