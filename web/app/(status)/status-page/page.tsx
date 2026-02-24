@@ -1,47 +1,51 @@
 import { JobInfo } from 'app/(print)/print-plan/[id]/page'
-import PostType from 'lib/components/post/PostType'
+import { toZonedTime } from 'date-fns-tz'
 import AdorationSlotTable from 'lib/components/status-page/AdorationSlotTable'
 import AutoRefresh from 'lib/components/status-page/AutoRefresh'
 import AutoScroll from 'lib/components/status-page/AutoScroll'
 import PostCard from 'lib/components/status-page/PostCard'
 import { getFreeUpcomingAdorationSlots } from 'lib/data/adoration'
 import { getPlanByDate } from 'lib/data/plans'
-import { getPostsByDate } from 'lib/data/posts'
-import { compareTimes, formatDateLong } from 'lib/helpers/helpers'
+import { getGeneralPostsByDate, getTimePostsByDate } from 'lib/data/posts'
+import { formatDateLong, getDateMidnight } from 'lib/helpers/helpers'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
+import { sortJobsByAreaAndId } from 'lib/types/plan'
 import { PostComplete } from 'lib/types/post'
 
 export const dynamic = 'force-dynamic'
 
 export default async function StatusPage() {
   const date = getPlanDate()
+  const now = new Date()
+  const todayMidnight = getDateMidnight(now)
+  const tomorrowMidnight = new Date(
+    todayMidnight.getTime() + 24 * 60 * 60 * 1000
+  )
 
-  const todayMidnight = getDateMidnight(new Date())
-  const posts = await getPostsByDate(todayMidnight)
-  const timePosts =
-    posts
-      ?.filter(post => post.timeFrom !== null && post.timeTo !== null)
-      .sort(comparePosts) ?? []
-  const generalPosts =
-    posts?.filter(post => post.timeFrom === null || post.timeTo === null) ?? []
+  const generalPosts = await getGeneralPostsByDate(todayMidnight)
+  const todayTimePosts = filterTodayPosts(
+    await getTimePostsByDate(todayMidnight)
+  )
+  const tomorrowTimePosts = await getTimePostsByDate(tomorrowMidnight)
 
   const adorationSlots = await getFreeUpcomingAdorationSlots(10)
   const groupedAdorationSlots = groupAdorationSlotsByDay(adorationSlots)
 
   const plan = await getPlanByDate(date)
+  const sortedJobs = plan ? sortJobsByAreaAndId(plan.jobs) : []
 
   return (
     <div className="mb-5">
       <AutoRefresh seconds={15} />
       <AutoScroll intervalMs={20} stepPx={0}>
         <section>
-          <h2 className="mb-4 fs-1">Dnešní události</h2>
-
-          {posts !== null ? (
-            <div className="d-flex flex-column gap-4 flex-lg-row">
-              <section className="flex-grow-1">
-                <PostType title={'Obecné'}>
-                  <ol className="list-unstyled">
+          <h2 className="mb-4 fs-1">Nadcházející události</h2>
+          <section className="mb-5">
+            <h3>Obecné</h3>
+            {generalPosts && generalPosts.length > 0 ? (
+              <>
+                <section className="flex-grow-1">
+                  <ol className="list-unstyled d-flex flex-wrap gap-2">
                     {generalPosts.map(post => {
                       return (
                         <li key={post.id}>
@@ -50,32 +54,50 @@ export default async function StatusPage() {
                       )
                     })}
                   </ol>
-                </PostType>
-              </section>
-              <section className="flex-grow-1">
-                <PostType title={'Časové'}>
-                  <ol className="list-unstyled">
-                    {timePosts.map(post => {
-                      return (
-                        <li key={post.id}>
-                          <PostCard post={post} />
-                        </li>
-                      )
-                    })}
-                  </ol>
-                </PostType>
-              </section>
+                </section>
+              </>
+            ) : (
+              <span>Žádné události</span>
+            )}
+          </section>
+
+          <h3>Časové</h3>
+          {todayTimePosts && todayTimePosts.length > 0 && (
+            <div className="mb-5">
+              <h4>Dnešní</h4>
+              <ol className="list-unstyled d-flex flex-wrap gap-2">
+                {todayTimePosts?.map(post => {
+                  return (
+                    <li key={post.id}>
+                      <PostCard post={post} />
+                    </li>
+                  )
+                })}
+              </ol>
             </div>
-          ) : (
-            <span>Žádné naplánované události</span>
           )}
+          {tomorrowTimePosts && tomorrowTimePosts.length > 0 && (
+            <>
+              <h4>Zítřejší</h4>
+              <ol className="list-unstyled d-flex flex-wrap gap-2">
+                {tomorrowTimePosts?.map(post => {
+                  return (
+                    <li key={post.id}>
+                      <PostCard post={post} />
+                    </li>
+                  )
+                })}
+              </ol>
+            </>
+          )}
+          {!todayTimePosts && !tomorrowTimePosts && <span>Žádné události</span>}
         </section>
 
         <hr></hr>
         <section className="mb-5">
           <h2 className="mb-4 fs-1">Nejbližší volné adorační sloty</h2>
           {adorationSlots !== null && groupedAdorationSlots !== null ? (
-            <ol className="list-unstyled">
+            <ol className="list-unstyled d-flex flex-wrap gap-4">
               {Array.from(groupedAdorationSlots.entries()).map(
                 ([key, slots]) => {
                   return (
@@ -122,20 +144,11 @@ export default async function StatusPage() {
 
 function getPlanDate() {
   // Show today's plan if it is before 15:00, show tomorrow's plan otherwise
-  const date = new Date()
-  if (date.getHours() + 1 >= 15) {
-    date.setDate(date.getDate() + 1)
+  const now = toZonedTime(new Date(), 'Europe/Prague')
+  if (now.getHours() >= 15) {
+    now.setDate(now.getDate() + 1)
   }
-  return getDateMidnight(date)
-}
-
-function getDateMidnight(date: Date) {
-  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-}
-
-// Function for sorting time posts
-function comparePosts(a: PostComplete, b: PostComplete) {
-  return compareTimes(a.timeFrom, b.timeFrom)
+  return getDateMidnight(now)
 }
 
 function groupAdorationSlotsByDay(
@@ -154,4 +167,23 @@ function groupAdorationSlotsByDay(
     }
   })
   return map
+}
+
+function postTimeToDate(time: string): Date {
+  const split = time.split(':')
+  const hrs = Number(split[0])
+  const min = Number(split[1])
+
+  const res = toZonedTime(new Date(), 'Europe/Prague')
+  res.setHours(hrs, min, 0, 0)
+  return res
+}
+
+function filterTodayPosts(posts: PostComplete[]) {
+  const now = toZonedTime(new Date(), 'Europe/Prague')
+  console.log(now)
+  return posts.filter(post => {
+    const postDate = postTimeToDate(post.timeFrom!)
+    return postDate > now
+  })
 }

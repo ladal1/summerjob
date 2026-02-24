@@ -15,6 +15,7 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import path from 'path'
 import { existsAdorationSlot } from './adoration'
+import { getDateMidnight } from 'lib/helpers/helpers'
 
 export async function getPostsWithAdorationFlag(): Promise<{
   posts: PostComplete[]
@@ -81,7 +82,7 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
   }
 }
 
-export async function getPostsByDate(
+export async function getGeneralPostsByDate(
   date: Date
 ): Promise<PostComplete[] | null> {
   const activeEventId = await cache_getActiveSummerJobEventId()
@@ -94,6 +95,9 @@ export async function getPostsByDate(
       availability: {
         has: date,
       },
+      // general post == time is null
+      timeFrom: null,
+      timeTo: null,
     },
     include: {
       participants: {
@@ -112,6 +116,44 @@ export async function getPostsByDate(
   if (!posts) {
     return null
   }
+  return posts.map(post => ({
+    ...post,
+    tags: post.tags as unknown as PostTag[],
+  }))
+}
+
+export async function getTimePostsByDate(date: Date): Promise<PostComplete[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const posts = await prisma.post.findMany({
+    where: {
+      forEventId: activeEventId,
+      availability: {
+        has: date,
+      },
+      // time post == time is not null
+      timeFrom: { not: null },
+      timeTo: { not: null },
+    },
+    include: {
+      participants: {
+        select: {
+          workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      timeFrom: 'asc',
+    },
+  })
   return posts.map(post => ({
     ...post,
     tags: post.tags as unknown as PostTag[],
@@ -306,4 +348,7 @@ export async function deletePost(id: string) {
       },
     })
   })
+}
+function getMidnightDate(now: Date) {
+  throw new Error('Function not implemented.')
 }

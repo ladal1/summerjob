@@ -13,7 +13,7 @@ export default async function PostCard({ post }: PostCardProps) {
     post.shortDescription && post.shortDescription.trim().length > 1
 
   return (
-    <div className="smj-color-bubble rounded my-4 p-2 smj-shadow">
+    <div className="smj-color-bubble rounded p-2 smj-shadow h-100">
       <h4 className="fs-4 mb-1">{post.name}</h4>
       <div className="d-flex flex-column gap-6">
         {hasTime && (

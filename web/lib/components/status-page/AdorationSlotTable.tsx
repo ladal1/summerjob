@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 
 interface AdorationSlotTableProps {
@@ -11,7 +12,7 @@ export default async function AdorationSlotTable({
   slots,
 }: AdorationSlotTableProps) {
   return (
-    <div className="mb-5 w-75">
+    <div>
       <h4 className="fs-3 mb-2">
         <i className="fas fa-calendar me-1"></i>
         {label}
@@ -26,14 +27,17 @@ export default async function AdorationSlotTable({
         </thead>
         <tbody>
           {slots.map(slot => {
-            const endTime = new Date(
-              slot.dateStart.getTime() + slot.length * 60000
+            const dateEnd = new Date(
+              slot.dateStart.getTime() + slot.length * 60 * 1000
             )
-            const startTimeStr = format(slot.dateStart, 'HH:mm')
-            const endTimeStr = format(endTime, 'HH:mm')
+            const localStartTime = toZonedTime(slot.dateStart, 'Europe/Prague')
+            const localEndTime = toZonedTime(dateEnd, 'Europe/Prague')
+
+            const startTimeStr = format(localStartTime, 'HH:mm')
+            const endTimeStr = format(localEndTime, 'HH:mm')
             return (
               <tr key={slot.id}>
-                <td className="w-25">
+                <td className="w-25 text-nowrap">
                   {startTimeStr} - {endTimeStr}
                 </td>
                 <td className="w-50">{slot.location}</td>
