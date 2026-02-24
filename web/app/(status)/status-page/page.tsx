@@ -37,7 +37,7 @@ export default async function StatusPage() {
   return (
     <div className="mb-5">
       <AutoRefresh seconds={15} />
-      <AutoScroll intervalMs={20} stepPx={0}>
+      <AutoScroll intervalMs={20} stepPx={2}>
         <section>
           <h2 className="mb-4 fs-1">Nadcházející události</h2>
           <section className="">
@@ -119,7 +119,7 @@ export default async function StatusPage() {
                 Plán - {formatDateLong(plan.day, false)}
               </h2>
               <ol className="list-unstyled d-flex flex-wrap">
-                {plan.jobs.map(job => {
+                {sortedJobs.map(job => {
                   return (
                     <li key={job.id} className="w-50">
                       <JobInfo
@@ -183,7 +183,6 @@ function postTimeToDate(time: string): Date {
 
 function filterTodayPosts(posts: PostComplete[]) {
   const now = toZonedTime(new Date(), 'Europe/Prague')
-  console.log(now)
   return posts.filter(post => {
     const postDate = postTimeToDate(post.timeFrom!)
     return postDate > now
