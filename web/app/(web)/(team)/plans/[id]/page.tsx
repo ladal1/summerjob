@@ -16,8 +16,9 @@ type PathProps = {
 export default async function PlanPage(props: PathProps) {
   const params = await props.params
   const session = await getSMJSession()
-  const accessedFromReception =
-    session?.permissions.includes(Permission.RECEPTION) ?? false
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
+  )
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
   const serialized = serializePlan(plan)

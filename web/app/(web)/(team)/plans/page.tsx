@@ -13,8 +13,9 @@ export default async function PlansPage() {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
 
   const session = await getSMJSession()
-  const accessedFromReception =
-    session?.permissions.includes(Permission.RECEPTION) ?? false
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
+  )
 
   const { startDate, endDate } = summerJobEvent!
   return (

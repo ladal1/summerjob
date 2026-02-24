@@ -24,13 +24,6 @@ export default function SignInClientPage({
   } = useForm<EmailData>({
     resolver: zodResolver(EmailSchema),
   })
-
-  const [receptionLogin, setReceptionLogin] = useState(false)
-  const [receptionPassword, setReceptionPassword] = useState('')
-  const toggleReceptionLogin = () => {
-    setReceptionLogin(!receptionLogin)
-  }
-
   const onSubmit = (dataForm: EmailData) => {
     signIn('email', dataForm)
   }
@@ -41,13 +34,6 @@ export default function SignInClientPage({
 
   const onSeznamSignIn = () => {
     signIn('seznam')
-  }
-
-  const onReceptionSignIn = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    await signIn('reception', {
-      password: receptionPassword,
-    })
   }
 
   return (
@@ -73,90 +59,42 @@ export default function SignInClientPage({
       )}
       <div className="row mb-3">
         <div className="col-12">
-          {!receptionLogin && (
-            <div>
-              <form action="#" onSubmit={handleSubmit(onSubmit)}>
-                <TextInput
-                  id="email"
-                  label="E-mail"
-                  placeholder="user@example.cz"
-                  register={() => register('email')}
-                  errors={errors}
-                  margin={false}
-                />
-                <input
-                  className="mt-4 w-100 btn btn-primary p-2"
-                  type="submit"
-                  value="Přihlásit se"
-                />
-              </form>
+          <div>
+            <form action="#" onSubmit={handleSubmit(onSubmit)}>
+              <TextInput
+                id="email"
+                label="E-mail"
+                placeholder="user@example.cz"
+                register={() => register('email')}
+                errors={errors}
+                margin={false}
+              />
+              <input
+                className="mt-4 w-100 btn btn-primary p-2"
+                type="submit"
+                value="Přihlásit se"
+              />
+            </form>
 
-              <div className="d-flex flex-column gap-2 mt-4">
-                <ButtonWithSvg
-                  type="button"
-                  disabled={false}
-                  iconSrc="/icons/google.svg"
-                  onClick={onGoogleSignIn}
-                >
-                  Přihlásit se přes Google
-                </ButtonWithSvg>
-                <ButtonWithSvg
-                  type="button"
-                  disabled={false}
-                  iconSrc="/icons/seznam.svg"
-                  onClick={onSeznamSignIn}
-                >
-                  Přihlásit se přes Seznam
-                </ButtonWithSvg>
-
-                <div className="mt-4 d-flex align-items-center text-muted">
-                  <div className="flex-grow-1 border-top" />
-                  <span className="px-3">Nebo</span>
-                  <div className="flex-grow-1 border-top" />
-                </div>
-
-                <button
-                  className="mt-4 w-100 btn btn-light p-2"
-                  type="button"
-                  onClick={toggleReceptionLogin}
-                >
-                  Přihlásit se k recepci
-                </button>
-              </div>
-            </div>
-          )}
-
-          {receptionLogin && (
-            <div>
-              <form onSubmit={onReceptionSignIn}>
-                <Label
-                  id="reception-password"
-                  label="Kód k recepci"
-                  margin={false}
-                />
-                <input
-                  id="reception-password"
-                  className="p-0 w-100 form-control smj-input fs-5"
-                  type="password"
-                  placeholder="Zadejte kód k recepci"
-                  onChange={e => setReceptionPassword(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="mt-4 p-2 w-100 btn btn-primary"
-                >
-                  Přihlásit se
-                </button>
-              </form>
-              <button
-                className="mt-3 p-2 w-100 btn btn-light"
+            <div className="d-flex flex-column gap-2 mt-4">
+              <ButtonWithSvg
                 type="button"
-                onClick={toggleReceptionLogin}
+                disabled={false}
+                iconSrc="/icons/google.svg"
+                onClick={onGoogleSignIn}
               >
-                Zpět
-              </button>
+                Přihlásit se přes Google
+              </ButtonWithSvg>
+              <ButtonWithSvg
+                type="button"
+                disabled={false}
+                iconSrc="/icons/seznam.svg"
+                onClick={onSeznamSignIn}
+              >
+                Přihlásit se přes Seznam
+              </ButtonWithSvg>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@ export default async function StatusPage() {
   const generalPosts =
     posts?.filter(post => post.timeFrom === null || post.timeTo === null) ?? []
 
-  const adorationSlots = await getFreeUpcomingAdorationSlots(20)
+  const adorationSlots = await getFreeUpcomingAdorationSlots(10)
   const groupedAdorationSlots = groupAdorationSlotsByDay(adorationSlots)
 
   const plan = await getPlanByDate(date)
@@ -33,7 +33,7 @@ export default async function StatusPage() {
   return (
     <div className="mb-5">
       <AutoRefresh seconds={15} />
-      <AutoScroll intervalMs={20} stepPx={2}>
+      <AutoScroll intervalMs={20} stepPx={0}>
         <section>
           <h2 className="mb-4 fs-1">Dnešní události</h2>
 

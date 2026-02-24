@@ -30,8 +30,9 @@ export default async function EditPostPage(props: Params) {
   const isAdvancedAccessAllowed = await withPermissions([Permission.POSTS])
 
   const session = await getSMJSession()
-  const accessedFromReception =
-    session?.permissions.includes(Permission.RECEPTION) ?? false
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
+  )
 
   return (
     <>

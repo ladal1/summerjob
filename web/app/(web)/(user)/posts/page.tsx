@@ -24,8 +24,9 @@ export default async function PostsPage() {
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
   const session = await getSMJSession()
 
-  const accessedFromReception =
-    session?.permissions.includes(Permission.RECEPTION) ?? false
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
+  )
   return (
     <PostsClientPage
       sPosts={sPosts}
