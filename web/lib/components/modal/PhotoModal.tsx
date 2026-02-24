@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { SafePhotoImage } from '../photo/SafePhotoImage'
 import { useEffect, useState } from 'react'
 import { calculateDimensions } from '../photo/photo'
 import { Modal, ModalSize } from './Modal'
@@ -41,7 +41,7 @@ export default function PhotoModal({ onClose, photo }: PhotoModalProps) {
             width: dimensions.width,
           }}
         >
-          <Image
+          <SafePhotoImage
             style={{ objectFit: 'contain' }}
             alt="Fotografie"
             src={photo}

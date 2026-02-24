@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { readFile, stat } from 'fs/promises'
+import { createReadStream } from 'fs'
+import { stat } from 'fs/promises'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getWorkerPhotoPathById } from 'lib/data/workers'
 import { fileTypeFromFile } from 'file-type'
 
-// Whitelist of allowed image MIME types
 const ALLOWED_IMAGE_MIME_TYPES = [
   'image/jpeg',
   'image/png',
@@ -27,34 +27,30 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const workerPhotoPath = await getWorkerPhotoPathById(id)
     if (!workerPhotoPath) {
-      res.status(404).end()
+      res.status(404).json({ error: 'Photo not found' })
       return
     }
 
-    // Get file stats - this will throw if file doesn't exist
     let fileStat
     try {
       fileStat = await stat(workerPhotoPath)
-    } catch (error) {
-      console.error(`Photo file not found: ${workerPhotoPath}`, error)
-      res.status(404).end()
+    } catch {
+      res.status(404).json({ error: 'Photo file not found' })
       return
     }
 
-    // Check if file has content
     if (fileStat.size === 0) {
       console.error(`Photo file is empty: ${workerPhotoPath}`)
-      res.status(500).end()
+      res.status(404).json({ error: 'Photo file is empty' })
       return
     }
 
-    // Validate actual MIME type by reading file content
     let fileType
     try {
       fileType = await fileTypeFromFile(workerPhotoPath)
-    } catch (error) {
-      console.error(`Error detecting file type for: ${workerPhotoPath}`, error)
-      res.status(500).end()
+    } catch {
+      console.error(`Error detecting file type for: ${workerPhotoPath}`)
+      res.status(500).json({ error: 'Error detecting file type' })
       return
     }
 
@@ -62,29 +58,26 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
       console.error(
         `Invalid or unsupported image type: ${fileType?.mime || 'unknown'} for file: ${workerPhotoPath}`
       )
-      res.status(415).end() // 415 Unsupported Media Type
+      res.status(415).json({ error: 'Unsupported image type' })
       return
     }
 
-    // Read the entire file into a buffer
-    let fileBuffer
-    try {
-      fileBuffer = await readFile(workerPhotoPath)
-    } catch (error) {
-      console.error('Error reading photo file:', error)
-      res.status(500).end()
-      return
-    }
-
-    // Set headers and send the complete buffer
     res.setHeader('Content-Type', fileType.mime)
-    res.setHeader('Content-Length', fileBuffer.length)
-    res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
-    res.status(200).end(fileBuffer)
+    res.setHeader('Content-Length', fileStat.size)
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+
+    const fileStream = createReadStream(workerPhotoPath)
+    fileStream.on('error', err => {
+      console.error('Error streaming photo:', err)
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Error streaming photo' })
+      }
+    })
+    fileStream.pipe(res)
   } catch (error) {
     console.error('Error serving photo:', error)
     if (!res.headersSent) {
-      res.status(500).end()
+      res.status(500).json({ error: 'Internal server error' })
     }
   }
 }
@@ -94,15 +87,13 @@ async function isAllowedToAccessWorkerPhoto(
   res: NextApiResponse
 ) {
   if (!session) {
-    res.status(401).end()
-    return
+    res.status(401).json({ error: 'Unauthorized' })
+    return false
   }
-  const regularAccess = isAccessAllowed([Permission.WORKERS], session)
-  if (regularAccess) {
-    return true
-  }
+  const access = isAccessAllowed([Permission.WORKERS], session)
+  if (access) return true
 
-  res.status(403).end()
+  res.status(403).json({ error: 'Forbidden' })
   return false
 }
 

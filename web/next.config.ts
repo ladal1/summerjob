@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   distDir: 'build',
   images: {
     qualities: [25, 50, 98, 100],
+    minimumCacheTTL: 60,
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, 'fs/promises': false };
