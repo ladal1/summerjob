@@ -28,6 +28,7 @@ import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 import { useAPISkills } from 'lib/fetcher/skill'
 import { useAPIToolNames } from 'lib/fetcher/tool-name'
+import PushNotificationManagerButton from '../notifications/PushNotificationManagerButton'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -368,6 +369,13 @@ export default function EditWorker({
                 <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
               </p>
             )
+          )}
+
+          {isProfilePage && (
+            <>
+              <Label id="notifications" label="Oznámení" />
+              <PushNotificationManagerButton />
+            </>
           )}
 
           {!isProfilePage && (

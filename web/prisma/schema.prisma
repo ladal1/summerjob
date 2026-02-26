@@ -151,6 +151,7 @@ model Worker {
   application        Application?                @relation(fields: [applicationId], references: [id])
   applicationId      String?                     @unique
   adorationSlots     AdorationSlot[] @relation("SlotWorkers")
+  PushSubscriptions  PushSubscription[]
 }
 
 model WorkerPermissions {
@@ -417,4 +418,13 @@ model FoodDeliveryJobOrder {
 
   @@unique([foodDeliveryId, activeJobId]) // Each job can appear only once per delivery
   @@unique([foodDeliveryId, order])       // Each order position is unique per delivery
+}
+
+model PushSubscription {
+  id       String @id @default(uuid())
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId String
+  endpoint String @unique
+  p256dh   String
+  auth     String
 }
