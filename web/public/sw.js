@@ -1,12 +1,5 @@
 self.addEventListener('push', function (event) {
-  let data = { title: 'Test noticication', body: 'Test notification body' }
-
-  try {
-    if (event.data) data = event.data.json()
-  } catch {
-    if (event.data)
-      data = { title: 'Test notification', body: event.data.text() }
-  }
+  const data = event.data ? event.data.json() : {}
 
   const options = {
     body: data.body,
@@ -39,5 +32,5 @@ self.addEventListener('notificationclick', function (event) {
   if (event.action === 'close') {
     return
   }
-  event.waitUntil(clients.openWindow('/my-plan'))
+  event.waitUntil(clients.openWindow(event.notification.data.url))
 })

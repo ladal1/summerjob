@@ -4,18 +4,29 @@ import { PushSubscription } from 'lib/prisma/zod'
 export async function createPushSubscription(
   subscriptionData: PushSubscription
 ) {
-  const subscription = await prisma.pushSubscription.create({
-    data: {
+  return await prisma.pushSubscription.upsert({
+    where: {
+      endpoint: subscriptionData.endpoint,
+    },
+    create: {
       ...subscriptionData,
     },
+    update: {
+      workerId: subscriptionData.workerId,
+      p256dh: subscriptionData.p256dh,
+      auth: subscriptionData.auth,
+    },
   })
-  return subscription
 }
 
-export async function deletePushSubscription(endpoint: string) {
-  await prisma.pushSubscription.delete({
+export async function deletePushSubscription(
+  endpoint: string,
+  workerId: string
+) {
+  return await prisma.pushSubscription.delete({
     where: {
       endpoint,
+      workerId,
     },
   })
 }

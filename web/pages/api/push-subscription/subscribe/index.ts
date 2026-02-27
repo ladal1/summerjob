@@ -15,9 +15,10 @@ async function post(
     res.status(403).end()
     return
   }
+
   const email = session.user?.email
   if (!email) {
-    res.status(400).json({ error: 'Missing session email' })
+    res.status(400).end()
     return
   }
 
@@ -26,19 +27,24 @@ async function post(
     res.status(400).end()
     return
   }
+
   const worker = await prisma.worker.findUnique({
     where: { email },
     select: { id: true },
   })
+  if (!worker) {
+    res.status(400).end()
+    return
+  }
 
   const pushSubscription = <PushSubscription>{
-    workerId: worker!.id,
+    workerId: worker.id,
     endpoint: data.endpoint,
     p256dh: data.keys.p256dh,
     auth: data.keys.auth,
   }
   await createPushSubscription(pushSubscription)
-  res.status(201).end()
+  res.status(200).end()
 }
 
 export default APIAccessController([], APIMethodHandler({ post }))

@@ -19,11 +19,16 @@ export default function PushNotificationManagerButton() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   )
-  const [loading, setLoading] = useState<boolean>(false)
-  const [supported, setSupported] = useState<boolean>(false)
+  const [loading, setLoading] = useState(false)
+  const [supported, setSupported] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
+    if (
+      'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      'Notification' in window
+    ) {
       setSupported(true)
       registerServiceWorker()
     }
@@ -40,6 +45,7 @@ export default function PushNotificationManagerButton() {
 
   async function subscribeToPush() {
     setLoading(true)
+    setErrorMessage('')
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') {
       setLoading(false)
@@ -47,7 +53,6 @@ export default function PushNotificationManagerButton() {
     }
 
     const registration = await navigator.serviceWorker.ready
-    console.log('registration:', registration)
     const sub = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(
@@ -55,16 +60,22 @@ export default function PushNotificationManagerButton() {
       ),
     })
 
-    console.log('sub:', sub)
+    try {
+      const res = await fetch('/api/push-subscription/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sub),
+      })
 
-    await fetch('/api/push-subscription/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sub),
-    })
-
-    setSubscription(sub)
-    setLoading(false)
+      if (!res.ok) {
+        throw new Error()
+      }
+      setSubscription(sub)
+    } catch {
+      setErrorMessage('Došlo k chybě, zkuste to prosím později')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function unsubscribeFromPush() {
@@ -72,12 +83,19 @@ export default function PushNotificationManagerButton() {
     const endpoint = subscription?.endpoint
     await subscription?.unsubscribe()
 
-    // Remove/deactivate on server
-    await fetch('/api/push-subscription/unsubscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint }),
-    })
+    try {
+      const res = await fetch('/api/push-subscription/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint }),
+      })
+
+      if (!res.ok) {
+        throw new Error()
+      }
+    } catch {
+      setErrorMessage('Došlo k chybě, zkuste to prosím později')
+    }
 
     // Re-check actual browser state
     const registration = await navigator.serviceWorker.ready
@@ -115,6 +133,7 @@ export default function PushNotificationManagerButton() {
           </button>
         </>
       )}
+      <p className="text-danger mt-2">{errorMessage}</p>
     </div>
   )
 }
