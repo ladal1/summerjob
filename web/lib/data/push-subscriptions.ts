@@ -1,8 +1,8 @@
 import prisma from 'lib/prisma/connection'
-import { PushSubscription } from 'lib/prisma/zod'
+import { PushSubscriptionCreateData } from 'lib/types/push-subscription'
 
 export async function createPushSubscription(
-  subscriptionData: PushSubscription
+  subscriptionData: PushSubscriptionCreateData
 ) {
   return await prisma.pushSubscription.upsert({
     where: {

@@ -1,9 +1,12 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { getWorkerIdFromSession } from 'lib/auth/auth'
 import { createPushSubscription } from 'lib/data/push-subscriptions'
-import prisma from 'lib/prisma/connection'
-import { PushSubscription } from 'lib/prisma/zod'
 import { ExtendedSession } from 'lib/types/auth'
+import {
+  BrowserPushSubscriptionSchema,
+  PushSubscriptionCreateData,
+} from 'lib/types/push-subscription'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function post(
@@ -11,37 +14,27 @@ async function post(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  if (!session) {
+  const workerId = await getWorkerIdFromSession(session)
+  if (!workerId) {
     res.status(403).end()
     return
   }
 
-  const email = session.user?.email
-  if (!email) {
-    res.status(400).end()
+  // Parse the subscription coming from the browser
+  const browserParsed = BrowserPushSubscriptionSchema.safeParse(req.body)
+  if (!browserParsed.success) {
+    res.status(400).json({
+      error: 'Invalid push subscription payload',
+    })
     return
   }
+  const browserSub = browserParsed.data
 
-  const data = req.body
-  if (!data) {
-    res.status(400).end()
-    return
-  }
-
-  const worker = await prisma.worker.findUnique({
-    where: { email },
-    select: { id: true },
-  })
-  if (!worker) {
-    res.status(400).end()
-    return
-  }
-
-  const pushSubscription = <PushSubscription>{
-    workerId: worker.id,
-    endpoint: data.endpoint,
-    p256dh: data.keys.p256dh,
-    auth: data.keys.auth,
+  const pushSubscription = <PushSubscriptionCreateData>{
+    workerId: workerId,
+    endpoint: browserSub.endpoint,
+    p256dh: browserSub.keys.p256dh,
+    auth: browserSub.keys.auth,
   }
   await createPushSubscription(pushSubscription)
   res.status(200).end()
