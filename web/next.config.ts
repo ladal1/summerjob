@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   distDir: 'build',
   images: {
     qualities: [25, 50, 98, 100],
-    unoptimized: true,
+    unoptimized: false,
     loader: 'default',
     remotePatterns: [],
     dangerouslyAllowSVG: false,

@@ -1,17 +1,17 @@
 # Dockerfile for the main application
 
 # Install dependencies only when needed
-FROM node:22-alpine AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+FROM node:22-slim AS deps
+# Use slim (glibc) to match the builder and runner stages, ensuring compatible native binaries (e.g., sharp).
+RUN apt-get update -y && apt-get install -y --no-install-recommends libc6-compat openssl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
 # Copy prisma schema for the prepare script
 COPY prisma ./prisma
-RUN npm ci && npm install -g --arch=x64 --platform=linux --libc=glibc sharp@0.33.4
-ENV NEXT_SHARP_PATH=/usr/local/lib/node_modules/sharp
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM node:22-slim AS builder
@@ -31,7 +31,6 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && \
 # Production image, copy all the files and run next
 FROM node:22-slim AS runner
 WORKDIR /app
-COPY --from=deps --chown=nextjs:nodejs /usr/local/lib/node_modules/sharp /usr/local/lib/node_modules/sharp
 
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
@@ -46,6 +45,9 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder --chown=nextjs:nodejs /app/build/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/build/static ./build/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy sharp and its native binaries so Next.js image optimisation works at runtime
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@img ./node_modules/@img
 RUN mkdir /web-storage && chmod 777 /web-storage
 
 USER nextjs
