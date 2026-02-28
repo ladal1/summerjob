@@ -27,9 +27,7 @@ export default function DeleteReceptionPasswordButton({
     const res = await fetch(
       `/api/summerjob-events/${eventId}/set-reception-password`,
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: null }),
+        method: 'DELETE',
       }
     )
     if (!res.ok) {
@@ -43,7 +41,7 @@ export default function DeleteReceptionPasswordButton({
   return (
     <div className="d-flex flex-column align-items-end gap-2">
       <button
-        className="btn btn-outline-danger"
+        className="btn btn-outline-danger text-nowrap"
         type="button"
         onClick={confirmDelete}
         disabled={loading}

@@ -18,7 +18,7 @@ async function post(
   const { password } = req.body
 
   try {
-    if (password !== null) {
+    if (typeof password === 'string' && password.length > 0) {
       await setReceptionPassword(eventId, password)
       await logger.apiRequest(
         APILogEvent.SMJEVENT_RECEPTION_PASSWORD_MODIFY,
@@ -27,15 +27,8 @@ async function post(
         session
       )
     } else {
-      await logger.apiRequest(
-        APILogEvent.SMJEVENT_RECEPTION_PASSWORD_DELETE,
-        eventId,
-        {},
-        session
-      )
-      await unsetReceptionPassword(eventId)
+      throw new Error('Neplatné heslo.')
     }
-
     res.status(200).end()
   } catch (err: unknown) {
     console.error(err)
@@ -49,7 +42,25 @@ async function post(
   }
 }
 
+async function del(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  session: ExtendedSession
+) {
+  const eventId = req.query.eventId as string
+
+  await logger.apiRequest(
+    APILogEvent.SMJEVENT_RECEPTION_PASSWORD_DELETE,
+    eventId,
+    {},
+    session
+  )
+  await unsetReceptionPassword(eventId)
+
+  res.status(200).end()
+}
+
 export default APIAccessController(
   [Permission.ADMIN],
-  APIMethodHandler({ post })
+  APIMethodHandler({ post, del })
 )

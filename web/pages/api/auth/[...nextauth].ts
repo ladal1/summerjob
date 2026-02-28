@@ -13,6 +13,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { checkReceptionPassword } from 'lib/data/summerjob-event'
 import { encode as defaultEncode } from 'next-auth/jwt'
 import { v4 as uuid } from 'uuid'
+import { add } from 'date-fns'
 
 type SeznamProfile = {
   oauth_user_id: string
@@ -96,18 +97,8 @@ const SeznamProvider: OAuthConfig<SeznamProfile> = {
       email: profile.email,
     }
   },
-}
 
-async function hasLoggedInWithEmail(email: string) {
-  // Check if user has logged in with their email before, this makes the user
-  // have to sign in with email first and link oauth accounts once signed in
-  // It is important to have automatic account linking turned off in oauth providers
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: { emailVerified: true },
-  })
-  if (user?.emailVerified) return true
-  return false
+  allowDangerousEmailAccountLinking: true,
 }
 
 const prismaAdapter = PrismaAdapter(prisma)
@@ -157,17 +148,17 @@ export const authOptions: NextAuthOptions = {
         const password = credentials?.password ?? ''
         const isValid = await checkReceptionPassword(password)
         if (!isValid) {
-          // This is returned instead of null to redirect the user to the error page
-          return { id: '', email: '' }
+          return null
         }
 
+        const receptionEmail = process.env.RECEPTION_EMAIL!
         const receptionUser = await prisma.user.upsert({
-          where: { email: process.env.RECEPTION_EMAIL },
-          update: { email: process.env.RECEPTION_EMAIL },
-          create: { email: process.env.RECEPTION_EMAIL },
+          where: { email: receptionEmail },
+          update: { email: receptionEmail },
+          create: { email: receptionEmail },
         })
         if (!receptionUser) {
-          return { id: '', email: '' }
+          return null
         }
         return {
           id: receptionUser.id,
@@ -179,6 +170,7 @@ export const authOptions: NextAuthOptions = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
     }),
 
     SeznamProvider,
@@ -189,16 +181,6 @@ export const authOptions: NextAuthOptions = {
       if (!params.user.email) return false
       const user = await getUserByEmail(params.user.email)
       if (!user) return false
-      if (
-        params.account?.provider === 'google' ||
-        params.account?.provider === 'seznam'
-      ) {
-        // User has to sign in with email first and then link their account to oauth
-        const hasVerifiedEmail = await hasLoggedInWithEmail(params.user.email)
-        if (!hasVerifiedEmail) {
-          return '/auth/signIn?error=OAuthAccountNotLinked'
-        }
-      }
       if (params.account?.provider === 'seznam') {
         if (!params.profile?.email) return false
       }
@@ -252,10 +234,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error('No user ID found in token')
         }
 
+        const expires = add(new Date(), { days: 30 })
         const createdSession = await prismaAdapter.createSession?.({
           sessionToken: sessionToken,
           userId: params.token.sub,
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          expires,
         })
 
         if (!createdSession) {

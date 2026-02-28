@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 
 interface ButtonWithSvgProps {
   children: React.ReactNode
@@ -24,7 +25,7 @@ export default function ButtonWithSvg({
       onClick={onClick}
       type={type}
     >
-      <img src={iconSrc} width={20} height={20} alt="" />
+      <Image src={iconSrc} width={20} height={20} alt="" />
       {children}
     </button>
   )

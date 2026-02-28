@@ -1,12 +1,7 @@
 'use client'
-import { EmailData, EmailSchema } from 'lib/types/email'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import logoImage from 'public/logo-smj-yellow.png'
-import { useForm } from 'react-hook-form'
-import { TextInput } from '../forms/input/TextInput'
-import { zodResolver } from '@hookform/resolvers/zod'
-import ButtonWithSvg from './ButtonWithSvg'
 import { useState } from 'react'
 import { Label } from '../forms/Label'
 

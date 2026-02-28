@@ -6,9 +6,12 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
   const { password } = req.body
 
   try {
+    if (typeof password !== 'string') {
+      throw new Error('Heslo musí být string')
+    }
     const isValid = await checkReceptionPassword(password)
     if (!isValid) {
-      throw new Error('Zadali jste nesprávný kód')
+      throw new Error('Zadali jste nesprávné heslo')
     }
     res.status(200).json({ valid: isValid })
   } catch (err: unknown) {

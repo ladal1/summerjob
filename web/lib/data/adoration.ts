@@ -192,29 +192,65 @@ export async function getFreeUpcomingAdorationSlots(
     throw new NoActiveEventError()
   }
 
+  if (limit <= 0) {
+    return []
+  }
+
   const now = new Date()
-  const adorationSlots = await prisma.adorationSlot.findMany({
-    where: {
-      eventId: activeEventId,
-      dateStart: {
-        gte: now,
-      },
-    },
-    include: {
-      workers: {
-        select: {
-          id: true,
+  const result: AdorationSlotWithWorkerIds[] = []
+  let cursorId: string | undefined
+  const batchSize = limit * 2
+
+  // Fetch the slots in small batches to filter available slots
+  // without having to fetch all the slots every time
+  while (result.length < limit) {
+    const currentBatch = await prisma.adorationSlot.findMany({
+      where: {
+        eventId: activeEventId,
+        dateStart: {
+          gte: now,
         },
       },
-    },
-    orderBy: {
-      dateStart: 'asc',
-    },
-  })
+      include: {
+        workers: {
+          select: {
+            id: true,
+          },
+        },
+      },
+      orderBy: [{ dateStart: 'asc' }, { id: 'asc' }],
+      take: batchSize,
+      ...(cursorId
+        ? {
+            cursor: { id: cursorId },
+            skip: 1,
+          }
+        : {}),
+    })
 
-  return adorationSlots
-    .filter(slot => slot.workers.length < slot.capacity)
-    .slice(0, limit)
+    if (currentBatch.length === 0) {
+      break
+    }
+
+    // Filter available slots from the current batch
+    for (const slot of currentBatch) {
+      if (slot.workers.length < slot.capacity) {
+        result.push(slot)
+        if (result.length >= limit) {
+          break
+        }
+      }
+    }
+
+    // Move cursor
+    cursorId = currentBatch[currentBatch.length - 1].id
+
+    if (currentBatch.length < batchSize) {
+      break
+    }
+  }
+
+  return result
 }
 
 export async function signUpForAdorationSlot(

@@ -1,4 +1,4 @@
-import { getSMJSession, isAccessAllowed, withPermissions } from 'lib/auth/auth'
+import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditWorker from 'lib/components/worker/EditWorker'

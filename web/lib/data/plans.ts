@@ -201,7 +201,7 @@ export async function getPlanByDate(date: Date): Promise<PlanComplete | null> {
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const plan = await prisma.plan.findUnique({
+  const plan = await prisma.plan.findFirst({
     where: { day: date, published: true, summerJobEventId: activeEventId },
     include: {
       jobs: {

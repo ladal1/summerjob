@@ -1,4 +1,4 @@
-import { getSMJSession, isAccessAllowed, withPermissions } from 'lib/auth/auth'
+import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import PostsClientPage from 'lib/components/post/PostsClientPage'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'

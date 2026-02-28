@@ -26,7 +26,7 @@ async function createReceptionAccount() {
       },
     })
     console.log('Účet recepce byl úspěšně vytvořen.')
-  } catch (e: unknown) {
+  } catch {
     console.log(
       '[ERROR] Účet recepce se napodařilo vytvořit. Ujistěte se, zda-li již neexistuje.'
     )

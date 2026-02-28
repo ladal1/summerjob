@@ -7,15 +7,15 @@ import { useForm } from 'react-hook-form'
 import { TextInput } from '../forms/input/TextInput'
 import { zodResolver } from '@hookform/resolvers/zod'
 import ButtonWithSvg from './ButtonWithSvg'
-import { useState } from 'react'
-import { Label } from '../forms/Label'
 
 interface SignInClientPageProps {
   errorMessage?: string
+  availableOAuthProviders: { google: boolean; seznam: boolean }
 }
 
 export default function SignInClientPage({
   errorMessage,
+  availableOAuthProviders,
 }: SignInClientPageProps) {
   const {
     register,
@@ -77,22 +77,27 @@ export default function SignInClientPage({
             </form>
 
             <div className="d-flex flex-column gap-2 mt-4">
-              <ButtonWithSvg
-                type="button"
-                disabled={false}
-                iconSrc="/icons/google.svg"
-                onClick={onGoogleSignIn}
-              >
-                Přihlásit se přes Google
-              </ButtonWithSvg>
-              <ButtonWithSvg
-                type="button"
-                disabled={false}
-                iconSrc="/icons/seznam.svg"
-                onClick={onSeznamSignIn}
-              >
-                Přihlásit se přes Seznam
-              </ButtonWithSvg>
+              {availableOAuthProviders.google && (
+                <ButtonWithSvg
+                  type="button"
+                  disabled={false}
+                  iconSrc="/icons/google.svg"
+                  onClick={onGoogleSignIn}
+                >
+                  Přihlásit se přes Google
+                </ButtonWithSvg>
+              )}
+
+              {availableOAuthProviders.seznam && (
+                <ButtonWithSvg
+                  type="button"
+                  disabled={false}
+                  iconSrc="/icons/seznam.svg"
+                  onClick={onSeznamSignIn}
+                >
+                  Přihlásit se přes Seznam
+                </ButtonWithSvg>
+              )}
             </div>
           </div>
         </div>

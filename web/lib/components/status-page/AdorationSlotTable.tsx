@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { add, format } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 
@@ -27,9 +27,7 @@ export default async function AdorationSlotTable({
         </thead>
         <tbody>
           {slots.map(slot => {
-            const dateEnd = new Date(
-              slot.dateStart.getTime() + slot.length * 60 * 1000
-            )
+            const dateEnd = add(slot.dateStart, { minutes: slot.length })
             const localStartTime = toZonedTime(slot.dateStart, 'Europe/Prague')
             const localEndTime = toZonedTime(dateEnd, 'Europe/Prague')
 

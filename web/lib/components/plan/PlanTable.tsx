@@ -66,7 +66,7 @@ export function PlanTable({
       })
     }
     return baseColumns
-  }, [showNumbers])
+  }, [showNumbers, accessedFromReception])
 
   // Create position mapping based on sortJobsByAreaAndId function
   const jobPositionMap = useMemo(() => {

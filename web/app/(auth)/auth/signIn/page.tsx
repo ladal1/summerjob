@@ -1,4 +1,4 @@
-import { getSMJSession } from 'lib/auth/auth'
+import { getAvailableOAuthProviders, getSMJSession } from 'lib/auth/auth'
 import CenteredBox from 'lib/components/auth/CenteredBox'
 import SignInClientPage from 'lib/components/auth/SignInClientPage'
 import { redirect } from 'next/navigation'
@@ -20,9 +20,14 @@ export default async function SignInPage(props: Props) {
   }
   const errorMsg = ErrorReason.get(searchParams?.error as string) || undefined
 
+  const availableOAuthProviders = getAvailableOAuthProviders()
+
   return (
     <CenteredBox>
-      <SignInClientPage errorMessage={errorMsg} />
+      <SignInClientPage
+        errorMessage={errorMsg}
+        availableOAuthProviders={availableOAuthProviders}
+      />
     </CenteredBox>
   )
 }
@@ -37,5 +42,6 @@ const ErrorReason = new Map<string, string>([
     'OAuthAccountNotLinked',
     'Váš účet není s touto službou propojen. Přihlašte se prosím pomocí e-mailu a v profilu si následně účet propojte.',
   ],
+  ['CredentialsSignin', 'Přihlášení k recepci se nepodařilo.'],
   ['Default', 'Nastala chyba. Zkuste to znovu.'],
 ])

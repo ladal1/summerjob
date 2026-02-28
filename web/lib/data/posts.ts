@@ -15,7 +15,6 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import path from 'path'
 import { existsAdorationSlot } from './adoration'
-import { getDateMidnight } from 'lib/helpers/helpers'
 
 export async function getPostsWithAdorationFlag(): Promise<{
   posts: PostComplete[]
@@ -348,7 +347,4 @@ export async function deletePost(id: string) {
       },
     })
   })
-}
-function getMidnightDate(now: Date) {
-  throw new Error('Function not implemented.')
 }

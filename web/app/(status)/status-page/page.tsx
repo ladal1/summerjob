@@ -11,6 +11,7 @@ import { formatDateLong, getDateMidnight } from 'lib/helpers/helpers'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 import { sortJobsByAreaAndId } from 'lib/types/plan'
 import { PostComplete } from 'lib/types/post'
+import { add } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,9 +19,7 @@ export default async function StatusPage() {
   const date = getPlanDate()
   const now = new Date()
   const todayMidnight = getDateMidnight(now)
-  const tomorrowMidnight = new Date(
-    todayMidnight.getTime() + 24 * 60 * 60 * 1000
-  )
+  const tomorrowMidnight = add(todayMidnight, { days: 1 })
 
   const generalPosts = await getGeneralPostsByDate(todayMidnight)
   const todayTimePosts = filterTodayPosts(

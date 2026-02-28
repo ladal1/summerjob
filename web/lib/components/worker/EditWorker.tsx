@@ -28,7 +28,6 @@ import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 import { useAPISkills } from 'lib/fetcher/skill'
 import { useAPIToolNames } from 'lib/fetcher/tool-name'
-import OAuthConnections from '../auth/OAuthConnections'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>
@@ -40,7 +39,6 @@ interface EditWorkerProps {
   accessedFromReception: boolean
   carAccess: boolean
   label: string
-  oauthLinks?: { google: boolean; seznam: boolean }
 }
 
 export default function EditWorker({
@@ -50,7 +48,6 @@ export default function EditWorker({
   accessedFromReception,
   carAccess,
   label,
-  oauthLinks,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker)
 
@@ -377,10 +374,6 @@ export default function EditWorker({
                 <i>Pro přiřazení auta kontaktujte tým SummerJob.</i>
               </p>
             )
-          )}
-
-          {isProfilePage && (
-            <OAuthConnections label="Propojené účty" oauthLinks={oauthLinks} />
           )}
 
           {!isProfilePage && (
