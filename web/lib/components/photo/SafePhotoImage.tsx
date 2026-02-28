@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { useState } from 'react'
+import { DefaultAvatarSVG } from './DefaultAvatarSVG'
 
 interface SafePhotoImageProps {
   src: string
@@ -21,19 +22,6 @@ interface SafePhotoImageProps {
   className?: string
 }
 
-const DEFAULT_AVATAR_SVG = (
-  <svg
-    viewBox="0 0 64 64"
-    xmlns="http://www.w3.org/2000/svg"
-    strokeWidth="3"
-    stroke="#000000"
-    fill="none"
-    style={{ width: '100%', height: '100%' }}
-  >
-    <circle cx="32" cy="18.14" r="11.14" />
-    <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
-  </svg>
-)
 
 /**
  * SafePhotoImage is a thin wrapper around `next/image` that adds safer handling
@@ -71,7 +59,7 @@ export const SafePhotoImage = ({ src, alt, ...props }: SafePhotoImageProps) => {
         }}
         className={props.className}
       >
-        {DEFAULT_AVATAR_SVG}
+        <DefaultAvatarSVG style={{ width: '100%', height: '100%' }} />
       </div>
     )
   }
