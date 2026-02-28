@@ -58,6 +58,8 @@ export const SafePhotoImage = ({ src, alt, ...props }: SafePhotoImageProps) => {
           ...props.style,
         }}
         className={props.className}
+        onClick={props.onClick}
+        onMouseDown={props.onMouseDown}
       >
         <DefaultAvatarSVG style={{ width: '100%', height: '100%' }} />
       </div>
