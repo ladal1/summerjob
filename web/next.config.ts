@@ -7,9 +7,9 @@ const nextConfig: NextConfig = {
   distDir: 'build',
   images: {
     qualities: [25, 50, 98, 100],
-    unoptimized: false,
+    unoptimized: true,
     loader: 'default',
-    domains: [],
+    remotePatterns: [],
     dangerouslyAllowSVG: false,
     contentDispositionType: 'inline',
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

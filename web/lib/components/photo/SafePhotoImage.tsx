@@ -35,6 +35,25 @@ const DEFAULT_AVATAR_SVG = (
   </svg>
 )
 
+/**
+ * SafePhotoImage is a thin wrapper around `next/image` that adds safer handling
+ * for images served from dynamic or error‑prone sources (e.g. `/api/` routes).
+ *
+ * When the `src` starts with `/api/`, image optimization is disabled via the
+ * `unoptimized` prop to avoid Sharp errors that can occur when optimizing
+ * API‑backed images.
+ *
+ * If an image load error occurs (`onError`), and the `src` is an `/api/` URL,
+ * the component renders a generic fallback avatar SVG sized using either the
+ * provided `width`/`height` or `fill`/`style` props instead of the broken image.
+ *
+ * Use this component instead of `next/image` when:
+ * - You are rendering images from `/api/` endpoints or other unstable sources.
+ * - You want a built‑in, neutral avatar fallback when loading fails.
+ *
+ * All props other than `src` and `alt` are passed directly through to
+ * `next/image`.
+ */
 export const SafePhotoImage = ({ src, alt, ...props }: SafePhotoImageProps) => {
   const [hasError, setHasError] = useState(false)
 

@@ -45,7 +45,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
     // Check if file has content
     if (fileStat.size === 0) {
       console.log(`Photo file is empty: ${workerPhotoPath}`)
-      res.status(404).json({ error: 'Photo file is empty' })
+      res.status(500).json({ error: 'Photo file is empty' })
       return
     }
 
@@ -70,7 +70,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
     // Set headers before streaming
     res.setHeader('Content-Type', fileType.mime)
     res.setHeader('Content-Length', fileStat.size.toString())
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+    res.setHeader('Cache-Control', 'public, max-age=86400')
     res.status(200)
 
     // Stream the file to the response
@@ -80,7 +80,12 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
       console.error('Error streaming photo file:', error)
       if (!res.headersSent) {
         res.status(500).json({ error: 'Error streaming photo' })
+      } else {
+        // Ensure the response is properly terminated if an error occurs after headers are sent
+        res.end()
       }
+      // Explicitly destroy the stream to ensure file handles are released
+      fileStream.destroy()
     })
 
     fileStream.pipe(res)
