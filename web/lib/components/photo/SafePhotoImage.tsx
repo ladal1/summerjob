@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DefaultAvatarSVG } from './DefaultAvatarSVG'
 
 interface SafePhotoImageProps {
@@ -44,6 +44,10 @@ interface SafePhotoImageProps {
  */
 export const SafePhotoImage = ({ src, alt, ...props }: SafePhotoImageProps) => {
   const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setHasError(false)
+  }, [src])
 
   // If it's an API URL and we have an error, show fallback
   if (hasError && src.startsWith('/api/')) {
