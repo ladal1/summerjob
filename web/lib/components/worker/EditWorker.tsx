@@ -36,6 +36,7 @@ interface EditWorkerProps {
   serializedWorker: Serialized
   allDates: DateBool[][]
   isProfilePage: boolean
+  accessedFromReception: boolean
   carAccess: boolean
   label: string
 }
@@ -44,6 +45,7 @@ export default function EditWorker({
   serializedWorker,
   allDates,
   isProfilePage,
+  accessedFromReception,
   carAccess,
   label,
 }: EditWorkerProps) {
@@ -173,33 +175,37 @@ export default function EditWorker({
         isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="edit-worker" onSubmit={handleSubmit(onSubmit)}>
-          <TextInput
-            id="firstName"
-            label="Jméno"
-            placeholder="Jméno"
-            register={() =>
-              register('firstName', {
-                onChange: e =>
-                  (e.target.value = removeRedundantSpace(e.target.value)),
-              })
-            }
-            errors={errors}
-            mandatory
-            margin={false}
-          />
-          <TextInput
-            id="lastName"
-            label="Příjmení"
-            placeholder="Příjmení"
-            errors={errors}
-            register={() =>
-              register('lastName', {
-                onChange: e =>
-                  (e.target.value = removeRedundantSpace(e.target.value)),
-              })
-            }
-            mandatory
-          />
+          {!accessedFromReception && (
+            <>
+              <TextInput
+                id="firstName"
+                label="Jméno"
+                placeholder="Jméno"
+                register={() =>
+                  register('firstName', {
+                    onChange: e =>
+                      (e.target.value = removeRedundantSpace(e.target.value)),
+                  })
+                }
+                errors={errors}
+                mandatory
+                margin={false}
+              />
+              <TextInput
+                id="lastName"
+                label="Příjmení"
+                placeholder="Příjmení"
+                errors={errors}
+                register={() =>
+                  register('lastName', {
+                    onChange: e =>
+                      (e.target.value = removeRedundantSpace(e.target.value)),
+                  })
+                }
+                mandatory
+              />
+            </>
+          )}
           {!isProfilePage && (
             <TextInput
               id="age"
@@ -299,7 +305,7 @@ export default function EditWorker({
               ]}
             />
           )}
-          {!isProfilePage && (
+          {!isProfilePage && !accessedFromReception && (
             <ImageUploader
               id="photoFile"
               label="Fotografie"

@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { format } from 'date-fns'
+import { addHours, format, isAfter } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { useAPIWorkers } from 'lib/fetcher/worker'
-import { apiAdorationAssignWorker, apiAdorationUnassignWorker } from 'lib/fetcher/adoration'
+import {
+  apiAdorationAssignWorker,
+  apiAdorationUnassignWorker,
+} from 'lib/fetcher/adoration'
 import { FilterSelectInput } from 'lib/components/forms/input/FilterSelectInput'
 import type { FrontendAdorationSlot } from 'lib/types/adoration'
 import type { FilterSelectItem } from 'lib/components/filter-select/FilterSelect'
@@ -13,17 +16,24 @@ interface Props {
   slot: FrontendAdorationSlot
   onClose: () => void
   onAssigned: () => void
+  accessedFromReception: boolean
 }
 
 export default function AdorationWorkerAssignModal({
   slot,
   onClose,
   onAssigned,
+  accessedFromReception,
 }: Props) {
   const [loading, setLoading] = useState(false)
   const backdropRef = useRef<HTMLDivElement>(null)
 
   const { data: workers = [], isLoading: workersLoading } = useAPIWorkers()
+
+  // A worker can be unassigned from a slot from the reception only if the slot is more than 4 hours into the future
+  const canUnassign =
+    !accessedFromReception ||
+    isAfter(slot.localDateStart, addHours(new Date(), 4))
 
   const {
     formState: { errors },
@@ -34,10 +44,13 @@ export default function AdorationWorkerAssignModal({
   })
 
   // Filter out workers already assigned to this slot
-  const availableWorkers = workers.filter(worker => 
-    !slot.workers.some(assigned => 
-      assigned.firstName === worker.firstName && assigned.lastName === worker.lastName
-    )
+  const availableWorkers = workers.filter(
+    worker =>
+      !slot.workers.some(
+        assigned =>
+          assigned.firstName === worker.firstName &&
+          assigned.lastName === worker.lastName
+      )
   )
 
   // Convert workers to FilterSelectItem format
@@ -81,8 +94,13 @@ export default function AdorationWorkerAssignModal({
     }
   }
 
-  const handleRemoveWorker = async (workerFirstName: string, workerLastName: string) => {
-    const worker = workers.find(w => w.firstName === workerFirstName && w.lastName === workerLastName)
+  const handleRemoveWorker = async (
+    workerFirstName: string,
+    workerLastName: string
+  ) => {
+    const worker = workers.find(
+      w => w.firstName === workerFirstName && w.lastName === workerLastName
+    )
     if (!worker) {
       alert('Pracant nenalezen.')
       return
@@ -106,16 +124,24 @@ export default function AdorationWorkerAssignModal({
       style={{ zIndex: 1050 }}
       ref={backdropRef}
     >
-      <div className="bg-white rounded shadow-lg p-4" style={{ width: '600px' }}>
+      <div
+        className="bg-white rounded shadow-lg p-4"
+        style={{ width: '600px' }}
+      >
         <div className="d-flex justify-content-between align-items-start mb-3">
           <h5 className="mb-0">Přiřadit pracanta na adoraci</h5>
-          <button type="button" className="btn-close" onClick={onClose}></button>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={onClose}
+          ></button>
         </div>
 
         <div className="mb-3">
           <h6>Slot info:</h6>
           <p className="mb-1">
-            <strong>Čas:</strong> {format(slot.localDateStart, 'HH:mm')} ({slot.length} min)
+            <strong>Čas:</strong> {format(slot.localDateStart, 'HH:mm')} (
+            {slot.length} min)
           </p>
           <p className="mb-1">
             <strong>Lokace:</strong> {slot.location}
@@ -130,15 +156,28 @@ export default function AdorationWorkerAssignModal({
             <h6>Aktuálně přiřazení pracanti:</h6>
             <ul className="list-group">
               {slot.workers.map((worker, index) => (
-                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                  <span>{worker.firstName} {worker.lastName}</span>
-                  <button
-                    className="btn btn-sm btn-outline-danger"
-                    disabled={loading}
-                    onClick={() => handleRemoveWorker(worker.firstName, worker.lastName)}
-                  >
-                    Odebrat
-                  </button>
+                <li
+                  key={index}
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <span>
+                    {worker.firstName} {worker.lastName}
+                  </span>
+                  {canUnassign ? (
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      disabled={loading}
+                      onClick={() =>
+                        handleRemoveWorker(worker.firstName, worker.lastName)
+                      }
+                    >
+                      Odebrat
+                    </button>
+                  ) : (
+                    <span className="text-danger">
+                      Pracanta již nelze odebrat
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -160,7 +199,7 @@ export default function AdorationWorkerAssignModal({
                       placeholder="Vyberte pracanta..."
                       items={workerItems}
                       errors={errors}
-                      onSelected={(workerId) => setSelectedWorkerId(workerId)}
+                      onSelected={workerId => setSelectedWorkerId(workerId)}
                     />
                     {/* Fix for modal styling conflicts */}
                     <style jsx>{`

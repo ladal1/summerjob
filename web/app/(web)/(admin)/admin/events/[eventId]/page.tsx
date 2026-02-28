@@ -11,7 +11,7 @@ type Props = {
 }
 
 export default async function SummerJobEventPage(props: Props) {
-  const params = await props.params;
+  const params = await props.params
   const event = await getSummerJobEventById(params.eventId)
   if (!event) {
     return <ErrorPage404 message="Ročník nenalezen."></ErrorPage404>
@@ -19,9 +19,7 @@ export default async function SummerJobEventPage(props: Props) {
   const sEvent = serializeSummerJobEvent(event)
   return (
     <>
-      <PageHeader title={event.name} isFluid={false}>
-        {}
-      </PageHeader>
+      <PageHeader title={event.name} isFluid={false} />
       <EventClientPage sEvent={sEvent} />
     </>
   )

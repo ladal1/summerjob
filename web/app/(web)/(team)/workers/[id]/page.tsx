@@ -1,4 +1,4 @@
-import { withPermissions } from 'lib/auth/auth'
+import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditWorker from 'lib/components/worker/EditWorker'
@@ -14,19 +14,24 @@ type Params = {
 }
 
 export default async function EditWorkerPage(props: Params) {
-  const params = await props.params;
+  const params = await props.params
   const worker = await getWorkerById(params.id)
   if (!worker) {
     return <ErrorPage404 message="Pracant nenalezen." />
   }
   const serializedWorker = serializeWorker(worker)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-   
+
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
 
   const isCarAccessAllowed = await withPermissions([Permission.CARS])
+
+  const session = await getSMJSession()
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
+  )
 
   return (
     <>
@@ -34,8 +39,13 @@ export default async function EditWorkerPage(props: Params) {
         serializedWorker={serializedWorker}
         allDates={allDates}
         isProfilePage={false}
+        accessedFromReception={accessedFromReception}
         carAccess={isCarAccessAllowed.success}
-        label="Upravit pracanta"
+        label={
+          accessedFromReception
+            ? `Upravit pracanta - ${worker.firstName} ${worker.lastName}`
+            : 'Upravit pracanta'
+        }
       />
     </>
   )

@@ -12,6 +12,7 @@ import remarkGfm from 'remark-gfm'
 interface PostBubbleProps {
   item: PostComplete
   advancedAccess?: boolean
+  accessedFromReception?: boolean
   onUpdated?: () => void
   showTime?: boolean
   userId: string
@@ -20,6 +21,7 @@ interface PostBubbleProps {
 export const PostBubble = ({
   item,
   advancedAccess = false,
+  accessedFromReception = false,
   onUpdated,
   showTime = true,
   userId,
@@ -28,11 +30,12 @@ export const PostBubble = ({
   const onCloseModal = () => {
     setIsOpenedInfoModal(false)
   }
-  
+
   // Check if post has meaningful content
-  const hasDescription = item.shortDescription && item.shortDescription.trim().length > 1
+  const hasDescription =
+    item.shortDescription && item.shortDescription.trim().length > 1
   const isCompact = !hasDescription
-  
+
   return (
     <>
       <div
@@ -51,6 +54,7 @@ export const PostBubble = ({
                 <PostBubbleActions
                   post={item}
                   advancedAccess={advancedAccess}
+                  accessedFromReception={accessedFromReception}
                   onUpdated={onUpdated}
                 />
               </div>
@@ -68,7 +72,9 @@ export const PostBubble = ({
               </ReactMarkdown>
             </div>
           )}
-          <div className={`d-flex justify-content-between align-items-center ${isCompact ? 'mt-1' : ''}`}>
+          <div
+            className={`d-flex justify-content-between align-items-center ${isCompact ? 'mt-1' : ''}`}
+          >
             <div className="d-flex flex-wrap fs-7 text-muted">
               {item.tags.map(tag => (
                 <span key={tag} className="pill-static">
@@ -95,7 +101,13 @@ export const PostBubble = ({
                 e.stopPropagation()
               }}
             >
-              <Participate post={item} onUpdated={onUpdated} userId={userId} />
+              {!accessedFromReception && (
+                <Participate
+                  post={item}
+                  onUpdated={onUpdated}
+                  userId={userId}
+                />
+              )}
             </div>
           )}
         </div>
@@ -106,6 +118,7 @@ export const PostBubble = ({
           onClose={onCloseModal}
           onUpdated={onUpdated}
           userId={userId}
+          accessedFromReception={accessedFromReception}
         />
       )}
     </>

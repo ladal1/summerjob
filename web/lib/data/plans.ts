@@ -196,6 +196,93 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
   return { ...plan, jobs }
 }
 
+export async function getPlanByDate(date: Date): Promise<PlanComplete | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const plan = await prisma.plan.findFirst({
+    where: { day: date, published: true, summerJobEventId: activeEventId },
+    include: {
+      jobs: {
+        include: {
+          workers: {
+            include: {
+              cars: {
+                where: {
+                  deleted: false,
+                  forEventId: activeEventId,
+                },
+              },
+              availability: {
+                where: {
+                  eventId: activeEventId,
+                },
+                take: 1,
+              },
+              foodAllergies: true,
+              workAllergies: true,
+              skills: true,
+              tools: true,
+            },
+          },
+          proposedJob: {
+            include: {
+              area: true,
+              toolsOnSite: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              toolsToTakeWith: {
+                include: {
+                  tool: {
+                    include: {
+                      skills: true,
+                    },
+                  },
+                },
+              },
+              allergens: true,
+            },
+          },
+          rides: {
+            include: {
+              driver: true,
+              car: true,
+              job: {
+                include: {
+                  proposedJob: true,
+                },
+              },
+              passengers: true,
+            },
+          },
+          responsibleWorker: true,
+        },
+      },
+    },
+  })
+  if (!plan) {
+    return null
+  }
+  const jobs: ActiveJobNoPlan[] = []
+  for (const job of plan.jobs) {
+    const workers = (
+      job.workers as Parameters<typeof databaseWorkerToWorkerComplete>[0][]
+    ).map(databaseWorkerToWorkerComplete)
+    jobs.push({
+      ...job,
+      workers,
+    })
+  }
+  return { ...plan, jobs }
+}
+
 export async function createPlan(date: Date): Promise<Plan> {
   const event = await prisma.summerJobEvent.findFirst({
     where: {
