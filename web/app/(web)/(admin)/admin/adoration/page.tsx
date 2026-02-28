@@ -16,9 +16,8 @@ export default async function AdminAdorationPage() {
   const canDeleteSlots =
     session?.permissions.includes(Permission.ADMIN) ?? false
 
-  const canModifyAdorations = isAccessAllowed(
-    [Permission.ADMIN, Permission.ADORATION],
-    session
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
   )
 
   return (
@@ -30,7 +29,7 @@ export default async function AdminAdorationPage() {
           endDate: event.endDate.toISOString(),
         }}
         canDeleteSlots={canDeleteSlots}
-        canModifyAdorations={canModifyAdorations}
+        accessedFromReception={accessedFromReception}
       />
     </div>
   )

@@ -21,13 +21,13 @@ interface Props {
     endDate: string
   }
   canDeleteSlots: boolean
-  canModifyAdorations: boolean
+  accessedFromReception: boolean
 }
 
 export default function AdminAdorationManager({
   event,
   canDeleteSlots,
-  canModifyAdorations,
+  accessedFromReception,
 }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -282,7 +282,7 @@ export default function AdminAdorationManager({
             </div>
           </div>
 
-          {canModifyAdorations && (
+          {!accessedFromReception && (
             <div className="d-flex gap-2 align-items-center mb-3">
               <button
                 className="btn btn-sm btn-outline-primary"
@@ -312,7 +312,7 @@ export default function AdminAdorationManager({
             </div>
           )}
 
-          {canModifyAdorations && (
+          {!accessedFromReception && (
             <div className="form-check mb-2">
               <input
                 type="checkbox"
@@ -330,7 +330,7 @@ export default function AdminAdorationManager({
           <table className="table table-bordered table-sm mt-3">
             <thead className="table-primary">
               <tr>
-                {canModifyAdorations && (
+                {!accessedFromReception && (
                   <th style={{ width: '40px' }}>
                     <input
                       type="checkbox"
@@ -373,7 +373,7 @@ export default function AdminAdorationManager({
 
                 return (
                   <tr key={slot.id} className={statusInfo.rowClass}>
-                    {canModifyAdorations && (
+                    {!accessedFromReception && (
                       <td className="align-middle">
                         <input
                           type="checkbox"
@@ -432,7 +432,7 @@ export default function AdminAdorationManager({
                     </td>
                     <td className="align-middle">
                       <div className="d-flex gap-1 d-none d-md-flex">
-                        {canModifyAdorations && (
+                        {!accessedFromReception && (
                           <button
                             className="btn btn-sm btn-outline-dark"
                             onClick={() => openEditModal(slot)}
@@ -493,6 +493,7 @@ export default function AdminAdorationManager({
           onAssigned={() => {
             mutate() // Refresh the slots data
           }}
+          accessedFromReception={accessedFromReception}
         />
       )}
       {showEditModal && selectedSlotForEdit && (
