@@ -1,5 +1,5 @@
 import { getActiveSummerJobEvent } from 'lib/data/summerjob-event'
-import { getSMJSession, isAccessAllowed } from 'lib/auth/auth'
+import { getSMJSession } from 'lib/auth/auth'
 import { Permission } from 'lib/types/auth'
 import AdminAdorationManager from 'lib/components/adoration/AdorationAdminPage'
 
