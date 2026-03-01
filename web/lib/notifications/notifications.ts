@@ -1,3 +1,5 @@
+import { createNotification } from 'lib/data/notification'
+import { getWorkerIds } from 'lib/data/workers'
 import prisma from 'lib/prisma/connection'
 import webpush from 'web-push'
 
@@ -44,13 +46,22 @@ export async function sendNotificationToWorker(
 }
 
 export async function sendNotificationToAllWorkers(payload: string) {
+  // Save notification to all worker's notification tab
+  const workerIds = await getWorkerIds()
+  workerIds.forEach(
+    async id =>
+      await createNotification({
+        workerId: id,
+        body: payload,
+      })
+  )
+
+  // Send push notification to all subsciptions
   const subscriptions = await prisma.pushSubscription.findMany()
   if (!subscriptions) {
     return
   }
-
   const message = normalizePayload(payload)
-
   await Promise.all(
     subscriptions.map(async sub => {
       await webpush.sendNotification(

@@ -66,6 +66,12 @@ export function NavbarServer({ session }: NavbarServerProps) {
       icon: 'fas fa-user',
       permissions: [],
     },
+    {
+      path: '/notifications',
+      name: 'Oznámení',
+      icon: 'fas fa-bell',
+      permissions: [],
+    },
   ]
 
   const availablePaths = navPaths.filter(path => {

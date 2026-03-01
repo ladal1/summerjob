@@ -6,9 +6,7 @@ useZodOpenApi
 const NotificationBasicSchema = z
   .object({
     workerId: z.uuid(),
-    title: z.string().min(1),
     body: z.string().min(1),
-    url: z.url().optional().nullable(),
   })
   .strict()
 

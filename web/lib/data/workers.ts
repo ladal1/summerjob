@@ -81,6 +81,26 @@ export async function getWorkers(
   return res
 }
 
+// Returns ids of all workers for the active event
+export async function getWorkerIds(): Promise<string[]> {
+  const users = await prisma.worker.findMany({
+    where: {
+      deleted: false,
+      availability: {
+        some: {
+          event: {
+            isActive: true,
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+  return users.map(u => u.id)
+}
+
 export async function getWorkerPhotoPathById(
   id: string,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma

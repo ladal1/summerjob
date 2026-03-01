@@ -82,7 +82,7 @@ export function isAccessAllowed(
 }
 
 export async function getWorkerIdFromSession(
-  session: ExtendedSession
+  session: ExtendedSession | null
 ): Promise<string | null> {
   if (!session) {
     return null
