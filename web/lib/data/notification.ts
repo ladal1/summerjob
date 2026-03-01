@@ -1,18 +1,42 @@
+import { add } from 'date-fns'
 import prisma from 'lib/prisma/connection'
-import type { Notification } from 'lib/prisma/zod'
-import { NotificationCreateData } from 'lib/types/notification'
+import {
+  FrontentNotificationData,
+  NotificationCreateData,
+} from 'lib/types/notification'
 
 export async function getWorkersNotifications(
   workerId: string
-): Promise<Notification[]> {
-  return await prisma.notification.findMany({
+): Promise<FrontentNotificationData[]> {
+  // Only get notifications that are not older than 2 months so that workers don't see notifications from old events
+  const twoMonthsAgo = add(new Date(), { months: -2 })
+
+  const notifications = await prisma.notification.findMany({
     where: {
-      workerId,
+      workers: {
+        some: { id: workerId },
+      },
+      receivedAt: {
+        gte: twoMonthsAgo,
+      },
     },
     orderBy: {
       receivedAt: 'desc',
     },
+    include: {
+      seenByWorkers: {
+        where: { id: workerId }, // check if notification has been seen by this worker
+        select: { id: true },
+      },
+    },
   })
+
+  return notifications.map(n => ({
+    id: n.id,
+    text: n.text,
+    receivedAt: n.receivedAt,
+    seen: n.seenByWorkers.length > 0,
+  }))
 }
 
 export async function getUnreadNotificationsCount(
@@ -20,8 +44,16 @@ export async function getUnreadNotificationsCount(
 ): Promise<number> {
   return await prisma.notification.count({
     where: {
-      workerId,
-      seen: false,
+      workers: {
+        some: {
+          id: workerId,
+        },
+      },
+      seenByWorkers: {
+        none: {
+          id: workerId,
+        },
+      },
     },
   })
 }
@@ -31,7 +63,10 @@ export async function createNotification(
 ) {
   return await prisma.notification.create({
     data: {
-      ...notificationData,
+      text: notificationData.text,
+      workers: {
+        connect: notificationData.workerIds.map(id => ({ id })),
+      },
     },
   })
 }
@@ -40,25 +75,27 @@ export async function markNotificationAsSeen(
   notificationId: string,
   workerId: string
 ) {
-  return await prisma.notification.updateMany({
+  const notification = await prisma.notification.findFirst({
     where: {
       id: notificationId,
-      workerId,
+      workers: {
+        some: { id: workerId },
+      },
+    },
+    select: { id: true },
+  })
+  if (!notification) {
+    throw new Error('Notification not found for this worker')
+  }
+
+  return await prisma.notification.update({
+    where: {
+      id: notificationId,
     },
     data: {
-      seen: true,
-    },
-  })
-}
-
-export async function deleteNotification(
-  notificationId: string,
-  workerId: string
-) {
-  return await prisma.notification.deleteMany({
-    where: {
-      id: notificationId,
-      workerId,
+      seenByWorkers: {
+        connect: { id: workerId },
+      },
     },
   })
 }

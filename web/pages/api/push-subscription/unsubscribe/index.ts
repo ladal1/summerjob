@@ -36,7 +36,11 @@ async function post(
   }
 
   const deleted = await deletePushSubscription(endpoint, worker!.id)
-  deleted ? res.status(200).end() : res.status(404).end()
+  if (deleted) {
+    res.status(200).end()
+    return
+  }
+  res.status(404).end()
 }
 
 export default APIAccessController([], APIMethodHandler({ post }))

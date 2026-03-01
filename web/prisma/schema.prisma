@@ -152,7 +152,8 @@ model Worker {
   applicationId      String?                     @unique
   adorationSlots     AdorationSlot[] @relation("SlotWorkers")
   pushSubscriptions  PushSubscription[]
-  notifications      Notification[]
+  notifications      Notification[]              @relation("NotificationRecipients")
+  seenNotifications  Notification[]              @relation("NotificationSeenBy")
 }
 
 model WorkerPermissions {
@@ -433,10 +434,9 @@ model PushSubscription {
 
 // Internal notifications
 model Notification {
-  id         String     @id @default(uuid())
-  worker     Worker     @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  workerId   String
-  body       String
-  seen       Boolean    @default(false)
-  receivedAt DateTime @default(now())
+  id            String   @id @default(uuid())
+  workers       Worker[] @relation("NotificationRecipients")
+  seenByWorkers Worker[] @relation("NotificationSeenBy")
+  text          String
+  receivedAt    DateTime @default(now())
 }

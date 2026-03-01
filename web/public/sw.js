@@ -8,19 +8,9 @@ self.addEventListener('push', function (event) {
     vibrate: [100, 50, 100],
     requireInteraction: true,
     data: {
-      url: data.url || '/my-plan',
+      url: data.url || '/',
       dateOfArrival: Date.now(),
     },
-    actions: [
-      {
-        action: 'open',
-        title: 'Otevřít stránku',
-      },
-      {
-        action: 'close',
-        title: 'Zavřít',
-      },
-    ],
   }
   event.waitUntil(
     self.registration.showNotification(data.title || 'SummerJob', options)
@@ -28,9 +18,5 @@ self.addEventListener('push', function (event) {
 })
 
 self.addEventListener('notificationclick', function (event) {
-  event.notification.close()
-  if (event.action === 'close') {
-    return
-  }
   event.waitUntil(clients.openWindow(event.notification.data.url))
 })

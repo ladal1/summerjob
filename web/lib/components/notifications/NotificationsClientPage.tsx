@@ -1,11 +1,11 @@
 'use client'
 
 import PageHeader from 'lib/components/page-header/PageHeader'
-import { Notification } from 'lib/prisma/client'
 import UserNotification from './UserNotification'
+import { FrontentNotificationData } from 'lib/types/notification'
 
 interface Props {
-  notifications: Notification[]
+  notifications: FrontentNotificationData[]
 }
 
 export default function UserNotificationPage({ notifications }: Props) {

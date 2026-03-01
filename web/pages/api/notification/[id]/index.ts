@@ -17,12 +17,14 @@ async function patch(
     return
   }
 
-  const id = req.query.id as string
-  const updated = await markNotificationAsSeen(id, workerId)
-  if (updated.count === 0) {
+  try {
+    const id = req.query.id as string
+    await markNotificationAsSeen(id, workerId)
+  } catch {
     res.status(404).end()
     return
   }
+
   res.status(204).end()
 }
 

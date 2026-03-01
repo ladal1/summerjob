@@ -2,11 +2,11 @@
 
 import { formatInTimeZone } from 'date-fns-tz'
 import { useAPINotificationUpdate } from 'lib/fetcher/notification'
-import { Notification } from 'lib/prisma/client'
+import { FrontentNotificationData } from 'lib/types/notification'
 import { useState } from 'react'
 
 interface Props {
-  notification: Notification
+  notification: FrontentNotificationData
 }
 
 export default function UserNotification({ notification }: Props) {
@@ -37,7 +37,7 @@ export default function UserNotification({ notification }: Props) {
           </>
         )}
 
-        <p>{notification.body}</p>
+        <p>{notification.text}</p>
       </div>
 
       <div className="d-flex flex-column align-items-end text-end flex-shrink-0">
