@@ -36,14 +36,12 @@ export default async function NotificationPage() {
       <section>
         <div className="container mb-3">
           <EditBox>
-            <>
-              <h4 className="mb-3">Zaslání hromadné notifikace účastníkům</h4>
-              <SendPushNotificationForm
-                availableDates={availableDates}
-                availableJobs={availableJobs}
-                availablePosts={availablePosts}
-              ></SendPushNotificationForm>
-            </>
+            <h4 className="mb-3">Zaslání hromadné notifikace účastníkům</h4>
+            <SendPushNotificationForm
+              availableDates={availableDates}
+              availableJobs={availableJobs}
+              availablePosts={availablePosts}
+            ></SendPushNotificationForm>
           </EditBox>
         </div>
       </section>

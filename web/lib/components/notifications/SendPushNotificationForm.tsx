@@ -54,7 +54,6 @@ export default function SendPushNotificationForm({
       setStatusMessage('Nepodařilo se odeslat oznámení')
     } finally {
       setLoading(false)
-      console.log(notificationTarget)
     }
   }
 
@@ -110,8 +109,7 @@ export default function SendPushNotificationForm({
   const [notificationTarget, setNotificationTarget] =
     useState<NotificationTarget | null>(null)
 
-  //#region Date selection
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  // Date selection
   const dateSelectItems = availableDates.map(date => {
     const dateId = date.toISOString().slice(0, 10)
     return {
@@ -121,13 +119,10 @@ export default function SendPushNotificationForm({
     }
   })
   const handleSelectDate = (date: string) => {
-    setSelectedDate(date)
     setNotificationTarget({ type: 'working-on-day', date })
   }
-  //#endregion
 
-  //#region Job selection
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
+  // Job selection
   const jobSelectItems = availableJobs.map(job => {
     return {
       id: job.jobId,
@@ -136,13 +131,10 @@ export default function SendPushNotificationForm({
     }
   })
   const handleSelectJob = (jobId: string) => {
-    setSelectedJobId(jobId)
     setNotificationTarget({ type: 'working-on-job', jobId })
   }
-  //#endregion
 
-  //#region Post selection
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  // Post selection
   const postSelectItems = availablePosts.map(post => {
     return {
       id: post.postId,
@@ -151,10 +143,8 @@ export default function SendPushNotificationForm({
     }
   })
   const handleSelectPost = (postId: string) => {
-    setSelectedPostId(postId)
     setNotificationTarget({ type: 'signed-up-for-post', postId })
   }
-  //#endregion
 
   return (
     <form onSubmit={handleSubmit}>
@@ -236,7 +226,7 @@ export default function SendPushNotificationForm({
           onConfirm={handleConfirm}
           onReject={() => setShowConfirmModal(false)}
         >
-          Chystáte se odeslat oznámení všem účastníkům akce.
+          Opravdu chcete odeslat hromadnou notifikaci?
         </ConfirmationModal>
       )}
     </form>

@@ -23,14 +23,25 @@ export type FrontentNotificationData = z.infer<
   typeof FrontendNotificationSchema
 >
 
-export type NotificationTarget =
-  | { type: 'everyone' }
-  | { type: 'working-on-day'; date: string }
-  | { type: 'working-on-job'; jobId: string }
-  | { type: 'signed-up-for-post'; postId: string }
-  | { type: 'food-allergies' }
+export const NotificationTargetSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('everyone') }).strict(),
+  z
+    .object({ type: z.literal('working-on-day'), date: z.string().min(1) })
+    .strict(),
+  z
+    .object({ type: z.literal('working-on-job'), jobId: z.string().min(1) })
+    .strict(),
+  z
+    .object({
+      type: z.literal('signed-up-for-post'),
+      postId: z.string().min(1),
+    })
+    .strict(),
+  z.object({ type: z.literal('food-allergies') }).strict(),
+])
+export type NotificationTarget = z.infer<typeof NotificationTargetSchema>
 
-export type NotificationMulticastRequest = {
-  payload: string
-  target: NotificationTarget
-}
+export const NotificationMulticastRequestSchema = z.object({
+  payload: z.string().trim().min(1),
+  target: NotificationTargetSchema,
+})

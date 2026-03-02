@@ -82,10 +82,11 @@ export async function getWorkers(
 }
 
 // Returns ids of all workers for the active event
-export async function getWorkerIds(): Promise<string[]> {
-  const users = await prisma.worker.findMany({
+export async function getAllWorkerIds(): Promise<string[]> {
+  const workers = await prisma.worker.findMany({
     where: {
       deleted: false,
+      blocked: false,
       availability: {
         some: {
           event: {
@@ -98,7 +99,53 @@ export async function getWorkerIds(): Promise<string[]> {
       id: true,
     },
   })
-  return users.map(u => u.id)
+  return workers.map(w => w.id)
+}
+
+// Returns ids of all workers that are working on a given day
+export async function getWorkerIdsWorkingOnDate(date: Date): Promise<string[]> {
+  const workers = await prisma.worker.findMany({
+    where: {
+      deleted: false,
+      blocked: false,
+      availability: {
+        some: {
+          event: {
+            isActive: true,
+          },
+        },
+      },
+      jobs: {
+        some: {
+          plan: {
+            day: date,
+          },
+        },
+      },
+    },
+  })
+  return workers.map(w => w.id)
+}
+
+// Returns ids of all workers that have a food allergy
+export async function getWorkerIdsWithFoodAllergies(): Promise<string[]> {
+  const workers = await prisma.worker.findMany({
+    where: {
+      deleted: false,
+      blocked: false,
+      availability: {
+        some: {
+          event: {
+            isActive: true,
+          },
+        },
+      },
+      foodAllergies: {
+        some: {},
+      },
+    },
+  })
+  return workers.map(w => w.id)
 }
 
 export async function getWorkerPhotoPathById(
