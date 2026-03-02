@@ -5,6 +5,7 @@ import { Label } from '../forms/Label'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import type { NotificationTarget } from 'lib/types/notification'
+import { formatDateLong } from 'lib/helpers/helpers'
 
 interface Props {
   availableDates: Date[]
@@ -17,7 +18,7 @@ export default function SendPushNotificationForm({
   availableJobs,
   availablePosts,
 }: Props) {
-  const [value, setValue] = useState('')
+  const [message, setMessage] = useState('')
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -40,14 +41,14 @@ export default function SendPushNotificationForm({
       const res = await fetch('/api/push-subscription/multicast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payload: value }),
+        body: JSON.stringify({ payload: message, target: notificationTarget }),
       })
 
       if (!res.ok) {
         throw new Error()
       }
       setStatusMessage('Oznámení úspěšně odesláno')
-      setValue('')
+      setMessage('')
     } catch {
       setError(true)
       setStatusMessage('Nepodařilo se odeslat oznámení')
@@ -64,15 +65,12 @@ export default function SendPushNotificationForm({
         setNotificationTarget({ type: 'everyone' })
         break
       case 'working-on-day':
-        setNotificationTarget({
-          type: 'working-on-day',
-          date: availableDates[0],
-        })
+        setNotificationTarget({ type: 'working-on-day', date: '' })
         break
       case 'working-on-job':
         setNotificationTarget({ type: 'working-on-job', jobId: '' })
         break
-      case 'signed-up-for-event':
+      case 'signed-up-for-post':
         setNotificationTarget({ type: 'signed-up-for-post', postId: '' })
         break
       case 'food-allergies':
@@ -112,6 +110,52 @@ export default function SendPushNotificationForm({
   const [notificationTarget, setNotificationTarget] =
     useState<NotificationTarget | null>(null)
 
+  //#region Date selection
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const dateSelectItems = availableDates.map(date => {
+    const dateId = date.toISOString().slice(0, 10)
+    return {
+      id: dateId,
+      name: formatDateLong(date),
+      searchable: formatDateLong(date),
+    }
+  })
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date)
+    setNotificationTarget({ type: 'working-on-day', date })
+  }
+  //#endregion
+
+  //#region Job selection
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
+  const jobSelectItems = availableJobs.map(job => {
+    return {
+      id: job.jobId,
+      name: job.jobName,
+      searchable: job.jobName,
+    }
+  })
+  const handleSelectJob = (jobId: string) => {
+    setSelectedJobId(jobId)
+    setNotificationTarget({ type: 'working-on-job', jobId })
+  }
+  //#endregion
+
+  //#region Post selection
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const postSelectItems = availablePosts.map(post => {
+    return {
+      id: post.postId,
+      name: post.postName,
+      searchable: post.postName,
+    }
+  })
+  const handleSelectPost = (postId: string) => {
+    setSelectedPostId(postId)
+    setNotificationTarget({ type: 'signed-up-for-post', postId })
+  }
+  //#endregion
+
   return (
     <form onSubmit={handleSubmit}>
       <FilterSelectInput
@@ -123,6 +167,37 @@ export default function SendPushNotificationForm({
         errors={{}}
       />
 
+      {notificationTarget?.type === 'working-on-day' && (
+        <FilterSelectInput
+          id="date"
+          label="Datum"
+          placeholder={'Vyberte datum'}
+          items={dateSelectItems}
+          onSelected={handleSelectDate}
+          errors={{}}
+        />
+      )}
+      {notificationTarget?.type === 'working-on-job' && (
+        <FilterSelectInput
+          id="job"
+          label="Job"
+          placeholder={'Vyberte job'}
+          items={jobSelectItems}
+          onSelected={handleSelectJob}
+          errors={{}}
+        />
+      )}
+      {notificationTarget?.type === 'signed-up-for-post' && (
+        <FilterSelectInput
+          id="post"
+          label="Událost"
+          placeholder={'Vyberte událost'}
+          items={postSelectItems}
+          onSelected={handleSelectPost}
+          errors={{}}
+        />
+      )}
+
       <Label id="notification-multicast-input" label="Text notifikace"></Label>
       <div className="d-flex flex-row gap-3">
         <input
@@ -131,15 +206,15 @@ export default function SendPushNotificationForm({
           className="form-control pb-0 fs-5"
           placeholder="Zadejte text hromadné notifikace..."
           autoComplete="off"
-          value={value}
-          onChange={e => setValue(e.target.value)}
+          value={message}
+          onChange={e => setMessage(e.target.value)}
         />
 
         <button
           type="submit"
           className="btn btn-primary text-nowrap"
           disabled={
-            value.trim() === '' || loading || notificationTarget === null
+            message.trim() === '' || loading || notificationTarget === null
           }
         >
           {loading ? 'Posílání...' : 'Poslat oznámení'}

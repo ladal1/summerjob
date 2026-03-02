@@ -25,7 +25,7 @@ export type FrontentNotificationData = z.infer<
 
 export type NotificationTarget =
   | { type: 'everyone' }
-  | { type: 'working-on-day'; date: Date }
+  | { type: 'working-on-day'; date: string }
   | { type: 'working-on-job'; jobId: string }
   | { type: 'signed-up-for-post'; postId: string }
   | { type: 'food-allergies' }
