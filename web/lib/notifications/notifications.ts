@@ -18,6 +18,40 @@ function normalizePayload(payload: string) {
   })
 }
 
+async function sendPushToSubscription(
+  sub: {
+    id?: string
+    endpoint: string
+    p256dh: string
+    auth: string
+  },
+  message: string
+) {
+  try {
+    await webpush.sendNotification(
+      {
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.p256dh,
+          auth: sub.auth,
+        },
+      },
+      message
+    )
+  } catch (err) {
+    if (
+      !!err &&
+      typeof err === 'object' &&
+      'statusCode' in err &&
+      (err.statusCode === 404 || err.statusCode === 410)
+    ) {
+      await prisma.pushSubscription.deleteMany({
+        where: { endpoint: sub.endpoint },
+      })
+    }
+  }
+}
+
 export async function sendNotificationToWorker(
   workerId: string,
   payload: string
@@ -31,18 +65,7 @@ export async function sendNotificationToWorker(
   const message = normalizePayload(payload)
 
   await Promise.all(
-    subscriptions.map(async sub => {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
-        },
-        message
-      )
-    })
+    subscriptions.map(sub => sendPushToSubscription(sub, message))
   )
 }
 
@@ -68,17 +91,6 @@ export async function sendNotificationToAllWorkers(payload: string) {
   }
   const message = normalizePayload(payload)
   await Promise.all(
-    subscriptions.map(async sub => {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
-        },
-        message
-      )
-    })
+    subscriptions.map(sub => sendPushToSubscription(sub, message))
   )
 }

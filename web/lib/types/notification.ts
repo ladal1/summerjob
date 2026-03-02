@@ -22,3 +22,15 @@ export const FrontendNotificationSchema = z.object({
 export type FrontentNotificationData = z.infer<
   typeof FrontendNotificationSchema
 >
+
+export type NotificationTarget =
+  | { type: 'everyone' }
+  | { type: 'working-on-day'; date: Date }
+  | { type: 'working-on-job'; jobId: string }
+  | { type: 'signed-up-for-post'; postId: string }
+  | { type: 'food-allergies' }
+
+export type NotificationMulticastRequest = {
+  payload: string
+  target: NotificationTarget
+}
