@@ -38,7 +38,7 @@ export default function SendPushNotificationForm({
     setShowConfirmModal(false)
 
     try {
-      const res = await fetch('/api/push-subscription/multicast', {
+      const res = await fetch('/api/notification/multicast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payload: message, target: notificationTarget }),

@@ -1,4 +1,6 @@
+import { startOfTomorrow } from 'date-fns'
 import { getActiveJobById } from 'lib/data/active-jobs'
+import { getUpcomingAdorationSlots } from 'lib/data/adoration'
 import { createNotification } from 'lib/data/notification'
 import { getPostById } from 'lib/data/posts'
 import {
@@ -7,6 +9,7 @@ import {
   getWorkerIdsWithFoodAllergies,
 } from 'lib/data/workers'
 import { getDateFromISOString } from 'lib/helpers/helpers'
+import { Prisma } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import { NotificationCreateData } from 'lib/types/notification'
 import webpush from 'web-push'
@@ -23,7 +26,7 @@ function normalizePayload(payload: string) {
   return JSON.stringify({
     title: 'SummerJob',
     body: payload,
-    url: '/',
+    url: '/notifications',
   })
 }
 
@@ -132,4 +135,52 @@ export async function sendNotificationToWorkersWithFoodAllergies(
 ) {
   const workerIds = await getWorkerIdsWithFoodAllergies()
   await sendNotificationToWorkers(workerIds, payload)
+}
+
+// Sends a notification to all workers informing them of their plan tomorrow (has/doesn't have a job)
+export async function sendDailyReminderNotification() {
+  const tomorrow = startOfTomorrow()
+
+  const allWorkerIds = await getAllWorkerIds()
+  const workerIdsJobTomorrow = await getWorkerIdsWorkingOnDate(tomorrow)
+  const workerIdsNoJobTomorrow = allWorkerIds.filter(
+    worker => !workerIdsJobTomorrow.includes(worker)
+  )
+
+  const jobTomorrowPayload = 'Zítra jste zapsán/a na práci'
+  const noJobTomorrowPayload = 'Zítra máte volno'
+
+  await sendNotificationToWorkers(workerIdsJobTomorrow, jobTomorrowPayload)
+  await sendNotificationToWorkers(workerIdsNoJobTomorrow, noJobTomorrowPayload)
+}
+
+// Sends a notification to all workers that have an upcoming adoration
+export async function sendAdorationReminderNotification() {
+  const HOURS = 1 // How many hours in advance to give the notification
+  const adorationSlots = await getUpcomingAdorationSlots(HOURS)
+
+  adorationSlots.forEach(slot =>
+    slot.workers.forEach(async worker => {
+      try {
+        // Log the reminder so the notification gets sent only once
+        await prisma.adorationReminderLogging.create({
+          data: {
+            workerId: worker.id,
+            adorationSlotId: slot.id,
+          },
+        })
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          return
+        }
+        throw err
+      }
+
+      const payload = `Adorace na místě: ${slot.location} začíná za méně než ${HOURS} hodinu`
+      await sendNotificationToWorkers([worker.id], payload)
+    })
+  )
 }

@@ -440,3 +440,11 @@ model Notification {
   text          String
   receivedAt    DateTime @default(now())
 }
+
+model AdorationReminderLogging {
+  id            String   @id @default(uuid())
+  workerId String
+  adorationSlotId String
+  
+  @@unique([workerId, adorationSlotId])
+}

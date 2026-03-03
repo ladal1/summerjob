@@ -8,7 +8,7 @@ self.addEventListener('push', function (event) {
     vibrate: [100, 50, 100],
     requireInteraction: true,
     data: {
-      url: data.url || '/',
+      url: data.url || '/notifications',
       dateOfArrival: Date.now(),
     },
   }
