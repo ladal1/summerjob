@@ -155,6 +155,7 @@ export default function SendPushNotificationForm({
         items={notificationTargetSelectItems}
         onSelected={handleSelectTarget}
         errors={{}}
+        autocomplete="off"
       />
 
       {notificationTarget?.type === 'working-on-day' && (
@@ -165,6 +166,7 @@ export default function SendPushNotificationForm({
           items={dateSelectItems}
           onSelected={handleSelectDate}
           errors={{}}
+          autocomplete="off"
         />
       )}
       {notificationTarget?.type === 'working-on-job' && (
@@ -175,6 +177,7 @@ export default function SendPushNotificationForm({
           items={jobSelectItems}
           onSelected={handleSelectJob}
           errors={{}}
+          autocomplete="off"
         />
       )}
       {notificationTarget?.type === 'signed-up-for-post' && (
@@ -185,6 +188,7 @@ export default function SendPushNotificationForm({
           items={postSelectItems}
           onSelected={handleSelectPost}
           errors={{}}
+          autocomplete="off"
         />
       )}
 
