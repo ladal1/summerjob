@@ -52,6 +52,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
         Permission.ADMIN,
         Permission.ADORATION,
         Permission.APPLICATIONS,
+        Permission.NOTIFICATIONS,
       ],
     },
     {

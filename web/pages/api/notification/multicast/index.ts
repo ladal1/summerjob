@@ -57,6 +57,6 @@ async function post(
 }
 
 export default APIAccessController(
-  [Permission.ADMIN],
+  [Permission.NOTIFICATIONS],
   APIMethodHandler({ post })
 )
