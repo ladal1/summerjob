@@ -147,8 +147,10 @@ export async function sendDailyReminderNotification() {
     worker => !workerIdsJobTomorrow.includes(worker)
   )
 
-  const jobTomorrowPayload = 'Zítra jste zapsán/a na práci'
-  const noJobTomorrowPayload = 'Zítra máte volno'
+  const jobTomorrowPayload =
+    'Zítra jste zapsán/a na práci. Pokud máte pocit, že to je špatně, zkontrolujte si nastavení své dostupnosti v profilu a kontaktujte tým SummerJob.'
+  const noJobTomorrowPayload =
+    'Zítra máte volno. Pokud máte pocit, že to je špatně, zkontrolujte si nastavení své dostupnosti v profilu a kontaktujte tým SummerJob.'
 
   await sendNotificationToWorkers(workerIdsJobTomorrow, jobTomorrowPayload)
   await sendNotificationToWorkers(workerIdsNoJobTomorrow, noJobTomorrowPayload)
