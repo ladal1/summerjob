@@ -28,7 +28,6 @@ import { LinkToOtherForm } from '../forms/LinkToOtherForm'
 import { useAPIWorkAllergies } from 'lib/fetcher/work-allergy'
 import { useAPISkills } from 'lib/fetcher/skill'
 import { useAPIToolNames } from 'lib/fetcher/tool-name'
-import PushNotificationManagerButton from '../notifications/PushNotificationManagerBar'
 
 const schema = WorkerUpdateSchema
 type WorkerForm = z.input<typeof schema>

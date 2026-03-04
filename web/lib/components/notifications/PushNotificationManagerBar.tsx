@@ -25,9 +25,6 @@ function isIOSStandalone() {
 }
 
 export default function PushNotificationManagerButton() {
-  const [subscription, setSubscription] = useState<PushSubscription | null>(
-    null
-  )
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isShown, setIsShown] = useState(false)
@@ -51,7 +48,6 @@ export default function PushNotificationManagerButton() {
       })
 
       const sub = await registration.pushManager.getSubscription()
-      setSubscription(sub)
 
       if (sub) {
         // If subscription exists in browser, rebind it to the currently logged in user
@@ -109,7 +105,6 @@ export default function PushNotificationManagerButton() {
         throw new Error()
       }
 
-      setSubscription(sub)
       setSuccess(true)
       setTimeout(() => setIsShown(false), 5000)
     } catch {
