@@ -151,6 +151,9 @@ model Worker {
   application        Application?                @relation(fields: [applicationId], references: [id])
   applicationId      String?                     @unique
   adorationSlots     AdorationSlot[] @relation("SlotWorkers")
+  pushSubscriptions  PushSubscription[]
+  notifications      Notification[]              @relation("NotificationRecipients")
+  seenNotifications  Notification[]              @relation("NotificationSeenBy")
 }
 
 model WorkerPermissions {
@@ -417,4 +420,31 @@ model FoodDeliveryJobOrder {
 
   @@unique([foodDeliveryId, activeJobId]) // Each job can appear only once per delivery
   @@unique([foodDeliveryId, order])       // Each order position is unique per delivery
+}
+
+// Subscriptions for push notifications
+model PushSubscription {
+  id       String @id @default(uuid())
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId String
+  endpoint String @unique
+  p256dh   String
+  auth     String
+}
+
+// Internal notifications
+model Notification {
+  id            String   @id @default(uuid())
+  workers       Worker[] @relation("NotificationRecipients")
+  seenByWorkers Worker[] @relation("NotificationSeenBy")
+  text          String
+  receivedAt    DateTime @default(now())
+}
+
+model AdorationReminderLogging {
+  id            String   @id @default(uuid())
+  workerId String
+  adorationSlotId String
+  
+  @@unique([workerId, adorationSlotId])
 }

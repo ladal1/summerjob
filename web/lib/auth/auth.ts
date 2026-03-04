@@ -1,3 +1,4 @@
+import prisma from 'lib/prisma/connection'
 import { ExtendedSession, Permission, UserSession } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Session } from 'next-auth'
@@ -45,7 +46,7 @@ export async function withPermissions(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSession()
   const allowed = isAccessAllowed(permissions, session)
-   
+
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -63,7 +64,7 @@ export async function withPermissionsAPI(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSessionAPI(req, res)
   const allowed = isAccessAllowed(permissions, session)
-   
+
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -78,6 +79,30 @@ export function isAccessAllowed(
     if (session.permissions.includes(permission)) return true
   }
   return false
+}
+
+export async function getWorkerIdFromSession(
+  session: ExtendedSession | null
+): Promise<string | null> {
+  if (!session) {
+    return null
+  }
+  const email = session.user?.email
+  if (!email) {
+    return null
+  }
+  const worker = await prisma.worker.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+    },
+  })
+  if (!worker) {
+    return null
+  }
+  return worker.id
 }
 
 /**

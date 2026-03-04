@@ -3,7 +3,7 @@ import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import { Permission } from 'lib/types/auth'
 
 export const metadata = {
-  title: 'Administrace'
+  title: 'Administrace',
 }
 
 export default async function AdminLayout({
@@ -11,7 +11,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const isAllowed = await withPermissions([Permission.ADMIN, Permission.APPLICATIONS, Permission.ADORATION])
+  const isAllowed = await withPermissions([
+    Permission.ADMIN,
+    Permission.APPLICATIONS,
+    Permission.ADORATION,
+    Permission.NOTIFICATIONS,
+  ])
   if (!isAllowed.success) {
     return <AccessDeniedPage />
   }
