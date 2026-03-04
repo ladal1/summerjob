@@ -24,7 +24,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
     register,
     handleSubmit,
     formState: { errors, dirtyFields },
-  } = useForm<AreaCreateData>({
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 

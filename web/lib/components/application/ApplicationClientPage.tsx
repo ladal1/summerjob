@@ -1,12 +1,10 @@
 'use client'
 
- 
- 
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   ApplicationCreateSchema,
   ApplicationCreateDataInput,
@@ -53,7 +51,11 @@ export default function ApplicationsPage({
     clearErrors,
     control,
     formState: { errors },
-  } = useForm<ApplicationCreateDataInput>({
+  } = useForm<
+    z.input<typeof ApplicationCreateSchema>,
+    unknown,
+    ApplicationCreateDataInput
+  >({
     resolver: zodResolver(ApplicationCreateSchema),
   })
   const { isMutating, error, reset } = useAPIApplicationCreate({
