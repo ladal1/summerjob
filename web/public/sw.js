@@ -3,8 +3,8 @@ self.addEventListener('push', function (event) {
 
   const options = {
     body: data.body,
-    // icon: '/favicon.ico',
-    // badge: '/favicon.ico',
+    icon: '/icon-256x256.png',
+    badge: '/icon-96x96.png',
     vibrate: [100, 50, 100],
     requireInteraction: true,
     data: {
