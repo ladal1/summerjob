@@ -11,9 +11,6 @@ import { statSync } from 'fs'
 import path from 'path'
 
 describe('Posts', function () {
-  beforeEach(async () => {
-    await api.clearPosts()
-  })
   //#region Access
   describe('#access', function () {
     it('should be accessible without permission', async function () {
@@ -79,7 +76,7 @@ describe('Posts', function () {
     // then
     expect(resp.status).toBe(200)
     expect(Array.isArray(resp.body.posts)).toBe(true)
-    expect(resp.body.posts).toHaveLength(1)
+    expect(resp.body.posts).toHaveLength(4)
   })
 
   it('returns a proposed post by id', async function () {

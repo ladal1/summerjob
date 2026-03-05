@@ -60,8 +60,7 @@ jobs:
         run: npm run build
 
       - name: Start Next.js server
-        run: |
-          nohup npm run start -- -p $PORT > ../next-server.log 2>&1 &
+        run: nohup npm run start -- -p $PORT > ../next-server.log 2>&1 &
 
       - name: Wait for server to be ready
         run: |

@@ -204,12 +204,6 @@ class Common {
   }
   //#endregion
 
-  //region DB helpers
-  clearPosts = async () => {
-    await prisma.post.deleteMany()
-  }
-  //#endregion
-
   //region Basic API usage
   clearCache = async () => {
     await this.post('/api/test/clear-cache', Id.ADMIN, {})
@@ -490,6 +484,9 @@ class Common {
         Id.ADMIN
       )
     }
+
+    // Clear smj event cache
+    await this.clearCache()
     // Delete all photos
     this.clearDirectory(this.getUploadDirForImages())
   }
@@ -515,11 +512,11 @@ export function createSkillHasData() {
   }
 }
 
-export function createToolNameData() {
+export function createToolNameData(skills = [], jobTypes = []) {
   return {
     name: faker.word.noun(),
-    skills: [],
-    jobTypes: [],
+    skills,
+    jobTypes,
   }
 }
 
