@@ -144,6 +144,7 @@ class Common {
     this._email = admin.email
     this._event = { id: event.id, start: event.startDate, end: event.endDate }
     this._session = await this.getSession()
+    await this.clearCache()
   }
 
   getSummerJobEventId = () => this._event.id
@@ -210,6 +211,10 @@ class Common {
   //#endregion
 
   //region Basic API usage
+  clearCache = async () => {
+    await this.post('/api/test/clear-cache', Id.ADMIN, {})
+  }
+
   deletePlan = async (planId: string) => {
     await this.del(`/api/plans/${planId}`, Id.ADMIN)
   }

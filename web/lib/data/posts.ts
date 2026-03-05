@@ -3,7 +3,6 @@ import formidable from 'formidable'
 import {
   deleteFile,
   getUploadDirForImages,
-  getUploadDirForImagesForCurrentEvent,
   renameFile,
   updatePhotoPathByNewFilename,
 } from 'lib/api/fileManager'
