@@ -1,5 +1,7 @@
 import { api, createFoodAllergyData, Id, isEmpty } from './common'
 
+type FoodAllergy = { id: string; name: string }
+
 describe('Food allergies', function () {
   //#region Access
   describe('#access', function () {
@@ -32,9 +34,7 @@ describe('Food allergies', function () {
       }
 
       const afterDelete = await api.get('/api/food-allergies', '')
-      expect((afterDelete.body as any[]).map(fa => fa.id)).toContain(
-        id
-      )
+      expect((afterDelete.body as FoodAllergy[]).map(fa => fa.id)).toContain(id)
     })
 
     it('should not be able to update without permission', async function () {
@@ -46,7 +46,9 @@ describe('Food allergies', function () {
 
       const newName = 'New name'
       for (const perm of perms) {
-        const resp = await api.patch(`/api/food-allergies/${id}`, perm, { name: newName })
+        const resp = await api.patch(`/api/food-allergies/${id}`, perm, {
+          name: newName,
+        })
         expect(resp.status).toBe(403)
         expect(isEmpty(resp.body)).toBe(true)
       }
@@ -127,25 +129,34 @@ describe('Food allergies', function () {
       const foodAllergy = await api.post('/api/food-allergies', Id.ADMIN, body)
       const foodAllergyId = foodAllergy.body.id
       // Check that the food allergy was added
-      const foodAllergiesAfterAdding = await api.get('/api/food-allergies', Id.ADMIN)
+      const foodAllergiesAfterAdding = await api.get(
+        '/api/food-allergies',
+        Id.ADMIN
+      )
       console.log(JSON.stringify(foodAllergy, null, 2))
       expect(foodAllergiesAfterAdding.body).toHaveLength(
         allergiesBeforeAdding.body.length + 1
       )
-      expect((foodAllergiesAfterAdding.body as any[]).map(fa => fa.id)).toContain(
-        foodAllergyId
-      )
+      expect(
+        (foodAllergiesAfterAdding.body as FoodAllergy[]).map(fa => fa.id)
+      ).toContain(foodAllergyId)
       // Delete the food allergy
-      const resp = await api.del(`/api/food-allergies/${foodAllergyId}`, Id.ADMIN)
+      const resp = await api.del(
+        `/api/food-allergies/${foodAllergyId}`,
+        Id.ADMIN
+      )
       expect(resp.status).toBe(204)
       // Check that the food allergy was deleted
-      const foodAllergiesAfterRemoving = await api.get('/api/food-allergies', '')
+      const foodAllergiesAfterRemoving = await api.get(
+        '/api/food-allergies',
+        ''
+      )
       expect(foodAllergiesAfterRemoving.body).toHaveLength(
         allergiesBeforeAdding.body.length
       )
-      expect((foodAllergiesAfterRemoving.body as any[]).map(fa => fa.id)).not.toContain(
-        foodAllergyId
-      )
+      expect(
+        (foodAllergiesAfterRemoving.body as FoodAllergy[]).map(fa => fa.id)
+      ).not.toContain(foodAllergyId)
     })
   })
   //#endregion
