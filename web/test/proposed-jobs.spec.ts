@@ -2,7 +2,6 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import {
   Id,
-  Tools,
   api,
   createProposedJobData,
   getFileNameAndType,
@@ -51,7 +50,8 @@ describe('Proposed Jobs', function () {
     it('creates a proposed job', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
       // when
       const resp = await api.post('/api/proposed-jobs', Id.JOBS, body)
       // then
@@ -65,7 +65,8 @@ describe('Proposed Jobs', function () {
     it('returns a list of proposedJobs', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
       await api.post('/api/proposed-jobs', Id.JOBS, body)
       // when
       const resp = await api.get('/api/proposed-jobs', Id.JOBS)
@@ -80,7 +81,8 @@ describe('Proposed Jobs', function () {
     it('returns a proposed job by id', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
       const job = await api.post('/api/proposed-jobs', Id.JOBS, body)
       // when
       const resp = await api.get(`/api/proposed-jobs/${job.body.id}`, Id.JOBS)
@@ -95,7 +97,8 @@ describe('Proposed Jobs', function () {
     it('updates a proposed job', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
       const job = await api.post('/api/proposed-jobs', Id.JOBS, body)
       const selectedProposedJob = job.body
 
@@ -124,7 +127,8 @@ describe('Proposed Jobs', function () {
     it("can't update a proposed-job - wrong parameter", async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
       const job = await api.post('/api/proposed-jobs', Id.JOBS, body)
       const selectedProposedJob = job.body
       const payload = {
@@ -150,7 +154,8 @@ describe('Proposed Jobs', function () {
         '/api/proposed-jobs',
         Id.JOBS
       )
-      const body = createProposedJobData(area.id)
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
       const proposedJob = await api.post('/api/proposed-jobs', Id.JOBS, body)
       const proposedJobId = proposedJob.body.id
       // Check that the proposed job was added
@@ -192,8 +197,11 @@ describe('Proposed Jobs', function () {
       it('creates proposed-job with valid photo', async function () {
         // given
         const area = await api.createArea()
-        const body = createProposedJobData(area.id)
-        const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+        const jobType = await api.createJobType()
+        const body = createProposedJobData(area.id, jobType.id)
+        const file = path.normalize(
+          `${__dirname}/resources/logo-smj-yellow.png`
+        )
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
         // then
@@ -212,7 +220,7 @@ describe('Proposed Jobs', function () {
           proposedJob.body.photos.at(0).photoPath
         )
         expect(fileName).toBe(proposedJob.body.photos.at(0).id)
-        expect(fileType).toBe('.ico')
+        expect(fileType).toBe('.png')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -226,11 +234,14 @@ describe('Proposed Jobs', function () {
       it('creates proposed-job with multiple valid photos', async function () {
         // given
         const area = await api.createArea()
-        const body = createProposedJobData(area.id)
+        const jobType = await api.createJobType()
+        const body = createProposedJobData(area.id, jobType.id)
         const file0 = path.normalize(
           `${__dirname}/resources/logo-smj-yellow.png`
         )
-        const file1 = path.normalize(`${__dirname}/resources/favicon.ico`)
+        const file1 = path.normalize(
+          `${__dirname}/resources/logo-smj-yellow.png`
+        )
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [
           file0,
@@ -259,7 +270,7 @@ describe('Proposed Jobs', function () {
           proposedJob.body.photos.at(1).photoPath
         )
         expect(fileName1).toBe(proposedJob.body.photos.at(1).id)
-        expect(fileType1).toBe('.ico')
+        expect(fileType1).toBe('.png')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -273,7 +284,8 @@ describe('Proposed Jobs', function () {
       it('creates proposed-job with invalid photo', async function () {
         // given
         const area = await api.createArea()
-        const body = createProposedJobData(area.id)
+        const jobType = await api.createJobType()
+        const body = createProposedJobData(area.id, jobType.id)
         const file = path.normalize(`${__dirname}/resources/invalidPhoto.ts`)
         // when
         const resp = await api.post('/api/proposed-jobs', Id.JOBS, body, [file])
@@ -293,7 +305,8 @@ describe('Proposed Jobs', function () {
       it('creates proposed-job with valid and one invalid photos', async function () {
         // given
         const area = await api.createArea()
-        const body = createProposedJobData(area.id)
+        const jobType = await api.createJobType()
+        const body = createProposedJobData(area.id, jobType.id)
         const file0 = path.normalize(
           `${__dirname}/resources/logo-smj-yellow.png`
         )
@@ -319,7 +332,7 @@ describe('Proposed Jobs', function () {
 
     it('create proposed-job with too many photos', async function () {
       // given
-      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       const files: string[] = Array(11).fill(file)
       // when
       const created = await api.createProposedJobWithPhotos(files)
@@ -335,7 +348,9 @@ describe('Proposed Jobs', function () {
         // given
         const created = await api.createProposedJobWithPhotos([])
         expect(created.status).toBe(201)
-        const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+        const file = path.normalize(
+          `${__dirname}/resources/logo-smj-yellow.png`
+        )
         // when
         const patch = await api.patch(
           `/api/proposed-jobs/${created.body.id}`,
@@ -356,7 +371,7 @@ describe('Proposed Jobs', function () {
           proposedJob.body.photos.at(0).photoPath
         )
         expect(fileName).toBe(proposedJob.body.photos.at(0).id)
-        expect(fileType).toBe('.ico')
+        expect(fileType).toBe('.png')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -374,7 +389,9 @@ describe('Proposed Jobs', function () {
           path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
         ])
         expect(created.status).toBe(201)
-        const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+        const file = path.normalize(
+          `${__dirname}/resources/logo-smj-yellow.png`
+        )
         // when
         const patch = await api.patch(
           `/api/proposed-jobs/${created.body.id}`,
@@ -395,7 +412,7 @@ describe('Proposed Jobs', function () {
           proposedJob.body.photos.at(2).photoPath
         )
         expect(fileName).toBe(proposedJob.body.photos.at(2).id)
-        expect(fileType).toBe('.ico')
+        expect(fileType).toBe('.png')
         // verify number of files in /proposed-jobs/{id} folder
         const numOfFiles = await api.numberOfFilesInsideDirectory(
           path.join(
@@ -412,7 +429,7 @@ describe('Proposed Jobs', function () {
       const created = await api.createProposedJobWithPhotos([])
       expect(created.status).toBe(201)
       const file0 = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
-      const file1 = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file1 = path.normalize(`${__dirname}/resources/jpeg-photo.jpeg`)
       // when
       const patch = await api.patch(
         `/api/proposed-jobs/${created.body.id}`,
@@ -439,7 +456,7 @@ describe('Proposed Jobs', function () {
         proposedJob.body.photos.at(1).photoPath
       )
       expect(fileName1).toBe(proposedJob.body.photos.at(1).id)
-      expect(fileType1).toBe('.ico')
+      expect(fileType1).toBe('.jpg')
 
       // verify number of files in /proposed-jobs/{id} folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
@@ -518,7 +535,7 @@ describe('Proposed Jobs', function () {
       it("delete proposed-job's only photo", async function () {
         // given
         const created = await api.createProposedJobWithPhotos([
-          path.normalize(`${__dirname}/resources/favicon.ico`),
+          path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
         ])
         expect(created.status).toBe(201)
         const createdProposedJob = await api.get(
@@ -560,8 +577,8 @@ describe('Proposed Jobs', function () {
       it("delete proposed-job's non-only photo", async function () {
         // given
         const created = await api.createProposedJobWithPhotos([
-          path.normalize(`${__dirname}/resources/favicon.ico`),
           path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
+          path.normalize(`${__dirname}/resources/jpeg-photo.jpeg`),
         ])
         expect(created.status).toBe(201)
         const createdProposedJob = await api.get(
@@ -570,7 +587,7 @@ describe('Proposed Jobs', function () {
         )
         expect(Array.isArray(createdProposedJob.body.photos)).toBe(true)
         expect(createdProposedJob.body.photos).toHaveLength(2)
-        const photoId = createdProposedJob.body.photos.at(0).id // delete ico file
+        const photoId = createdProposedJob.body.photos.at(0).id // delete png file
         const payload = {
           photoIdsDeleted: [photoId],
         }
@@ -594,7 +611,7 @@ describe('Proposed Jobs', function () {
           proposedJob.body.photos.at(0).photoPath
         )
         expect(fileName).toBe(proposedJob.body.photos.at(0).id)
-        expect(fileType).toBe('.png')
+        expect(fileType).toBe('.jpg')
         // verify existence of /proposed-jobs/{id} folder
         expect(
           api.pathExists(
@@ -620,7 +637,7 @@ describe('Proposed Jobs', function () {
   it('deletation of proposed-job will delete all his photos and upload directory', async function () {
     // given
     const created = await api.createProposedJobWithPhotos([
-      path.normalize(`${__dirname}/resources/favicon.ico`),
+      path.normalize(`${__dirname}/resources/jpeg-photo.jpeg`),
       path.normalize(`${__dirname}/resources/logo-smj-yellow.png`),
     ])
     expect(created.status).toBe(201)
@@ -649,7 +666,7 @@ describe('Proposed Jobs', function () {
   describe('##get', function () {
     it("get proposed-job's photo", async function () {
       //given
-      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       const created = await api.createProposedJobWithPhotos([file])
       expect(created.status).toBe(201)
       const createdProposedJob = await api.get(
@@ -705,8 +722,10 @@ describe('Proposed Jobs', function () {
     it('create proposed-job with tools to take with', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
-      const tool = { tool: Tools.AXE, amount: 5 }
+      const jobType = await api.createJobType()
+      const toolName = await api.createToolName()
+      const body = createProposedJobData(area.id, jobType.id)
+      const tool = { toolNameId: toolName.id, amount: 5 }
       const payload = {
         ...body,
         toolsToTakeWith: { tools: [tool] },
@@ -728,7 +747,7 @@ describe('Proposed Jobs', function () {
       ).toBe('object')
       expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('tool')
       expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('amount')
-      expect(get.body.toolsToTakeWith.at(0).tool).toBe(tool.tool)
+      expect(get.body.toolsToTakeWith.at(0).tool.id).toBe(tool.toolNameId)
       expect(get.body.toolsToTakeWith.at(0).amount).toBe(tool.amount)
       // clean
       await api.deleteArea(area.id)
@@ -737,8 +756,9 @@ describe('Proposed Jobs', function () {
     it('create proposed-job with invalid tool to take with', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
-      const tool = { tool: 'NON_EXISTENT', amount: 5 }
+      const jobType = await api.createJobType()
+      const body = createProposedJobData(area.id, jobType.id)
+      const tool = { toolNameId: 'bad_id', amount: 5 }
       const payload = {
         ...body,
         toolsToTakeWith: { tools: [tool] },
@@ -750,11 +770,13 @@ describe('Proposed Jobs', function () {
       await api.deleteArea(area.id)
     })
 
-    it('update proposed-job tools to take with', async function () {
+    it('update proposed-job tools to take with amount', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
-      const tool = { tool: Tools.AXE, amount: 5 }
+      const jobType = await api.createJobType()
+      const toolName = await api.createToolName()
+      const body = createProposedJobData(area.id, jobType.id)
+      const tool = { toolNameId: toolName.id, amount: 5 }
       const payload = {
         ...body,
         toolsToTakeWith: { tools: [tool] },
@@ -764,10 +786,11 @@ describe('Proposed Jobs', function () {
         `/api/proposed-jobs/${created.body.id}`,
         Id.JOBS
       )
+      const updatedAmount = 2
       const toolUpload = {
         id: getCreated.body.toolsToTakeWith.at(0).id,
-        tool: Tools.AXE,
-        amount: 4,
+        toolNameId: toolName.id,
+        amount: updatedAmount,
       }
       const payloadUpload = {
         toolsToTakeWithUpdated: { tools: [toolUpload] },
@@ -794,8 +817,8 @@ describe('Proposed Jobs', function () {
       ).toBe('object')
       expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('tool')
       expect(get.body.toolsToTakeWith.at(0)).toHaveProperty('amount')
-      expect(get.body.toolsToTakeWith.at(0).tool).toBe(toolUpload.tool)
-      expect(get.body.toolsToTakeWith.at(0).amount).toBe(toolUpload.amount)
+      expect(get.body.toolsToTakeWith.at(0).tool.id).toBe(toolUpload.toolNameId)
+      expect(get.body.toolsToTakeWith.at(0).amount).toBe(updatedAmount)
       // clean
       await api.deleteArea(area.id)
     })
@@ -803,8 +826,10 @@ describe('Proposed Jobs', function () {
     it('delete proposed-job tools to take with', async function () {
       // given
       const area = await api.createArea()
-      const body = createProposedJobData(area.id)
-      const tool = { tool: Tools.AXE, amount: 5 }
+      const jobType = await api.createJobType()
+      const toolName = await api.createToolName()
+      const body = createProposedJobData(area.id, jobType.id)
+      const tool = { toolNameId: toolName.id, amount: 5 }
       const payload = {
         ...body,
         toolsToTakeWith: { tools: [tool] },
