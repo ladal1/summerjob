@@ -11,6 +11,7 @@ import { IconAndLabel } from '../forms/IconAndLabel'
 import { Participate } from './Participate'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { SafePhotoImage } from '../photo/SafePhotoImage'
 
 interface PostModalProps {
   item: PostComplete
@@ -89,7 +90,7 @@ export const PostModal = ({
                 position: 'relative',
               }}
             >
-              <Image
+              <SafePhotoImage
                 style={{ objectFit: 'contain' }}
                 alt="Fotografie"
                 src={`/api/posts/${item.id}/photo`}
