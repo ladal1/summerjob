@@ -278,8 +278,9 @@ class Common {
     return job.body
   }
 
-  deleteProposedJob = async (jobId: string) => {
-    await this.del(`/api/proposed-jobs/${jobId}`, Id.ADMIN)
+  createSkill = async () => {
+    const skill = await this.post('/api/skills', Id.ADMIN, createSkillHasData())
+    return skill.body
   }
   // #endregion
 

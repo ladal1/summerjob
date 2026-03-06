@@ -1,11 +1,4 @@
-import {
-  api,
-  createJobTypeData,
-  createSkillHasData,
-  createToolNameData,
-  Id,
-  isEmpty,
-} from './common'
+import { api, createToolNameData, Id, isEmpty } from './common'
 
 type ToolName = { id: string; name: string }
 
@@ -86,12 +79,10 @@ describe('Tool names', function () {
       const skillIds: string[] = []
       const jobTypeIds: string[] = []
       for (let i = 0; i < 5; ++i) {
-        const skillBody = createSkillHasData()
-        const jobTypeBody = createJobTypeData()
-        const skill = await api.post('/api/skills', Id.ADMIN, skillBody)
-        const jobType = await api.post('/api/job-types', Id.ADMIN, jobTypeBody)
-        skillIds.push(skill.body.id)
-        jobTypeIds.push(jobType.body.id)
+        const skill = await api.createSkill()
+        const jobType = await api.createJobType()
+        skillIds.push(skill.id)
+        jobTypeIds.push(jobType.id)
       }
 
       // Create tool name
@@ -174,9 +165,8 @@ describe('Tool names', function () {
       const id = toolName.body.id
 
       // Create the skill
-      const skillBody = createSkillHasData()
-      const skill = await api.post('/api/skills', Id.ADMIN, skillBody)
-      const skillId = skill.body.id
+      const skill = await api.createSkill()
+      const skillId = skill.id
 
       // Update the tool name
       const patchBody = {
