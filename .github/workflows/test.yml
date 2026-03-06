@@ -1,0 +1,85 @@
+name: Test
+  
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test -d test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test?schema=public
+      NODE_ENV: test
+      PORT: 3000
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ci_dummy_secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22.15.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.15.0"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: | 
+          npx prisma generate
+          npx prisma db push --force-reset
+      
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Start Next.js server
+        run: nohup npm run start -- -p $PORT > ../next-server.log 2>&1 &
+
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..60}; do
+            sleep 3
+            if curl -fsS "http://localhost:${PORT}" >/dev/null; then
+              echo "Server is up"
+              exit 0
+            fi
+          done
+          echo "Server did not start. Logs:"
+          cat ../next-server.log
+          exit 1
+      
+      - name: Run tests
+        run: npm test
+
+      - name: Print server log on failure
+        if: failure()
+        run: |
+          echo "=== next-server.log ==="
+          cat ../next-server.log || true
