@@ -66,7 +66,7 @@ describe('Food allergies', function () {
 
   //#region Basic
   describe('#basic', function () {
-    it('create a food allergy', async function () {
+    it('creates a food allergy', async function () {
       const body = createFoodAllergyData()
       const resp = await api.post('/api/food-allergies', Id.ADMIN, body)
       expect(resp.status).toBe(201)
@@ -74,7 +74,7 @@ describe('Food allergies', function () {
       expect(resp.body).toHaveProperty('id')
     })
 
-    it('return 404 when food allergy doesnt exist', async function () {
+    it('returns 404 when food allergy doesnt exist', async function () {
       const resp = await api.get('/api/food-allergies/1', '')
       expect(resp.status).toBe(404)
     })
@@ -83,11 +83,13 @@ describe('Food allergies', function () {
       const resp = await api.get('/api/food-allergies', '')
       expect(resp.status).toBe(200)
       expect(Array.isArray(resp.body)).toBe(true)
-      // 4 food allegies created in previous tests
+      // 4 food allergies created in previous tests
       expect(resp.body).toHaveLength(4)
     })
 
     it('returns a food allergy by id', async function () {
+      const body = createFoodAllergyData()
+      await api.post('/api/food-allergies', Id.ADMIN, body)
       const foodAllergies = await api.get('/api/food-allergies', '')
       const selectedFoodAllergy = foodAllergies.body[0]
       const resp = await api.get(
@@ -113,6 +115,8 @@ describe('Food allergies', function () {
         body
       )
       expect(patch.status).toBe(204)
+      expect(isEmpty(patch.body)).toBe(true)
+
       const resp = await api.get(
         `/api/food-allergies/${selectedFoodAllergy.id}`,
         ''
@@ -133,7 +137,6 @@ describe('Food allergies', function () {
         '/api/food-allergies',
         Id.ADMIN
       )
-      console.log(JSON.stringify(foodAllergy, null, 2))
       expect(foodAllergiesAfterAdding.body).toHaveLength(
         allergiesBeforeAdding.body.length + 1
       )

@@ -512,11 +512,14 @@ export function createSkillHasData() {
   }
 }
 
-export function createToolNameData(skills = [], jobTypes = []) {
+export function createToolNameData(
+  skillIds: string[] = [],
+  jobTypeIds: string[] = []
+) {
   return {
     name: faker.word.noun(),
-    skills,
-    jobTypes,
+    skills: skillIds,
+    jobTypes: jobTypeIds,
   }
 }
 
