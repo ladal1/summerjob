@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import { SafePhotoImage } from './SafePhotoImage'
 import { useState } from 'react'
 import PhotoModal from '../modal/PhotoModal'
 
@@ -25,7 +25,7 @@ export function PhotoOnClickModal({
         className="border rounded overflow-hidden"
         onClick={() => setOpen(true)}
       >
-        <Image
+        <SafePhotoImage
           src={photoURL}
           alt={alt}
           fill
