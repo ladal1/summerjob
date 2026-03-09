@@ -48,7 +48,6 @@ export default function PhotoModal({ onClose, photo }: PhotoModalProps) {
             fill
             sizes="100vw"
             loading="eager"
-            key={Date.now()}
             quality={50}
             onLoadingComplete={({ naturalWidth, naturalHeight }) => {
               setDimensions(

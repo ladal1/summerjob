@@ -7,6 +7,7 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getWorkerPhotoPathById } from 'lib/data/workers'
 import { fileTypeFromFile } from 'file-type'
 
+// Whitelist of allowed image MIME types
 const ALLOWED_IMAGE_MIME_TYPES = [
   'image/jpeg',
   'image/png',
@@ -31,48 +32,62 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
       return
     }
 
+    // Get file stats - this will throw if file doesn't exist
     let fileStat
     try {
       fileStat = await stat(workerPhotoPath)
     } catch {
+      console.log(`Photo file not found: ${workerPhotoPath}`)
       res.status(404).json({ error: 'Photo file not found' })
       return
     }
 
+    // Check if file has content
     if (fileStat.size === 0) {
-      console.error(`Photo file is empty: ${workerPhotoPath}`)
-      res.status(404).json({ error: 'Photo file is empty' })
+      console.log(`Photo file is empty: ${workerPhotoPath}`)
+      res.status(500).json({ error: 'Photo file is empty' })
       return
     }
 
+    // Validate actual MIME type by reading file content
     let fileType
     try {
       fileType = await fileTypeFromFile(workerPhotoPath)
-    } catch {
-      console.error(`Error detecting file type for: ${workerPhotoPath}`)
+    } catch (error) {
+      console.error(`Error detecting file type for: ${workerPhotoPath}`, error)
       res.status(500).json({ error: 'Error detecting file type' })
       return
     }
 
     if (!fileType || !ALLOWED_IMAGE_MIME_TYPES.includes(fileType.mime)) {
-      console.error(
-        `Invalid or unsupported image type: ${fileType?.mime || 'unknown'} for file: ${workerPhotoPath}`
+      console.log(
+        `Unsupported image type: ${fileType?.mime || 'unknown'} for ${workerPhotoPath}`
       )
-      res.status(415).json({ error: 'Unsupported image type' })
+      res.status(415).json({ error: 'Unsupported image type' }) // 415 Unsupported Media Type
       return
     }
 
+    // Set headers before streaming
     res.setHeader('Content-Type', fileType.mime)
-    res.setHeader('Content-Length', fileStat.size)
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+    res.setHeader('Content-Length', fileStat.size.toString())
+    res.setHeader('Cache-Control', 'public, max-age=86400')
+    res.status(200)
 
+    // Stream the file to the response
     const fileStream = createReadStream(workerPhotoPath)
-    fileStream.on('error', err => {
-      console.error('Error streaming photo:', err)
+
+    fileStream.on('error', error => {
+      console.error('Error streaming photo file:', error)
       if (!res.headersSent) {
         res.status(500).json({ error: 'Error streaming photo' })
+      } else {
+        // Ensure the response is properly terminated if an error occurs after headers are sent
+        res.end()
       }
+      // Explicitly destroy the stream to ensure file handles are released
+      fileStream.destroy()
     })
+
     fileStream.pipe(res)
   } catch (error) {
     console.error('Error serving photo:', error)
@@ -90,8 +105,10 @@ async function isAllowedToAccessWorkerPhoto(
     res.status(401).json({ error: 'Unauthorized' })
     return false
   }
-  const access = isAccessAllowed([Permission.WORKERS], session)
-  if (access) return true
+  const regularAccess = isAccessAllowed([Permission.WORKERS], session)
+  if (regularAccess) {
+    return true
+  }
 
   res.status(403).json({ error: 'Forbidden' })
   return false
