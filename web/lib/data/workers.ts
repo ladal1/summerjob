@@ -31,6 +31,7 @@ export async function getWorkers(
           event: {
             isActive: true,
           },
+          show: true,
         },
       },
       ...(withoutJobInPlanId && {
@@ -57,6 +58,7 @@ export async function getWorkers(
           event: {
             isActive: true,
           },
+          show: true,
         },
         take: 1,
       },
