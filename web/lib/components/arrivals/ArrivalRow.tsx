@@ -27,36 +27,61 @@ function formatBirthDate(isoDate: string | null): string {
 export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
   const [showCarForm, setShowCarForm] = useState(false)
   const [showHideConfirm, setShowHideConfirm] = useState(false)
+  const [optimisticArrived, setOptimisticArrived] = useState<boolean | null>(
+    null
+  )
+  const [optimisticShow, setOptimisticShow] = useState<boolean | null>(null)
+
+  const arrived = optimisticArrived ?? worker.arrived
+  const show = optimisticShow ?? worker.show
 
   const { trigger: triggerArrived, isMutating: arriveMutating } =
-    useAPIMarkArrived(worker.id, { onSuccess: onUpdated })
+    useAPIMarkArrived(worker.id, {
+      onSuccess: () => {
+        setOptimisticArrived(null)
+        onUpdated()
+      },
+    })
 
   const { trigger: triggerHide, isMutating: hideMutating } = useAPIMarkNoShow(
     worker.id,
-    { onSuccess: onUpdated }
+    {
+      onSuccess: () => {
+        setOptimisticShow(null)
+        onUpdated()
+      },
+    }
   )
 
   const { trigger: triggerUnhide, isMutating: unhideMutating } =
-    useAPIUnmarkNoShow(worker.id, { onSuccess: onUpdated })
+    useAPIUnmarkNoShow(worker.id, {
+      onSuccess: () => {
+        setOptimisticShow(null)
+        onUpdated()
+      },
+    })
 
   const isMutating = arriveMutating || hideMutating || unhideMutating
 
   const handleArrived = () => {
+    setOptimisticArrived(true)
     triggerArrived({})
   }
 
   const handleHide = () => {
+    setOptimisticShow(false)
     triggerHide({})
     setShowHideConfirm(false)
   }
 
   const handleUnhide = () => {
+    setOptimisticShow(true)
     triggerUnhide()
   }
 
-  const rowClass = worker.arrived
+  const rowClass = arrived
     ? 'table-success'
-    : !worker.show
+    : !show
       ? 'table-secondary text-muted'
       : ''
 
@@ -88,7 +113,7 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
         </td>
         <td className="smj-sticky-col-right smj-table-header">
           <div className="d-flex gap-1 justify-content-end">
-            {!worker.arrived && worker.show && (
+            {!arrived && show && (
               <button
                 className="btn btn-sm btn-success"
                 type="button"
@@ -99,13 +124,13 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
                 <i className="fas fa-check"></i>
               </button>
             )}
-            {worker.arrived && (
+            {arrived && (
               <span className="badge bg-success align-self-center">
                 <i className="fas fa-check me-1"></i>
                 Dorazil
               </span>
             )}
-            {worker.show && !worker.arrived && (
+            {show && !arrived && (
               <button
                 className="btn btn-sm btn-outline-danger"
                 type="button"
@@ -116,7 +141,7 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
                 <i className="fas fa-eye-slash"></i>
               </button>
             )}
-            {!worker.show && (
+            {!show && (
               <button
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
