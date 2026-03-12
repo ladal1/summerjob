@@ -65,6 +65,8 @@ export enum APILogEvent {
   TOOL_NAME_CREATE = 'TOOL_NAME_CREATE',
   TOOL_NAME_MODIFY = 'TOOL_NAME_MODIFY',
   TOOL_NAME_DELETE = 'TOOL_NAME_DELETE',
+  WORKER_ARRIVAL = 'WORKER_ARRIVAL',
+  WORKER_NO_SHOW = 'WORKER_NO_SHOW',
 }
 
 export type Logging = z.infer<typeof LoggingSchema>

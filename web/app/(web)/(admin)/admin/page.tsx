@@ -5,7 +5,7 @@ import { Permission } from 'lib/types/auth'
 
 export default async function AdminPage() {
   const session = await getSMJSession()
-  
+
   // Helper function to check permissions
   const hasPermission = (permission: Permission) => {
     return isAccessAllowed([permission], session)
@@ -13,8 +13,12 @@ export default async function AdminPage() {
 
   // Always show admin options if user has ADMIN permission
   const hasAdminPermission = hasPermission(Permission.ADMIN)
-  const hasApplicationsPermission = hasAdminPermission || hasPermission(Permission.APPLICATIONS)
-  const hasAdorationPermission = hasAdminPermission || hasPermission(Permission.ADORATION)
+  const hasApplicationsPermission =
+    hasAdminPermission || hasPermission(Permission.APPLICATIONS)
+  const hasAdorationPermission =
+    hasAdminPermission || hasPermission(Permission.ADORATION)
+  const hasWorkersPermission =
+    hasAdminPermission || hasPermission(Permission.WORKERS)
   return (
     <>
       <PageHeader title="Administrace" isFluid={false}>
@@ -24,6 +28,25 @@ export default async function AdminPage() {
       <section>
         <div className="container">
           <div className="list-group">
+            {hasWorkersPermission && (
+              <Link
+                className="list-group-item list-group-item-action"
+                href="/admin/arrivals"
+              >
+                <div className="row">
+                  <div className="col">
+                    <h5>Příjezdy</h5>
+                    <p>
+                      Evidence příjezdů účastníků, přidání auta, export pro GDPR
+                      souhlas.
+                    </p>
+                  </div>
+                  <div className="col d-flex justify-content-end align-items-center gap-3">
+                    <i className="fas fa-chevron-right"></i>
+                  </div>
+                </div>
+              </Link>
+            )}
             {hasAdminPermission && (
               <Link
                 className="list-group-item list-group-item-action"
