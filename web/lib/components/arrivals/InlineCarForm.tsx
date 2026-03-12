@@ -2,8 +2,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPICarCreate } from 'lib/fetcher/car'
 import { formatNumber } from 'lib/helpers/helpers'
-import { CarCreateSchema, type CarCreateData } from 'lib/types/car'
+import { CarCreateSchema } from 'lib/types/car'
+import type { z } from 'zod'
 import { useForm } from 'react-hook-form'
+
+type CarCreateInput = z.input<typeof CarCreateSchema>
 
 interface InlineCarFormProps {
   workerId: string
@@ -27,18 +30,20 @@ export default function InlineCarForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CarCreateData>({
+  } = useForm<CarCreateInput>({
     resolver: zodResolver(CarCreateSchema),
     defaultValues: {
       ownerId: workerId,
       seats: 4,
       odometerStart: 0,
       description: '',
+      name: '',
+      reimbursementAmount: 0,
     },
   })
 
-  const onSubmit = (data: CarCreateData) => {
-    trigger(data)
+  const onSubmit = (data: CarCreateInput) => {
+    trigger(CarCreateSchema.parse(data))
   }
 
   return (
