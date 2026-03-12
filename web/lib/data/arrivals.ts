@@ -79,6 +79,25 @@ export async function markWorkerArrived(workerId: string) {
   })
 }
 
+export async function unmarkWorkerArrived(workerId: string) {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+
+  return await prisma.workerAvailability.update({
+    where: {
+      workerId_eventId: {
+        workerId,
+        eventId: activeEventId,
+      },
+    },
+    data: {
+      arrived: false,
+    },
+  })
+}
+
 export async function hideWorker(workerId: string) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {

@@ -2,6 +2,7 @@
 import { ArrivalWorker } from 'lib/types/arrival'
 import {
   useAPIMarkArrived,
+  useAPIUnmarkArrived,
   useAPIMarkNoShow,
   useAPIUnmarkNoShow,
 } from 'lib/fetcher/arrival'
@@ -53,6 +54,14 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
     }
   )
 
+  const { trigger: triggerUnarrive, isMutating: unarriveMutating } =
+    useAPIUnmarkArrived(worker.id, {
+      onSuccess: () => {
+        setOptimisticArrived(null)
+        onUpdated()
+      },
+    })
+
   const { trigger: triggerUnhide, isMutating: unhideMutating } =
     useAPIUnmarkNoShow(worker.id, {
       onSuccess: () => {
@@ -61,7 +70,8 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
       },
     })
 
-  const isMutating = arriveMutating || hideMutating || unhideMutating
+  const isMutating =
+    arriveMutating || unarriveMutating || hideMutating || unhideMutating
 
   const handleArrived = () => {
     setOptimisticArrived(true)
@@ -72,6 +82,11 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
     setOptimisticShow(false)
     triggerHide({})
     setShowHideConfirm(false)
+  }
+
+  const handleUnarrive = () => {
+    setOptimisticArrived(false)
+    triggerUnarrive()
   }
 
   const handleUnhide = () => {
@@ -125,10 +140,16 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
               </button>
             )}
             {arrived && (
-              <span className="badge bg-success align-self-center">
+              <button
+                className="btn btn-sm btn-success"
+                type="button"
+                onClick={handleUnarrive}
+                disabled={isMutating}
+                title="Zrušit příchod"
+              >
                 <i className="fas fa-check me-1"></i>
                 Dorazil
-              </span>
+              </button>
             )}
             {show && !arrived && (
               <button

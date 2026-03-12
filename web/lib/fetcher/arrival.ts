@@ -14,6 +14,10 @@ export function useAPIMarkArrived(workerId: string, options?: any) {
   )
 }
 
+export function useAPIUnmarkArrived(workerId: string, options?: any) {
+  return useDataDelete(`/api/arrivals/${workerId}/arrive`, options)
+}
+
 export function useAPIMarkNoShow(workerId: string, options?: any) {
   return useDataCreate<Record<string, never>>(
     `/api/arrivals/${workerId}/no-show`,
