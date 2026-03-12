@@ -28,7 +28,7 @@ export default function InlineCarForm({
     handleSubmit,
     formState: { errors },
   } = useForm<CarCreateData>({
-    resolver: zodResolver(CarCreateSchema),
+    resolver: zodResolver(CarCreateSchema) as ReturnType<typeof zodResolver>,
     defaultValues: {
       ownerId: workerId,
       seats: 4,
