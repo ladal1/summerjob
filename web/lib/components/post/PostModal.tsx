@@ -5,12 +5,12 @@ import Map from '../map/Map'
 import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 import { useMemo } from 'react'
 import { Label } from '../forms/Label'
-import Image from 'next/image'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { IconAndLabel } from '../forms/IconAndLabel'
 import { Participate } from './Participate'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { SafePhotoImage } from '../photo/SafePhotoImage'
 
 interface PostModalProps {
   item: PostComplete
@@ -91,7 +91,7 @@ export const PostModal = ({
                 position: 'relative',
               }}
             >
-              <Image
+              <SafePhotoImage
                 style={{ objectFit: 'contain' }}
                 alt="Fotografie"
                 src={`/api/posts/${item.id}/photo`}

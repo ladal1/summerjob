@@ -95,8 +95,7 @@ const ProposedJobBasicSchema = z
         message: err.invalidTypeNumber,
       })
       .int({ message: err.nonInteger })
-      .positive({ message: err.nonPositiveNumber })
-      .default(1),
+      .positive({ message: err.nonPositiveNumber }),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
     photoFiles: z
