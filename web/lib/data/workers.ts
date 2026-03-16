@@ -63,6 +63,7 @@ export async function getWorkers(
       foodAllergies: true,
       workAllergies: true,
       skills: true,
+      tools: true,
     },
     orderBy: [
       {

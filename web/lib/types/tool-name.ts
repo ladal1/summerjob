@@ -7,18 +7,22 @@ import { customErrorMessages as err } from 'lib/lang/error-messages'
 useZodOpenApi
 
 export const ToolNameCompleteSchema = ToolNameSchema.extend({
-  skills: z.array(
-    z.object({
-      name: z.string(),
-      id: z.uuid(),
-    })
-  ),
-  jobTypes: z.array(
-    z.object({
-      name: z.string(),
-      id: z.uuid(),
-    })
-  ),
+  skills: z
+    .array(
+      z.object({
+        name: z.string(),
+        id: z.uuid(),
+      })
+    )
+    .default([]),
+  jobTypes: z
+    .array(
+      z.object({
+        name: z.string(),
+        id: z.uuid(),
+      })
+    )
+    .default([]),
 })
 
 export type ToolNameComplete = z.infer<typeof ToolNameCompleteSchema>

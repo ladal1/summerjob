@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import formidable from 'formidable'
 import {
   deleteFile,
-  getUploadDirForImagesForCurrentEvent,
+  getUploadDirForImages,
   renameFile,
   updatePhotoPathByNewFilename,
 } from 'lib/api/fileManager'
@@ -113,7 +113,7 @@ export async function getPostPhotoById(
   if (!post || !post.photoPath) {
     return null
   }
-  const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+  const uploadDirAbsolutePath = getUploadDirForImages()
   return path.join(uploadDirAbsolutePath, post.photoPath)
 }
 
@@ -190,7 +190,7 @@ export async function internal_updatePost(
       await deleteFile(postPhotoPath) // delete original image if necessary
     }
     // Save only relative part of photoPath
-    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const uploadDirAbsolutePath = getUploadDirForImages()
     const relativePath = path.normalize(
       photoPath.substring(uploadDirAbsolutePath.length)
     )
@@ -245,7 +245,7 @@ export async function createPost(
         updatePhotoPathByNewFilename(temporaryPhotoPath, post.id) ?? ''
       await renameFile(temporaryPhotoPath, photoPath)
       // Save only relative part of photoPath
-      const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+      const uploadDirAbsolutePath = getUploadDirForImages()
       const relativePath = path.normalize(
         photoPath.substring(uploadDirAbsolutePath.length)
       )
