@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
 import { PrismaClient } from '../lib/prisma/client'
 import request from 'supertest'
 import { fakerCS_CZ } from '@faker-js/faker'
@@ -170,8 +170,10 @@ class Common {
   private clearDirectory = async (dir: string) => {
     try {
       const entries = await promises.readdir(dir)
-      entries.map(entry =>
-        promises.rm(path.join(dir, entry), { recursive: true, force: true })
+      await Promise.all(
+        entries.map(entry =>
+          promises.rm(path.join(dir, entry), { recursive: true, force: true })
+        )
       )
     } catch (err) {
       console.error(err)
@@ -200,7 +202,7 @@ class Common {
     const resp = await this.get(`/api/workers/${workerId}`, Id.WORKERS)
     const relativePath = resp.body.photoPath
     const absolutePath = path.join(this.getUploadDirForImages(), relativePath)
-    this.deleteFile(absolutePath)
+    await this.deleteFile(absolutePath)
   }
   //#endregion
 
@@ -286,26 +288,26 @@ class Common {
 
   // #region Complicated API usage
   createProposedJobWithPhotos = async (filePaths: string[]) => {
-    const area = await api.createArea()
-    const jobType = await api.createJobType()
+    const area = await this.createArea()
+    const jobType = await this.createJobType()
     const body = createProposedJobData(area.id, jobType.id)
-    return await api.post('/api/proposed-jobs', Id.JOBS, body, filePaths)
+    return await this.post('/api/proposed-jobs', Id.JOBS, body, filePaths)
   }
 
   createPlanWithJob = async () => {
-    const plan = await api.post(
+    const plan = await this.post(
       '/api/plans',
       Id.PLANS,
-      createPlanData(api.getSummerJobEventEnd())
+      createPlanData(this.getSummerJobEventEnd())
     )
-    const area = await api.createArea()
-    const jobType = await api.createJobType()
-    const job = await api.createProposedJob(area.id, jobType.id)
+    const area = await this.createArea()
+    const jobType = await this.createJobType()
+    const job = await this.createProposedJob(area.id, jobType.id)
     const payload = {
       proposedJobId: job.id,
       planId: plan.body.id,
     }
-    const activeJob = await api.post(
+    const activeJob = await this.post(
       `/api/plans/${plan.body.id}/active-jobs`,
       Id.PLANS,
       payload
@@ -342,7 +344,7 @@ class Common {
     })
 
     // Add another job to the plan with two different workers
-    const jobType = await api.createJobType()
+    const jobType = await this.createJobType()
     const otherJob = await this.createProposedJob(area.id, jobType.id)
     await this.post(`/api/plans/${plan.id}/active-jobs`, Id.PLANS, {
       proposedJobId: otherJob.id,
@@ -467,12 +469,12 @@ class Common {
     const workers = await this.get('/api/workers', Id.WORKERS)
     for (const worker of workers.body) {
       if (worker.id === this._adminId) continue
-      await api.deleteWorker(worker.id)
+      await this.deleteWorker(worker.id)
     }
     // Delete all cars
     const cars = await this.get('/api/cars', Id.CARS)
     for (const car of cars.body) {
-      await api.deleteCar(car.id)
+      await this.deleteCar(car.id)
     }
     // Delete all areas - this also deletes all proposed and active jobs
     const areas = await this.get(
@@ -480,7 +482,7 @@ class Common {
       Id.ADMIN
     )
     for (const area of areas.body) {
-      await api.del(
+      await this.del(
         `/api/summerjob-events/${this.getSummerJobEventId()}/areas/${area.id}`,
         Id.ADMIN
       )
@@ -489,27 +491,31 @@ class Common {
     // Clear smj event cache
     await this.clearCache()
     // Delete all photos
-    this.clearDirectory(this.getUploadDirForImages())
+    await this.clearDirectory(this.getUploadDirForImages())
   }
   //#endregion
 }
 
 //#region Generate data
+function uniqueValue(prefix: string) {
+  return `${prefix}-${randomUUID()}`
+}
+
 export function createFoodAllergyData() {
   return {
-    name: faker.food.ingredient(),
+    name: uniqueValue('food-allergy'),
   }
 }
 
 export function createWorkAllergyData() {
   return {
-    name: faker.word.noun(),
+    name: uniqueValue('work-allergy'),
   }
 }
 
 export function createSkillHasData() {
   return {
-    name: faker.word.noun(),
+    name: uniqueValue('skill'),
   }
 }
 
@@ -518,7 +524,7 @@ export function createToolNameData(
   jobTypeIds: string[] = []
 ) {
   return {
-    name: faker.word.noun(),
+    name: uniqueValue('tool'),
     skills: skillIds,
     jobTypes: jobTypeIds,
   }
@@ -526,7 +532,7 @@ export function createToolNameData(
 
 export function createJobTypeData() {
   return {
-    name: faker.word.noun(),
+    name: uniqueValue('job-type'),
   }
 }
 
@@ -535,7 +541,7 @@ export function createWorkerData() {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     age: faker.number.int({ min: 10, max: 99 }),
-    email: faker.internet.email(),
+    email: `${uniqueValue('worker-email')}@test.test`,
     phone: faker.phone.number({ style: 'national' }),
     team: Math.random() > 0.5,
     strong: Math.random() > 0.5,
