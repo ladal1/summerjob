@@ -13,23 +13,31 @@ import path from 'path'
 describe('Posts', function () {
   //#region Access
   describe('#access', function () {
-    it('should be accessible with permission', async function () {
+    it('should be accessible without permission', async function () {
+      const resp = await api.get('/api/posts', '')
+      // then
+      expect(resp.status).toBe(200)
+    })
+    it('should be able to create with permission', async function () {
       // given
-      const perms = [Id.POSTS, Id.ADMIN]
+      const perms = [Id.ADMIN, Id.POSTS]
+      const body = createPostData()
       for (const perm of perms) {
         // when
-        const resp = await api.get('/api/posts', perm)
+        const resp = await api.post('/api/posts', perm, body)
         // then
-        expect(resp.status).toBe(200)
+        expect(resp.status).toBe(201)
+        expect(resp.body && typeof resp.body).toBe('object')
+        expect(resp.body).toHaveProperty('id')
       }
     })
-
-    it('should not be accessible without permission', async function () {
+    it('should not be able to create without permission', async function () {
       // given
       const perms = [Id.CARS, Id.WORKERS, Id.JOBS, Id.PLANS, '']
+      const body = createPostData()
       for (const perm of perms) {
         // when
-        const resp = await api.get('/api/posts', perm)
+        const resp = await api.post('/api/posts', perm, body)
         // then
         expect(resp.status).toBe(403)
         expect(isEmpty(resp.body)).toBe(true)
@@ -67,8 +75,8 @@ describe('Posts', function () {
     const resp = await api.get('/api/posts', Id.POSTS)
     // then
     expect(resp.status).toBe(200)
-    expect(Array.isArray(resp.body)).toBe(true)
-    expect(resp.body).toHaveLength(1)
+    expect(Array.isArray(resp.body.posts)).toBe(true)
+    expect(resp.body.posts).toHaveLength(4)
   })
 
   it('returns a proposed post by id', async function () {
@@ -86,8 +94,9 @@ describe('Posts', function () {
 
   it('updates a post', async function () {
     // given
+    await api.post('/api/posts', Id.POSTS, createPostData())
     const posts = await api.get('/api/posts', Id.POSTS)
-    const selectedPost = posts.body[0]
+    const selectedPost = posts.body.posts[0]
     const body = {
       tags: ['SPORTS'],
       name: 'new name',
@@ -109,8 +118,9 @@ describe('Posts', function () {
 
   it("can't update a post - wrong parameter", async function () {
     // given
+    await api.post('/api/posts', Id.POSTS, createPostData())
     const posts = await api.get('/api/posts', Id.POSTS)
-    const selectedPost = posts.body[0]
+    const selectedPost = posts.body.posts[0]
     const body = {
       wrongParameter: 'test',
     }
@@ -136,10 +146,12 @@ describe('Posts', function () {
     const postId = post.body.id
     // Check that the post was added
     const postsAfterAdding = await api.get('/api/posts', Id.POSTS)
-    expect(postsAfterAdding.body).toHaveLength(
-      postsBeforeAdding.body.length + 1
+    expect(postsAfterAdding.body.posts).toHaveLength(
+      postsBeforeAdding.body.posts.length + 1
     )
-    expect((postsAfterAdding.body as any[]).map(w => w.id)).toContain(postId)
+    expect((postsAfterAdding.body.posts as any[]).map(w => w.id)).toContain(
+      postId
+    )
     // when
     // Delete the post
     const resp = await api.del(`/api/posts/${postId}`, Id.POSTS)
@@ -147,10 +159,12 @@ describe('Posts', function () {
     expect(resp.status).toBe(204)
     // Check that the post was deleted
     const postsAfterRemoving = await api.get('/api/posts', Id.POSTS)
-    expect(postsAfterRemoving.body).toHaveLength(postsBeforeAdding.body.length)
-    expect((postsAfterRemoving.body as any[]).map(w => w.id)).not.toContain(
-      postId
+    expect(postsAfterRemoving.body.posts).toHaveLength(
+      postsBeforeAdding.body.posts.length
     )
+    expect(
+      (postsAfterRemoving.body.posts as any[]).map(w => w.id)
+    ).not.toContain(postId)
   })
 
   //#region Photo
@@ -158,7 +172,9 @@ describe('Posts', function () {
     it('creates post with valid photo', async function () {
       // given
       const body = createPostData()
-      const filePath = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const filePath = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
@@ -182,7 +198,7 @@ describe('Posts', function () {
       // verify naming of file
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
       expect(fileName).toBe(resp.body.id)
-      expect(fileType).toBe('.ico')
+      expect(fileType).toBe('.png')
       // verify number of files in /posts folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImagesForCurrentEvent(), '/posts')
@@ -208,7 +224,7 @@ describe('Posts', function () {
     it('creates post with too many photos', async function () {
       // given
       const body = createPostData()
-      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       // when
       const resp = await api.post('/api/posts', Id.POSTS, body, [file, file])
       // then
@@ -303,7 +319,7 @@ describe('Posts', function () {
     it("get post's photo", async function () {
       // given
       const body = createPostData()
-      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       const createdPost = await api.post('/api/posts', Id.POSTS, body, [file])
       // when
       const resp = await api.get(
