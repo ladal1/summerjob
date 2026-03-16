@@ -154,6 +154,7 @@ model Worker {
   pushSubscriptions  PushSubscription[]
   notifications      Notification[]              @relation("NotificationRecipients")
   seenNotifications  Notification[]              @relation("NotificationSeenBy")
+  adorationReminderLogging AdorationReminderLogging[]
 }
 
 model WorkerPermissions {
@@ -394,6 +395,7 @@ model AdorationSlot {
   workers   Worker[]                @relation("SlotWorkers")
   event     SummerJobEvent          @relation(fields: [eventId], references: [id])
   eventId   String
+  adorationReminderLogging AdorationReminderLogging[]
 }
 
 model FoodDelivery {
@@ -442,8 +444,11 @@ model Notification {
 }
 
 model AdorationReminderLogging {
-  id            String   @id @default(uuid())
-  workerId String
+  id String @id @default(uuid())
+  
+  worker          Worker        @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId        String
+  adorationSlot   AdorationSlot @relation(fields: [adorationSlotId], references: [id], onDelete: Cascade)
   adorationSlotId String
   
   @@unique([workerId, adorationSlotId])
