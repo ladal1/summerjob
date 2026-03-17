@@ -7,18 +7,18 @@ import PostCard from 'lib/components/status-page/PostCard'
 import { getFreeUpcomingAdorationSlots } from 'lib/data/adoration'
 import { getPlanByDate } from 'lib/data/plans'
 import { getGeneralPostsByDate, getTimePostsByDate } from 'lib/data/posts'
-import { formatDateLong, getDateMidnight } from 'lib/helpers/helpers'
+import { formatDateLong } from 'lib/helpers/helpers'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 import { sortJobsByAreaAndId } from 'lib/types/plan'
 import { PostComplete } from 'lib/types/post'
-import { add } from 'date-fns'
+import { add, startOfDay } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
 
 export default async function StatusPage() {
   const date = getPlanDate()
   const now = new Date()
-  const todayMidnight = getDateMidnight(now)
+  const todayMidnight = startOfDay(now)
   const tomorrowMidnight = add(todayMidnight, { days: 1 })
 
   const generalPosts = await getGeneralPostsByDate(todayMidnight)
@@ -149,7 +149,7 @@ function getPlanDate() {
   if (now.getHours() >= 15) {
     now.setDate(now.getDate() + 1)
   }
-  return getDateMidnight(now)
+  return startOfDay(now)
 }
 
 function groupAdorationSlotsByDay(

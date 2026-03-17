@@ -38,10 +38,6 @@ const ErrorReason = new Map<string, string>([
     'EmailSignin',
     'Nepodařilo se odeslat přihlašovací e-mail. Zkuste to později. Pokud problém přetrvává, kontaktujte správce.',
   ],
-  [
-    'OAuthAccountNotLinked',
-    'Váš účet není s touto službou propojen. Přihlašte se prosím pomocí e-mailu a v profilu si následně účet propojte.',
-  ],
   ['CredentialsSignin', 'Přihlášení k recepci se nepodařilo.'],
   ['Default', 'Nastala chyba. Zkuste to znovu.'],
 ])

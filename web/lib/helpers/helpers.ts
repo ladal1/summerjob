@@ -218,8 +218,3 @@ export function compareTimes(timeA: string | null, timeB: string | null) {
   if (!timeB) return -1
   return formateTime(timeA).localeCompare(formateTime(timeB))
 }
-
-// Get the midnight time of a date
-export function getDateMidnight(date: Date) {
-  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-}

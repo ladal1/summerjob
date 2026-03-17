@@ -151,7 +151,10 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const receptionEmail = process.env.RECEPTION_EMAIL!
+        const receptionEmail = process.env.RECEPTION_EMAIL
+        if (!receptionEmail) {
+          return null
+        }
         const receptionUser = await prisma.user.upsert({
           where: { email: receptionEmail },
           update: { email: receptionEmail },
