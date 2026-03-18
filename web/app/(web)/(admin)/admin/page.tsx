@@ -138,7 +138,7 @@ export default async function AdminPage() {
                 <div className="row">
                   <div className="col">
                     <h5>Notifikace</h5>
-                    <p>Poslat hromadnou notifikaci všem účastníkům akce.</p>
+                    <p>Poslat hromadnou notifikaci skupině účastníků akce.</p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">
                     <i className="fas fa-chevron-right"></i>
