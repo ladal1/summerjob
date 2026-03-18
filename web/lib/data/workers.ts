@@ -124,6 +124,9 @@ export async function getWorkerIdsWorkingOnDate(date: Date): Promise<string[]> {
         },
       },
     },
+    select: {
+      id: true,
+    },
   })
   return workers.map(w => w.id)
 }
@@ -144,6 +147,9 @@ export async function getWorkerIdsWithFoodAllergies(): Promise<string[]> {
       foodAllergies: {
         some: {},
       },
+    },
+    select: {
+      id: true,
     },
   })
   return workers.map(w => w.id)

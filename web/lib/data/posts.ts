@@ -58,6 +58,7 @@ export async function getPostsWithOpenParticipation(): Promise<Post[]> {
   return await prisma.post.findMany({
     where: {
       isOpenForParticipants: true,
+      forEventId: activeEventId,
     },
   })
 }

@@ -2,11 +2,11 @@
 
 import { formatInTimeZone } from 'date-fns-tz'
 import { useAPINotificationUpdate } from 'lib/fetcher/notification'
-import { FrontentNotificationData } from 'lib/types/notification'
+import { FrontendNotificationData } from 'lib/types/notification'
 import { useState } from 'react'
 
 interface Props {
-  notification: FrontentNotificationData
+  notification: FrontendNotificationData
 }
 
 export default function UserNotification({ notification }: Props) {

@@ -161,7 +161,7 @@ export default function PushNotificationManagerButton() {
           )}
 
           <button
-            className={`btn-close ms-auto me-1 ${!success && 'btn-close-white'}`}
+            className={`btn-close ms-auto me-1 ${success ? '' : 'btn-close-white'}`}
             role="status"
             type="button"
             onClick={() => setIsShown(false)}

@@ -1,13 +1,13 @@
 import { add } from 'date-fns'
 import prisma from 'lib/prisma/connection'
 import {
-  FrontentNotificationData,
+  FrontendNotificationData,
   NotificationCreateData,
 } from 'lib/types/notification'
 
 export async function getWorkersNotifications(
   workerId: string
-): Promise<FrontentNotificationData[]> {
+): Promise<FrontendNotificationData[]> {
   // Only get notifications that are not older than 2 months so that workers don't see notifications from old events
   const twoMonthsAgo = add(new Date(), { months: -2 })
 
@@ -34,7 +34,7 @@ export async function getWorkersNotifications(
   return notifications.map(n => ({
     id: n.id,
     text: n.text,
-    receivedAt: n.receivedAt,
+    receivedAt: n.receivedAt.toISOString(),
     seen: n.seenByWorkers.length > 0,
   }))
 }

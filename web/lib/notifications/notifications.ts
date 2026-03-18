@@ -161,8 +161,8 @@ export async function sendAdorationReminderNotification() {
   const HOURS = 1 // How many hours in advance to give the notification
   const adorationSlots = await getUpcomingAdorationSlots(HOURS)
 
-  adorationSlots.forEach(slot =>
-    slot.workers.forEach(async worker => {
+  for (const slot of adorationSlots) {
+    for (const worker of slot.workers) {
       try {
         // Log the reminder so the notification gets sent only once
         await prisma.adorationReminderLogging.create({
@@ -176,13 +176,13 @@ export async function sendAdorationReminderNotification() {
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === 'P2002'
         ) {
-          return
+          continue
         }
         throw err
       }
 
       const payload = `Adorace na místě: ${slot.location} začíná za méně než ${HOURS} hodinu`
       await sendNotificationToWorkers([worker.id], payload)
-    })
-  )
+    }
+  }
 }

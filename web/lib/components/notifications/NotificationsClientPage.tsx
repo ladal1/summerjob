@@ -2,10 +2,10 @@
 
 import PageHeader from 'lib/components/page-header/PageHeader'
 import UserNotification from './UserNotification'
-import { FrontentNotificationData } from 'lib/types/notification'
+import { FrontendNotificationData } from 'lib/types/notification'
 
 interface Props {
-  notifications: FrontentNotificationData[]
+  notifications: FrontendNotificationData[]
 }
 
 export default function UserNotificationPage({ notifications }: Props) {

@@ -16,17 +16,22 @@ export type NotificationCreateData = z.infer<typeof NotificationCreateSchema>
 export const FrontendNotificationSchema = z.object({
   id: z.uuid(),
   text: z.string().min(1),
-  receivedAt: z.date(),
+  receivedAt: z.string(),
   seen: z.boolean(),
 })
-export type FrontentNotificationData = z.infer<
+export type FrontendNotificationData = z.infer<
   typeof FrontendNotificationSchema
 >
 
 export const NotificationTargetSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('everyone') }).strict(),
   z
-    .object({ type: z.literal('working-on-day'), date: z.string().min(1) })
+    .object({
+      type: z.literal('working-on-day'),
+      date: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected date in YYYY-MM-DD format'),
+    })
     .strict(),
   z
     .object({ type: z.literal('working-on-job'), jobId: z.string().min(1) })

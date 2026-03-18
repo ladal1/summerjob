@@ -23,10 +23,19 @@ export async function deletePushSubscription(
   endpoint: string,
   workerId: string
 ) {
-  return await prisma.pushSubscription.delete({
+  const subscription = await prisma.pushSubscription.findFirst({
     where: {
       endpoint,
       workerId,
+    },
+  })
+  if (!subscription) {
+    return null
+  }
+
+  return await prisma.pushSubscription.delete({
+    where: {
+      endpoint: subscription.endpoint,
     },
   })
 }
