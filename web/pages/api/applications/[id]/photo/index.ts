@@ -65,7 +65,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.setHeader('Content-Type', fileType.mime)
     res.setHeader('Content-Length', fileStat.size)
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+    res.setHeader('Cache-Control', 'public, max-age=5, must-revalidate')
 
     const fileStream = createReadStream(photoPath)
     fileStream.on('error', err => {

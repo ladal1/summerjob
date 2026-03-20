@@ -98,12 +98,23 @@ export const optimizeAndSaveImage = async (
 ) => {
   const uploadRoot = path.resolve(getUploadDirForImages())
   const resolvedDestPath = path.resolve(destPath)
-  const relativePath = path.relative(uploadRoot, resolvedDestPath)
-  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+  const relativeDestPath = path.relative(uploadRoot, resolvedDestPath)
+  if (relativeDestPath.startsWith('..') || path.isAbsolute(relativeDestPath)) {
     throw new Error('Invalid file path: Path is outside the allowed directory.')
   }
 
-  await sharp(sourcePath)
+  const resolvedSourcePath = path.resolve(sourcePath)
+  const relativeSourcePath = path.relative(uploadRoot, resolvedSourcePath)
+  if (
+    relativeSourcePath.startsWith('..') ||
+    path.isAbsolute(relativeSourcePath)
+  ) {
+    throw new Error(
+      'Invalid source file path: Path is outside the allowed directory.'
+    )
+  }
+
+  await sharp(resolvedSourcePath)
     .resize(maxWidth, maxHeight, {
       fit: 'inside',
       withoutEnlargement: true,
@@ -112,7 +123,7 @@ export const optimizeAndSaveImage = async (
     .toFile(resolvedDestPath)
 
   // Clean up the original temp file if it's different from dest
-  if (path.resolve(sourcePath) !== resolvedDestPath) {
-    await promises.unlink(sourcePath).catch(() => {})
+  if (resolvedSourcePath !== resolvedDestPath) {
+    await promises.unlink(resolvedSourcePath).catch(() => {})
   }
 }
