@@ -32,7 +32,7 @@ export default function NewEventModal({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<z.infer<typeof schema>>({
+  } = useForm<z.input<typeof schema>, unknown, SummerJobEventsAPIPostData>({
     resolver: zodResolver(schema),
   })
 
