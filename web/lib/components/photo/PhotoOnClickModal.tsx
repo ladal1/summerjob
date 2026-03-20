@@ -1,6 +1,7 @@
 import { SafePhotoImage } from './SafePhotoImage'
 import { useState } from 'react'
 import PhotoModal from '../modal/PhotoModal'
+import { SafePhotoImage } from './SafePhotoImage'
 
 interface PhotoOnClickModalProps {
   photoURL: string

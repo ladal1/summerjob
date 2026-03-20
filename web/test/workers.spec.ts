@@ -152,9 +152,11 @@ describe('Workers', function () {
     it('creates worker with valid photo', async function () {
       // given
       const body = createWorkerData()
-      const filePath = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const filePath = path.normalize(
+        `${__dirname}/resources/logo-smj-yellow.png`
+      )
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent() + '/workers')
+        path.join(api.getUploadDirForImages() + '/workers')
       )
       expect(numOfFilesBef).toBe(0)
       // when
@@ -178,10 +180,10 @@ describe('Workers', function () {
       // verify naming of file
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
       expect(fileName).toBe(resp.body.id)
-      expect(fileType).toBe('.ico')
+      expect(fileType).toBe('.png')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFiles).toBe(1)
     })
@@ -196,7 +198,7 @@ describe('Workers', function () {
       expect(resp.status).toBe(400)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFiles).toBe(1) // one because prev test
     })
@@ -204,7 +206,7 @@ describe('Workers', function () {
     it('creates worker with too many photos', async function () {
       // given
       const body = createWorkerData()
-      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       // when
       const resp = await api.post('/api/workers/new', Id.WORKERS, body, [
         file,
@@ -214,7 +216,7 @@ describe('Workers', function () {
       expect(resp.status).toBe(413)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFiles).toBe(1) // one because prev test
     })
@@ -232,7 +234,7 @@ describe('Workers', function () {
       )
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFilesBef).toBe(1)
       const patch = await api.patch(
@@ -265,7 +267,7 @@ describe('Workers', function () {
       expect(fileType).toBe('.png')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFiles).toBe(2) // this and other test before
     })
@@ -287,7 +289,7 @@ describe('Workers', function () {
       }
       // when
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFilesBef).toBe(3)
       const patch = await api.patch(
@@ -307,7 +309,7 @@ describe('Workers', function () {
       expect(resp.body.photoPath).toBe('')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFiles).toBe(2)
     })
@@ -315,7 +317,7 @@ describe('Workers', function () {
     it("get worker's photo", async function () {
       // given
       const body = createWorkerData()
-      const file = path.normalize(`${__dirname}/resources/favicon.ico`)
+      const file = path.normalize(`${__dirname}/resources/logo-smj-yellow.png`)
       const createdWorker = await api.post(
         '/api/workers/new',
         Id.WORKERS,
@@ -339,8 +341,7 @@ describe('Workers', function () {
 
       // verify cache control headers
       expect(resp.headers['cache-control']).toContain('public')
-      expect(resp.headers['cache-control']).toContain('max-age=5')
-      expect(resp.headers['cache-control']).toContain('must-revalidate')
+      expect(resp.headers['cache-control']).toContain('max-age=86400')
 
       // verify content by reading the image file
       const fileStat = statSync(file)
@@ -374,7 +375,7 @@ describe('Workers', function () {
         [fileOfNewWorker]
       )
       const numOfFilesBef = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFilesBef).toBe(4)
       // when
@@ -391,7 +392,7 @@ describe('Workers', function () {
       expect(resp.status).toBe(404)
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
-        path.join(api.getUploadDirForImagesForCurrentEvent(), '/workers')
+        path.join(api.getUploadDirForImages(), '/workers')
       )
       expect(numOfFiles).toBe(3)
     })
