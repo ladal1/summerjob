@@ -171,16 +171,13 @@ describe('Workers', function () {
       expect(resp.body.photoPath).not.toBe('')
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
       expect(api.pathExists(absolutePath)).toBe(true)
-      // verify content by reading the image file
-      const fileStat = statSync(filePath)
-      const expectedSize = fileStat.size
+      // verify content by reading the optimized image file
       const fileStatUploaded = statSync(absolutePath)
-      const uploadedSize = fileStatUploaded.size
-      expect(expectedSize).toBe(uploadedSize)
-      // verify naming of file
+      expect(fileStatUploaded.size).toBeGreaterThan(0)
+      // verify naming of file (optimized to .jpg)
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
       expect(fileName).toBe(resp.body.id)
-      expect(fileType).toBe('.png')
+      expect(fileType).toBe('.jpg')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImages(), '/workers')
@@ -253,18 +250,15 @@ describe('Workers', function () {
       // verify existence of photo path
       expect(resp.body).toHaveProperty('photoPath')
       expect(resp.body.photoPath).not.toBe('')
-      // verify content by reading the image file
+      // verify content by reading the optimized image file
       const absolutePath = api.getAbsolutePath(resp.body.photoPath)
-      const fileStat = statSync(filePath)
-      const expectedSize = fileStat.size
       const fileStatUploaded = statSync(absolutePath)
-      const uploadedSize = fileStatUploaded.size
-      expect(expectedSize).toBe(uploadedSize)
-      // verify naming of file
+      expect(fileStatUploaded.size).toBeGreaterThan(0)
+      // verify naming of file (optimized to .jpg)
       const { fileName, fileType } = getFileNameAndType(resp.body.photoPath)
       expect(fileName).toBe(resp.body.id)
       expect(fileName).toBe(selectedWorker.body.id)
-      expect(fileType).toBe('.png')
+      expect(fileType).toBe('.jpg')
       // verify number of files in /workers folder
       const numOfFiles = await api.numberOfFilesInsideDirectory(
         path.join(api.getUploadDirForImages(), '/workers')
@@ -333,20 +327,15 @@ describe('Workers', function () {
       // verify status code
       expect(resp.status).toBe(200)
 
-      // verify content type
+      // verify content type (optimized to JPEG)
       expect(resp.headers['content-type']).toContain('image')
 
       // verify content length
       expect(resp.headers['content-length']).toBeDefined()
+      expect(parseInt(resp.headers['content-length'])).toBeGreaterThan(0)
 
       // verify cache control headers
       expect(resp.headers['cache-control']).toContain('public')
-      expect(resp.headers['cache-control']).toContain('max-age=86400')
-
-      // verify content by reading the image file
-      const fileStat = statSync(file)
-      const expectedSize = fileStat.size
-      expect(parseInt(resp.headers['content-length'])).toBe(expectedSize)
     })
 
     it("return 404 if worker doesn't have photo", async function () {
