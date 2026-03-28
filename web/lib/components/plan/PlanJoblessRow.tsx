@@ -23,6 +23,7 @@ interface PlanJoblessRowProps {
   reloadPlan: () => void
   onWorkerHover: (url: string | null) => void
   adorationByWorker?: Map<string, boolean>
+  accessedFromReception: boolean
 }
 
 export function PlanJoblessRow({
@@ -34,6 +35,7 @@ export function PlanJoblessRow({
   onWorkerDragStart,
   reloadPlan,
   onWorkerHover,
+  accessedFromReception,
   adorationByWorker = new Map(),
 }: PlanJoblessRowProps) {
   const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined)
@@ -113,9 +115,11 @@ export function PlanJoblessRow({
                 <th>
                   <strong>Alergie</strong>
                 </th>
-                <th>
-                  <strong>Akce</strong>
-                </th>
+                {!accessedFromReception && (
+                  <th>
+                    <strong>Akce</strong>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -125,7 +129,8 @@ export function PlanJoblessRow({
                     worker,
                     planDay,
                     setWorkerToMove,
-                    adorationByWorker
+                    adorationByWorker,
+                    accessedFromReception
                   )}
                   key={worker.id}
                   draggable={true}
@@ -158,7 +163,8 @@ function formatWorkerData(
   worker: WorkerComplete,
   planDay: Date,
   requestMoveWorker: (worker: WorkerComplete) => void,
-  adorationByWorker: Map<string, boolean>
+  adorationByWorker: Map<string, boolean>,
+  accessedFromReception: boolean
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
@@ -166,7 +172,7 @@ function formatWorkerData(
 
   const allergies = [...worker.workAllergies.map(wa => wa.name)]
 
-  return [
+  const cols = [
     { content: name },
     { content: worker.phone },
     {
@@ -185,7 +191,10 @@ function formatWorkerData(
       ),
     },
     { content: allergies.join(', ') },
-    {
+  ]
+
+  if (!accessedFromReception) {
+    cols.push({
       content: (
         <span
           key={`actions-${worker.id}`}
@@ -194,8 +203,10 @@ function formatWorkerData(
           {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
         </span>
       ),
-    },
-  ]
+    })
+  }
+
+  return cols
 }
 
 function moveWorkerToJobIcon(move: () => void) {

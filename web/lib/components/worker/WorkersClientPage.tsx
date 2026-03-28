@@ -15,10 +15,12 @@ import WorkersTable from './WorkersTable'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
+  accessedFromReception: boolean
 }
 
 export default function WorkersClientPage({
   sWorkers,
+  accessedFromReception,
 }: WorkersClientPageProps) {
   const inititalWorkers = deserializeWorkers(sWorkers)
   const { data, error, mutate } = useAPIWorkers({
@@ -86,31 +88,35 @@ export default function WorkersClientPage({
   return (
     <>
       <PageHeader title="Pracanti">
-        <Link href={`/workers/import`}>
-          <button className="btn btn-primary btn-with-icon" type="button">
-            <i className="fas fa-users"></i>
-            <span>Hromadný import</span>
-          </button>
-        </Link>
-        <Link href={`/workers/new`}>
-          <button className="btn btn-primary btn-with-icon" type="button">
-            <i className="fas fa-user-plus"></i>
-            <span>Přidat pracanta</span>
-          </button>
-        </Link>
-        <Link
-          href="/api/workers/export-contacts"
-          className="btn btn-secondary btn-with-icon"
-        >
-          <i className="fas fa-address-book"></i>
-          <span>Export kontaktů</span>
-        </Link>
-        <Link href={`/print-workers`} prefetch={false}>
-          <button className="btn btn-secondary btn-with-icon" type="button">
-            <i className="fas fa-print"></i>
-            <span>Tisknout</span>
-          </button>
-        </Link>
+        {!accessedFromReception && (
+          <>
+            <Link href={`/workers/import`}>
+              <button className="btn btn-primary btn-with-icon" type="button">
+                <i className="fas fa-users"></i>
+                <span>Hromadný import</span>
+              </button>
+            </Link>
+            <Link href={`/workers/new`}>
+              <button className="btn btn-primary btn-with-icon" type="button">
+                <i className="fas fa-user-plus"></i>
+                <span>Přidat pracanta</span>
+              </button>
+            </Link>
+            <Link
+              href="/api/workers/export-contacts"
+              className="btn btn-secondary btn-with-icon"
+            >
+              <i className="fas fa-address-book"></i>
+              <span>Export kontaktů</span>
+            </Link>
+            <Link href={`/print-workers`} prefetch={false}>
+              <button className="btn btn-secondary btn-with-icon" type="button">
+                <i className="fas fa-print"></i>
+                <span>Tisknout</span>
+              </button>
+            </Link>
+          </>
+        )}
       </PageHeader>
 
       <section>
@@ -143,6 +149,7 @@ export default function WorkersClientPage({
                 workers={filteredData || []}
                 onUpdated={mutate}
                 onHover={setWorkerPhotoURL}
+                accessedFromReception={accessedFromReception}
               />
             </div>
             <div className="col-sm-12 col-lg-2">

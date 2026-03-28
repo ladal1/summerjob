@@ -33,8 +33,13 @@ type PostForm = z.input<typeof schema>
 interface EditPostProps {
   serializedPost: Serialized
   allDates: DateBool[][]
+  accessedFromReception: boolean
 }
-export default function EditPost({ serializedPost, allDates }: EditPostProps) {
+export default function EditPost({
+  serializedPost,
+  allDates,
+  accessedFromReception,
+}: EditPostProps) {
   const post = deserializePost(serializedPost)
   const { data: workers } = useAPIWorkers()
   const {
@@ -314,255 +319,274 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
       }
     >
       <form id="edit-post" onSubmit={handleSubmit(onSubmit)}>
-        <TextInput
-          id="name"
-          label="Název"
-          placeholder="Název"
-          register={() =>
-            register('name', {
-              onChange: e => {
-                e.target.value = removeRedundantSpace(e.target.value)
-              },
-            })
-          }
-          errors={errors}
-          mandatory
-          margin={false}
-        />
-        <MarkdownEditor
-          id="shortDescription"
-          label="Krátký popis"
-          placeholder="Popis příspěvku... (podporuje Markdown formátování)"
-          rows={3}
-          register={() => register('shortDescription')}
-          errors={errors as FieldErrors<Record<string, unknown>>}
-          mandatory
-        />
-        <MarkdownEditor
-          id="longDescription"
-          label="Dlouhý popis"
-          placeholder="Detailní popis příspěvku... (podporuje Markdown formátování)"
-          rows={6}
-          register={() => register('longDescription')}
-          errors={errors as FieldErrors<Record<string, unknown>>}
-        />
-        <div className="d-flex flex-row">
-          <DateSelectionInput
-            id="availability"
-            label="Platné pro dny"
-            register={() => register('availability')}
-            days={allDates}
-          />
-        </div>
-        <TimeInput
-          label="Čas"
-          register={register}
-          errors={errors}
-          setValue={setValue}
-          timeFromId="timeFrom"
-          timeToId="timeTo"
-        />
-        <MapInput
-          address={{
-            id: 'address',
-            label: 'Adresa',
-            placeholder: 'Adresa',
-            init: post.address ?? '',
-            register: registerAdress,
-          }}
-          coordinates={{
-            id: 'coordinates',
-            label: 'Souřadnice',
-            placeholder: '0, 0',
-            init: getCoordinates(),
-            register: registerCoordinates,
-          }}
-          errors={errors}
-        />
-        <ImageUploader
-          id="photoFile"
-          label="Fotografie"
-          secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-          photoInit={
-            post.photoPath
-              ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
-              : null
-          }
-          errors={errors}
-          registerPhoto={registerPhoto}
-          removeNewPhoto={removeNewPhoto}
-          removeExistingPhoto={removeExistingPhoto}
-        />
-        <PillSelectInput
-          id="tags"
-          label="Tagy"
-          placeholder={'Vyberte tagy'}
-          items={manageTagSelectItems()}
-          init={fetchTagSelectItems(post.tags)}
-          removeExisting={removeExistingTag}
-          register={selectTags}
-          errors={errors}
-        />
-        {isOpenForParticipants && !isMandatory && (
+        {!accessedFromReception && (
           <>
             <TextInput
-              id="maxParticipants"
-              type="number"
-              label="Maximální počet účastníků"
-              placeholder="Maximální počet účastníků"
-              min={1}
+              id="name"
+              label="Název"
+              placeholder="Název"
               register={() =>
-                register('maxParticipants', {
-                  valueAsNumber: true,
-                  onChange: e =>
-                    (e.target.value = formatNumber(e.target.value)),
+                register('name', {
+                  onChange: e => {
+                    e.target.value = removeRedundantSpace(e.target.value)
+                  },
                 })
               }
               errors={errors}
+              mandatory
+              margin={false}
             />
+            <MarkdownEditor
+              id="shortDescription"
+              label="Krátký popis"
+              placeholder="Popis příspěvku... (podporuje Markdown formátování)"
+              rows={3}
+              register={() => register('shortDescription')}
+              errors={errors as FieldErrors<Record<string, unknown>>}
+              mandatory
+            />
+            <MarkdownEditor
+              id="longDescription"
+              label="Dlouhý popis"
+              placeholder="Detailní popis příspěvku... (podporuje Markdown formátování)"
+              rows={6}
+              register={() => register('longDescription')}
+              errors={errors as FieldErrors<Record<string, unknown>>}
+            />
+            <div className="d-flex flex-row">
+              <DateSelectionInput
+                id="availability"
+                label="Platné pro dny"
+                register={() => register('availability')}
+                days={allDates}
+              />
+            </div>
+            <TimeInput
+              label="Čas"
+              register={register}
+              errors={errors}
+              setValue={setValue}
+              timeFromId="timeFrom"
+              timeToId="timeTo"
+            />
+            <MapInput
+              address={{
+                id: 'address',
+                label: 'Adresa',
+                placeholder: 'Adresa',
+                init: post.address ?? '',
+                register: registerAdress,
+              }}
+              coordinates={{
+                id: 'coordinates',
+                label: 'Souřadnice',
+                placeholder: '0, 0',
+                init: getCoordinates(),
+                register: registerCoordinates,
+              }}
+              errors={errors}
+            />
+            <ImageUploader
+              id="photoFile"
+              label="Fotografie"
+              secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+              photoInit={
+                post.photoPath
+                  ? [{ url: `/api/posts/${post.id}/photo`, index: '0' }]
+                  : null
+              }
+              errors={errors}
+              registerPhoto={registerPhoto}
+              removeNewPhoto={removeNewPhoto}
+              removeExistingPhoto={removeExistingPhoto}
+            />
+            <PillSelectInput
+              id="tags"
+              label="Tagy"
+              placeholder={'Vyberte tagy'}
+              items={manageTagSelectItems()}
+              init={fetchTagSelectItems(post.tags)}
+              removeExisting={removeExistingTag}
+              register={selectTags}
+              errors={errors}
+            />
+            {isOpenForParticipants && !isMandatory && (
+              <>
+                <TextInput
+                  id="maxParticipants"
+                  type="number"
+                  label="Maximální počet účastníků"
+                  placeholder="Maximální počet účastníků"
+                  min={1}
+                  register={() =>
+                    register('maxParticipants', {
+                      valueAsNumber: true,
+                      onChange: e =>
+                        (e.target.value = formatNumber(e.target.value)),
+                    })
+                  }
+                  errors={errors}
+                />
+              </>
+            )}
+            <OtherAttributesInput
+              label="Další vlastnosti"
+              register={register}
+              objects={[
+                {
+                  id: 'isMandatory',
+                  icon: 'fas fa-people-pulling',
+                  label: 'Povinná účast pro všechny',
+                },
+                {
+                  id: 'isOpenForParticipants',
+                  icon: 'fas fa-door-open',
+                  label: 'Otevřeno pro zapsání účastníky',
+                },
+              ]}
+            />{' '}
           </>
         )}
-        <OtherAttributesInput
-          label="Další vlastnosti"
-          register={register}
-          objects={[
-            {
-              id: 'isMandatory',
-              icon: 'fas fa-people-pulling',
-              label: 'Povinná účast pro všechny',
-            },
-            {
-              id: 'isOpenForParticipants',
-              icon: 'fas fa-door-open',
-              label: 'Otevřeno pro zapsání účastníky',
-            },
-          ]}
-        />{' '}
-        <Label id={'participants'} label="Zapsaní účastníci" />
-        {/* Add new participants */}
-        <div className="mb-3">
-          <FilterSelectInput
-            id="add-participants"
-            label="Přidat účastníky"
-            placeholder="Vybrat účastníky..."
-            onSelected={(participantId: string) =>
-              addParticipant(participantId)
-            }
-            items={getAvailableParticipants()}
-            errors={{}}
-            preserveSearchOnSelect={true}
-          />
-        </div>
-        {/* Current participants list with remove buttons */}
-        <div>
-          {post.maxParticipants && (
-            <div className="text-muted fs-7 mb-2">
-              Počet účastníků:{' '}
-              {post.participants.length +
-                participantChanges.addParticipantIds.length -
-                participantChanges.removeParticipantIds.length}{' '}
-              / {post.maxParticipants}
-              {post.participants.length +
-                participantChanges.addParticipantIds.length -
-                participantChanges.removeParticipantIds.length >=
-                post.maxParticipants && (
-                <span className="text-warning ms-2">• Plná kapacita</span>
-              )}
-            </div>
-          )}
 
-          {/* Multi-column participant list */}
-          <div className="row g-2">
-            {/* Current enrolled participants */}
-            {post.participants
-              .sort((a, b) =>
-                a.worker.lastName.localeCompare(b.worker.lastName)
-              )
-              .map(participant => {
-                const isMarkedForRemoval =
-                  participantChanges.removeParticipantIds.includes(
-                    participant.workerId
+        {/*If accessed from the reception, the event has to be open for participants to sign users in*/}
+        {(!accessedFromReception || isOpenForParticipants) && (
+          <>
+            <Label id={'participants'} label="Zapsaní účastníci" />
+            {/* Add new participants */}
+            <div className="mb-3">
+              <FilterSelectInput
+                id="add-participants"
+                label="Přidat účastníky"
+                placeholder="Vybrat účastníky..."
+                onSelected={(participantId: string) =>
+                  addParticipant(participantId)
+                }
+                items={getAvailableParticipants()}
+                errors={{}}
+                preserveSearchOnSelect={true}
+              />
+            </div>
+            {/* Current participants list with remove buttons */}
+            <div>
+              {post.maxParticipants && (
+                <div className="text-muted fs-7 mb-2">
+                  Počet účastníků:{' '}
+                  {post.participants.length +
+                    participantChanges.addParticipantIds.length -
+                    participantChanges.removeParticipantIds.length}{' '}
+                  / {post.maxParticipants}
+                  {post.participants.length +
+                    participantChanges.addParticipantIds.length -
+                    participantChanges.removeParticipantIds.length >=
+                    post.maxParticipants && (
+                    <span className="text-warning ms-2">• Plná kapacita</span>
+                  )}
+                </div>
+              )}
+
+              {/* Multi-column participant list */}
+              <div className="row g-2">
+                {/* Current enrolled participants */}
+                {post.participants
+                  .sort((a, b) =>
+                    a.worker.lastName.localeCompare(b.worker.lastName)
                   )
-                return (
-                  <div
-                    key={participant.workerId}
-                    className="col-12 col-md-6 col-lg-4"
-                  >
-                    <div
-                      className={`d-flex justify-content-between align-items-center p-2 border rounded ${isMarkedForRemoval ? 'bg-light' : 'bg-white'}`}
-                    >
-                      <span className="flex-grow-1 me-2 d-flex justify-content-between align-items-center">
-                        <span
-                          className={`${isMarkedForRemoval ? 'text-decoration-line-through text-muted' : ''}`}
+                  .map(participant => {
+                    const isMarkedForRemoval =
+                      participantChanges.removeParticipantIds.includes(
+                        participant.workerId
+                      )
+                    return (
+                      <div
+                        key={participant.workerId}
+                        className="col-12 col-md-6 col-lg-4"
+                      >
+                        <div
+                          className={`d-flex justify-content-between align-items-center p-2 border rounded ${isMarkedForRemoval ? 'bg-light' : 'bg-white'}`}
                         >
-                          <small>
-                            {participant.worker.firstName}{' '}
-                            {participant.worker.lastName}
+                          <span className="flex-grow-1 me-2 d-flex justify-content-between align-items-center">
+                            <span
+                              className={`${isMarkedForRemoval ? 'text-decoration-line-through text-muted' : ''}`}
+                            >
+                              <small>
+                                {participant.worker.firstName}{' '}
+                                {participant.worker.lastName}
+                              </small>
+                            </span>
+                            {isMarkedForRemoval && (
+                              <small className="text-danger ms-2">
+                                (bude odebrán)
+                              </small>
+                            )}
+                          </span>
+                          <button
+                            type="button"
+                            className={`btn btn-sm ${isMarkedForRemoval ? 'btn-secondary' : 'btn-outline-danger'}`}
+                            onClick={() =>
+                              removeParticipant(participant.workerId)
+                            }
+                            title={
+                              isMarkedForRemoval
+                                ? 'Zrušit odebrání'
+                                : 'Odebrat účastníka'
+                            }
+                            style={{ minWidth: '32px' }}
+                          >
+                            <i
+                              className={`fas ${isMarkedForRemoval ? 'fa-undo' : 'fa-times'}`}
+                            ></i>
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                {/* Participants to be added */}
+                {participantChanges.addParticipantIds.map(participantId => {
+                  const worker = workers?.find(w => w.id === participantId)
+                  if (!worker) return null
+                  return (
+                    <div
+                      key={participantId}
+                      className="col-12 col-md-6 col-lg-4"
+                    >
+                      <div className="d-flex justify-content-between align-items-center p-2 border rounded bg-success-subtle">
+                        <span className="flex-grow-1 me-2 d-flex justify-content-between align-items-center">
+                          <span className="text-success">
+                            <small>
+                              {worker.firstName} {worker.lastName}
+                            </small>
+                          </span>
+                          <small className="text-success ms-2">
+                            (bude přidán)
                           </small>
                         </span>
-                        {isMarkedForRemoval && (
-                          <small className="text-danger ms-2">
-                            (bude odebrán)
-                          </small>
-                        )}
-                      </span>
-                      <button
-                        type="button"
-                        className={`btn btn-sm ${isMarkedForRemoval ? 'btn-secondary' : 'btn-outline-danger'}`}
-                        onClick={() => removeParticipant(participant.workerId)}
-                        title={
-                          isMarkedForRemoval
-                            ? 'Zrušit odebrání'
-                            : 'Odebrat účastníka'
-                        }
-                        style={{ minWidth: '32px' }}
-                      >
-                        <i
-                          className={`fas ${isMarkedForRemoval ? 'fa-undo' : 'fa-times'}`}
-                        ></i>
-                      </button>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => removeParticipant(participantId)}
+                          title="Zrušit přidání"
+                          style={{ minWidth: '32px' }}
+                        >
+                          <i className="fas fa-undo"></i>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-
-            {/* Participants to be added */}
-            {participantChanges.addParticipantIds.map(participantId => {
-              const worker = workers?.find(w => w.id === participantId)
-              if (!worker) return null
-              return (
-                <div key={participantId} className="col-12 col-md-6 col-lg-4">
-                  <div className="d-flex justify-content-between align-items-center p-2 border rounded bg-success-subtle">
-                    <span className="flex-grow-1 me-2 d-flex justify-content-between align-items-center">
-                      <span className="text-success">
-                        <small>
-                          {worker.firstName} {worker.lastName}
-                        </small>
-                      </span>
-                      <small className="text-success ms-2">(bude přidán)</small>
-                    </span>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => removeParticipant(participantId)}
-                      title="Zrušit přidání"
-                      style={{ minWidth: '32px' }}
-                    >
-                      <i className="fas fa-undo"></i>
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {post.participants.length === 0 &&
-            participantChanges.addParticipantIds.length === 0 && (
-              <div className="text-center py-4">
-                <p className="text-muted mb-0">Zatím žádní zapsaní účastníci</p>
+                  )
+                })}
               </div>
-            )}
-        </div>
+
+              {post.participants.length === 0 &&
+                participantChanges.addParticipantIds.length === 0 && (
+                  <div className="text-center py-4">
+                    <p className="text-muted mb-0">
+                      Zatím žádní zapsaní účastníci
+                    </p>
+                  </div>
+                )}
+            </div>
+          </>
+        )}
       </form>
     </Form>
   )

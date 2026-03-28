@@ -8,12 +8,14 @@ import { PinIcon } from '../forms/PinIcon'
 interface PostBubbleActionsProps {
   post: PostComplete
   advancedAccess: boolean
+  accessedFromReception: boolean
   onUpdated: () => void
 }
 
 export const PostBubbleActions = ({
   post,
   advancedAccess,
+  accessedFromReception,
   onUpdated,
 }: PostBubbleActionsProps) => {
   const { trigger, isMutating, error, reset } = useAPIPostDelete(post.id, {
@@ -37,6 +39,20 @@ export const PostBubbleActions = ({
 
   const setPinned = (pinned: boolean) => {
     triggerUpdate({ isPinned: pinned })
+  }
+
+  if (accessedFromReception && post.isOpenForParticipants) {
+    return (
+      <span>
+        <Link
+          href={`/posts/${post.id}`}
+          onClick={e => e.stopPropagation()}
+          className="smj-action-edit"
+        >
+          <i className="fas fa-edit" title="Upravit"></i>
+        </Link>
+      </span>
+    )
   }
 
   return (

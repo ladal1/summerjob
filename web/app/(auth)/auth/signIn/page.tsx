@@ -1,4 +1,4 @@
-import { getSMJSession } from 'lib/auth/auth'
+import { getAvailableOAuthProviders, getSMJSession } from 'lib/auth/auth'
 import CenteredBox from 'lib/components/auth/CenteredBox'
 import SignInClientPage from 'lib/components/auth/SignInClientPage'
 import { redirect } from 'next/navigation'
@@ -8,7 +8,7 @@ type Props = {
 }
 
 export default async function SignInPage(props: Props) {
-  const searchParams = await props.searchParams;
+  const searchParams = await props.searchParams
   const session = await getSMJSession()
   if (searchParams?.callbackUrl && session) {
     if (typeof searchParams.callbackUrl === 'string') {
@@ -20,9 +20,14 @@ export default async function SignInPage(props: Props) {
   }
   const errorMsg = ErrorReason.get(searchParams?.error as string) || undefined
 
+  const availableOAuthProviders = getAvailableOAuthProviders()
+
   return (
     <CenteredBox>
-      <SignInClientPage errorMessage={errorMsg} />
+      <SignInClientPage
+        errorMessage={errorMsg}
+        availableOAuthProviders={availableOAuthProviders}
+      />
     </CenteredBox>
   )
 }
@@ -33,5 +38,6 @@ const ErrorReason = new Map<string, string>([
     'EmailSignin',
     'Nepodařilo se odeslat přihlašovací e-mail. Zkuste to později. Pokud problém přetrvává, kontaktujte správce.',
   ],
+  ['CredentialsSignin', 'Přihlášení k recepci se nepodařilo.'],
   ['Default', 'Nastala chyba. Zkuste to znovu.'],
 ])

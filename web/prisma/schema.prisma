@@ -290,6 +290,7 @@ model SummerJobEvent {
   posts              Post[]
   adorationSlots     AdorationSlot[]
   applications       Application[]
+  receptionPasswordHash String?
 }
 
 model Logging {

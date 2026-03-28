@@ -45,7 +45,7 @@ export async function withPermissions(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSession()
   const allowed = isAccessAllowed(permissions, session)
-   
+
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -63,7 +63,7 @@ export async function withPermissionsAPI(
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSessionAPI(req, res)
   const allowed = isAccessAllowed(permissions, session)
-   
+
   return allowed ? { success: true, session: session! } : { success: false }
 }
 
@@ -78,6 +78,20 @@ export function isAccessAllowed(
     if (session.permissions.includes(permission)) return true
   }
   return false
+}
+
+export function getAvailableOAuthProviders(): {
+  google: boolean
+  seznam: boolean
+} {
+  return {
+    google: Boolean(
+      process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ),
+    seznam: Boolean(
+      process.env.SEZNAM_CLIENT_ID && process.env.SEZNAM_CLIENT_SECRET
+    ),
+  }
 }
 
 /**

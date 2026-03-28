@@ -3,7 +3,7 @@ import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import { Permission } from 'lib/types/auth'
 
 export const metadata = {
-  title: 'Pracanti'
+  title: 'Pracanti',
 }
 
 export default async function WorkersLayout({
@@ -11,7 +11,10 @@ export default async function WorkersLayout({
 }: {
   children: React.ReactNode
 }) {
-  const isAllowed = await withPermissions([Permission.WORKERS])
+  const isAllowed = await withPermissions([
+    Permission.WORKERS,
+    Permission.RECEPTION,
+  ])
   if (!isAllowed.success) {
     return <AccessDeniedPage />
   }
