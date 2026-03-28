@@ -1,5 +1,5 @@
 ARG NODE_VERSION=24.13.0-slim
-ARG SHARP_VERSION=0.34.5
+ARG SHARP_VERSION=0.33.5
 
 # ============================================
 # Stage 1: Dependencies
@@ -64,9 +64,7 @@ RUN mkdir -p build && chown node:node build
 COPY --from=builder --chown=node:node /app/build/standalone ./
 COPY --from=builder --chown=node:node /app/build/static ./build/static
 
-RUN npm install --cpu=x64 --os=linux --libc=glibc sharp@${SHARP_VERSION} && \
-        npm install --cpu=arm64 --os=darwin sharp@${SHARP_VERSION} && \
-        npm install --cpu=x64 --os=linux --libc=musl sharp@${SHARP_VERSION}
+RUN npm install --cpu=x64 --os=linux --libc=glibc sharp@${SHARP_VERSION}
 
 RUN mkdir /web-storage && chmod 777 /web-storage
 
