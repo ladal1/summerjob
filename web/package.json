@@ -23,7 +23,7 @@
   },
   "overrides": {
     "sharp": {
-      "sharp": "^0.33.5"
+      "sharp": "0.33.5"
     }
   },
   "dependencies": {
