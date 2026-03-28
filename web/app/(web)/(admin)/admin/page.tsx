@@ -5,7 +5,7 @@ import { Permission } from 'lib/types/auth'
 
 export default async function AdminPage() {
   const session = await getSMJSession()
-  
+
   // Helper function to check permissions
   const hasPermission = (permission: Permission) => {
     return isAccessAllowed([permission], session)
@@ -13,8 +13,11 @@ export default async function AdminPage() {
 
   // Always show admin options if user has ADMIN permission
   const hasAdminPermission = hasPermission(Permission.ADMIN)
-  const hasApplicationsPermission = hasAdminPermission || hasPermission(Permission.APPLICATIONS)
-  const hasAdorationPermission = hasAdminPermission || hasPermission(Permission.ADORATION)
+  const hasApplicationsPermission =
+    hasAdminPermission || hasPermission(Permission.APPLICATIONS)
+  const hasAdorationPermission =
+    hasAdminPermission || hasPermission(Permission.ADORATION)
+  const hasReceptionPermission = hasPermission(Permission.RECEPTION)
   return (
     <>
       <PageHeader title="Administrace" isFluid={false}>
@@ -92,7 +95,7 @@ export default async function AdminPage() {
               </Link>
             )}
 
-            {hasAdorationPermission && (
+            {(hasAdorationPermission || hasReceptionPermission) && (
               <Link
                 className="list-group-item list-group-item-action"
                 href="/admin/adoration"
@@ -118,6 +121,23 @@ export default async function AdminPage() {
                   <div className="col">
                     <h5>Seznamy</h5>
                     <p>Nastavit možné alergie, nářadí, schopnosti.</p>
+                  </div>
+                  <div className="col d-flex justify-content-end align-items-center gap-3">
+                    <i className="fas fa-chevron-right"></i>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {hasAdminPermission && (
+              <Link
+                className="list-group-item list-group-item-action"
+                href="/admin/reception"
+              >
+                <div className="row">
+                  <div className="col">
+                    <h5>Recepce</h5>
+                    <p>Nastavit heslo pro recepci.</p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">
                     <i className="fas fa-chevron-right"></i>

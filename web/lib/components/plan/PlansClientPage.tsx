@@ -14,12 +14,14 @@ interface PlansClientPageProps {
   initialData: Serialized
   startDate: string
   endDate: string
+  accessedFromReception: boolean
 }
 
 export default function PlansClientPage({
   initialData,
   startDate,
   endDate,
+  accessedFromReception,
 }: PlansClientPageProps) {
   const initialDataParsed = deserializePlans(initialData)
   const { data, error, isLoading } = useAPIPlans({
@@ -31,8 +33,13 @@ export default function PlansClientPage({
 
   const sortedPlans = useMemo(() => {
     if (!data) return []
-    return data.sort((a, b) => b.day.getTime() - a.day.getTime())
-  }, [data])
+
+    const visiblePlans = accessedFromReception
+      ? data.filter(plan => plan.published === true)
+      : data
+
+    return visiblePlans.sort((a, b) => b.day.getTime() - a.day.getTime())
+  }, [data, accessedFromReception])
 
   if (error && !data) {
     return <ErrorPage error={error} />
@@ -54,14 +61,16 @@ export default function PlansClientPage({
   return (
     <>
       <PageHeader title="Seznam plánů" isFluid={false}>
-        <button
-          className="btn btn-primary btn-with-icon"
-          type="button"
-          onClick={openModal}
-        >
-          <i className="far fa-calendar-plus"></i>
-          <span>Nový plán</span>
-        </button>
+        {!accessedFromReception && (
+          <button
+            className="btn btn-primary btn-with-icon"
+            type="button"
+            onClick={openModal}
+          >
+            <i className="far fa-calendar-plus"></i>
+            <span>Nový plán</span>
+          </button>
+        )}
       </PageHeader>
 
       <section>

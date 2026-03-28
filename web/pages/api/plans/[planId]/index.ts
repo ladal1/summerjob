@@ -49,12 +49,16 @@ async function del(
 }
 
 export default APIAccessController(
-  [Permission.PLANS],
+  {
+    GET: [Permission.PLANS, Permission.RECEPTION],
+    DELETE: [Permission.PLANS],
+    PATCH: [Permission.PLANS],
+  },
   APIMethodHandler({ get, del, patch })
 )
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }
