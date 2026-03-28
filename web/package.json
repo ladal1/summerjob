@@ -21,6 +21,11 @@
     "prepare": "npx prisma generate && cd .. && husky web/.husky",
     "maildev": "maildev"
   },
+  "overrides": {
+    "sharp": {
+      "sharp": "^0.33.5"
+    }
+  },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
     "@hookform/resolvers": "5.2.2",
