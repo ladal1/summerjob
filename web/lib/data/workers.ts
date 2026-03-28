@@ -1,7 +1,7 @@
 import {
   deleteFile,
   getUploadDirForImages,
-  optimizeAndSaveImage,
+  renameFile,
   updatePhotoPathByNewFilename,
 } from 'lib/api/fileManager'
 import { getPhotoPath } from 'lib/api/parse-form'
@@ -322,12 +322,12 @@ async function internal_createWorker(
       },
     },
   })
-  // Optimize and save photo file, update worker with new photo path.
+  // Rename photo file and update worker with new photo path to it.
   if (file) {
-    const temporaryPhotoPath = getPhotoPath(file)
-    const dir = path.dirname(temporaryPhotoPath)
-    const photoPath = path.join(dir, `${worker.id}.jpg`)
-    await optimizeAndSaveImage(temporaryPhotoPath, photoPath)
+    const temporaryPhotoPath = getPhotoPath(file) // update photoPath
+    const photoPath =
+      updatePhotoPathByNewFilename(temporaryPhotoPath, worker.id) ?? ''
+    await renameFile(temporaryPhotoPath, photoPath)
     // Save only relative part of photoPath
     const uploadDirAbsolutePath = getUploadDirForImages()
     const relativePath = path.normalize(
@@ -431,19 +431,18 @@ export async function internal_updateWorker(
     }),
   }
 
-  // Optimize uploaded photo and update path. Delete old photo if different.
+  // Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted.
   if (file) {
-    const tempPhotoPath = getPhotoPath(file)
-    const dir = path.dirname(tempPhotoPath)
-    const optimizedPath = path.join(dir, `${id}.jpg`)
-    await optimizeAndSaveImage(tempPhotoPath, optimizedPath)
+    const photoPath = getPhotoPath(file) // update photoPath
     const workerPhotoPath = await getWorkerPhotoPathById(id, prismaClient)
-    if (workerPhotoPath && workerPhotoPath !== optimizedPath) {
-      await deleteFile(workerPhotoPath)
+    if (workerPhotoPath && workerPhotoPath !== photoPath) {
+      // if original image exists and it is named differently (meaning it wasn't replaced already by parseFormWithImages) delete it
+      await deleteFile(workerPhotoPath) // delete original image if necessary
     }
+    // Save only relative part of photoPath
     const uploadDirAbsolutePath = getUploadDirForImages()
     const relativePath = path.normalize(
-      optimizedPath.substring(uploadDirAbsolutePath.length)
+      photoPath.substring(uploadDirAbsolutePath.length)
     )
     data.photoPath = relativePath
   } else if (data.photoFileRemoved) {
