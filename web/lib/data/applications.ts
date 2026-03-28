@@ -1,7 +1,7 @@
 import {
   deleteFile,
   getUploadDirForImages,
-  optimizeAndSaveImage,
+  renameFile,
 } from 'lib/api/fileManager'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 import formidable from 'formidable'
@@ -73,10 +73,11 @@ export async function createApplication(
     try {
       const uploadDir = await getApplicationsUploadDir()
 
-      const fileName = `${application.id}.jpg`
+      const fileExtension = path.extname(file.originalFilename || '.png')
+      const fileName = `${application.id}${fileExtension}`
       const photoPath = path.join(uploadDir, fileName)
 
-      await optimizeAndSaveImage(file.filepath, photoPath)
+      await renameFile(file.filepath, photoPath)
 
       const relativePath = path.join('applications', fileName)
 
@@ -104,15 +105,23 @@ export async function updateApplication(
 
   if (file) {
     const uploadDir = await getApplicationsUploadDir()
-    const fileName = `${id}.jpg`
+    const fileExtension = path.extname(file.originalFilename || '.png')
+    const fileName = `${id}${fileExtension}`
     photoPath = path.join(uploadDir, fileName)
+
+    const resolvedPhotoPath = path.resolve(photoPath) // Normalize the path
+    const relativePath = path.relative(uploadDir, resolvedPhotoPath)
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+      throw new Error(
+        'Invalid file path: Path is outside the allowed directory.'
+      )
+    }
+    await renameFile(file.filepath, resolvedPhotoPath)
 
     const oldPhotoPath = await getApplicationPhotoPathById(id, prismaClient)
     if (oldPhotoPath) {
       await deleteFile(oldPhotoPath)
     }
-
-    await optimizeAndSaveImage(file.filepath, photoPath)
 
     photoPath = path.join('applications', fileName)
   } else if (data.photoFileRemoved) {

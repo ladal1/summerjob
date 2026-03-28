@@ -22,6 +22,7 @@ interface SafePhotoImageProps {
   className?: string
 }
 
+
 /**
  * SafePhotoImage is a thin wrapper around `next/image` that adds safer handling
  * for images served from dynamic or error‑prone sources (e.g. `/api/` routes).
