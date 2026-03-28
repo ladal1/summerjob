@@ -191,7 +191,7 @@ export default function ApplicationsPage({
             dobrovolníků stejně jako v předešlých letech překročí kapacitu celé
             akce. V takovém případě budou mít přednost zájemci, kteří chtějí
             přijet makat na celý týden, splňují věkový limit a přihlásili se
-            nejrychleji. Tak hodně štěstí, těšíme se! :slightly_smiling_face:
+            nejrychleji. Tak hodně štěstí, těšíme se! 🙂
           </p>
           <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
             <div className="w-100 w-md-45">
