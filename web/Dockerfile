@@ -1,4 +1,5 @@
 ARG NODE_VERSION=24.13.0-slim
+ARG SHARP_VERSION=0.34.5
 
 # ============================================
 # Stage 1: Dependencies
@@ -16,7 +17,10 @@ COPY package.json package-lock.json .npmrc* ./
 COPY prisma ./prisma
 
 # Install dependencies
-RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund && \
+        npm install --cpu=x64 --os=linux --libc=glibc sharp@${SHARP_VERSION} && \
+        npm install --cpu=arm64 --os=darwin sharp@${SHARP_VERSION} && \
+        npm install --cpu=x64 --os=linux --libc=musl sharp@${SHARP_VERSION}
 
 # ============================================
 # Stage 2: Build Next.js app (standalone output)
