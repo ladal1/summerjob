@@ -105,6 +105,20 @@ export async function getWorkerIdFromSession(
   return worker.id
 }
 
+export function getAvailableOAuthProviders(): {
+  google: boolean
+  seznam: boolean
+} {
+  return {
+    google: Boolean(
+      process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ),
+    seznam: Boolean(
+      process.env.SEZNAM_CLIENT_ID && process.env.SEZNAM_CLIENT_SECRET
+    ),
+  }
+}
+
 /**
  * Email HTML body
  * Insert invisible space into domains from being turned into a hyperlink by email

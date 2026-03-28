@@ -8,14 +8,14 @@ import { Permission } from 'lib/types/auth'
 import { serializeWorker } from 'lib/types/worker'
 
 export const metadata = {
-  title: 'Můj profil'
+  title: 'Můj profil',
 }
 
 export const dynamic = 'force-dynamic'
 
 export default async function MyProfilePage() {
   const session = await getSMJSession()
-   
+
   const worker = await getWorkerById(session!.userID)
 
   if (!worker || !worker.availability) {
@@ -23,7 +23,7 @@ export default async function MyProfilePage() {
   }
   const serializedWorker = serializeWorker(worker)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
-   
+
   const { startDate, endDate } = summerJobEvent!
 
   const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
@@ -36,6 +36,7 @@ export default async function MyProfilePage() {
         serializedWorker={serializedWorker}
         allDates={allDates}
         isProfilePage={true}
+        accessedFromReception={false}
         carAccess={isCarAccessAllowed.success}
         label="Upravit profil"
       />

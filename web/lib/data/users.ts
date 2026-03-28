@@ -246,3 +246,14 @@ export async function unblockRegisteredUsers(
     },
   })
 }
+
+export async function getUserOAuthLinks(email: string) {
+  return await prisma.user.findUnique({
+    where: {
+      email,
+    },
+    include: {
+      accounts: true,
+    },
+  })
+}

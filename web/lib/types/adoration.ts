@@ -26,6 +26,16 @@ export interface FrontendAdorationSlot {
   }[]
 }
 
+export interface AdorationSlotWithWorkerIds {
+  id: string
+  dateStart: Date
+  location: string
+  length: number
+  capacity: number
+  eventId: string
+  workers: { id: string }[]
+}
+
 // API response types
 export interface APIAdorationWorker {
   id: string

@@ -16,6 +16,7 @@ export default async function AdminLayout({
     Permission.APPLICATIONS,
     Permission.ADORATION,
     Permission.NOTIFICATIONS,
+    Permission.RECEPTION,
   ])
   if (!isAllowed.success) {
     return <AccessDeniedPage />

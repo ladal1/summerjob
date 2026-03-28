@@ -86,6 +86,7 @@ interface PostsClientPageProps {
   endDate: string
   allDates: DateBool[][]
   advancedAccess: boolean
+  accessedFromReception: boolean
   userId: string
 }
 
@@ -95,6 +96,7 @@ export default function PostsClientPage({
   endDate,
   allDates,
   advancedAccess,
+  accessedFromReception,
   userId,
 }: PostsClientPageProps) {
   const inititalPosts = deserializePosts(sPosts)
@@ -452,6 +454,7 @@ export default function PostsClientPage({
               <PostBubble
                 item={item}
                 advancedAccess={advancedAccess}
+                accessedFromReception={accessedFromReception}
                 onUpdated={mutate}
                 userId={userId}
               />
@@ -502,7 +505,7 @@ export default function PostsClientPage({
         <div className="row">
           <div className="col-lg-4">
             <PostType title="Obecné">
-              {hasAdoration && (
+              {hasAdoration && !accessedFromReception && (
                 <div className="pb-1">
                   <AdorationBox />
                 </div>
@@ -512,6 +515,7 @@ export default function PostsClientPage({
                   <PostBubble
                     item={item}
                     advancedAccess={advancedAccess}
+                    accessedFromReception={accessedFromReception}
                     onUpdated={mutate}
                     userId={userId}
                   />
@@ -551,6 +555,7 @@ export default function PostsClientPage({
                         key={index}
                         item={item}
                         advancedAccess={advancedAccess}
+                        accessedFromReception={accessedFromReception}
                         onUpdated={mutate}
                         showTime={false}
                         userId={userId}

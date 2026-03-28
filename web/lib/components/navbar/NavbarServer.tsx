@@ -24,7 +24,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/plans',
       name: 'Plány',
       icon: 'fas fa-calendar-days',
-      permissions: [Permission.PLANS],
+      permissions: [Permission.PLANS, Permission.RECEPTION],
     },
     {
       path: '/jobs',
@@ -42,7 +42,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/workers',
       name: 'Pracanti',
       icon: 'far fa-user',
-      permissions: [Permission.WORKERS],
+      permissions: [Permission.WORKERS, Permission.RECEPTION],
     },
     {
       path: '/admin',
@@ -53,6 +53,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
         Permission.ADORATION,
         Permission.APPLICATIONS,
         Permission.NOTIFICATIONS,
+        Permission.RECEPTION,
       ],
     },
     {

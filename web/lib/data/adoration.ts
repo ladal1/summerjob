@@ -4,6 +4,9 @@ import type { PrismaTransactionClient } from 'lib/types/prisma'
 import { startOfDay, endOfDay, addDays, format, add } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
 import { AdorationSlot, Worker } from 'lib/prisma/client'
+import { cache_getActiveSummerJobEventId } from './cache'
+import { NoActiveEventError } from './internal-error'
+import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
 
 // CEST timezone identifier
 const CEST_TZ = 'Europe/Prague'
@@ -180,6 +183,75 @@ export async function getAllAdorationSlotsForEventUser(
         isUserSignedUp,
       }
     })
+}
+
+export async function getFreeUpcomingAdorationSlots(
+  limit: number
+): Promise<AdorationSlotWithWorkerIds[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+
+  if (limit <= 0) {
+    return []
+  }
+
+  const now = new Date()
+  const result: AdorationSlotWithWorkerIds[] = []
+  let cursorId: string | undefined
+  const batchSize = limit * 2
+
+  // Fetch the slots in small batches to filter available slots
+  // without having to fetch all the slots every time
+  while (result.length < limit) {
+    const currentBatch = await prisma.adorationSlot.findMany({
+      where: {
+        eventId: activeEventId,
+        dateStart: {
+          gte: now,
+        },
+      },
+      include: {
+        workers: {
+          select: {
+            id: true,
+          },
+        },
+      },
+      orderBy: [{ dateStart: 'asc' }, { id: 'asc' }],
+      take: batchSize,
+      ...(cursorId
+        ? {
+            cursor: { id: cursorId },
+            skip: 1,
+          }
+        : {}),
+    })
+
+    if (currentBatch.length === 0) {
+      break
+    }
+
+    // Filter available slots from the current batch
+    for (const slot of currentBatch) {
+      if (slot.workers.length < slot.capacity) {
+        result.push(slot)
+        if (result.length >= limit) {
+          break
+        }
+      }
+    }
+
+    // Move cursor
+    cursorId = currentBatch[currentBatch.length - 1].id
+
+    if (currentBatch.length < batchSize) {
+      break
+    }
+  }
+
+  return result
 }
 
 export async function signUpForAdorationSlot(
