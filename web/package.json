@@ -14,11 +14,17 @@
     "delete-db": "tsx prisma/drop-tables.ts",
     "create-session": "tsx scripts/create-session.ts",
     "create-admin": "tsx scripts/create-admin.ts",
+    "create-reception": "tsx scripts/create-reception.ts",
     "test": "vitest run",
     "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prettier:fix": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prepare": "npx prisma generate && cd .. && husky web/.husky",
     "maildev": "maildev"
+  },
+  "overrides": {
+    "sharp": {
+      "sharp": "0.33.5"
+    }
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
@@ -51,10 +57,11 @@
     "react-markdown": "^10.1.0",
     "react-select": "^5.10.2",
     "remark-gfm": "^4.0.1",
-    "sharp": "^0.34.2",
+    "sharp": "^0.33.5",
     "swr": "^2.4.0",
     "ts-node": "^10.9.2",
     "typescript": "5.9.3",
+    "uuid": "^13.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

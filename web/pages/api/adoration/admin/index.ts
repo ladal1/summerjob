@@ -4,14 +4,16 @@ import { APIAccessController } from 'lib/api/APIAccessControler'
 import { Permission } from 'lib/types/auth'
 
 export default APIAccessController(
-  [Permission.ADMIN, Permission.ADORATION],
-  async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse,
-  ) {
+  [Permission.ADMIN, Permission.ADORATION, Permission.RECEPTION],
+  async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { date, eventId } = req.query
 
-    if (!date || !eventId || typeof date !== 'string' || typeof eventId !== 'string') {
+    if (
+      !date ||
+      !eventId ||
+      typeof date !== 'string' ||
+      typeof eventId !== 'string'
+    ) {
       return res.status(400).json({ message: 'Chybí nebo neplatné parametry.' })
     }
 

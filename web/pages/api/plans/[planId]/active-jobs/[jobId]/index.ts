@@ -25,6 +25,25 @@ async function patch(
   if (!data) {
     return
   }
+
+  // A reception user can only change "completed" and "proposedJob"."privateDescription"
+  if (session.permissions.includes(Permission.RECEPTION)) {
+    const allowedPlanProps = ['completed', 'proposedJob']
+    const allowedJobProps = ['privateDescription']
+
+    const disallowedPlanProps = Object.keys(data).filter(
+      key => !allowedPlanProps.includes(key)
+    )
+    const disallowedJobProps = Object.keys(data.proposedJob ?? {}).filter(
+      key => !allowedJobProps.includes(key)
+    )
+
+    if (disallowedPlanProps.length !== 0 || disallowedJobProps.length !== 0) {
+      res.status(403).end()
+      return
+    }
+  }
+
   await logger.apiRequest(APILogEvent.PLAN_JOB_MODIFY, id, json, session)
   await updateActiveJob(id, data)
   res.status(204).end()
@@ -58,7 +77,11 @@ async function del(
 }
 
 export default APIAccessController(
-  [Permission.PLANS],
+  {
+    GET: [Permission.PLANS],
+    PATCH: [Permission.PLANS, Permission.RECEPTION],
+    DELETE: [Permission.PLANS],
+  },
   APIMethodHandler({ patch, get, del })
 )
 

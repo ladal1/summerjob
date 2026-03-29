@@ -13,7 +13,12 @@ export default async function AdminAdorationPage() {
     return <p className="mt-5 text-center">Žádný aktivní ročník</p>
   }
 
-  const canDeleteSlots = session?.permissions.includes(Permission.ADMIN) ?? false
+  const canDeleteSlots =
+    session?.permissions.includes(Permission.ADMIN) ?? false
+
+  const accessedFromReception = !!session?.permissions.includes(
+    Permission.RECEPTION
+  )
 
   return (
     <div className="container mt-4">
@@ -21,9 +26,10 @@ export default async function AdminAdorationPage() {
         event={{
           id: event.id,
           startDate: event.startDate.toISOString(),
-          endDate: event.endDate.toISOString()
+          endDate: event.endDate.toISOString(),
         }}
         canDeleteSlots={canDeleteSlots}
+        accessedFromReception={accessedFromReception}
       />
     </div>
   )

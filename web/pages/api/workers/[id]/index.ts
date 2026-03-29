@@ -68,7 +68,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
     APILogEvent.WORKER_MODIFY,
     worker.id,
     workerData,
-     
+
     session!
   )
 
@@ -88,7 +88,6 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
-   
   await logger.apiRequest(APILogEvent.WORKER_DELETE, worker.id, {}, session!)
   await deleteWorker(worker.id)
 
@@ -104,7 +103,10 @@ async function isAllowedToAccessWorker(
     res.status(401).end()
     return
   }
-  const regularAccess = isAccessAllowed([Permission.WORKERS], session)
+  const regularAccess = isAccessAllowed(
+    [Permission.WORKERS, Permission.RECEPTION],
+    session
+  )
   if (regularAccess) {
     return true
   }
@@ -127,6 +129,7 @@ async function isAllowedToDeleteWorker(
   const regularAccess = isAccessAllowed([Permission.WORKERS], session)
   if (!regularAccess) {
     res.status(403).end()
+    return
   }
   return true
 }

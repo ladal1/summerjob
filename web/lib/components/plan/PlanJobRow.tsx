@@ -42,6 +42,7 @@ interface PlanJobRowProps {
   onWorkerHover: (url: string | null) => void
   adorationByWorker?: Map<string, boolean>
   jobPositionMap?: Map<string, number>
+  accessedFromReception: boolean
 }
 
 export function PlanJobRow({
@@ -55,6 +56,7 @@ export function PlanJobRow({
   onWorkerHover,
   adorationByWorker = new Map(),
   jobPositionMap = new Map(),
+  accessedFromReception,
 }: PlanJobRowProps) {
   //#region Update job
   const { data: activeJobs } = useAPIActiveJobs({
@@ -238,7 +240,8 @@ export function PlanJobRow({
             sameWorkIssue,
             sameCoworkerIssue,
             adorationByWorker,
-            jobPositionMap
+            jobPositionMap,
+            accessedFromReception
           )}
           onDrop={onWorkerDropped(job.id)}
         >
@@ -271,15 +274,17 @@ export function PlanJobRow({
                     <th style={{ width: '20%' }}>
                       <strong>Doprava</strong>
                     </th>
-                    <th>
-                      <strong>Akce</strong>
-                    </th>
+                    {!accessedFromReception && (
+                      <th>
+                        <strong>Akce</strong>
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {job.workers.length === 0 && (
                     <tr>
-                      <td colSpan={6}>
+                      <td colSpan={accessedFromReception ? 5 : 6}>
                         <i>Žádní pracanti</i>
                       </td>
                     </tr>
@@ -297,7 +302,8 @@ export function PlanJobRow({
                         setWorkerToMove,
                         promoteWorkerToResponsible,
                         reloadPlan,
-                        adorationByWorker
+                        adorationByWorker,
+                        accessedFromReception
                       )}
                       onMouseEnter={() =>
                         worker.photoPath
@@ -380,9 +386,10 @@ function formatRowData(
   sameWorkIssue: boolean,
   sameCoworkerIssue: boolean,
   adorationByWorker: Map<string, boolean>,
-  jobPositionMap: Map<string, number>
+  jobPositionMap: Map<string, number>,
+  accessedFromReception: boolean
 ): RowCells[] {
-  return [
+  const cells: RowCells[] = [
     {
       content: (
         <span key={`completed-${job.id}`} onClick={e => e.stopPropagation()}>
@@ -416,7 +423,10 @@ function formatRowData(
     { content: job.proposedJob.address },
     { content: formatAmenities(job) },
     { content: jobPositionMap.get(job.id) || job.proposedJob.priority },
-    {
+  ]
+
+  if (!accessedFromReception) {
+    cells.push({
       content: (
         <span
           key={`actions-${job.id}`}
@@ -434,8 +444,10 @@ function formatRowData(
         </span>
       ),
       stickyRight: true,
-    },
-  ]
+    })
+  }
+
+  return cells
 }
 
 function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
@@ -474,7 +486,8 @@ function formatWorkerData(
   requestMoveWorker: (worker: WorkerComplete) => void,
   promoteWorker: (workerId: string) => void,
   reloadPlan: () => void,
-  adorationByWorker: Map<string, boolean>
+  adorationByWorker: Map<string, boolean>,
+  accessedFromReception: boolean
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
@@ -495,7 +508,7 @@ function formatWorkerData(
   const workerSameWork = sameWork(worker.id, job, day, plannedJobs)
   const workerSameCoworker = sameCoworker(worker.id, job, day, plannedJobs)
 
-  return [
+  const cols = [
     {
       content: (
         <>
@@ -527,7 +540,10 @@ function formatWorkerData(
         />
       ),
     },
-    {
+  ]
+
+  if (!accessedFromReception) {
+    cols.push({
       content: (
         <span
           key={`actions-${worker.id}`}
@@ -541,8 +557,10 @@ function formatWorkerData(
           {removeWorkerIcon(() => removeWorker(worker.id))}
         </span>
       ),
-    },
-  ]
+    })
+  }
+
+  return cols
 }
 
 function promoteWorkerIcon(promote: () => void) {
