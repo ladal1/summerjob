@@ -4,6 +4,7 @@ import { useAPIArrivals } from 'lib/fetcher/arrival'
 import { normalizeString } from 'lib/helpers/helpers'
 import { Serialized } from 'lib/types/serialize'
 import { ArrivalWorker, deserializeArrivals } from 'lib/types/arrival'
+import { SortOrder } from '../table/SortableTable'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { Filters } from '../filters/Filters'
@@ -23,22 +24,35 @@ export default function ArrivalsClientPage({
 
   const searchParams = useSearchParams()
   const searchQ = searchParams?.get('search')
+  const onlyNotArrivedQ = searchParams?.get('onlyNotArrived')
+  const showHiddenQ = searchParams?.get('showHidden')
 
   const [filter, setFilter] = useState(searchQ ?? '')
-  const [onlyNotArrived, setOnlyNotArrived] = useState(true)
-  const [showHidden, setShowHidden] = useState(false)
+  const [onlyNotArrived, setOnlyNotArrived] = useState(
+    onlyNotArrivedQ !== null ? onlyNotArrivedQ === 'true' : true
+  )
+  const [showHidden, setShowHidden] = useState(showHiddenQ === 'true')
+
+  const sortColumnQ = searchParams?.get('sortColumn')
+  const sortDirectionQ = searchParams?.get('sortDirection')
+  const [sortOrder, setSortOrder] = useState<SortOrder>({
+    columnId: sortColumnQ ?? 'name',
+    direction: (sortDirectionQ as 'asc' | 'desc') || 'asc',
+  })
 
   const router = useRouter()
   useEffect(() => {
-    router.replace(
-      `?${new URLSearchParams({
-        search: filter,
-        onlyNotArrived: `${onlyNotArrived}`,
-        showHidden: `${showHidden}`,
-      })}`,
-      { scroll: false }
-    )
-  }, [filter, onlyNotArrived, showHidden, router])
+    const params = new URLSearchParams({
+      search: filter,
+      onlyNotArrived: `${onlyNotArrived}`,
+      showHidden: `${showHidden}`,
+    })
+    if (sortOrder.columnId !== 'name' || sortOrder.direction !== 'asc') {
+      params.set('sortColumn', sortOrder.columnId || 'name')
+      params.set('sortDirection', sortOrder.direction)
+    }
+    router.replace(`?${params}`, { scroll: false })
+  }, [filter, onlyNotArrived, showHidden, sortOrder, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(
@@ -94,7 +108,12 @@ export default function ArrivalsClientPage({
         </div>
         <div className="row gx-3">
           <div className="col-lg-9 pb-2">
-            <ArrivalsTable workers={filteredData || []} onUpdated={mutate} />
+            <ArrivalsTable
+              workers={filteredData || []}
+              onUpdated={mutate}
+              sortOrder={sortOrder}
+              onSortChanged={setSortOrder}
+            />
           </div>
           <div className="col-sm-12 col-lg-3">
             <div className="card smj-shadow rounded-3 mb-3">

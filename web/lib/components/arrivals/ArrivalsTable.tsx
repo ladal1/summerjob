@@ -6,7 +6,7 @@ import {
   SortOrder,
 } from '../table/SortableTable'
 import { MessageRow } from '../table/MessageRow'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import ArrivalRow from './ArrivalRow'
 
 const _columns: SortableColumn[] = [
@@ -25,17 +25,16 @@ const _columns: SortableColumn[] = [
 interface ArrivalsTableProps {
   workers: ArrivalWorker[]
   onUpdated: () => void
+  sortOrder: SortOrder
+  onSortChanged: (sort: SortOrder) => void
 }
 
 export default function ArrivalsTable({
   workers,
   onUpdated,
+  sortOrder,
+  onSortChanged,
 }: ArrivalsTableProps) {
-  const [sortOrder, setSortOrder] = useState<SortOrder>({
-    columnId: 'name',
-    direction: 'asc',
-  })
-
   const sortedData = useMemo(
     () => sortWorkers(workers, sortOrder),
     [workers, sortOrder]
@@ -45,7 +44,7 @@ export default function ArrivalsTable({
     <SortableTable
       columns={_columns}
       currentSort={sortOrder}
-      onRequestedSort={setSortOrder}
+      onRequestedSort={onSortChanged}
     >
       {workers.length === 0 && (
         <MessageRow message="Žádní pracanti" colspan={_columns.length} />
