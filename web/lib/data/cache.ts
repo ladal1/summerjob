@@ -1,7 +1,7 @@
 import { SummerJobEvent } from 'lib/prisma/client'
 import { getActiveSummerJobEvent } from './summerjob-event'
 
-let activeSummerjobEvent: SummerJobEvent
+let activeSummerjobEvent: SummerJobEvent | null
 
 export async function cache_getActiveSummerJobEventId() {
   const event = await cache_getActiveSummerJobEvent()
@@ -21,4 +21,8 @@ export async function cache_getActiveSummerJobEvent() {
 
 export function cache_setActiveSummerJobEvent(event: SummerJobEvent) {
   activeSummerjobEvent = event
+}
+
+export function cache_unsetActiveSummerJobEvent() {
+  activeSummerjobEvent = null
 }

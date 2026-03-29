@@ -1,12 +1,10 @@
 'use client'
 
- 
- 
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
   ApplicationCreateSchema,
   ApplicationCreateDataInput,
@@ -53,7 +51,11 @@ export default function ApplicationsPage({
     clearErrors,
     control,
     formState: { errors },
-  } = useForm<ApplicationCreateDataInput>({
+  } = useForm<
+    z.input<typeof ApplicationCreateSchema>,
+    unknown,
+    ApplicationCreateDataInput
+  >({
     resolver: zodResolver(ApplicationCreateSchema),
   })
   const { isMutating, error, reset } = useAPIApplicationCreate({
@@ -148,7 +150,7 @@ export default function ApplicationsPage({
 
   const registerPhoto = (file: File | null) => {
     try {
-      setValue('photoFile', file, { shouldDirty: true, shouldValidate: true })
+      setValue('photoFile', file, { shouldDirty: true })
     } catch (error) {
       console.error('Chyba v registerPhoto:', error)
     }
@@ -372,7 +374,7 @@ export default function ApplicationsPage({
             </div>
           </div>
           <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
-            {/* <div className="w-100 w-md-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
                 label={
@@ -393,7 +395,7 @@ export default function ApplicationsPage({
                 placeholder="XS, S, M, L, XL, XXL"
                 errors={errors}
               />
-            </div> */}
+            </div>
             <div className="w-100 w-md-45">
               <TextInput
                 id="playsInstrument"

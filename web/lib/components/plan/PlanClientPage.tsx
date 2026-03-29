@@ -36,6 +36,7 @@ interface PlanClientPageProps {
   initialDataPlan: Serialized
   initialDataJoblessWorkers: Serialized
   workerId: string
+  accessedFromReception: boolean
 }
 
 export default function PlanClientPage({
@@ -43,6 +44,7 @@ export default function PlanClientPage({
   initialDataPlan,
   initialDataJoblessWorkers,
   workerId,
+  accessedFromReception,
 }: PlanClientPageProps) {
   const initialDataPlanParsed = deserializePlan(initialDataPlan)
 
@@ -359,53 +361,68 @@ export default function PlanClientPage({
           <PageHeader
             title={planData ? formatDateLong(planData?.day) : 'Načítání...'}
           >
-            <button
-              className="btn btn-primary btn-with-icon"
-              type="button"
-              onClick={openModal}
-            >
-              <i className="fas fa-briefcase"></i>
-              <span>Přidat job</span>
-            </button>
-            <button
-              className="btn btn-primary btn-with-icon"
-              type="button"
-              onClick={generatePlan}
-              disabled={isSendingGenerate}
-            >
-              <i className="fas fa-cog"></i>
-              <span>Vygenerovat plán</span>
-            </button>
-            <button
-              className="btn btn-primary btn-with-icon"
-              type="button"
-              onClick={switchPublish}
-            >
-              <i className="fas fa-briefcase"></i>
-              <span>
-                {!planData?.published ? 'Zveřejnit plán' : 'Odzveřejnit plán'}
-              </span>
-            </button>
-            <Link href={`/plan/${planData?.id}/food-delivery`} prefetch={false}>
-              <button className="btn btn-warning btn-with-icon" type="button">
-                <i className="fas fa-utensils"></i>
-                <span>Rozvoz jídla</span>
-              </button>
-            </Link>
-            <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
-              <button className="btn btn-secondary btn-with-icon" type="button">
-                <i className="fas fa-print"></i>
-                <span>Tisknout</span>
-              </button>
-            </Link>
-            <button
-              className="btn btn-danger btn-with-icon"
-              type="button"
-              onClick={confirmDelete}
-            >
-              <i className="fas fa-trash-alt"></i>
-              <span>Odstranit</span>
-            </button>
+            {!accessedFromReception && (
+              <>
+                <button
+                  className="btn btn-primary btn-with-icon"
+                  type="button"
+                  onClick={openModal}
+                >
+                  <i className="fas fa-briefcase"></i>
+                  <span>Přidat job</span>
+                </button>
+                <button
+                  className="btn btn-primary btn-with-icon"
+                  type="button"
+                  onClick={generatePlan}
+                  disabled={isSendingGenerate}
+                >
+                  <i className="fas fa-cog"></i>
+                  <span>Vygenerovat plán</span>
+                </button>
+                <button
+                  className="btn btn-primary btn-with-icon"
+                  type="button"
+                  onClick={switchPublish}
+                >
+                  <i className="fas fa-briefcase"></i>
+                  <span>
+                    {!planData?.published
+                      ? 'Zveřejnit plán'
+                      : 'Odzveřejnit plán'}
+                  </span>
+                </button>
+                <Link
+                  href={`/plan/${planData?.id}/food-delivery`}
+                  prefetch={false}
+                >
+                  <button
+                    className="btn btn-warning btn-with-icon"
+                    type="button"
+                  >
+                    <i className="fas fa-utensils"></i>
+                    <span>Rozvoz jídla</span>
+                  </button>
+                </Link>
+                <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
+                  <button
+                    className="btn btn-secondary btn-with-icon"
+                    type="button"
+                  >
+                    <i className="fas fa-print"></i>
+                    <span>Tisknout</span>
+                  </button>
+                </Link>
+                <button
+                  className="btn btn-danger btn-with-icon"
+                  type="button"
+                  onClick={confirmDelete}
+                >
+                  <i className="fas fa-trash-alt"></i>
+                  <span>Odstranit</span>
+                </button>
+              </>
+            )}
           </PageHeader>
 
           <section>
@@ -455,6 +472,7 @@ export default function PlanClientPage({
                     showNumbers={showNumbers}
                     sortOrder={sortOrder}
                     onSortOrderChange={onSortOrderChange}
+                    accessedFromReception={accessedFromReception}
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">

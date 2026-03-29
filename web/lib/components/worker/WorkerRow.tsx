@@ -9,12 +9,14 @@ interface WorkerRowProps {
   worker: WorkerComplete
   onUpdated: () => void
   onHover: (url: string | null) => void
+  accessedFromReception: boolean
 }
 
 export default function WorkerRow({
   worker,
   onUpdated,
   onHover,
+  accessedFromReception,
 }: WorkerRowProps) {
   const { trigger, isMutating, error, reset } = useAPIWorkerDelete(worker.id, {
     onSuccess: onUpdated,
@@ -22,7 +24,14 @@ export default function WorkerRow({
   return (
     <SimpleRow
       key={worker.id}
-      data={formatWorkerRow(worker, trigger, isMutating, error, reset)}
+      data={formatWorkerRow(
+        worker,
+        trigger,
+        isMutating,
+        error,
+        reset,
+        accessedFromReception
+      )}
       onMouseEnter={() =>
         worker.photoPath
           ? onHover(`/api/workers/${worker.id}/photo`)
@@ -39,7 +48,8 @@ function formatWorkerRow(
   isBeingDeleted: boolean,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deletingError: any,
-  resetError: () => void
+  resetError: () => void,
+  accessedFromReception: boolean
 ) {
   const confirmationText = () => {
     return (
@@ -84,12 +94,14 @@ function formatWorkerRow(
           >
             <i className="fas fa-edit" title="Upravit"></i>
           </Link>
-          <DeleteIcon
-            onClick={onRequestDelete}
-            isBeingDeleted={isBeingDeleted}
-            showConfirmation={true}
-            getConfirmationMessage={confirmationText}
-          />
+          {!accessedFromReception && (
+            <DeleteIcon
+              onClick={onRequestDelete}
+              isBeingDeleted={isBeingDeleted}
+              showConfirmation={true}
+              getConfirmationMessage={confirmationText}
+            />
+          )}
           {deletingError && (
             <ErrorMessageModal
               onClose={resetError}

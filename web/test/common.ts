@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { randomBytes, randomUUID } from 'crypto'
 import { PrismaClient } from '../lib/prisma/client'
 import request from 'supertest'
 import { fakerCS_CZ } from '@faker-js/faker'
@@ -144,6 +144,7 @@ class Common {
     this._email = admin.email
     this._event = { id: event.id, start: event.startDate, end: event.endDate }
     this._session = await this.getSession()
+    await this.clearCache()
   }
 
   getSummerJobEventId = () => this._event.id
@@ -158,7 +159,7 @@ class Common {
     return this.getUploadDirForImages() + '/' + activeEventId
   }
 
-  private getUploadDirForImages = (): string => {
+  getUploadDirForImages = (): string => {
     return path.resolve(`../${process.env.UPLOAD_DIR || '/web-storage'}`)
   }
 
@@ -166,9 +167,14 @@ class Common {
     await promises.unlink(oldPhotoPath)
   }
 
-  private deleteDirectory = async (dir: string) => {
+  private clearDirectory = async (dir: string) => {
     try {
-      await promises.rm(dir, { recursive: true, force: true })
+      const entries = await promises.readdir(dir)
+      await Promise.all(
+        entries.map(entry =>
+          promises.rm(path.join(dir, entry), { recursive: true, force: true })
+        )
+      )
     } catch (err) {
       console.error(err)
     }
@@ -189,21 +195,22 @@ class Common {
   }
 
   getAbsolutePath = (relativePath: string) => {
-    return path.join(this.getUploadDirForImagesForCurrentEvent(), relativePath)
+    return path.join(this.getUploadDirForImages(), relativePath)
   }
 
   deleteWorkersPhoto = async (workerId: string) => {
     const resp = await this.get(`/api/workers/${workerId}`, Id.WORKERS)
     const relativePath = resp.body.photoPath
-    const absolutePath = path.join(
-      this.getUploadDirForImagesForCurrentEvent(),
-      relativePath
-    )
-    this.deleteFile(absolutePath)
+    const absolutePath = path.join(this.getUploadDirForImages(), relativePath)
+    await this.deleteFile(absolutePath)
   }
   //#endregion
 
   //region Basic API usage
+  clearCache = async () => {
+    await this.post('/api/test/clear-cache', Id.ADMIN, {})
+  }
+
   deletePlan = async (planId: string) => {
     await this.del(`/api/plans/${planId}`, Id.ADMIN)
   }
@@ -246,40 +253,61 @@ class Common {
     )
   }
 
-  createProposedJob = async (areaId: string) => {
+  createJobType = async () => {
+    const jobType = await this.post(
+      `/api/job-types`,
+      Id.ADMIN,
+      createJobTypeData()
+    )
+    return jobType.body
+  }
+
+  createToolName = async () => {
+    const toolName = await this.post(
+      `/api/tool-names`,
+      Id.ADMIN,
+      createToolNameData()
+    )
+    return toolName.body
+  }
+
+  createProposedJob = async (areaId: string, jobTypeId: string) => {
     const job = await this.post(
       `/api/proposed-jobs`,
       Id.ADMIN,
-      createProposedJobData(areaId)
+      createProposedJobData(areaId, jobTypeId)
     )
     return job.body
   }
 
-  deleteProposedJob = async (jobId: string) => {
-    await this.del(`/api/proposed-jobs/${jobId}`, Id.ADMIN)
+  createSkill = async () => {
+    const skill = await this.post('/api/skills', Id.ADMIN, createSkillHasData())
+    return skill.body
   }
   // #endregion
 
   // #region Complicated API usage
   createProposedJobWithPhotos = async (filePaths: string[]) => {
-    const area = await api.createArea()
-    const body = createProposedJobData(area.id)
-    return await api.post('/api/proposed-jobs', Id.JOBS, body, filePaths)
+    const area = await this.createArea()
+    const jobType = await this.createJobType()
+    const body = createProposedJobData(area.id, jobType.id)
+    return await this.post('/api/proposed-jobs', Id.JOBS, body, filePaths)
   }
 
   createPlanWithJob = async () => {
-    const plan = await api.post(
+    const plan = await this.post(
       '/api/plans',
       Id.PLANS,
-      createPlanData(api.getSummerJobEventEnd())
+      createPlanData(this.getSummerJobEventEnd())
     )
-    const area = await api.createArea()
-    const job = await api.createProposedJob(area.id)
+    const area = await this.createArea()
+    const jobType = await this.createJobType()
+    const job = await this.createProposedJob(area.id, jobType.id)
     const payload = {
       proposedJobId: job.id,
       planId: plan.body.id,
     }
-    const activeJob = await api.post(
+    const activeJob = await this.post(
       `/api/plans/${plan.body.id}/active-jobs`,
       Id.PLANS,
       payload
@@ -316,7 +344,8 @@ class Common {
     })
 
     // Add another job to the plan with two different workers
-    const otherJob = await this.createProposedJob(area.id)
+    const jobType = await this.createJobType()
+    const otherJob = await this.createProposedJob(area.id, jobType.id)
     await this.post(`/api/plans/${plan.id}/active-jobs`, Id.PLANS, {
       proposedJobId: otherJob.id,
       privateDescription: faker.lorem.paragraph(),
@@ -440,12 +469,12 @@ class Common {
     const workers = await this.get('/api/workers', Id.WORKERS)
     for (const worker of workers.body) {
       if (worker.id === this._adminId) continue
-      await api.deleteWorker(worker.id)
+      await this.deleteWorker(worker.id)
     }
     // Delete all cars
     const cars = await this.get('/api/cars', Id.CARS)
     for (const car of cars.body) {
-      await api.deleteCar(car.id)
+      await this.deleteCar(car.id)
     }
     // Delete all areas - this also deletes all proposed and active jobs
     const areas = await this.get(
@@ -453,29 +482,73 @@ class Common {
       Id.ADMIN
     )
     for (const area of areas.body) {
-      await api.del(
+      await this.del(
         `/api/summerjob-events/${this.getSummerJobEventId()}/areas/${area.id}`,
         Id.ADMIN
       )
     }
+
+    // Clear smj event cache
+    await this.clearCache()
     // Delete all photos
-    this.deleteDirectory(this.getUploadDirForImagesForCurrentEvent())
+    await this.clearDirectory(this.getUploadDirForImages())
   }
   //#endregion
 }
 
 //#region Generate data
+function uniqueValue(prefix: string) {
+  return `${prefix}-${randomUUID()}`
+}
+
+export function createFoodAllergyData() {
+  return {
+    name: uniqueValue('food-allergy'),
+  }
+}
+
+export function createWorkAllergyData() {
+  return {
+    name: uniqueValue('work-allergy'),
+  }
+}
+
+export function createSkillHasData() {
+  return {
+    name: uniqueValue('skill'),
+  }
+}
+
+export function createToolNameData(
+  skillIds: string[] = [],
+  jobTypeIds: string[] = []
+) {
+  return {
+    name: uniqueValue('tool'),
+    skills: skillIds,
+    jobTypes: jobTypeIds,
+  }
+}
+
+export function createJobTypeData() {
+  return {
+    name: uniqueValue('job-type'),
+  }
+}
+
 export function createWorkerData() {
   return {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     age: faker.number.int({ min: 10, max: 99 }),
-    email: faker.internet.email(),
+    email: `${uniqueValue('worker-email')}@test.test`,
     phone: faker.phone.number({ style: 'national' }),
     team: Math.random() > 0.5,
     strong: Math.random() > 0.5,
-    allergyIds: [],
+    foodAllergies: [],
+    workAllergies: [],
     skills: [],
+    tools: [],
     availability: {
       workDays: [],
     },
@@ -505,10 +578,10 @@ export function createAreaData() {
   }
 }
 
-export function createProposedJobData(areaId: string) {
+export function createProposedJobData(areaId: string, jobTypeId: string) {
   return {
     areaId: areaId,
-    allergens: ['HAY'],
+    allergens: [],
     privateDescription: 'string',
     publicDescription: 'string',
     name: 'string',
@@ -521,7 +594,7 @@ export function createProposedJobData(areaId: string) {
     hasFood: true,
     hasShower: true,
     availability: ['2023-04-24T00:00:00.000Z'],
-    jobType: 'OTHER',
+    jobType: jobTypeId,
     coordinates: [0, 0],
     priority: 1,
   }
@@ -534,7 +607,7 @@ export function createPostData() {
     timeFrom: '12:00',
     timeTo: '13:00',
     address: faker.location.streetAddress(),
-    coordinates: [],
+    //coordinates: [],
     shortDescription: 'string',
     longDescription: 'string',
     tags: ['EATING'],
@@ -566,13 +639,6 @@ export const Id = {
   POSTS: 'POSTS',
 }
 
-export const Tools = {
-  AXE: 'AXE',
-  BOW_SAW: 'BOW_SAW',
-  LADDER: 'LADDER',
-  PAINT: 'PAINT',
-  PAINT_ROLLER: 'PAINT_ROLLER',
-}
 //#endregion
 
 //#region Helpers

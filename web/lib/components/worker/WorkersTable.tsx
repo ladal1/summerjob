@@ -27,12 +27,14 @@ interface WorkersTableProps {
   workers: WorkerComplete[]
   onUpdated: () => void
   onHover: (url: string | null) => void
+  accessedFromReception: boolean
 }
 
 export default function WorkersTable({
   workers,
   onUpdated,
   onHover,
+  accessedFromReception,
 }: WorkersTableProps) {
   //#region Sort
   const [sortOrder, setSortOrder] = useState<SortOrder>({
@@ -76,6 +78,7 @@ export default function WorkersTable({
           worker={worker}
           onUpdated={onUpdated}
           onHover={onHover}
+          accessedFromReception={accessedFromReception}
         />
       ))}
     </SortableTable>

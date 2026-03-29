@@ -84,7 +84,8 @@ describe('Plans', function () {
       createPlanData(api.getSummerJobEventEnd())
     )
     const area = await api.createArea()
-    const job = await api.createProposedJob(area.id)
+    const jobType = await api.createJobType()
+    const job = await api.createProposedJob(area.id, jobType.id)
     const payload = {
       proposedJobId: job.id,
       planId: plan.body.id,
@@ -128,7 +129,8 @@ describe('Plans', function () {
       createPlanData(api.getSummerJobEventEnd())
     )
     const area = await api.createArea()
-    const job = await api.createProposedJob(area.id)
+    const jobType = await api.createJobType()
+    const job = await api.createProposedJob(area.id, jobType.id)
     const payload = {
       proposedJobId: job.id,
       planId: plan.body.id,
@@ -183,7 +185,8 @@ describe('Plans', function () {
 
   it('moves workers between jobs', async function () {
     const { plan, area, job } = await api.createPlanWithJob()
-    const proposedJob = await api.createProposedJob(area.id)
+    const jobType = await api.createJobType()
+    const proposedJob = await api.createProposedJob(area.id, jobType.id)
     const job2 = await api.post(`/api/plans/${plan.id}/active-jobs`, Id.PLANS, {
       proposedJobId: proposedJob.id,
       planId: plan.id,

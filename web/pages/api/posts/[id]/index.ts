@@ -126,7 +126,10 @@ async function isAllowedToAccessPost(
     res.status(401).end()
     return
   }
-  const regularAccess = isAccessAllowed([Permission.POSTS], session)
+  const regularAccess = isAccessAllowed(
+    [Permission.POSTS, Permission.RECEPTION],
+    session
+  )
   if (regularAccess) {
     return true
   }
@@ -137,7 +140,7 @@ async function isAllowedToAccessPost(
 export default APIAccessController(
   {
     GET: [Permission.POSTS],
-    PATCH: [Permission.POSTS],
+    PATCH: [Permission.POSTS, Permission.RECEPTION],
     DELETE: [Permission.POSTS],
     PUT: [],
   },

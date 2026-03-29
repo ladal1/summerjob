@@ -6,6 +6,7 @@ import { CarCreateSchema, type CarCreateData } from 'lib/types/car'
 import { WorkerBasicInfo } from 'lib/types/worker'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { FilterSelectItem } from '../filter-select/FilterSelect'
 import { FilterSelectInput } from '../forms/input/FilterSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
@@ -38,7 +39,7 @@ export default function CreateCar({ workers }: { workers: WorkerBasicInfo[] }) {
     handleSubmit,
     setValue,
     formState: { errors, dirtyFields },
-  } = useForm<CarCreateData>({
+  } = useForm<z.input<typeof CarCreateSchema>, unknown, CarCreateData>({
     resolver: zodResolver(CarCreateSchema),
     defaultValues: {
       seats: 4,

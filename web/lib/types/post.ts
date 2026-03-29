@@ -92,7 +92,7 @@ const PostBasicSchema = z
     tags: z.array(z.nativeEnum(PostTag)).optional(),
     isMandatory: z.boolean().optional(),
     isOpenForParticipants: z.boolean().optional(),
-    maxParticipants: z.number().positive().nullable(),
+    maxParticipants: z.number().positive().nullable().optional(),
   })
   .strict()
 

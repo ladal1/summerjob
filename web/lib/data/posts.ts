@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import formidable from 'formidable'
 import {
   deleteFile,
-  getUploadDirForImagesForCurrentEvent,
+  getUploadDirForImages,
   renameFile,
   updatePhotoPathByNewFilename,
 } from 'lib/api/fileManager'
@@ -81,6 +81,84 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
   }
 }
 
+export async function getGeneralPostsByDate(
+  date: Date
+): Promise<PostComplete[] | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const posts = await prisma.post.findMany({
+    where: {
+      forEventId: activeEventId,
+      availability: {
+        has: date,
+      },
+      // general post == time is null
+      timeFrom: null,
+      timeTo: null,
+    },
+    include: {
+      participants: {
+        select: {
+          workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+  })
+  if (!posts) {
+    return null
+  }
+  return posts.map(post => ({
+    ...post,
+    tags: post.tags as unknown as PostTag[],
+  }))
+}
+
+export async function getTimePostsByDate(date: Date): Promise<PostComplete[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const posts = await prisma.post.findMany({
+    where: {
+      forEventId: activeEventId,
+      availability: {
+        has: date,
+      },
+      // time post == time is not null
+      timeFrom: { not: null },
+      timeTo: { not: null },
+    },
+    include: {
+      participants: {
+        select: {
+          workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      timeFrom: 'asc',
+    },
+  })
+  return posts.map(post => ({
+    ...post,
+    tags: post.tags as unknown as PostTag[],
+  }))
+}
+
 export async function getPostPhotoById(
   id: string,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
@@ -100,7 +178,7 @@ export async function getPostPhotoById(
   if (!post || !post.photoPath) {
     return null
   }
-  const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+  const uploadDirAbsolutePath = getUploadDirForImages()
   return path.join(uploadDirAbsolutePath, post.photoPath)
 }
 
@@ -177,7 +255,7 @@ export async function internal_updatePost(
       await deleteFile(postPhotoPath) // delete original image if necessary
     }
     // Save only relative part of photoPath
-    const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+    const uploadDirAbsolutePath = getUploadDirForImages()
     const relativePath = path.normalize(
       photoPath.substring(uploadDirAbsolutePath.length)
     )
@@ -232,7 +310,7 @@ export async function createPost(
         updatePhotoPathByNewFilename(temporaryPhotoPath, post.id) ?? ''
       await renameFile(temporaryPhotoPath, photoPath)
       // Save only relative part of photoPath
-      const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+      const uploadDirAbsolutePath = getUploadDirForImages()
       const relativePath = path.normalize(
         photoPath.substring(uploadDirAbsolutePath.length)
       )

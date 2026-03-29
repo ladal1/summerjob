@@ -1,5 +1,5 @@
 import PhotoModal from 'lib/components/modal/PhotoModal'
-import Image from 'next/image'
+import { SafePhotoImage } from '../photo/SafePhotoImage'
 import React, { useState } from 'react'
 import { FieldErrors, FieldValues, Path } from 'react-hook-form'
 import FormWarning from './FormWarning'
@@ -148,7 +148,7 @@ export const ImageUploader = <FormData extends FieldValues>({
                         cursor: 'zoom-in',
                       }}
                     >
-                      <Image
+                      <SafePhotoImage
                         style={{ objectFit: 'contain' }}
                         alt={`Fotografie ${index + 1}`}
                         src={url.url}
