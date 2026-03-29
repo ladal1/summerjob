@@ -167,6 +167,8 @@ model WorkerAvailability {
   eventId       String
   workDays      DateTime[]     @db.Date
   adorationDays DateTime[]     @db.Date
+  arrived       Boolean        @default(false)
+  show          Boolean        @default(true)
 
   @@unique([workerId, eventId])
 }
