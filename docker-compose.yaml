@@ -67,7 +67,7 @@ services:
   summerjob-amqp:
     container_name: summerjob-amqp
     hostname: summerjob-amqp
-    image: rabbitmq:4.1
+    image: rabbitmq:4.2
     restart: unless-stopped
     networks:
       - summerjob-network
