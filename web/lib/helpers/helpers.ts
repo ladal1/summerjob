@@ -218,3 +218,16 @@ export function compareTimes(timeA: string | null, timeB: string | null) {
   if (!timeB) return -1
   return formateTime(timeA).localeCompare(formateTime(timeB))
 }
+
+// Parse date from the YYYY-MM-DD format
+export function getDateFromISOString(dateStr: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr)
+  if (!match) {
+    throw new Error('Invalid date format')
+  }
+  const [, y, m, d] = match
+  const year = Number(y)
+  const month = Number(m)
+  const day = Number(d)
+  return new Date(Date.UTC(year, month - 1, day))
+}
