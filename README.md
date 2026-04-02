@@ -70,6 +70,18 @@ Aplikace defaultně běží na adrese: http://localhost:3000 .
   [summerjob/web]$ npx prisma migrate dev --name NAZEV_MIGRACE
   ```
 
+## Postgres upgrade script
+Pro upgrade PostgreSQL na novější verzi můžete využít script `scripts/postgres-upgrade.sh`.
+
+Script je určen pro deployment běžící přes `docker compose` a provádí upgrade bezpečně přes **dump + restore do nového Docker volume**. Původní volume zůstává zachováno pro případný rollback.
+
+### Použití
+Script spusťte z kořenové složky projektu. Zde je příklad použití pro upgrade na major verzi 16.
+```console
+  [summerjob]$ bash scripts/postgres-upgrade.sh 16
+```
+
+
 ## Časté problémy
 
 ### API handler should not return a value, received object.
