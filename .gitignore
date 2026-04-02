@@ -111,3 +111,6 @@ __pycache__/
 *.pyc
 .ruff_cache
 .venv
+
+# Backups
+pg-upgrade-backups
