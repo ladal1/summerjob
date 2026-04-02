@@ -78,7 +78,7 @@ Script je určen pro deployment běžící přes `docker compose` a provádí up
 ### Použití
 Script spusťte z kořenové složky projektu. Zde je příklad použití pro upgrade na major verzi 16.
 ```console
-  [summerjob]$ bash scripts/postgres-upgrade.sh 16
+[summerjob]$ bash scripts/postgres-upgrade.sh 16
 ```
 
 
