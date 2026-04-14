@@ -15,7 +15,7 @@ COPY package.json package-lock.json .npmrc* ./
 COPY prisma ./prisma
 
 # Install dependencies
-RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund --include=optional --cpu=wasm32
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 # ============================================
 # Stage 2: Build Next.js app (standalone output)

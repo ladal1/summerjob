@@ -22,9 +22,7 @@
     "maildev": "maildev"
   },
   "overrides": {
-    "sharp": {
-      "sharp": "0.33.5"
-    }
+    "sharp": "^0.32.6"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.4.0",
@@ -58,7 +56,7 @@
     "react-markdown": "^10.1.0",
     "react-select": "^5.10.2",
     "remark-gfm": "^4.0.1",
-    "sharp": "^0.33.5",
+    "sharp": "^0.32.6",
     "swr": "^2.4.0",
     "ts-node": "^10.9.2",
     "typescript": "5.9.3",
