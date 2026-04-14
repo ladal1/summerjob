@@ -38,18 +38,10 @@ function makeVCard(w: {
     `FN:${fn}`,
     'ORG:SummerJob',
     'CATEGORIES:SummerJob',
+    `TEL;TYPE=CELL:${normalizePhone(w.phone)}`,
+    `EMAIL;TYPE=INTERNET:${escapeVCardText(w.email)}`,
+    'END:VCARD',
   ]
-
-  const phone = normalizePhone(w.phone)
-  if (phone) {
-    lines.push(`TEL;TYPE=CELL:${phone}`)
-  }
-  if (w.email) {
-    lines.push(`EMAIL;TYPE=INTERNET:${escapeVCardText(w.email)}`)
-  }
-
-  lines.push('END:VCARD')
-
   return lines.join('\r\n')
 }
 
