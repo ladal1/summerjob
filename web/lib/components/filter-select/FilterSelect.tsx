@@ -14,6 +14,7 @@ interface FilterSelectProps {
   onSelected: (id: string) => void
   defaultSelected?: FilterSelectItem
   preserveSearchOnSelect?: boolean
+  autocomplete?: string
 }
 
 // Helper function to remove accents from text for better search matching
@@ -28,6 +29,7 @@ export function FilterSelect({
   onSelected,
   defaultSelected,
   preserveSearchOnSelect = false,
+  autocomplete,
 }: FilterSelectProps) {
   const [search, setSearch] = useState(defaultSelected?.name ?? '')
   const [selected, setSelected] = useState(defaultSelected?.name ?? '')
@@ -100,6 +102,7 @@ export function FilterSelect({
           className="smj-dropdown fs-5"
           type="text"
           placeholder={placeholder}
+          autoComplete={autocomplete}
           value={search}
           onClick={toggleDropdown}
           onChange={e => setSearch(e.target.value)}
