@@ -15,7 +15,7 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import path from 'path'
 import { existsAdorationSlot } from './adoration'
-import { Post } from 'lib/prisma/client'
+import { Post } from 'lib/prisma/client/client'
 
 export async function getPostsWithAdorationFlag(): Promise<{
   posts: PostComplete[]

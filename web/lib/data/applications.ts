@@ -12,7 +12,7 @@ import {
   ApplicationUpdateDataInput,
 } from 'lib/types/application'
 import { getApplicationsUploadDir } from 'lib/api/fileManager'
-import type { Prisma } from 'lib/prisma/client'
+import type { Prisma } from 'lib/prisma/client/client'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 
 export async function getApplications() {

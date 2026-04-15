@@ -1,4 +1,4 @@
-import { Plan } from 'lib/prisma/client'
+import { Plan } from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { PlanComplete, PlanWithJobs } from 'lib/types/plan'

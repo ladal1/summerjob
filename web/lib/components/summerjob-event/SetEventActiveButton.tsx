@@ -1,5 +1,5 @@
 import { useAPISummerJobEventSetActive } from 'lib/fetcher/summerjob-event'
-import { SummerJobEvent } from 'lib/prisma/client'
+import { SummerJobEvent } from 'lib/prisma/client/client'
 import { useState } from 'react'
 import ConfirmationModal from '../modal/ConfirmationModal'
 

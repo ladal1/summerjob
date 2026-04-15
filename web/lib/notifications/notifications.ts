@@ -9,7 +9,7 @@ import {
   getWorkerIdsWithFoodAllergies,
 } from 'lib/data/workers'
 import { getDateFromISOString } from 'lib/helpers/helpers'
-import { Prisma } from 'lib/prisma/client'
+import { Prisma } from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import { NotificationCreateData } from 'lib/types/notification'
 import webpush from 'web-push'

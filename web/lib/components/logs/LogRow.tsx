@@ -1,5 +1,5 @@
 import { ExpandableRow } from '../table/ExpandableRow'
-import { Logging } from 'lib/prisma/client'
+import { Logging } from 'lib/prisma/client/client'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
 
 interface LogRowProps {

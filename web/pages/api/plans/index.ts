@@ -1,6 +1,6 @@
 import { createPlan, getPlans } from 'lib/data/plans'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { Prisma } from 'lib/prisma/client'
+import { Prisma } from 'lib/prisma/client/client'
 import { ApiBadRequestError, WrappedError } from 'lib/types/api-error'
 import { InvalidDataError } from 'lib/data/internal-error'
 import { APIAccessController } from 'lib/api/APIAccessControler'

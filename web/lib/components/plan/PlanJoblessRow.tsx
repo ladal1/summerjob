@@ -1,6 +1,6 @@
 import { hasWorkerAdorationOnDay } from 'lib/helpers/adoration'
 import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
-import type { Worker } from 'lib/prisma/client'
+import type { Worker } from 'lib/prisma/client/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { WorkerComplete } from 'lib/types/worker'
 import { useEffect, useState } from 'react'

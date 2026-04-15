@@ -1,12 +1,16 @@
 import dotenv from 'dotenv'
 import { randomBytes } from 'crypto'
-import { PrismaClient } from '../lib/prisma/client'
+import { PrismaClient } from '../lib/prisma/client/client'
 import readline from 'readline'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 // Load environment variables
 dotenv.config()
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+})
+const prisma = new PrismaClient({ adapter })
 
 function getEmailFromUser(): Promise<string> {
   const rl = readline.createInterface({

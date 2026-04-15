@@ -1,11 +1,15 @@
 import { randomBytes, randomUUID } from 'crypto'
-import { PrismaClient } from '../lib/prisma/client'
+import { PrismaClient } from '../lib/prisma/client/client'
 import request from 'supertest'
 import { fakerCS_CZ } from '@faker-js/faker'
 import path from 'path'
 import fs, { promises } from 'fs'
+import { PrismaPg } from '@prisma/adapter-pg'
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+})
+const prisma = new PrismaClient({ adapter })
 const faker = fakerCS_CZ
 
 /**

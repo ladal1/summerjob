@@ -1,4 +1,4 @@
-import { SummerJobEvent } from 'lib/prisma/client'
+import { SummerJobEvent } from 'lib/prisma/client/client'
 import { getActiveSummerJobEvent } from './summerjob-event'
 
 let activeSummerjobEvent: SummerJobEvent | null

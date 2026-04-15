@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": ".",
-    "target": "es2017",
+    "target": "es2023",
     "lib": [
       "dom",
       "dom.iterable",

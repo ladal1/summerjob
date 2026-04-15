@@ -5,7 +5,11 @@ import {
   updatePhotoPathByNewFilename,
 } from 'lib/api/fileManager'
 import { getPhotoPath } from 'lib/api/parse-form'
-import { PrismaClient, Worker, WorkerAvailability } from 'lib/prisma/client'
+import {
+  PrismaClient,
+  Worker,
+  WorkerAvailability,
+} from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 import {

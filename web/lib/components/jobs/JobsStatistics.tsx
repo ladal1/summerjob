@@ -1,4 +1,4 @@
-import { ToolName } from 'lib/prisma/client'
+import { ToolName } from 'lib/prisma/client/client'
 import { ProposedJobComplete } from 'lib/types/proposed-job'
 import React, { useMemo } from 'react'
 

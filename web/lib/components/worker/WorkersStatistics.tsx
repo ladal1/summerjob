@@ -1,4 +1,4 @@
-import { SkillHas } from 'lib/prisma/client'
+import { SkillHas } from 'lib/prisma/client/client'
 import { WorkerComplete } from 'lib/types/worker'
 import { useMemo } from 'react'
 

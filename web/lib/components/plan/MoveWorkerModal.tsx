@@ -1,6 +1,6 @@
 'use client'
 import { useAPIActiveJobUpdateDynamic } from 'lib/fetcher/active-job'
-import { Worker } from 'lib/prisma/client'
+import { Worker } from 'lib/prisma/client/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { useState } from 'react'
 import { FilterSelect } from '../filter-select/FilterSelect'

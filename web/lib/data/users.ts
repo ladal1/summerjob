@@ -1,4 +1,4 @@
-import { PrismaClient, WorkerPermissions } from 'lib/prisma/client'
+import { PrismaClient, WorkerPermissions } from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import { Permission } from 'lib/types/auth'
 import { PrismaTransactionClient } from 'lib/types/prisma'
