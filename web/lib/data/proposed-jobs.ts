@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from 'lib/prisma/client/client'
 import formidable from 'formidable'
 import prisma from 'lib/prisma/connection'
 import { PhotoIdsData } from 'lib/types/photo'
