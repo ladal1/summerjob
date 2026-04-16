@@ -11,6 +11,7 @@ export type Assignment = {
 }
 
 export type AssignmentsMap = Map<string, Assignment>
+export type CourierNotesMap = Map<number, string>
 
 const SAVE_DEBOUNCE_MS = 700
 
@@ -30,7 +31,22 @@ function assignmentsFromDeliveries(
   return map
 }
 
-function serialize(assignments: AssignmentsMap, courierNums: number[]): string {
+function notesFromDeliveries(
+  deliveries: FoodDeliveryAPIGetResponse | undefined
+): CourierNotesMap {
+  const map: CourierNotesMap = new Map()
+  if (!deliveries) return map
+  for (const delivery of deliveries) {
+    if (delivery.notes) map.set(delivery.courierNum, delivery.notes)
+  }
+  return map
+}
+
+function serialize(
+  assignments: AssignmentsMap,
+  courierNums: number[],
+  notes: CourierNotesMap
+): string {
   const entries = Array.from(assignments.entries())
     .map(
       ([jobId, a]) =>
@@ -41,7 +57,12 @@ function serialize(assignments: AssignmentsMap, courierNums: number[]): string {
         ] as const
     )
     .sort((a, b) => a[0].localeCompare(b[0]))
-  return JSON.stringify({ entries, couriers: [...courierNums].sort() })
+  const noteEntries = Array.from(notes.entries()).sort((a, b) => a[0] - b[0])
+  return JSON.stringify({
+    entries,
+    couriers: [...courierNums].sort(),
+    notes: noteEntries,
+  })
 }
 
 export function useFoodDeliveryState(planId: string) {
@@ -50,6 +71,7 @@ export function useFoodDeliveryState(planId: string) {
 
   const [assignments, setAssignments] = useState<AssignmentsMap>(new Map())
   const [courierNums, setCourierNums] = useState<number[]>([])
+  const [courierNotes, setCourierNotes] = useState<CourierNotesMap>(new Map())
   const [saveState, setSaveState] = useState<
     'idle' | 'saving' | 'saved' | 'error'
   >('idle')
@@ -58,21 +80,32 @@ export function useFoodDeliveryState(planId: string) {
   const lastSavedRef = useRef<string>('')
   const initializedRef = useRef(false)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingSaveRef = useRef<{
+    next: AssignmentsMap
+    nextCouriers: number[]
+    nextNotes: CourierNotesMap
+  } | null>(null)
 
   // Hydrate state from server once data arrives
   useEffect(() => {
     if (!deliveries || initializedRef.current) return
     const map = assignmentsFromDeliveries(deliveries)
     const nums = deliveries.map(d => d.courierNum).sort((a, b) => a - b)
+    const notes = notesFromDeliveries(deliveries)
     setAssignments(map)
     setCourierNums(nums)
-    lastSavedRef.current = serialize(map, nums)
+    setCourierNotes(notes)
+    lastSavedRef.current = serialize(map, nums, notes)
     initializedRef.current = true
   }, [deliveries])
 
   const persist = useCallback(
-    async (next: AssignmentsMap, nextCouriers: number[]) => {
-      const snapshot = serialize(next, nextCouriers)
+    async (
+      next: AssignmentsMap,
+      nextCouriers: number[],
+      nextNotes: CourierNotesMap
+    ) => {
+      const snapshot = serialize(next, nextCouriers, nextNotes)
       if (snapshot === lastSavedRef.current) return
 
       setSaveState('saving')
@@ -94,6 +127,7 @@ export function useFoodDeliveryState(planId: string) {
         ([courierNum, jobs]) => ({
           courierNum,
           planId,
+          notes: nextNotes.get(courierNum) ?? null,
           jobs: jobs.map((j, idx) => ({
             activeJobId: j.jobId,
             order: idx + 1,
@@ -105,6 +139,7 @@ export function useFoodDeliveryState(planId: string) {
       try {
         await bulkReplace(payload)
         lastSavedRef.current = snapshot
+        pendingSaveRef.current = null
         setSaveState('saved')
         setTimeout(() => setSaveState(s => (s === 'saved' ? 'idle' : s)), 1500)
         mutate()
@@ -117,14 +152,55 @@ export function useFoodDeliveryState(planId: string) {
   )
 
   const scheduleSave = useCallback(
-    (next: AssignmentsMap, nextCouriers: number[]) => {
+    (
+      next: AssignmentsMap,
+      nextCouriers: number[],
+      nextNotes: CourierNotesMap
+    ) => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      pendingSaveRef.current = { next, nextCouriers, nextNotes }
       saveTimerRef.current = setTimeout(() => {
-        persist(next, nextCouriers)
+        saveTimerRef.current = null
+        persist(next, nextCouriers, nextNotes)
       }, SAVE_DEBOUNCE_MS)
     },
     [persist]
   )
+
+  // Flush any pending debounced save when the user is about to leave the page
+  // and warn them if a save is currently in flight or queued.
+  useEffect(() => {
+    const beforeUnload = (e: BeforeUnloadEvent) => {
+      if (pendingSaveRef.current || saveState === 'saving') {
+        e.preventDefault()
+        // Required for legacy browsers; modern browsers show a generic message.
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', beforeUnload)
+    return () => window.removeEventListener('beforeunload', beforeUnload)
+  }, [saveState])
+
+  // On unmount: if there is a pending debounced save, fire it immediately so
+  // changes aren't lost when the user navigates away within the debounce window.
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+      const pending = pendingSaveRef.current
+      if (pending) {
+        // Best-effort fire; SWR mutation may or may not complete before unload.
+        persist(pending.next, pending.nextCouriers, pending.nextNotes).catch(
+          () => {}
+        )
+      }
+    }
+    // Intentionally omit `persist` from deps — we want this cleanup to run only
+    // on real unmount, not whenever persist's identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const updateAssignments = useCallback(
     (
@@ -139,11 +215,24 @@ export function useFoodDeliveryState(planId: string) {
           courierNums
         )
         setCourierNums(nextNums)
-        scheduleSave(nextA, nextNums)
+        scheduleSave(nextA, nextNums, courierNotes)
         return nextA
       })
     },
-    [courierNums, scheduleSave]
+    [courierNums, courierNotes, scheduleSave]
+  )
+
+  const setCourierNote = useCallback(
+    (courierNum: number, note: string) => {
+      setCourierNotes(prev => {
+        const next = new Map(prev)
+        if (note.trim() === '') next.delete(courierNum)
+        else next.set(courierNum, note)
+        scheduleSave(assignments, courierNums, next)
+        return next
+      })
+    },
+    [assignments, courierNums, scheduleSave]
   )
 
   const assignJob = useCallback(
@@ -194,11 +283,18 @@ export function useFoodDeliveryState(planId: string) {
     const nextNum = courierNums.length === 0 ? 1 : Math.max(...courierNums) + 1
     const nextCouriers = [...courierNums, nextNum]
     setCourierNums(nextCouriers)
-    scheduleSave(assignments, nextCouriers)
-  }, [assignments, courierNums, scheduleSave])
+    scheduleSave(assignments, nextCouriers, courierNotes)
+  }, [assignments, courierNums, courierNotes, scheduleSave])
 
   const removeCourier = useCallback(
     (courierNum: number) => {
+      // Drop any note for the removed courier as well.
+      setCourierNotes(prev => {
+        if (!prev.has(courierNum)) return prev
+        const next = new Map(prev)
+        next.delete(courierNum)
+        return next
+      })
       updateAssignments(prev => {
         const next = new Map(prev)
         for (const [jobId, a] of prev) {
@@ -229,11 +325,13 @@ export function useFoodDeliveryState(planId: string) {
     loadError: error,
     assignments,
     courierNums,
+    courierNotes,
     saveState,
     saveError,
     assignJob,
     unassignJob,
     setRecipients,
+    setCourierNote,
     addCourier,
     removeCourier,
     clearAll,

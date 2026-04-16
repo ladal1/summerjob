@@ -12,6 +12,7 @@ export interface FoodDeliveryJobInput {
 export interface FoodDeliveryCreateData {
   courierNum: number
   planId: string
+  notes?: string | null
   jobs?: FoodDeliveryJobInput[]
 }
 
@@ -72,6 +73,7 @@ export async function createFoodDelivery(data: FoodDeliveryCreateData) {
     data: {
       courierNum: data.courierNum,
       planId: data.planId,
+      notes: data.notes ?? null,
       jobs: {
         create: (data.jobs || []).map(job => ({
           activeJobId: job.activeJobId,
@@ -185,6 +187,7 @@ export async function replaceAllFoodDeliveries(
           data: {
             courierNum: data.courierNum,
             planId: data.planId,
+            notes: data.notes ?? null,
             jobs: {
               create: (data.jobs || []).map(job => ({
                 activeJobId: job.activeJobId,

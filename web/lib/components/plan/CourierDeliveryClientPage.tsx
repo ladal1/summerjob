@@ -213,6 +213,23 @@ export default function CourierDeliveryClientPage({
               <span>{showMap ? 'Skrýt mapu' : 'Zobrazit mapu'}</span>
             </button>
           )}
+          {courierJobs.length > 0 && (
+            <Link
+              href={`/print-food-delivery/${planId}?courier=${courierNum}`}
+              target="_blank"
+              className="flex-md-shrink-0"
+            >
+              <button
+                className="btn btn-primary btn-with-icon w-100"
+                type="button"
+                title="Tisk delivery sheetu pro tohoto rozvozníka"
+                style={{ minWidth: '160px' }}
+              >
+                <i className="fas fa-print"></i>
+                <span>Tisk delivery sheetu</span>
+              </button>
+            </Link>
+          )}
         </div>
       </PageHeader>
 

@@ -123,6 +123,6 @@ async function get(
 }
 
 export default APIAccessController(
-  [], // No permissions required for courier delivery viewing
+  [], // requires login only
   APIMethodHandler({ get })
 )

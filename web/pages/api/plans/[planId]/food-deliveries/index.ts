@@ -43,10 +43,24 @@ async function post(
     (d: FoodDeliveryCreateData) => ({ ...d, planId })
   )
 
+  const totalJobOrders = deliveries.reduce(
+    (sum, d) => sum + (d.jobs?.length ?? 0),
+    0
+  )
+  const totalRecipients = deliveries.reduce(
+    (sum, d) =>
+      sum +
+      (d.jobs?.reduce((s, j) => s + (j.recipientIds?.length ?? 0), 0) ?? 0),
+    0
+  )
   await logger.apiRequest(
-    APILogEvent.FOOD_DELIVERY_CREATE,
+    APILogEvent.FOOD_DELIVERY_BULK_REPLACE,
     planId,
-    { bulk: true, count: deliveries.length },
+    {
+      couriers: deliveries.length,
+      jobOrders: totalJobOrders,
+      recipients: totalRecipients,
+    },
     session
   )
 

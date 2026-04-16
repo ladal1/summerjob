@@ -400,6 +400,7 @@ model FoodDelivery {
   courierNum Int                   // Courier number (1, 2, 3, etc.)
   plan       Plan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
   planId     String
+  notes      String?               // Free-text notes shown to courier
   jobs       FoodDeliveryJobOrder[]
   createdAt  DateTime              @default(now())
   updatedAt  DateTime              @updatedAt
