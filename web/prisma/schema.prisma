@@ -151,6 +151,7 @@ model Worker {
   application        Application?                @relation(fields: [applicationId], references: [id])
   applicationId      String?                     @unique
   adorationSlots     AdorationSlot[] @relation("SlotWorkers")
+  foodDeliveryRecipient FoodDeliveryJobOrder[] @relation("FoodDeliveryRecipients")
 }
 
 model WorkerPermissions {
@@ -415,6 +416,7 @@ model FoodDeliveryJobOrder {
   order          Int          // Order of delivery (1, 2, 3, etc.)
   completed      Boolean      @default(false)
   completedAt    DateTime?
+  recipients     Worker[]     @relation("FoodDeliveryRecipients")
 
   @@unique([foodDeliveryId, activeJobId]) // Each job can appear only once per delivery
   @@unique([foodDeliveryId, order])       // Each order position is unique per delivery

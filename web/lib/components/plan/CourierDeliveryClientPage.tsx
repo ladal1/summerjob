@@ -51,25 +51,32 @@ export default function CourierDeliveryClientPage({
         const job = planData.jobs.find(j => j.id === jobOrder.activeJobId)
         if (!job) return null
 
+        const recipientIds = new Set((jobOrder.recipients ?? []).map(r => r.id))
+        const fallbackRecipients = !job.proposedJob.hasFood
+          ? job.workers
+          : job.workers.filter(w => w.foodAllergies.length > 0)
+        const sourceWorkers =
+          recipientIds.size > 0
+            ? job.workers.filter(w => recipientIds.has(w.id))
+            : fallbackRecipients
+
+        const recipients = sourceWorkers.map(worker => ({
+          id: worker.id,
+          firstName: worker.firstName,
+          lastName: worker.lastName,
+          phone: worker.phone,
+          age: worker.age || undefined,
+          allergies: worker.foodAllergies.map(allergy => allergy.name),
+        }))
+
         return {
           job,
           order: jobOrder.order,
           completed: jobOrder.completed,
           jobOrderId: jobOrder.id,
-          workersWithAllergies: job.workers
-            .filter(worker => worker.foodAllergies.length > 0)
-            .map(worker => ({
-              id: worker.id,
-              firstName: worker.firstName,
-              lastName: worker.lastName,
-              phone: worker.phone,
-              age: worker.age || undefined,
-              allergies: worker.foodAllergies.map(allergy => allergy.name),
-            })),
+          workersWithAllergies: recipients,
           needsFoodDelivery: !job.proposedJob.hasFood,
-          hasWorkersWithAllergies: job.workers.some(
-            worker => worker.foodAllergies.length > 0
-          ),
+          hasWorkersWithAllergies: recipients.some(r => r.allergies.length > 0),
         }
       })
       .filter(item => item !== null)
@@ -465,11 +472,11 @@ export default function CourierDeliveryClientPage({
                                       </div>
                                     </div>
 
-                                    {/* Worker allergies */}
+                                    {/* Recipients */}
                                     {workersWithAllergies.length > 0 && (
                                       <div className="mb-2">
                                         <div className="small text-muted mb-1">
-                                          Pracanti s alergiemi:
+                                          Příjemci jídla:
                                         </div>
                                         <div className="d-flex flex-column d-sm-flex flex-sm-row flex-wrap gap-1">
                                           {workersWithAllergies.map(worker => (
@@ -509,21 +516,13 @@ export default function CourierDeliveryClientPage({
                                     {/* Meal count */}
                                     <div className="small text-muted mb-2">
                                       <i className="fas fa-utensils me-1"></i>
-                                      {(() => {
-                                        const allergicWorkers =
-                                          job.workers.filter(
-                                            w => w.foodAllergies.length > 0
-                                          ).length
-                                        const totalWorkers = job.workers.length
-                                        const nonAllergicWorkers =
-                                          totalWorkers - allergicWorkers
-
-                                        if (!job.proposedJob.hasFood) {
-                                          return `${allergicWorkers} bezalergenních, ${nonAllergicWorkers} běžných jídel`
-                                        } else {
-                                          return `${allergicWorkers} bezalergenních jídel (jídlo na místě pro ostatní)`
-                                        }
-                                      })()}
+                                      {workersWithAllergies.length} jíd
+                                      {workersWithAllergies.length === 1
+                                        ? 'lo'
+                                        : workersWithAllergies.length < 5
+                                          ? 'la'
+                                          : 'el'}{' '}
+                                      k doručení
                                     </div>
 
                                     {/* Badges */}

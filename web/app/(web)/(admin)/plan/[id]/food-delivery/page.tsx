@@ -1,6 +1,6 @@
 import { getSMJSession } from 'lib/auth/auth'
 import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
-import FoodDeliveryClientPage from 'lib/components/plan/FoodDeliveryClientPage'
+import FoodDeliveryPage from 'lib/components/plan/food-delivery/FoodDeliveryPage'
 import { Permission } from 'lib/types/auth'
 
 interface PageProps {
@@ -21,5 +21,5 @@ export default async function Page(props: PageProps) {
     return <AccessDeniedPage />
   }
 
-  return <FoodDeliveryClientPage planId={id} />
+  return <FoodDeliveryPage planId={id} />
 }
