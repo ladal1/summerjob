@@ -1,4 +1,4 @@
-import type { Worker } from 'lib/prisma/client'
+import type { Worker } from 'lib/prisma/client/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { PlanComplete, sortJobsByAreaAndId } from 'lib/types/plan'
 import { RidesForJob } from 'lib/types/ride'

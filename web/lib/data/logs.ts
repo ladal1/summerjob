@@ -1,4 +1,4 @@
-import { Prisma } from 'lib/prisma/client'
+import { Prisma } from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import { LogsResponse } from 'lib/types/log'
 import { APILogEvent } from 'lib/types/logger'
@@ -36,7 +36,7 @@ export async function getLogs({
   offset ??= 0
   limit ??= 5
 
-  const whereClause = Prisma.validator<Prisma.LoggingWhereInput>()({
+  const whereClause = {
     AND: [
       {
         OR: [
@@ -52,7 +52,7 @@ export async function getLogs({
         },
       },
     ],
-  })
+  } satisfies Prisma.LoggingWhereInput
 
   return await prisma.$transaction(async tx => {
     const logs = await tx.logging.findMany({

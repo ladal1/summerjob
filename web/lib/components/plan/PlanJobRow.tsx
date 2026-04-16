@@ -5,7 +5,7 @@ import {
   useAPIActiveJobUpdate,
 } from 'lib/fetcher/active-job'
 import { formatDateShort } from 'lib/helpers/helpers'
-import type { Worker } from 'lib/prisma/client'
+import type { Worker } from 'lib/prisma/client/client'
 import { ActiveJobNoPlan, ActiveJobWorkersAndJobs } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { ToolCompleteData } from 'lib/types/tool'

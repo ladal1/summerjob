@@ -1,4 +1,4 @@
-import { Logging } from 'lib/prisma/client'
+import { Logging } from 'lib/prisma/client/client'
 import { MessageRow } from '../table/MessageRow'
 import { SortableColumn, SortableTable } from '../table/SortableTable'
 import LogRow from './LogRow'

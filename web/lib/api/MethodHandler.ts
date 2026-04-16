@@ -5,7 +5,7 @@ import {
 } from 'lib/types/api-error'
 import { InternalError, InvalidDataError } from 'lib/data/internal-error'
 import logger from 'lib/logger/logger'
-import { Prisma } from 'lib/prisma/client'
+import { Prisma } from 'lib/prisma/client/client'
 import { APIMethod } from 'lib/types/api'
 import { ExtendedSession } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'

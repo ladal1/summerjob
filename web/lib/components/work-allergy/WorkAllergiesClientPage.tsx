@@ -28,7 +28,7 @@ export default function WorkAllergiesClientPage({
       <section>
         <div className="container-fluid">
           <div className="row gx-3">
-            <div className="col-lg-10 pb-2">
+            <div className="pb-2">
               <WorkAllergiesTable data={data} reload={requestReload} />
             </div>
           </div>

@@ -1,10 +1,14 @@
-import { PrismaClient } from '../lib/prisma/client'
+import { PrismaClient } from '../lib/prisma/client/client'
 import dotenv from 'dotenv'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 // Load environment variables
 dotenv.config()
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+})
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   const tablenames = await prisma.$queryRaw<

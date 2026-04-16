@@ -1,4 +1,4 @@
-import type { Prisma } from 'lib/prisma/client'
+import type { Prisma } from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import {
   ActiveJobComplete,

@@ -1,4 +1,4 @@
-import type { Application } from 'lib/prisma/client'
+import type { Application } from 'lib/prisma/client/client'
 import prisma from 'lib/prisma/connection'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import { eachDayOfInterval } from 'date-fns/eachDayOfInterval'

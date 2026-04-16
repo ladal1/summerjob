@@ -7,15 +7,19 @@ import {
   ProposedJob,
   SummerJobEvent,
   Worker,
-} from '../lib/prisma/client'
+} from '../lib/prisma/client/client'
 import { faker as faker } from '@faker-js/faker'
-import { Prisma } from '../lib/prisma/client'
+import { Prisma } from '../lib/prisma/client/client'
 import { AdorationSlotCreateManyInput } from '../lib/prisma/client/models'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 // Load environment variables
 dotenv.config()
 
-const prisma = new PrismaClient()
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL!,
+})
+const prisma = new PrismaClient({ adapter })
 
 function choose<T>(array: T[], amount: number): T[] {
   return array
@@ -188,7 +192,7 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
     const skills = choose([...SKILL_NAMES], between(1, 3))
     const tools = choose([...TOOLS.map(t => t.name)], between(1, 2))
 
-    return Prisma.validator<Prisma.WorkerCreateInput>()({
+    return {
       firstName,
       lastName,
       phone: faker.phone.number(),
@@ -210,7 +214,7 @@ async function createWorkers(eventId: string, days: Date[], count = 100) {
           permissions: [],
         },
       },
-    })
+    } satisfies Prisma.WorkerCreateInput
   }
 
   const withCar = (worker: Prisma.WorkerCreateInput) => {
