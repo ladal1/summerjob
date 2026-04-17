@@ -104,13 +104,12 @@ interface Props {
   initialDataPlan?: Serialized
 }
 
+// Defaults předvyplněné při prvním přiřazení jobu rozvozníkovi:
+// – alergici vždy (dostanou speciální jídlo), plus
+// – všichni ostatní, když se na místě nevaří (jinak jim rozvoz nedáváme).
 function defaultRecipientsFor(job: ActiveJobNoPlan): string[] {
-  const allergic = job.workers
-    .filter(w => w.foodAllergies.length > 0)
-    .map(w => w.id)
-  if (allergic.length > 0) return allergic
   if (!job.proposedJob.hasFood) return job.workers.map(w => w.id)
-  return []
+  return job.workers.filter(w => w.foodAllergies.length > 0).map(w => w.id)
 }
 
 function isSuggested(job: ActiveJobNoPlan): boolean {
@@ -187,9 +186,11 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
       )
         return
       const existing = assignments.get(dragData.jobId)
-      // Preserve recipients on reassignment, otherwise start empty —
-      // user picks explicitly via dropdown / bulk actions.
-      const recipientIds = existing ? Array.from(existing.recipientIds) : []
+      // Preserve recipients on reassignment; on new assignment prefill defaults
+      // (all allergics, plus everyone when there's no food on-site).
+      const recipientIds = existing
+        ? Array.from(existing.recipientIds)
+        : defaultRecipientsFor(job)
       assignJob(dragData.jobId, dropData.courierNum, recipientIds)
     } else if (dropData.type === 'unassign') {
       if (dragData.type === 'assigned-job') {
@@ -294,9 +295,13 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
       unassignJob(jobId)
       return
     }
-    if (!jobsById.has(jobId)) return
-    // Start with no recipients — user picks explicitly.
-    assignJob(jobId, courierNum, [])
+    const job = jobsById.get(jobId)
+    if (!job) return
+    const existing = assignments.get(jobId)
+    const recipientIds = existing
+      ? Array.from(existing.recipientIds)
+      : defaultRecipientsFor(job)
+    assignJob(jobId, courierNum, recipientIds)
   }
 
   const completedActiveJobIds = useMemo(() => {
@@ -692,7 +697,13 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
                               key={job.id}
                               job={job}
                               courierNums={courierNums}
-                              onAssign={num => assignJob(job.id, num, [])}
+                              onAssign={num =>
+                                assignJob(
+                                  job.id,
+                                  num,
+                                  defaultRecipientsFor(job)
+                                )
+                              }
                               onShowOnMap={() => showJobOnMap(job.id)}
                             />
                           ))}
@@ -726,7 +737,13 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
                               job={job}
                               courierNums={courierNums}
                               manual
-                              onAssign={num => assignJob(job.id, num, [])}
+                              onAssign={num =>
+                                assignJob(
+                                  job.id,
+                                  num,
+                                  defaultRecipientsFor(job)
+                                )
+                              }
                               onShowOnMap={() => showJobOnMap(job.id)}
                             />
                           ))}
