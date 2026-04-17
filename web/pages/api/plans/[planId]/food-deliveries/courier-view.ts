@@ -1,4 +1,3 @@
-import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getFoodDeliveriesWithPlanByPlanId } from 'lib/data/food-delivery'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -122,7 +121,5 @@ async function get(
   res.status(200).json(transformedData)
 }
 
-export default APIAccessController(
-  [], // requires login only
-  APIMethodHandler({ get })
-)
+// Public endpoint — couriers access their delivery list via URL without an account.
+export default APIMethodHandler({ get })

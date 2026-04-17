@@ -171,6 +171,9 @@ export async function updateJobDeliveryStatus(
   })
 }
 
+// Upsert-based replace: preserves FoodDelivery.id (so courier URLs stay stable
+// across saves) and FoodDeliveryJobOrder.id + completed state for jobs that
+// stay assigned to the same courier.
 export async function replaceAllFoodDeliveries(
   planId: string,
   deliveries: FoodDeliveryCreateData[]
@@ -179,29 +182,80 @@ export async function replaceAllFoodDeliveries(
   if (!activeEventId) throw new NoActiveEventError()
 
   return prisma.$transaction(async tx => {
-    await tx.foodDelivery.deleteMany({ where: { planId } })
+    const incomingCourierNums = deliveries.map(d => d.courierNum)
 
-    return Promise.all(
-      deliveries.map(data =>
-        tx.foodDelivery.create({
-          data: {
-            courierNum: data.courierNum,
-            planId: data.planId,
-            notes: data.notes ?? null,
-            jobs: {
-              create: (data.jobs || []).map(job => ({
-                activeJobId: job.activeJobId,
-                order: job.order,
-                completed: job.completed ?? false,
-                recipients: job.recipientIds?.length
-                  ? { connect: job.recipientIds.map(id => ({ id })) }
-                  : undefined,
-              })),
+    // Drop couriers not in the new set (cascades job orders + recipient links).
+    await tx.foodDelivery.deleteMany({
+      where: { planId, courierNum: { notIn: incomingCourierNums } },
+    })
+
+    for (const data of deliveries) {
+      const delivery = await tx.foodDelivery.upsert({
+        where: {
+          courierNum_planId: { courierNum: data.courierNum, planId },
+        },
+        create: {
+          courierNum: data.courierNum,
+          planId,
+          notes: data.notes ?? null,
+        },
+        update: { notes: data.notes ?? null },
+      })
+
+      const incomingJobs = data.jobs ?? []
+      const incomingJobIds = incomingJobs.map(j => j.activeJobId)
+
+      // Drop job orders no longer assigned to this courier.
+      await tx.foodDeliveryJobOrder.deleteMany({
+        where: {
+          foodDeliveryId: delivery.id,
+          activeJobId: { notIn: incomingJobIds },
+        },
+      })
+
+      // Reordering would transiently violate @@unique([foodDeliveryId, order]).
+      // Flip existing orders to negatives first so the upsert below can freely
+      // assign new positive orders without colliding with old rows.
+      if (incomingJobs.length > 0) {
+        await tx.$executeRaw`
+          UPDATE "FoodDeliveryJobOrder"
+          SET "order" = -"order" - 1
+          WHERE "foodDeliveryId" = ${delivery.id}
+        `
+      }
+
+      for (const job of incomingJobs) {
+        await tx.foodDeliveryJobOrder.upsert({
+          where: {
+            foodDeliveryId_activeJobId: {
+              foodDeliveryId: delivery.id,
+              activeJobId: job.activeJobId,
             },
           },
-          include: deliveryInclude(activeEventId),
+          create: {
+            foodDeliveryId: delivery.id,
+            activeJobId: job.activeJobId,
+            order: job.order,
+            completed: job.completed ?? false,
+            recipients: job.recipientIds?.length
+              ? { connect: job.recipientIds.map(id => ({ id })) }
+              : undefined,
+          },
+          update: {
+            order: job.order,
+            // `completed` intentionally not touched — preserve courier-marked state.
+            recipients: {
+              set: (job.recipientIds ?? []).map(id => ({ id })),
+            },
+          },
         })
-      )
-    )
+      }
+    }
+
+    return tx.foodDelivery.findMany({
+      where: { planId },
+      include: deliveryInclude(activeEventId),
+      orderBy: { courierNum: 'asc' },
+    })
   })
 }

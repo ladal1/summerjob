@@ -49,9 +49,9 @@ async function del(
   res.status(204).end()
 }
 
-// GET requires authentication only (couriers without PLANS perm need to view their delivery).
+// GET is public — couriers open their delivery via URL without an account.
 // DELETE requires PLANS.
 export default APIMethodHandler({
-  get: APIAccessController([], get),
+  get,
   del: APIAccessController([Permission.PLANS], del),
 })
