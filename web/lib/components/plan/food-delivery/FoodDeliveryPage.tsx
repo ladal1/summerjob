@@ -149,6 +149,7 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
 
   const [showOtherJobs, setShowOtherJobs] = useState(false)
   const [otherSearch, setOtherSearch] = useState('')
+  const [suggestedSearch, setSuggestedSearch] = useState('')
   const [showMap, setShowMap] = useState(false)
   const [showAllJobsOnMap, setShowAllJobsOnMap] = useState(false)
   const [highlightJobId, setHighlightJobId] = useState<string | null>(null)
@@ -237,6 +238,14 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
     () => suggestedJobs.filter(j => !assignments.has(j.id)),
     [suggestedJobs, assignments]
   )
+
+  const unassignedSuggestedFiltered = useMemo(() => {
+    const q = suggestedSearch.trim().toLowerCase()
+    if (!q) return unassignedSuggested
+    return unassignedSuggested.filter(j =>
+      j.proposedJob.name.toLowerCase().includes(q)
+    )
+  }, [unassignedSuggested, suggestedSearch])
 
   const couriersView = useMemo(() => {
     return courierNums.map(num => {
@@ -662,17 +671,34 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
                       </div>
                     )
                   ) : (
-                    <div className="list-group list-group-flush">
-                      {unassignedSuggested.map(job => (
-                        <JobCandidateRow
-                          key={job.id}
-                          job={job}
-                          courierNums={courierNums}
-                          onAssign={num => assignJob(job.id, num, [])}
-                          onShowOnMap={() => showJobOnMap(job.id)}
-                        />
-                      ))}
-                    </div>
+                    <>
+                      <input
+                        type="text"
+                        className="form-control form-control-sm mb-2"
+                        placeholder="Hledat navržený job..."
+                        value={suggestedSearch}
+                        onChange={e => setSuggestedSearch(e.target.value)}
+                        aria-label="Hledat mezi navrženými joby"
+                      />
+                      {unassignedSuggestedFiltered.length === 0 ? (
+                        <div className="text-muted small text-center p-3">
+                          <i className="fas fa-search me-2"></i>
+                          Žádný navržený job neodpovídá hledání.
+                        </div>
+                      ) : (
+                        <div className="list-group list-group-flush">
+                          {unassignedSuggestedFiltered.map(job => (
+                            <JobCandidateRow
+                              key={job.id}
+                              job={job}
+                              courierNums={courierNums}
+                              onAssign={num => assignJob(job.id, num, [])}
+                              onShowOnMap={() => showJobOnMap(job.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="card-footer p-2">
@@ -769,8 +795,8 @@ export default function FoodDeliveryPage({ planId, initialDataPlan }: Props) {
                     <i className="fas fa-truck fa-3x text-primary mb-3"></i>
                     <h5>Začni přidáním rozvozníka</h5>
                     <p className="text-muted mb-3">
-                      Vytvoř prvního rozvozníka tlačítkem nahoře, pak přiřaď
-                      navržené joby z levého panelu.
+                      Vytvoř prvního rozvozníka, pak přiřaď navržené joby z
+                      levého panelu.
                     </p>
                     <button
                       type="button"
