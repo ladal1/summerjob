@@ -1,3 +1,6 @@
+-- Add free-text notes column to FoodDelivery (e.g. "kde sehnat klíče od kuchyně")
+ALTER TABLE "FoodDelivery" ADD COLUMN "notes" TEXT;
+
 -- CreateTable
 CREATE TABLE "_FoodDeliveryRecipients" (
     "A" TEXT NOT NULL,
