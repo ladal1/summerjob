@@ -183,11 +183,11 @@ export default function ApplicationsPage({
           <p>
             Milý SummerJobáku,
             <br />
-            vítej u přihlašování na SummerJob 2025. Letos budeme v termínu 29.
-            6. - 6. 7. znovu pomáhat v Šluknovském výběžku. Jsme rádi, že se
-            nebojíš přiložit ruku k dílu! Aby ses mohl zařadit mezi letošní
-            pracanty, musíš nejdřív úspěšně vyplnit všechny potřebné údaje a
-            zaplatit účastnický poplatek. Může se stát, že počet přihlášených
+            vítej u přihlašování na SummerJob 2026. Letos budeme v termínu 5.
+            7.–12. 7. poprvé pomáhat na Osoblažsku. Jsme rádi, že se nebojíš
+            přiložit ruku k dílu! Aby ses mohl zařadit mezi letošní pracanty,
+            musíš nejdřív úspěšně vyplnit všechny potřebné údaje a zaplatit
+            účastnický poplatek. Může se stát, že počet přihlášených
             dobrovolníků stejně jako v předešlých letech překročí kapacitu celé
             akce. V takovém případě budou mít přednost zájemci, kteří chtějí
             přijet makat na celý týden, splňují věkový limit a přihlásili se
@@ -380,7 +380,9 @@ export default function ApplicationsPage({
                 label={
                   <>
                     Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu
-                    (modrá/červená/zelená). Objednávka je závazná.{' '}
+                    (přírodní/béžová/šedomodrá). Dámské tričko doporučujeme
+                    objednat o velikost větší než normálně. Objednávka je
+                    závazná.{' '}
                     <a
                       href="https://summerjob.eu/merch"
                       target="_blank"
