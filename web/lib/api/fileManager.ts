@@ -1,6 +1,7 @@
 import { promises } from 'fs'
 import crypto from 'crypto'
 import path from 'path'
+import sharp from 'sharp'
 import { cache_getActiveSummerJobEventId } from 'lib/data/cache'
 import { NoActiveEventError } from 'lib/data/internal-error'
 
@@ -86,4 +87,43 @@ export const deleteDirectory = async (dirName: string) => {
     await promises.access(dirName)
     await promises.rmdir(dirName)
   } catch {}
+}
+
+export const optimizeAndSaveImage = async (
+  sourcePath: string,
+  destPath: string,
+  maxWidth = 1920,
+  maxHeight = 1920,
+  quality = 80
+) => {
+  const uploadRoot = path.resolve(getUploadDirForImages())
+  const resolvedDestPath = path.resolve(destPath)
+  const relativeDestPath = path.relative(uploadRoot, resolvedDestPath)
+  if (relativeDestPath.startsWith('..') || path.isAbsolute(relativeDestPath)) {
+    throw new Error('Invalid file path: Path is outside the allowed directory.')
+  }
+
+  const resolvedSourcePath = path.resolve(sourcePath)
+  const relativeSourcePath = path.relative(uploadRoot, resolvedSourcePath)
+  if (
+    relativeSourcePath.startsWith('..') ||
+    path.isAbsolute(relativeSourcePath)
+  ) {
+    throw new Error(
+      'Invalid source file path: Path is outside the allowed directory.'
+    )
+  }
+
+  await sharp(resolvedSourcePath)
+    .resize(maxWidth, maxHeight, {
+      fit: 'inside',
+      withoutEnlargement: true,
+    })
+    .jpeg({ quality })
+    .toFile(resolvedDestPath)
+
+  // Clean up the original temp file if it's different from dest
+  if (resolvedSourcePath !== resolvedDestPath) {
+    await promises.unlink(resolvedSourcePath).catch(() => {})
+  }
 }

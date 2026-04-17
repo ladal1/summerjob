@@ -151,6 +151,7 @@ model Worker {
   application        Application?                @relation(fields: [applicationId], references: [id])
   applicationId      String?                     @unique
   adorationSlots     AdorationSlot[] @relation("SlotWorkers")
+  foodDeliveryRecipient FoodDeliveryJobOrder[] @relation("FoodDeliveryRecipients")
   pushSubscriptions  PushSubscription[]
   notifications      Notification[]              @relation("NotificationRecipients")
   seenNotifications  Notification[]              @relation("NotificationSeenBy")
@@ -404,6 +405,7 @@ model FoodDelivery {
   courierNum Int                   // Courier number (1, 2, 3, etc.)
   plan       Plan                  @relation(fields: [planId], references: [id], onDelete: Cascade)
   planId     String
+  notes      String?               // Free-text notes shown to courier
   jobs       FoodDeliveryJobOrder[]
   createdAt  DateTime              @default(now())
   updatedAt  DateTime              @updatedAt
@@ -420,6 +422,7 @@ model FoodDeliveryJobOrder {
   order          Int          // Order of delivery (1, 2, 3, etc.)
   completed      Boolean      @default(false)
   completedAt    DateTime?
+  recipients     Worker[]     @relation("FoodDeliveryRecipients")
 
   @@unique([foodDeliveryId, activeJobId]) // Each job can appear only once per delivery
   @@unique([foodDeliveryId, order])       // Each order position is unique per delivery

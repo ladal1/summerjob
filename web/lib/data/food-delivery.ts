@@ -2,226 +2,107 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import prisma from 'lib/prisma/connection'
 
+export interface FoodDeliveryJobInput {
+  activeJobId: string
+  order: number
+  completed?: boolean
+  recipientIds?: string[]
+}
+
 export interface FoodDeliveryCreateData {
   courierNum: number
   planId: string
-  jobs?: Array<{
-    activeJobId: string
-    order: number
-  }>
+  notes?: string | null
+  jobs?: FoodDeliveryJobInput[]
 }
 
 export interface FoodDeliveryUpdateData {
-  jobs: Array<{
-    activeJobId: string
-    order: number
-    completed?: boolean
-  }>
+  jobs: FoodDeliveryJobInput[]
 }
+
+const deliveryInclude = (activeEventId: string) => ({
+  jobs: {
+    include: {
+      activeJob: {
+        include: {
+          proposedJob: { include: { area: true } },
+          workers: {
+            include: {
+              availability: {
+                where: { eventId: activeEventId },
+                take: 1,
+              },
+              foodAllergies: true,
+            },
+          },
+          responsibleWorker: true,
+        },
+      },
+      recipients: true,
+    },
+    orderBy: { order: 'asc' as const },
+  },
+})
 
 export async function getFoodDeliveriesByPlanId(planId: string) {
   const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
+  if (!activeEventId) throw new NoActiveEventError()
 
-  const deliveries = await prisma.foodDelivery.findMany({
-    where: {
-      planId: planId,
-    },
-    include: {
-      jobs: {
-        include: {
-          activeJob: {
-            include: {
-              proposedJob: {
-                include: {
-                  area: true,
-                },
-              },
-              workers: {
-                include: {
-                  availability: {
-                    where: {
-                      eventId: activeEventId,
-                    },
-                    take: 1,
-                  },
-                },
-              },
-              responsibleWorker: true,
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
-      },
-    },
-    orderBy: {
-      courierNum: 'asc',
-    },
+  return prisma.foodDelivery.findMany({
+    where: { planId },
+    include: deliveryInclude(activeEventId),
+    orderBy: { courierNum: 'asc' },
   })
-
-  return deliveries
-}
-
-export async function createFoodDelivery(data: FoodDeliveryCreateData) {
-  const delivery = await prisma.foodDelivery.create({
-    data: {
-      courierNum: data.courierNum,
-      planId: data.planId,
-      jobs: {
-        create: (data.jobs || []).map(job => ({
-          activeJobId: job.activeJobId,
-          order: job.order,
-        })),
-      },
-    },
-    include: {
-      jobs: {
-        include: {
-          activeJob: {
-            include: {
-              proposedJob: {
-                include: {
-                  area: true,
-                },
-              },
-              workers: true,
-              responsibleWorker: true,
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
-      },
-    },
-  })
-
-  return delivery
-}
-
-export async function updateFoodDelivery(
-  deliveryId: string,
-  data: FoodDeliveryUpdateData
-) {
-  // Delete existing job orders for this delivery
-  await prisma.foodDeliveryJobOrder.deleteMany({
-    where: {
-      foodDeliveryId: deliveryId,
-    },
-  })
-
-  // Create new job orders
-  const delivery = await prisma.foodDelivery.update({
-    where: {
-      id: deliveryId,
-    },
-    data: {
-      jobs: {
-        create: (data.jobs || []).map(job => ({
-          activeJobId: job.activeJobId,
-          order: job.order,
-          completed: job.completed || false,
-        })),
-      },
-    },
-    include: {
-      jobs: {
-        include: {
-          activeJob: {
-            include: {
-              proposedJob: {
-                include: {
-                  area: true,
-                },
-              },
-              workers: true,
-              responsibleWorker: true,
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
-      },
-    },
-  })
-
-  return delivery
 }
 
 export async function getFoodDeliveryById(deliveryId: string) {
   const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
+  if (!activeEventId) throw new NoActiveEventError()
 
-  const delivery = await prisma.foodDelivery.findUnique({
-    where: {
-      id: deliveryId,
-    },
-    include: {
+  return prisma.foodDelivery.findUnique({
+    where: { id: deliveryId },
+    include: deliveryInclude(activeEventId),
+  })
+}
+
+export async function createFoodDelivery(data: FoodDeliveryCreateData) {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) throw new NoActiveEventError()
+
+  return prisma.foodDelivery.create({
+    data: {
+      courierNum: data.courierNum,
+      planId: data.planId,
+      notes: data.notes ?? null,
       jobs: {
-        include: {
-          activeJob: {
-            include: {
-              proposedJob: {
-                include: {
-                  area: true,
-                },
-              },
-              workers: {
-                include: {
-                  availability: {
-                    where: {
-                      eventId: activeEventId,
-                    },
-                    take: 1,
-                  },
-                },
-              },
-              responsibleWorker: true,
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
+        create: (data.jobs || []).map(job => ({
+          activeJobId: job.activeJobId,
+          order: job.order,
+          completed: job.completed ?? false,
+          recipients: job.recipientIds?.length
+            ? { connect: job.recipientIds.map(id => ({ id })) }
+            : undefined,
+        })),
       },
     },
+    include: deliveryInclude(activeEventId),
   })
-
-  return delivery
 }
 
 export async function getFoodDeliveriesWithPlanByPlanId(planId: string) {
   const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
+  if (!activeEventId) throw new NoActiveEventError()
 
-  // Get plan data
   const plan = await prisma.plan.findUnique({
-    where: {
-      id: planId,
-    },
+    where: { id: planId },
     include: {
       jobs: {
         include: {
-          proposedJob: {
-            include: {
-              area: true,
-            },
-          },
+          proposedJob: { include: { area: true } },
           workers: {
             include: {
               availability: {
-                where: {
-                  eventId: activeEventId,
-                },
+                where: { eventId: activeEventId },
                 take: 1,
               },
               foodAllergies: true,
@@ -233,50 +114,29 @@ export async function getFoodDeliveriesWithPlanByPlanId(planId: string) {
     },
   })
 
-  if (!plan) {
-    return null
-  }
+  if (!plan) return null
 
-  // Get food deliveries for this plan
   const deliveries = await getFoodDeliveriesByPlanId(planId)
-
-  return {
-    plan,
-    deliveries,
-  }
+  return { plan, deliveries }
 }
 
 export async function getFoodDeliveryWithPlanById(deliveryId: string) {
   const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
+  if (!activeEventId) throw new NoActiveEventError()
 
-  // Get the delivery first to find the plan
   const delivery = await getFoodDeliveryById(deliveryId)
-  if (!delivery) {
-    return null
-  }
+  if (!delivery) return null
 
-  // Get the plan data
   const plan = await prisma.plan.findUnique({
-    where: {
-      id: delivery.planId,
-    },
+    where: { id: delivery.planId },
     include: {
       jobs: {
         include: {
-          proposedJob: {
-            include: {
-              area: true,
-            },
-          },
+          proposedJob: { include: { area: true } },
           workers: {
             include: {
               availability: {
-                where: {
-                  eventId: activeEventId,
-                },
+                where: { eventId: activeEventId },
                 take: 1,
               },
               foodAllergies: true,
@@ -288,109 +148,114 @@ export async function getFoodDeliveryWithPlanById(deliveryId: string) {
     },
   })
 
-  if (!plan) {
-    return null
-  }
+  if (!plan) return null
 
-  // Get all deliveries for this plan (for context)
   const allDeliveries = await getFoodDeliveriesByPlanId(delivery.planId)
-
-  return {
-    plan,
-    delivery,
-    allDeliveries,
-  }
+  return { plan, delivery, allDeliveries }
 }
 
 export async function deleteFoodDelivery(deliveryId: string) {
-  await prisma.foodDelivery.delete({
-    where: {
-      id: deliveryId,
-    },
-  })
+  await prisma.foodDelivery.delete({ where: { id: deliveryId } })
 }
 
 export async function updateJobDeliveryStatus(
   jobOrderId: string,
   completed: boolean
 ) {
-  const jobOrder = await prisma.foodDeliveryJobOrder.update({
-    where: {
-      id: jobOrderId,
-    },
+  return prisma.foodDeliveryJobOrder.update({
+    where: { id: jobOrderId },
     data: {
-      completed: completed,
+      completed,
       completedAt: completed ? new Date() : null,
     },
   })
-
-  return jobOrder
 }
 
+// Upsert-based replace: preserves FoodDelivery.id (so courier URLs stay stable
+// across saves) and FoodDeliveryJobOrder.id + completed state for jobs that
+// stay assigned to the same courier.
 export async function replaceAllFoodDeliveries(
   planId: string,
   deliveries: FoodDeliveryCreateData[]
 ) {
   const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new Error('No active summer job event found')
-  }
+  if (!activeEventId) throw new NoActiveEventError()
 
-  return await prisma.$transaction(async tx => {
-    // Delete all existing food deliveries for this plan
+  return prisma.$transaction(async tx => {
+    const incomingCourierNums = deliveries.map(d => d.courierNum)
+
+    // Drop couriers not in the new set (cascades job orders + recipient links).
     await tx.foodDelivery.deleteMany({
-      where: {
-        planId: planId,
-      },
+      where: { planId, courierNum: { notIn: incomingCourierNums } },
     })
 
-    // Create new deliveries
-    const createdDeliveries = await Promise.all(
-      deliveries.map(data =>
-        tx.foodDelivery.create({
-          data: {
-            courierNum: data.courierNum,
-            planId: data.planId,
-            jobs: {
-              create: (data.jobs || []).map(job => ({
-                activeJobId: job.activeJobId,
-                order: job.order,
-              })),
+    for (const data of deliveries) {
+      const delivery = await tx.foodDelivery.upsert({
+        where: {
+          courierNum_planId: { courierNum: data.courierNum, planId },
+        },
+        create: {
+          courierNum: data.courierNum,
+          planId,
+          notes: data.notes ?? null,
+        },
+        update: { notes: data.notes ?? null },
+      })
+
+      const incomingJobs = data.jobs ?? []
+      const incomingJobIds = incomingJobs.map(j => j.activeJobId)
+
+      // Drop job orders no longer assigned to this courier.
+      await tx.foodDeliveryJobOrder.deleteMany({
+        where: {
+          foodDeliveryId: delivery.id,
+          activeJobId: { notIn: incomingJobIds },
+        },
+      })
+
+      // Reordering would transiently violate @@unique([foodDeliveryId, order]).
+      // Flip existing orders to negatives first so the upsert below can freely
+      // assign new positive orders without colliding with old rows.
+      if (incomingJobs.length > 0) {
+        await tx.$executeRaw`
+          UPDATE "FoodDeliveryJobOrder"
+          SET "order" = -"order" - 1
+          WHERE "foodDeliveryId" = ${delivery.id}
+        `
+      }
+
+      for (const job of incomingJobs) {
+        await tx.foodDeliveryJobOrder.upsert({
+          where: {
+            foodDeliveryId_activeJobId: {
+              foodDeliveryId: delivery.id,
+              activeJobId: job.activeJobId,
             },
           },
-          include: {
-            jobs: {
-              include: {
-                activeJob: {
-                  include: {
-                    proposedJob: {
-                      include: {
-                        area: true,
-                      },
-                    },
-                    workers: {
-                      include: {
-                        availability: {
-                          where: {
-                            eventId: activeEventId,
-                          },
-                          take: 1,
-                        },
-                      },
-                    },
-                    responsibleWorker: true,
-                  },
-                },
-              },
-              orderBy: {
-                order: 'asc',
-              },
+          create: {
+            foodDeliveryId: delivery.id,
+            activeJobId: job.activeJobId,
+            order: job.order,
+            completed: job.completed ?? false,
+            recipients: job.recipientIds?.length
+              ? { connect: job.recipientIds.map(id => ({ id })) }
+              : undefined,
+          },
+          update: {
+            order: job.order,
+            // `completed` intentionally not touched — preserve courier-marked state.
+            recipients: {
+              set: (job.recipientIds ?? []).map(id => ({ id })),
             },
           },
         })
-      )
-    )
+      }
+    }
 
-    return createdDeliveries
+    return tx.foodDelivery.findMany({
+      where: { planId },
+      include: deliveryInclude(activeEventId),
+      orderBy: { courierNum: 'asc' },
+    })
   })
 }

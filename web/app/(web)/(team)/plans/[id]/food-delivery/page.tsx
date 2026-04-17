@@ -1,7 +1,7 @@
 import { getSMJSession } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
 import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
-import FoodDeliveryClientPage from 'lib/components/plan/FoodDeliveryClientPage'
+import FoodDeliveryPage from 'lib/components/plan/food-delivery/FoodDeliveryPage'
 import { getPlanById } from 'lib/data/plans'
 import { Permission } from 'lib/types/auth'
 import { serializePlan } from 'lib/types/plan'
@@ -12,7 +12,7 @@ type PathProps = {
   }>
 }
 
-export default async function FoodDeliveryPage(props: PathProps) {
+export default async function Page(props: PathProps) {
   const params = await props.params
   const plan = await getPlanById(params.id)
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />
@@ -26,7 +26,5 @@ export default async function FoodDeliveryPage(props: PathProps) {
     return <AccessDeniedPage />
   }
 
-  return (
-    <FoodDeliveryClientPage planId={params.id} initialDataPlan={serialized} />
-  )
+  return <FoodDeliveryPage planId={params.id} initialDataPlan={serialized} />
 }
