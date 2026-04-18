@@ -15,6 +15,7 @@ import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import path from 'path'
 import { existsAdorationSlot } from './adoration'
+import { Post } from 'lib/prisma/client'
 
 export async function getPostsWithAdorationFlag(): Promise<{
   posts: PostComplete[]
@@ -47,6 +48,19 @@ export async function getPostsWithAdorationFlag(): Promise<{
     })),
     hasAdoration,
   }
+}
+
+export async function getPostsWithOpenParticipation(): Promise<Post[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  return await prisma.post.findMany({
+    where: {
+      isOpenForParticipants: true,
+      forEventId: activeEventId,
+    },
+  })
 }
 
 export async function getPostById(id: string): Promise<PostComplete | null> {

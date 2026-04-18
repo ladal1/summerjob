@@ -17,6 +17,8 @@ export default async function AdminPage() {
     hasAdminPermission || hasPermission(Permission.APPLICATIONS)
   const hasAdorationPermission =
     hasAdminPermission || hasPermission(Permission.ADORATION)
+  const hasNotificationsPermission =
+    hasAdminPermission || hasPermission(Permission.NOTIFICATIONS)
   const hasReceptionPermission = hasPermission(Permission.RECEPTION)
   return (
     <>
@@ -121,6 +123,23 @@ export default async function AdminPage() {
                   <div className="col">
                     <h5>Seznamy</h5>
                     <p>Nastavit možné alergie, nářadí, schopnosti.</p>
+                  </div>
+                  <div className="col d-flex justify-content-end align-items-center gap-3">
+                    <i className="fas fa-chevron-right"></i>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {hasNotificationsPermission && (
+              <Link
+                className="list-group-item list-group-item-action"
+                href="/admin/notifications"
+              >
+                <div className="row">
+                  <div className="col">
+                    <h5>Notifikace</h5>
+                    <p>Poslat hromadnou notifikaci skupině účastníků akce.</p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">
                     <i className="fas fa-chevron-right"></i>

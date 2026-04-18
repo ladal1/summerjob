@@ -52,6 +52,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
         Permission.ADMIN,
         Permission.ADORATION,
         Permission.APPLICATIONS,
+        Permission.NOTIFICATIONS,
         Permission.RECEPTION,
       ],
     },
@@ -65,6 +66,12 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/profile',
       name: 'Profil',
       icon: 'fas fa-user',
+      permissions: [],
+    },
+    {
+      path: '/notifications',
+      name: 'Oznámení',
+      icon: 'fas fa-bell',
       permissions: [],
     },
   ]

@@ -18,6 +18,7 @@ interface FilterSelectInputProps<FormData extends FieldValues> {
   preserveSearchOnSelect?: boolean
 
   mandatory?: boolean
+  autocomplete?: string
 }
 
 export const FilterSelectInput = <FormData extends FieldValues>({
@@ -32,6 +33,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
   preserveSearchOnSelect,
 
   mandatory = false,
+  autocomplete,
 }: FilterSelectInputProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
 
@@ -50,6 +52,7 @@ export const FilterSelectInput = <FormData extends FieldValues>({
         onSelected={onSelected}
         defaultSelected={defaultSelected}
         preserveSearchOnSelect={preserveSearchOnSelect}
+        autocomplete={autocomplete}
       />
       <FormWarning message={error} />
     </div>
