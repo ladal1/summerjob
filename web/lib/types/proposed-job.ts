@@ -27,6 +27,7 @@ export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
     z.object({
       id: z.string().uuid(),
       name: z.string(),
+      order: z.number().int(),
     })
   ),
 })
@@ -45,11 +46,13 @@ export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
     z.object({
       name: z.string(),
       id: z.uuid(),
+      order: z.number().int(),
     })
   ),
   jobType: z.object({
     name: z.string(),
     id: z.uuid(),
+    order: z.number().int(),
   }),
 })
 

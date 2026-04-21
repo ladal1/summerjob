@@ -21,6 +21,7 @@ export default async function ApplicationsPageServer() {
       isApplicationOpen={summerJobEvent.isApplicationOpen}
       isPasswordProtected={summerJobEvent.isPasswordProtected}
       eventId={summerJobEvent.id}
+      tShirtPrice={summerJobEvent.tShirtPrice ?? null}
     />
   )
 }

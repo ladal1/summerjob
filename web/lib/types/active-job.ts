@@ -1,6 +1,9 @@
 import { ActiveJobSchema, PlanSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import { z } from 'zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+
+useZodOpenApi
 import {
   ProposedJobForActiveJobSchema,
   ProposedJobWithArea,

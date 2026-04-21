@@ -12,6 +12,7 @@ export const ToolNameCompleteSchema = ToolNameSchema.extend({
       z.object({
         name: z.string(),
         id: z.uuid(),
+        order: z.number().int(),
       })
     )
     .default([]),
@@ -20,6 +21,7 @@ export const ToolNameCompleteSchema = ToolNameSchema.extend({
       z.object({
         name: z.string(),
         id: z.uuid(),
+        order: z.number().int(),
       })
     )
     .default([]),

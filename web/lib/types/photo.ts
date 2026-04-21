@@ -1,5 +1,8 @@
 import { JobPhotoSchema } from 'lib/prisma/zod'
 import { z } from 'zod'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+
+useZodOpenApi
 
 export const PhotoCompleteSchema = JobPhotoSchema
 

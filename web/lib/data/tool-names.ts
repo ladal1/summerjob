@@ -4,6 +4,7 @@ import {
   ToolNameCreateData,
   ToolNameUpdateData,
 } from 'lib/types/tool-name'
+import { reorderByIds } from './reorder-utils'
 
 export async function getToolNameById(
   id: string
@@ -26,6 +27,7 @@ export async function getToolNames() {
       skills: true,
       jobTypes: true,
     },
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
   })
   return toolNames
 }
@@ -58,9 +60,14 @@ export async function updateToolName(
 }
 
 export async function createToolName(toolNameData: ToolNameCreateData) {
+  const last = await prisma.toolName.findFirst({
+    orderBy: { order: 'desc' },
+    select: { order: true },
+  })
   const toolName = await prisma.toolName.create({
     data: {
       name: toolNameData.name,
+      order: last ? last.order + 1 : 0,
       skills: {
         connect: toolNameData.skills?.map(id => ({ id })) ?? [],
       },
@@ -78,4 +85,8 @@ export async function deleteToolName(toolNameId: string) {
       id: toolNameId,
     },
   })
+}
+
+export async function reorderToolNames(orderedIds: string[]) {
+  await reorderByIds(prisma.toolName, orderedIds, 'Nástroj neexistuje.')
 }

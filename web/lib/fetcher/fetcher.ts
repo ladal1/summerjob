@@ -86,6 +86,10 @@ export function useDataCreate<T>(url: string, options?: any) {
   return useSWRMutation<any, any, Key, T>(url, post, options)
 }
 
+export function useDataPost<T>(url: string, options?: any) {
+  return useSWRMutation<any, any, Key, T>(url, post, options)
+}
+
 export function useDataDelete(url: string, options?: any) {
   // Bugfix until this is solved
   options = { throwOnError: false, ...options }

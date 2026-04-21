@@ -84,6 +84,30 @@ async function handle(
       })
       return
     } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        const meta = error.meta as { target?: string[] | string } | undefined
+        const target = Array.isArray(meta?.target)
+          ? meta?.target.join(', ')
+          : typeof meta?.target === 'string'
+            ? meta?.target
+            : null
+        res.status(409).json({
+          error: new ApiBadRequestError(
+            target
+              ? `Hodnota pole „${target}" už existuje. Zvolte jinou.`
+              : 'Záznam s těmito údaji už existuje.'
+          ),
+        })
+        return
+      }
+      if (error.code === 'P2025') {
+        res.status(404).json({
+          error: new ApiBadRequestError(
+            'Záznam nebyl nalezen (možná už byl smazán).'
+          ),
+        })
+        return
+      }
       res.status(400).json({
         error: new ApiBadRequestError(),
       })

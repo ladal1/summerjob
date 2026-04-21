@@ -2,6 +2,9 @@ import { z } from 'zod'
 import { Permission } from './auth'
 import { Serialized } from './serialize'
 import { WorkerAvailabilitySchema } from 'lib/prisma/zod'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+
+useZodOpenApi
 
 export const UserCompleteSchema = z
   .object({

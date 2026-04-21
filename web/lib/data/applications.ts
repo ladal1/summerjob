@@ -26,6 +26,10 @@ export async function getApplications() {
 export async function getApplicationById(id: string) {
   return prisma.application.findUnique({
     where: { id },
+    include: {
+      tShirtSizeRef: true,
+      tShirtColorRef: true,
+    },
   })
 }
 
@@ -56,7 +60,9 @@ export async function createApplication(
         toolsBringing: data.toolsBringing,
         heardAboutUs: data.heardAboutUs,
         playsInstrument: data.playsInstrument,
-        tShirtSize: data.tShirtSize,
+        wantsTShirt: data.wantsTShirt,
+        tShirtSizeId: data.wantsTShirt ? data.tShirtSizeId : null,
+        tShirtColorId: data.wantsTShirt ? data.tShirtColorId : null,
         additionalInfo: data.additionalInfo,
         accommodationPrice: data.accommodationPrice,
         ownsCar: data.ownsCar,
@@ -225,6 +231,11 @@ export async function getApplicationsPaginated(
         heardAboutUs: true,
         playsInstrument: true,
         tShirtSize: true,
+        wantsTShirt: true,
+        tShirtSizeId: true,
+        tShirtColorId: true,
+        tShirtSizeRef: { select: { id: true, name: true } },
+        tShirtColorRef: { select: { id: true, name: true } },
         additionalInfo: true,
         photo: true,
         accommodationPrice: true,

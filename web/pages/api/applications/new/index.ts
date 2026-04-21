@@ -16,6 +16,7 @@ import {
   isApplicationPasswordProtected,
 } from 'lib/data/summerjob-event'
 import { sendApplicationSummaryEmail } from 'lib/email/sendApplicationSummary'
+import { Prisma } from 'lib/prisma/client'
 
 export type ApplicationAPIPostData = ApplicationCreateDataInput
 
@@ -65,7 +66,21 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
       ? files.photoFile[0]
       : files.photoFile
     : undefined
-  const application = await createApplication(applicationData, eventId, file)
+  let application
+  try {
+    application = await createApplication(applicationData, eventId, file)
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === 'P2002'
+    ) {
+      return res.status(409).json({
+        message:
+          'Na tento e-mail už je pro letošní ročník přihláška odeslaná. Pokud chceš údaje změnit, napiš nám na summerjob@summerjob.eu.',
+      })
+    }
+    throw e
+  }
 
   try {
     await sendApplicationSummaryEmail(applicationData.email, applicationData)

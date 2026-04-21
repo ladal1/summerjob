@@ -1,4 +1,7 @@
 import { z } from 'zod'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+
+useZodOpenApi
 
 function getToday() {
   const today = new Date()
@@ -45,7 +48,7 @@ export const ApplicationCreateSchema = z
       .string()
       .min(1, 'Adresa je povinná')
       .max(200, 'Adresa je příliš dlouhá'),
-    pastParticipation: z.boolean(),
+    pastParticipation: z.boolean({ message: 'Vyberte Ano nebo Ne' }),
     arrivalDate: z.coerce
       .date()
       .refine(
@@ -76,16 +79,15 @@ export const ApplicationCreateSchema = z
       .string()
       .max(150, 'Text je příliš dlouhý, max 150 znaků.')
       .optional(),
-    tShirtSize: z
-      .string()
-      .max(30, 'Zadejte např. S, M, L... a barvu')
-      .optional(),
+    wantsTShirt: z.boolean().default(false),
+    tShirtSizeId: z.string().uuid().optional().nullable(),
+    tShirtColorId: z.string().uuid().optional().nullable(),
     additionalInfo: z
       .string()
       .max(1000, 'Zpráva je příliš dlouhá, max 1000 znaků.')
       .optional(),
     accommodationPrice: z
-      .string()
+      .string({ message: 'Cena za ubytování je povinná' })
       .min(1, 'Cena za ubytování je povinná')
       .max(10, 'Číslo je příliš velké.'),
     ownsCar: z.boolean().default(false),
@@ -111,6 +113,22 @@ export const ApplicationCreateSchema = z
         code: 'custom',
         message: 'Datum odjezdu musí být po datu příjezdu',
       })
+    }
+    if (data.wantsTShirt) {
+      if (!data.tShirtSizeId) {
+        ctx.addIssue({
+          path: ['tShirtSizeId'],
+          code: 'custom',
+          message: 'Vyberte velikost trička',
+        })
+      }
+      if (!data.tShirtColorId) {
+        ctx.addIssue({
+          path: ['tShirtColorId'],
+          code: 'custom',
+          message: 'Vyberte barvu trička',
+        })
+      }
     }
   })
 export type ApplicationCreateDataInput = z.infer<typeof ApplicationCreateSchema>

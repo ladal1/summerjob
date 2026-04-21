@@ -20,6 +20,8 @@ import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributes
 import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
 import 'react-datepicker/dist/react-datepicker.css'
 import ApplicationPasswordForm from './ApplicationPasswordForm'
+import { useAPITShirtSizes } from 'lib/fetcher/t-shirt-size'
+import { useAPITShirtColors } from 'lib/fetcher/t-shirt-color'
 
 interface ApplicationsPageProps {
   startDate: string
@@ -27,6 +29,7 @@ interface ApplicationsPageProps {
   isApplicationOpen: boolean
   isPasswordProtected: boolean
   eventId: string
+  tShirtPrice: number | null
 }
 
 export default function ApplicationsPage({
@@ -35,10 +38,12 @@ export default function ApplicationsPage({
   isApplicationOpen,
   isPasswordProtected,
   eventId,
+  tShirtPrice,
 }: ApplicationsPageProps) {
   const [submitted, setSubmitted] = useState(false)
   const [hasAccess, setHasAccess] = useState(!isPasswordProtected)
   const [isLoading, setIsLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const router = useRouter()
 
@@ -50,6 +55,7 @@ export default function ApplicationsPage({
     setError,
     clearErrors,
     control,
+    watch,
     formState: { errors },
   } = useForm<
     z.input<typeof ApplicationCreateSchema>,
@@ -57,7 +63,13 @@ export default function ApplicationsPage({
     ApplicationCreateDataInput
   >({
     resolver: zodResolver(ApplicationCreateSchema),
+    defaultValues: {
+      wantsTShirt: false,
+    },
   })
+  const { data: tShirtSizes } = useAPITShirtSizes()
+  const { data: tShirtColors } = useAPITShirtColors()
+  const wantsTShirt = watch('wantsTShirt')
   const { isMutating, error, reset } = useAPIApplicationCreate({
     onSuccess: () => setSubmitted(true),
   })
@@ -65,6 +77,7 @@ export default function ApplicationsPage({
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
       setIsLoading(true)
+      setSubmitError(null)
 
       const formData = new FormData()
 
@@ -92,14 +105,23 @@ export default function ApplicationsPage({
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        console.error('Odpověď serveru:', error)
-        throw new Error('Odeslání přihlášky selhalo')
+        const body = await response.json().catch(() => ({}))
+        console.error('Odpověď serveru:', body)
+        const serverMsg =
+          typeof body?.message === 'string'
+            ? body.message
+            : typeof body?.error?.reason === 'string'
+              ? body.error.reason
+              : 'Odeslání přihlášky selhalo'
+        throw new Error(serverMsg)
       }
 
       setSubmitted(true)
     } catch (err) {
       console.error('Chyba při odesílání přihlášky:', err)
+      setSubmitError(
+        err instanceof Error ? err.message : 'Odeslání přihlášky selhalo'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -373,30 +395,66 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3 mt-4">
             <div className="w-100 w-md-45">
-              <TextInput
-                id="tShirtSize"
-                label={
-                  <>
-                    Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu
-                    (přírodní/béžová/šedomodrá). Dámské tričko doporučujeme
-                    objednat o velikost větší než normálně. Objednávka je
-                    závazná.{' '}
-                    <a
-                      href="https://summerjob.eu/merch"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Prohlédnout trička
-                    </a>
-                  </>
-                }
-                register={() => register('tShirtSize')}
-                labelClassName="light-placeholder"
-                placeholder="XS, S, M, L, XL, XXL"
-                errors={errors}
-              />
+              <div className="form-check d-flex align-items-center gap-2 mb-2 ps-0">
+                <input
+                  id="wantsTShirt"
+                  type="checkbox"
+                  className="form-check-input m-0"
+                  {...register('wantsTShirt')}
+                />
+                <label
+                  className="form-check-label fs-5 mb-0"
+                  htmlFor="wantsTShirt"
+                >
+                  Mám zájem o tričko
+                  {tShirtPrice !== null ? ` (${tShirtPrice} Kč)` : ''}
+                </label>
+              </div>
+              <p className="text-muted fs-6 fw-lighter mb-2">
+                Dámské tričko doporučujeme objednat o velikost větší než
+                normálně. Objednávka je závazná.{' '}
+                <a
+                  href="https://summerjob.eu/merch"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Prohlédnout trička
+                </a>
+              </p>
+              {wantsTShirt && (
+                <div className="d-flex flex-column gap-2">
+                  <FilterSelectInput
+                    id="tShirtSizeId"
+                    label="Velikost trička"
+                    placeholder="Vyberte velikost"
+                    labelClassName="light-placeholder"
+                    items={(tShirtSizes ?? []).map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      searchable: s.name,
+                    }))}
+                    onSelected={id => setValue('tShirtSizeId', id)}
+                    errors={errors}
+                    mandatory
+                  />
+                  <FilterSelectInput
+                    id="tShirtColorId"
+                    label="Barva trička"
+                    placeholder="Vyberte barvu"
+                    labelClassName="light-placeholder"
+                    items={(tShirtColors ?? []).map(c => ({
+                      id: c.id,
+                      name: c.name,
+                      searchable: c.name,
+                    }))}
+                    onSelected={id => setValue('tShirtColorId', id)}
+                    errors={errors}
+                    mandatory
+                  />
+                </div>
+              )}
             </div>
             <div className="w-100 w-md-45">
               <TextInput
@@ -483,6 +541,11 @@ export default function ApplicationsPage({
               },
             ]}
           />
+          {submitError && (
+            <div className="alert alert-danger mt-4" role="alert">
+              {submitError}
+            </div>
+          )}
           <button
             type="submit"
             className="w-full btn btn-primary d-block m-auto

@@ -4,6 +4,7 @@ import {
   WorkAllergyCreateData,
   WorkAllergyUpdateData,
 } from 'lib/types/work-allergy'
+import { reorderByIds } from './reorder-utils'
 
 export async function getWorkAllergyById(
   id: string
@@ -17,7 +18,9 @@ export async function getWorkAllergyById(
 }
 
 export async function getWorkAllergies() {
-  const workAllergies = await prisma.workAllergy.findMany()
+  const workAllergies = await prisma.workAllergy.findMany({
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
+  })
   return workAllergies
 }
 
@@ -38,9 +41,14 @@ export async function updateWorkAllergy(
 export async function createWorkAllergy(
   workAllergyData: WorkAllergyCreateData
 ) {
+  const last = await prisma.workAllergy.findFirst({
+    orderBy: { order: 'desc' },
+    select: { order: true },
+  })
   const workAllergy = await prisma.workAllergy.create({
     data: {
       name: workAllergyData.name,
+      order: last ? last.order + 1 : 0,
     },
   })
   return workAllergy
@@ -52,4 +60,12 @@ export async function deleteWorkAllergy(workAllergyId: string) {
       id: workAllergyId,
     },
   })
+}
+
+export async function reorderWorkAllergies(orderedIds: string[]) {
+  await reorderByIds(
+    prisma.workAllergy,
+    orderedIds,
+    'Pracovní alergie neexistuje.'
+  )
 }

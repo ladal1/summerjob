@@ -24,6 +24,9 @@ interface Application {
   arrivalDate: string
   departureDate: string
   tShirtSize?: string
+  wantsTShirt?: boolean
+  tShirtSizeRef?: { id: string; name: string } | null
+  tShirtColorRef?: { id: string; name: string } | null
   playsInstrument?: string
   accommodationPrice: string
   ownsCar: boolean
@@ -227,9 +230,27 @@ export default function ApplicationAdminDetailPage() {
                 </td>
               </tr>
               <tr>
-                <th scope="row">Velikost trička</th>
-                <td>{application.tShirtSize || 'Neuvedeno'}</td>
+                <th scope="row">Zájem o tričko</th>
+                <td>{application.wantsTShirt ? 'Ano' : 'Ne'}</td>
               </tr>
+              {application.wantsTShirt && (
+                <>
+                  <tr>
+                    <th scope="row">Velikost trička</th>
+                    <td>{application.tShirtSizeRef?.name ?? 'Neuvedeno'}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Barva trička</th>
+                    <td>{application.tShirtColorRef?.name ?? 'Neuvedeno'}</td>
+                  </tr>
+                </>
+              )}
+              {!application.wantsTShirt && application.tShirtSize && (
+                <tr>
+                  <th scope="row">Tričko (legacy)</th>
+                  <td>{application.tShirtSize}</td>
+                </tr>
+              )}
               <tr>
                 <th scope="row">Hudební nástroj</th>
                 <td>{application.playsInstrument || 'Neuvedeno'}</td>

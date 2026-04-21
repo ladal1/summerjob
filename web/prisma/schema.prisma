@@ -36,6 +36,7 @@ enum ApplicationStatus {
 model SkillHas {
   id      String   @id @default(uuid())
   name    String   @unique
+  order   Int      @default(0)
   workers Worker[]
   tools ToolName[]
 }
@@ -43,6 +44,7 @@ model SkillHas {
 model JobType {
   id    String   @id @default(uuid())
   name  String   @unique
+  order Int      @default(0)
   jobs  ProposedJob[]
   tools ToolName[]
 }
@@ -51,6 +53,7 @@ model JobType {
 model ToolName {
   id       String   @id @default(uuid())
   name     String   @unique
+  order    Int      @default(0)
   workers  Worker[]
   tools    Tool[]
   jobTypes JobType[]  // ToolName -> JobType mapping
@@ -60,6 +63,7 @@ model ToolName {
 model WorkAllergy {
   id        String   @id @default(uuid())
   name      String   @unique
+  order     Int      @default(0)
   workers   Worker[]
   jobs      ProposedJob[]
 }
@@ -67,6 +71,7 @@ model WorkAllergy {
 model FoodAllergy {
   id        String   @id @default(uuid())
   name      String   @unique
+  order     Int      @default(0)
   workers   Worker[]
 }
 
@@ -295,6 +300,21 @@ model SummerJobEvent {
   adorationSlots     AdorationSlot[]
   applications       Application[]
   receptionPasswordHash String?
+  tShirtPrice        Int?
+}
+
+model TShirtSize {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  order        Int           @default(0)
+  applications Application[]
+}
+
+model TShirtColor {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  order        Int           @default(0)
+  applications Application[]
 }
 
 model Logging {
@@ -372,7 +392,12 @@ model Application {
   toolsBringing  String   // Nářadí, které přiveze
   heardAboutUs   String?  // Jak se o nás dozvěděl
   playsInstrument String?
-  tShirtSize     String?  // Velikost trička
+  tShirtSize     String?  // legacy volné pole, zachováno pro historická data
+  wantsTShirt    Boolean  @default(false)
+  tShirtSizeId   String?
+  tShirtSizeRef  TShirtSize?  @relation(fields: [tShirtSizeId],  references: [id], onDelete: SetNull)
+  tShirtColorId  String?
+  tShirtColorRef TShirtColor? @relation(fields: [tShirtColorId], references: [id], onDelete: SetNull)
   additionalInfo String?  // Dodatečné informace
   photo          String   // Cesta k uložené fotce
   accommodationPrice String

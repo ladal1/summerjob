@@ -85,6 +85,34 @@ export default async function AdminPage() {
                   </div>
                 </div>
               </Link>
+
+              <Link
+                className="list-group-item list-group-item-action"
+                href="/admin/lists/t-shirt-sizes"
+              >
+                <div className="row">
+                  <div className="col">
+                    <h5>Velikosti trička</h5>
+                  </div>
+                  <div className="col d-flex justify-content-end align-items-center gap-3">
+                    <i className="fas fa-chevron-right"></i>
+                  </div>
+                </div>
+              </Link>
+
+              <Link
+                className="list-group-item list-group-item-action"
+                href="/admin/lists/t-shirt-colors"
+              >
+                <div className="row">
+                  <div className="col">
+                    <h5>Barvy trička</h5>
+                  </div>
+                  <div className="col d-flex justify-content-end align-items-center gap-3">
+                    <i className="fas fa-chevron-right"></i>
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         </section>

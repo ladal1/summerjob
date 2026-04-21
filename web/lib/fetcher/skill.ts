@@ -7,8 +7,10 @@ import {
   useDataDelete,
   useDataDeleteDynamic,
   useDataPartialUpdate,
+  useDataPost,
 } from './fetcher'
 import { SkillHasUpdateData } from 'lib/types/skill'
+import { ReorderData } from 'lib/types/reorder'
 
 export function useAPISkills(options?: any) {
   return useData<SkillHasAPIGetResponse>('/api/skills', options)
@@ -39,4 +41,8 @@ export function useAPISkillDeleteDynamic(
     return `/api/skills/${id}`
   }
   return useDataDeleteDynamic(url, options)
+}
+
+export function useAPISkillReorder(options?: any) {
+  return useDataPost<ReorderData>('/api/skills/reorder', options)
 }

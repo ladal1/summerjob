@@ -8,6 +8,7 @@ import DeleteEventButton from './DeleteEventButton'
 import SetEventActiveButton from './SetEventActiveButton'
 import ApplicationToggleButton from './ApplicationToggleButton'
 import PasswordProtectionForm from './PasswordProtectionForm'
+import TShirtPriceForm from './TShirtPriceForm'
 
 interface EventClientPageProps {
   sEvent: Serialized
@@ -75,6 +76,11 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
             <PasswordProtectionForm
               eventId={event.id}
               initialEnabled={event.isPasswordProtected}
+            />
+            <hr />
+            <TShirtPriceForm
+              eventId={event.id}
+              initialPrice={event.tShirtPrice ?? null}
             />
           </EditBox>
 
