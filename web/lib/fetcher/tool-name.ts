@@ -10,8 +10,10 @@ import {
   useDataDelete,
   useDataDeleteDynamic,
   useDataPartialUpdate,
+  useDataPost,
 } from './fetcher'
 import { ToolNameUpdateData } from 'lib/types/tool-name'
+import { ReorderData } from 'lib/types/reorder'
 
 export function useAPIToolNames(options?: any) {
   return useData<ToolNamesAPIGetResponse>('/api/tool-names', options)
@@ -42,4 +44,8 @@ export function useAPIToolNameDeleteDynamic(
     return `/api/tool-names/${id}`
   }
   return useDataDeleteDynamic(url, options)
+}
+
+export function useAPIToolNameReorder(options?: any) {
+  return useDataPost<ReorderData>('/api/tool-names/reorder', options)
 }

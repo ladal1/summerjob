@@ -1,7 +1,7 @@
 import {
   deleteFile,
   getUploadDirForImages,
-  renameFile,
+  optimizeAndSaveImage,
 } from 'lib/api/fileManager'
 import { PrismaTransactionClient } from 'lib/types/prisma'
 import formidable from 'formidable'
@@ -26,6 +26,10 @@ export async function getApplications() {
 export async function getApplicationById(id: string) {
   return prisma.application.findUnique({
     where: { id },
+    include: {
+      tShirtSizeRef: true,
+      tShirtColorRef: true,
+    },
   })
 }
 
@@ -56,7 +60,9 @@ export async function createApplication(
         toolsBringing: data.toolsBringing,
         heardAboutUs: data.heardAboutUs,
         playsInstrument: data.playsInstrument,
-        tShirtSize: data.tShirtSize,
+        wantsTShirt: data.wantsTShirt,
+        tShirtSizeId: data.wantsTShirt ? data.tShirtSizeId : null,
+        tShirtColorId: data.wantsTShirt ? data.tShirtColorId : null,
         additionalInfo: data.additionalInfo,
         accommodationPrice: data.accommodationPrice,
         ownsCar: data.ownsCar,
@@ -73,11 +79,10 @@ export async function createApplication(
     try {
       const uploadDir = await getApplicationsUploadDir()
 
-      const fileExtension = path.extname(file.originalFilename || '.png')
-      const fileName = `${application.id}${fileExtension}`
+      const fileName = `${application.id}.jpg`
       const photoPath = path.join(uploadDir, fileName)
 
-      await renameFile(file.filepath, photoPath)
+      await optimizeAndSaveImage(file.filepath, photoPath)
 
       const relativePath = path.join('applications', fileName)
 
@@ -105,23 +110,15 @@ export async function updateApplication(
 
   if (file) {
     const uploadDir = await getApplicationsUploadDir()
-    const fileExtension = path.extname(file.originalFilename || '.png')
-    const fileName = `${id}${fileExtension}`
+    const fileName = `${id}.jpg`
     photoPath = path.join(uploadDir, fileName)
-
-    const resolvedPhotoPath = path.resolve(photoPath) // Normalize the path
-    const relativePath = path.relative(uploadDir, resolvedPhotoPath)
-    if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
-      throw new Error(
-        'Invalid file path: Path is outside the allowed directory.'
-      )
-    }
-    await renameFile(file.filepath, resolvedPhotoPath)
 
     const oldPhotoPath = await getApplicationPhotoPathById(id, prismaClient)
     if (oldPhotoPath) {
       await deleteFile(oldPhotoPath)
     }
+
+    await optimizeAndSaveImage(file.filepath, photoPath)
 
     photoPath = path.join('applications', fileName)
   } else if (data.photoFileRemoved) {
@@ -234,6 +231,11 @@ export async function getApplicationsPaginated(
         heardAboutUs: true,
         playsInstrument: true,
         tShirtSize: true,
+        wantsTShirt: true,
+        tShirtSizeId: true,
+        tShirtColorId: true,
+        tShirtSizeRef: { select: { id: true, name: true } },
+        tShirtColorRef: { select: { id: true, name: true } },
         additionalInfo: true,
         photo: true,
         accommodationPrice: true,

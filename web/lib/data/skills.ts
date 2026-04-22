@@ -4,6 +4,7 @@ import {
   SkillHasCreateData,
   SkillHasUpdateData,
 } from 'lib/types/skill'
+import { reorderByIds } from './reorder-utils'
 
 export async function getSkillById(
   id: string
@@ -17,7 +18,9 @@ export async function getSkillById(
 }
 
 export async function getSkills() {
-  const skills = await prisma.skillHas.findMany()
+  const skills = await prisma.skillHas.findMany({
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
+  })
   return skills
 }
 
@@ -33,9 +36,14 @@ export async function updateSkill(skillId: string, skill: SkillHasUpdateData) {
 }
 
 export async function createSkill(skillData: SkillHasCreateData) {
+  const last = await prisma.skillHas.findFirst({
+    orderBy: { order: 'desc' },
+    select: { order: true },
+  })
   const skill = await prisma.skillHas.create({
     data: {
       name: skillData.name,
+      order: last ? last.order + 1 : 0,
     },
   })
   return skill
@@ -47,4 +55,8 @@ export async function deleteSkill(skillId: string) {
       id: skillId,
     },
   })
+}
+
+export async function reorderSkills(orderedIds: string[]) {
+  await reorderByIds(prisma.skillHas, orderedIds, 'Dovednost neexistuje.')
 }

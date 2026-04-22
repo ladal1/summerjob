@@ -115,14 +115,9 @@ export const BulletPointSelect = ({
         />
       </label>
 
-      {(errors[id]?.message as string) === 'Expected string, received null' && (
-        <p className="text-danger">Toto pole je povinné</p>
+      {errors[id] && (
+        <p className="text-danger">{errors[id]?.message as string}</p>
       )}
-
-      {errors[id] &&
-        (errors[id]?.message as string) != 'Expected string, received null' && (
-          <p className="text-danger">{errors[id]?.message as string}</p>
-        )}
     </div>
   )
 }

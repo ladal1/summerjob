@@ -4,6 +4,7 @@ import {
   JobTypeCreateData,
   JobTypeUpdateData,
 } from 'lib/types/job-type'
+import { reorderByIds } from './reorder-utils'
 
 export async function getJobTypeById(
   id: string
@@ -17,7 +18,9 @@ export async function getJobTypeById(
 }
 
 export async function getJobTypes() {
-  const jobTypes = await prisma.jobType.findMany()
+  const jobTypes = await prisma.jobType.findMany({
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
+  })
   return jobTypes
 }
 
@@ -36,9 +39,14 @@ export async function updateJobType(
 }
 
 export async function createJobType(jobTypeData: JobTypeCreateData) {
+  const last = await prisma.jobType.findFirst({
+    orderBy: { order: 'desc' },
+    select: { order: true },
+  })
   const jobType = await prisma.jobType.create({
     data: {
       name: jobTypeData.name,
+      order: last ? last.order + 1 : 0,
     },
   })
   return jobType
@@ -50,4 +58,8 @@ export async function deleteJobType(jobTypeId: string) {
       id: jobTypeId,
     },
   })
+}
+
+export async function reorderJobTypes(orderedIds: string[]) {
+  await reorderByIds(prisma.jobType, orderedIds, 'Typ práce neexistuje.')
 }

@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ModalProps {
   children: React.ReactNode
@@ -21,6 +22,11 @@ export function Modal({
   onClose,
 }: ModalProps) {
   const modalRef = useRef<HTMLInputElement>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,11 +49,13 @@ export function Modal({
     }
   }, [closeOnClickOutside, modalRef, onClose])
 
-  return (
+  if (!mounted) return null
+
+  return createPortal(
     <>
       <div className="modal-backdrop fade show"></div>
       <div className={`modal fade show ${size} d-block`} tabIndex={-1}>
-        <div className="modal-dialog">
+        <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content rounded-3" ref={modalRef}>
             <div className="modal-header">
               <h4 className="modal-title">{title}</h4>
@@ -62,6 +70,7 @@ export function Modal({
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }

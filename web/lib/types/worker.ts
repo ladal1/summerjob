@@ -17,24 +17,28 @@ export const WorkerCompleteSchema = WorkerSchema.extend({
     z.object({
       name: z.string(),
       id: z.uuid(),
+      order: z.number().int(),
     })
   ),
   skills: z.array(
     z.object({
       name: z.string(),
       id: z.uuid(),
+      order: z.number().int(),
     })
   ),
   foodAllergies: z.array(
     z.object({
       name: z.string(),
       id: z.uuid(),
+      order: z.number().int(),
     })
   ),
   workAllergies: z.array(
     z.object({
       name: z.string(),
       id: z.uuid(),
+      order: z.number().int(),
     })
   ),
 })

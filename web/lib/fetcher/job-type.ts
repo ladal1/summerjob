@@ -10,8 +10,10 @@ import {
   useDataDelete,
   useDataDeleteDynamic,
   useDataPartialUpdate,
+  useDataPost,
 } from './fetcher'
 import { JobTypeUpdateData } from 'lib/types/job-type'
+import { ReorderData } from 'lib/types/reorder'
 
 export function useAPIJobTypes(options?: any) {
   return useData<JobTypesAPIGetResponse>('/api/job-types', options)
@@ -42,4 +44,8 @@ export function useAPIJobTypeDeleteDynamic(
     return `/api/job-types/${id}`
   }
   return useDataDeleteDynamic(url, options)
+}
+
+export function useAPIJobTypeReorder(options?: any) {
+  return useDataPost<ReorderData>('/api/job-types/reorder', options)
 }

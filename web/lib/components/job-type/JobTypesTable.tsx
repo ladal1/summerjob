@@ -1,23 +1,7 @@
 import { JobTypeComplete } from 'lib/types/job-type'
-import { useMemo, useState } from 'react'
-import { MessageRow } from '../table/MessageRow'
-import {
-  SortOrder,
-  SortableColumn,
-  SortableTable,
-} from '../table/SortableTable'
-import { sortData } from '../table/SortData'
+import { useAPIJobTypeReorder } from 'lib/fetcher/job-type'
+import { DndSortableListTable } from '../table/DndSortableListTable'
 import JobTypeRow from './JobTypeRow'
-
-const _columns: SortableColumn[] = [
-  { id: 'name', name: 'Název' },
-  {
-    id: 'actions',
-    name: 'Akce',
-    notSortable: true,
-    stickyRight: true,
-  },
-]
 
 interface JobTypeTableProps {
   data?: JobTypeComplete[]
@@ -25,45 +9,26 @@ interface JobTypeTableProps {
 }
 
 export function JobTypesTable({ data, reload }: JobTypeTableProps) {
-  //#region Sort
-  const [sortOrder, setSortOrder] = useState<SortOrder>({
-    columnId: undefined,
-    direction: 'desc',
-  })
-  const onSortRequested = (direction: SortOrder) => {
-    setSortOrder(direction)
-  }
-
-  // names have to be same as collumns ids
-  const getSortable = useMemo(
-    () => ({
-      name: (jobType: JobTypeComplete) => jobType.name,
-    }),
-    []
-  )
-
-  const sortedData = useMemo(() => {
-    return data ? sortData(data, getSortable, sortOrder) : []
-  }, [data, getSortable, sortOrder])
-  //#endregion
+  const { trigger: triggerReorder } = useAPIJobTypeReorder()
 
   return (
-    <SortableTable
-      columns={_columns}
-      currentSort={sortOrder}
-      onRequestedSort={onSortRequested}
-    >
-      {data !== undefined && data.length === 0 && (
-        <MessageRow message="Žádné typy práce" colspan={_columns.length} />
+    <DndSortableListTable<JobTypeComplete>
+      data={data}
+      columns={[
+        { id: 'name', name: 'Název' },
+        { id: 'actions', name: 'Akce', stickyRight: true },
+      ]}
+      emptyMessage="Žádné typy práce"
+      onReorder={async ids => {
+        await triggerReorder({ ids })
+      }}
+      renderRow={item => (
+        <JobTypeRow
+          key={item.id}
+          jobType={item}
+          onUpdated={() => reload((data ?? []).filter(jt => jt.id !== item.id))}
+        />
       )}
-      {data !== undefined &&
-        sortedData.map(jobType => (
-          <JobTypeRow
-            key={jobType.id}
-            jobType={jobType}
-            onUpdated={() => reload(data.filter(fa => fa.id !== jobType.id))}
-          />
-        ))}
-    </SortableTable>
+    />
   )
 }

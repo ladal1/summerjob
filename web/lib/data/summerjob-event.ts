@@ -301,6 +301,25 @@ export async function unsetReceptionPassword(id: string) {
   })
 }
 
+export async function setTShirtPrice(id: string, price: number | null) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Event not found')
+  }
+
+  const updated = await prisma.summerJobEvent.update({
+    where: { id },
+    data: {
+      tShirtPrice: price,
+    },
+  })
+
+  return updated.tShirtPrice
+}
+
 export async function checkReceptionPassword(password: string) {
   const event = await getActiveSummerJobEvent()
 

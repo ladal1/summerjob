@@ -12,12 +12,24 @@ interface FormProps {
   onConfirmationClosed: () => void
   resetForm: () => void
   saved: boolean
-  error: boolean
+  error: unknown
   formId: string
   shouldShowBackButton?: boolean
   children: React.ReactNode
   saveBar?: boolean
   isDirty?: boolean
+}
+
+function getErrorMessage(error: unknown): string | undefined {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'reason' in error &&
+    typeof (error as { reason: unknown }).reason === 'string'
+  ) {
+    return (error as { reason: string }).reason
+  }
+  return undefined
 }
 
 export const Form = ({
@@ -102,7 +114,12 @@ export const Form = ({
             </div>
           </div>
           {saved && <SuccessProceedModal onClose={handleSuccessModalClose} />}
-          {error && <ErrorMessageModal onClose={resetForm} />}
+          {!!error && (
+            <ErrorMessageModal
+              onClose={resetForm}
+              mainMessage={getErrorMessage(error)}
+            />
+          )}
           {showConfirmation && (
             <UnsavedChangesModal
               onConfirm={confirmNavigation}

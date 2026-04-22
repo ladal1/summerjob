@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { WorkAllergyComplete } from 'lib/types/work-allergy'
 import { useAPIWorkAllergyDelete } from 'lib/fetcher/work-allergy'
-import { SimpleRow } from '../table/SimpleRow'
 import DeleteIcon from '../table/icons/DeleteIcon'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
+import { DndSortableRow } from '../table/DndSortableRow'
 
 interface WorkAllergyRowProps {
   workAllergy: WorkAllergyComplete
@@ -19,29 +19,6 @@ export default function WorkAllergyRow({
     { onSuccess: onUpdated }
   )
 
-  return (
-    <SimpleRow
-      key={workAllergy.id}
-      data={formatWorkAllergyRow(
-        workAllergy,
-        trigger,
-        isMutating,
-        error,
-        reset
-      )}
-    />
-  )
-}
-
-function formatWorkAllergyRow(
-  workAllergy: WorkAllergyComplete,
-  onRequestDelete: () => void,
-  isBeingDeleted: boolean,
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  deletingError: any,
-  resetError: () => void
-) {
   const confirmationText = () => (
     <>
       <div>Opravdu chcete smazat alergii „{workAllergy.name}“?</div>
@@ -49,38 +26,41 @@ function formatWorkAllergyRow(
     </>
   )
 
-  return [
-    { content: workAllergy.name },
-    {
-      content: (
-        <span
-          key={`actions-${workAllergy.id}`}
-          className="d-flex align-items-center gap-3"
-        >
-          <Link
-            href={`/admin/lists/work-allergies/${workAllergy.id}`}
-            onClick={e => e.stopPropagation()}
-            className="smj-action-edit"
-          >
-            <i className="fas fa-edit" title="Upravit"></i>
-          </Link>
-
-          <DeleteIcon
-            onClick={onRequestDelete}
-            isBeingDeleted={isBeingDeleted}
-            showConfirmation={true}
-            getConfirmationMessage={confirmationText}
-          />
-
-          {deletingError && (
-            <ErrorMessageModal
-              onClose={resetError}
-              mainMessage={'Nepodařilo se odstranit pracovní alergii.'}
-            />
-          )}
-        </span>
-      ),
-      stickyRight: true,
-    },
-  ]
+  return (
+    <DndSortableRow
+      id={workAllergy.id}
+      data={[
+        { content: workAllergy.name },
+        {
+          content: (
+            <span
+              key={`actions-${workAllergy.id}`}
+              className="d-flex align-items-center gap-3"
+            >
+              <Link
+                href={`/admin/lists/work-allergies/${workAllergy.id}`}
+                onClick={e => e.stopPropagation()}
+                className="smj-action-edit"
+              >
+                <i className="fas fa-edit" title="Upravit"></i>
+              </Link>
+              <DeleteIcon
+                onClick={trigger}
+                isBeingDeleted={isMutating}
+                showConfirmation={true}
+                getConfirmationMessage={confirmationText}
+              />
+              {error && (
+                <ErrorMessageModal
+                  onClose={reset}
+                  mainMessage={'Nepodařilo se odstranit pracovní alergii.'}
+                />
+              )}
+            </span>
+          ),
+          stickyRight: true,
+        },
+      ]}
+    />
+  )
 }

@@ -4,6 +4,7 @@ import {
   FoodAllergyCreateData,
   FoodAllergyUpdateData,
 } from 'lib/types/food-allergy'
+import { reorderByIds } from './reorder-utils'
 
 export async function getFoodAllergyById(
   id: string
@@ -17,7 +18,9 @@ export async function getFoodAllergyById(
 }
 
 export async function getFoodAllergies() {
-  const foodAllergies = await prisma.foodAllergy.findMany()
+  const foodAllergies = await prisma.foodAllergy.findMany({
+    orderBy: [{ order: 'asc' }, { name: 'asc' }],
+  })
   return foodAllergies
 }
 
@@ -38,9 +41,14 @@ export async function updateFoodAllergy(
 export async function createFoodAllergy(
   foodAllergyData: FoodAllergyCreateData
 ) {
+  const last = await prisma.foodAllergy.findFirst({
+    orderBy: { order: 'desc' },
+    select: { order: true },
+  })
   const foodAllergy = await prisma.foodAllergy.create({
     data: {
       name: foodAllergyData.name,
+      order: last ? last.order + 1 : 0,
     },
   })
   return foodAllergy
@@ -52,4 +60,8 @@ export async function deleteFoodAllergy(foodAllergyId: string) {
       id: foodAllergyId,
     },
   })
+}
+
+export async function reorderFoodAllergies(orderedIds: string[]) {
+  await reorderByIds(prisma.foodAllergy, orderedIds, 'Alergie neexistuje.')
 }

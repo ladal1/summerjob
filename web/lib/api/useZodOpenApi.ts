@@ -5,8 +5,10 @@
 
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 import { z } from 'zod'
+import { cs } from 'zod/locales'
 
 extendZodWithOpenApi(z)
+z.config(cs())
 
 const nothing = undefined
 export default nothing

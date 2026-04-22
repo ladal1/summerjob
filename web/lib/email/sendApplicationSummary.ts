@@ -1,5 +1,7 @@
 import { createTransport } from 'nodemailer'
 import { ApplicationCreateDataInput } from 'lib/types/application'
+import { getTShirtSizeById } from 'lib/data/t-shirt-sizes'
+import { getTShirtColorById } from 'lib/data/t-shirt-colors'
 
 const transport = createTransport(process.env.EMAIL_SERVER || '')
 
@@ -20,13 +22,18 @@ const fieldLabels: Partial<Record<keyof ApplicationCreateDataInput, string>> = {
   toolsBringing: 'Nářadí, které přivezu',
   heardAboutUs: 'Jak ses o nás dozvěděl/a',
   playsInstrument: 'Chceš zpívat nebo hrát na hudební nástroj ve schole',
-  tShirtSize: 'Velikost a barva trička',
+  wantsTShirt: 'Tričko',
   additionalInfo: 'Dodatečné informace',
   accommodationPrice: 'Cena za ubytování',
   ownsCar: 'Přijedu autem a jsem ochotný/á vozit pracanty na joby.',
   canBeMedic:
     'Jsem zdravotník a jsem ochotný/á se spoluúčastnit na péči o summerjobáky.',
 }
+
+const skippedInEmail: ReadonlySet<keyof ApplicationCreateDataInput> = new Set([
+  'tShirtSizeId',
+  'tShirtColorId',
+])
 
 const formatValue = (value: unknown): string => {
   if (value instanceof Date) {
@@ -56,9 +63,31 @@ export async function sendApplicationSummaryEmail(
   const intro = `Ahoj ${firstName},<br/><br/>děkujeme za odeslání přihlášky na SummerJob! Níže najdeš souhrn údajů, které jsi ${pronounText}.<br/><br/>`
   const outro = `<br/><br/><strong>Do tří týdnů ti potvrdíme účast.</strong><br/><br/>Tým SummerJob ❤️`
 
+  const [tShirtSize, tShirtColor] = await Promise.all([
+    data.wantsTShirt && data.tShirtSizeId
+      ? getTShirtSizeById(data.tShirtSizeId)
+      : null,
+    data.wantsTShirt && data.tShirtColorId
+      ? getTShirtColorById(data.tShirtColorId)
+      : null,
+  ])
+
   const details = Object.entries(rest)
+    .filter(
+      ([key]) => !skippedInEmail.has(key as keyof ApplicationCreateDataInput)
+    )
     .map(([key, value]) => {
       const label = fieldLabels[key as keyof ApplicationCreateDataInput] || key
+      if (key === 'wantsTShirt') {
+        if (!value) {
+          return `<strong>${label}:</strong> Ne`
+        }
+        const parts: string[] = []
+        if (tShirtSize) parts.push(`velikost ${tShirtSize.name}`)
+        if (tShirtColor) parts.push(`barva ${tShirtColor.name}`)
+        const suffix = parts.length ? ` (${parts.join(', ')})` : ''
+        return `<strong>${label}:</strong> Ano${suffix}`
+      }
       const formatted = formatValue(value)
       return `<strong>${label}:</strong> ${formatted}`
     })

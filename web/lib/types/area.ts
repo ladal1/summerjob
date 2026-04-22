@@ -2,6 +2,9 @@ import { z } from 'zod'
 import { Serialized } from './serialize'
 import { Area, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
+import useZodOpenApi from 'lib/api/useZodOpenApi'
+
+useZodOpenApi
 
 export const AreaCreateSchema = z
   .object({

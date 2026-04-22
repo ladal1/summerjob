@@ -9,10 +9,12 @@ export const ToolCompleteSchema = ToolSchema.extend({
   tool: z.object({
     id: z.uuid(),
     name: z.string(),
+    order: z.number().int(),
     skills: z.array(
       z.object({
         id: z.uuid(),
         name: z.string(),
+        order: z.number().int(),
       })
     ),
   }),

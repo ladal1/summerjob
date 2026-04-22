@@ -122,7 +122,9 @@ export default async function AdminPage() {
                 <div className="row">
                   <div className="col">
                     <h5>Seznamy</h5>
-                    <p>Nastavit možné alergie, nářadí, schopnosti.</p>
+                    <p>
+                      Nastavit možné alergie, nářadí, velikosti/barvy triček.
+                    </p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">
                     <i className="fas fa-chevron-right"></i>

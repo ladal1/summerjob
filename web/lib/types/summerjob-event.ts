@@ -54,6 +54,18 @@ export const SummerJobEventUpdateSchema = z
   })
   .strict()
 
+export const TShirtPriceUpdateSchema = z
+  .object({
+    tShirtPrice: z.coerce
+      .number()
+      .int()
+      .min(0, { message: 'Cena nemůže být záporná' })
+      .nullable(),
+  })
+  .strict()
+
+export type TShirtPriceUpdateData = z.infer<typeof TShirtPriceUpdateSchema>
+
 export type SummerJobEventUpdateDataInput = z.input<
   typeof SummerJobEventUpdateSchema
 >

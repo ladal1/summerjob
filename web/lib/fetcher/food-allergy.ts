@@ -10,8 +10,10 @@ import {
   useDataDelete,
   useDataDeleteDynamic,
   useDataPartialUpdate,
+  useDataPost,
 } from './fetcher'
 import { FoodAllergyUpdateData } from 'lib/types/food-allergy'
+import { ReorderData } from 'lib/types/reorder'
 
 export function useAPIFoodAllergies(options?: any) {
   return useData<FoodAllergiesAPIGetResponse>('/api/food-allergies', options)
@@ -42,4 +44,8 @@ export function useAPIFoodAllergyDeleteDynamic(
     return `/api/food-allergies/${id}`
   }
   return useDataDeleteDynamic(url, options)
+}
+
+export function useAPIFoodAllergyReorder(options?: any) {
+  return useDataPost<ReorderData>('/api/food-allergies/reorder', options)
 }
