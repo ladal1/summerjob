@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { Serialized } from './serialize'
-import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from 'lib/prisma/zod'
+import {
+  ActiveJobSchema,
+  AreaSchema,
+  ColorTagSchema,
+  ProposedJobSchema,
+} from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import {
@@ -140,6 +145,7 @@ const ProposedJobBasicSchema = z
     toolsOnSite: ToolsCreateSchema.optional(),
     toolsToTakeWith: ToolsCreateSchema.optional(),
     priority: z.number().default(1).optional(),
+    colorTags: z.array(ColorTagSchema).optional(),
   })
   .strict()
 
