@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { ExpandableRow } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
 import MoveWorkerModal from './MoveWorkerModal'
+import { WorkerColorTag } from '../worker/WorkerColorTag'
 
 const NO_JOB = 'NO_JOB'
 
@@ -130,7 +131,8 @@ export function PlanJoblessRow({
                     planDay,
                     setWorkerToMove,
                     adorationByWorker,
-                    accessedFromReception
+                    accessedFromReception,
+                    reloadPlan
                   )}
                   key={worker.id}
                   draggable={true}
@@ -164,7 +166,8 @@ function formatWorkerData(
   planDay: Date,
   requestMoveWorker: (worker: WorkerComplete) => void,
   adorationByWorker: Map<string, boolean>,
-  accessedFromReception: boolean
+  accessedFromReception: boolean,
+  reloadPlan: () => void
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
@@ -173,7 +176,18 @@ function formatWorkerData(
   const allergies = [...worker.workAllergies.map(wa => wa.name)]
 
   const cols = [
-    { content: name },
+    {
+      content: (
+        <span className="d-inline-flex align-items-center">
+          <WorkerColorTag
+            workerId={worker.id}
+            colorTags={worker.colorTags}
+            onUpdated={reloadPlan}
+          />
+          {name}
+        </span>
+      ),
+    },
     { content: worker.phone },
     {
       content: (
