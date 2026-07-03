@@ -33,6 +33,15 @@ enum ApplicationStatus {
   REJECTED
 }
 
+enum ColorTag {
+  YELLOW
+  GREEN
+  RED
+  PURPLE
+  BLUE
+  ORANGE
+}
+
 model SkillHas {
   id      String   @id @default(uuid())
   name    String   @unique
@@ -155,6 +164,7 @@ model Worker {
   notifications      Notification[]              @relation("NotificationRecipients")
   seenNotifications  Notification[]              @relation("NotificationSeenBy")
   adorationReminderLogging AdorationReminderLogging[]
+  colorTags          ColorTag[]                  @default([])
 }
 
 model WorkerPermissions {
@@ -220,6 +230,7 @@ model ProposedJob {
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
   photos             JobPhoto[]                  @relation("PhotoProposedJob")
   priority           Int                         @default(1)
+  colorTags          ColorTag[]                  @default([])
 }
 
 model PinnedProposedJobByWorker {
