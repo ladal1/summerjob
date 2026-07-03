@@ -27,6 +27,7 @@ import MoveWorkerModal from './MoveWorkerModal'
 import RideSelect from './RideSelect'
 import ToggleCompletedCheck from './ToggleCompletedCheck'
 import { SameCoworkerIssue, WorkerIssue } from './WorkerIssue'
+import { ColorTagCell } from '../table/ColorTagCell'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -403,6 +404,7 @@ function formatRowData(
           className="d-inline-flex gap-1 align-items-center"
           key={`name-${job.id}`}
         >
+          <ColorTagCell tags={job.proposedJob.colorTags} />
           {job.proposedJob.name}
           <ActiveJobIssueIcon
             job={job}

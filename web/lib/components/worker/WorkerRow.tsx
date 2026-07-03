@@ -1,9 +1,11 @@
-import { useAPIWorkerDelete } from 'lib/fetcher/worker'
+import { useAPIWorkerDelete, useAPIWorkerUpdate } from 'lib/fetcher/worker'
 import { WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
 import DeleteIcon from '../table/icons/DeleteIcon'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { SimpleRow } from '../table/SimpleRow'
+import { ColorTagCell } from '../table/ColorTagCell'
+import { ColorTag } from 'lib/prisma/client'
 
 interface WorkerRowProps {
   worker: WorkerComplete
@@ -21,6 +23,12 @@ export default function WorkerRow({
   const { trigger, isMutating, error, reset } = useAPIWorkerDelete(worker.id, {
     onSuccess: onUpdated,
   })
+  const { trigger: triggerUpdate } = useAPIWorkerUpdate(worker.id, {
+    onSuccess: onUpdated,
+  })
+  const setColorTags = (colorTags: ColorTag[]) => {
+    triggerUpdate({ colorTags })
+  }
   return (
     <SimpleRow
       key={worker.id}
@@ -30,7 +38,8 @@ export default function WorkerRow({
         isMutating,
         error,
         reset,
-        accessedFromReception
+        accessedFromReception,
+        setColorTags
       )}
       onMouseEnter={() =>
         worker.photoPath
@@ -49,7 +58,8 @@ function formatWorkerRow(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deletingError: any,
   resetError: () => void,
-  accessedFromReception: boolean
+  accessedFromReception: boolean,
+  setColorTags: (colorTags: ColorTag[]) => void
 ) {
   const confirmationText = () => {
     return (
@@ -62,7 +72,14 @@ function formatWorkerRow(
     )
   }
   return [
-    { content: worker.firstName },
+    {
+      content: (
+        <span className="d-inline-flex align-items-center">
+          <ColorTagCell tags={worker.colorTags} onChange={setColorTags} />
+          {worker.firstName}
+        </span>
+      ),
+    },
     { content: worker.lastName },
     { content: worker.phone },
     { content: worker.email },
