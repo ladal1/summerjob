@@ -96,14 +96,22 @@ export default function PushNotificationManagerButton() {
       return
     }
 
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    if (!vapidPublicKey) {
+      console.error(
+        '[PushNotifications] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set. Generate VAPID keys with: npx web-push generate-vapid-keys'
+      )
+      setErrorMessage('Došlo k chybě, zkuste to prosím později')
+      setLoading(false)
+      return
+    }
+
     let sub: PushSubscription | null = null
     try {
       const registration = await navigator.serviceWorker.ready
       sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-        ),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       })
       const res = await fetch('/api/push-subscription/subscribe', {
         method: 'POST',

@@ -26,6 +26,8 @@ services:
     build:
       context: web
       dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
     volumes:
       - ./web-storage:/web-storage
     depends_on:
