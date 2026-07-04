@@ -949,7 +949,7 @@ export default function FoodDeliveryClientPage({
                                                             d.courierNum ===
                                                             courierNumber
                                                         )?.id
-                                                      return `/plan/${planId}/courier/${deliveryId}?deliveryId=${deliveryId}`
+                                                      return `/plan/${planId}/courier/${courierNumber}?deliveryId=${deliveryId}`
                                                     })()}
                                                   >
                                                     <button

@@ -54,15 +54,20 @@ export type CourierDeliveryAPIGetResponse = {
   plan: CourierDeliveryPlan
   deliveries: CourierDeliveryData[]
 }
+type CourierDeliveryAPIErrorResponse = {
+  error: string
+}
 
 async function get(
   req: NextApiRequest,
-  res: NextApiResponse<CourierDeliveryAPIGetResponse>
+  res: NextApiResponse<
+    CourierDeliveryAPIGetResponse | CourierDeliveryAPIErrorResponse
+  >
 ) {
   const planId = req.query.planId as string
   const deliveryId = req.query.deliveryId
   if (typeof deliveryId !== 'string') {
-    res.status(400).end()
+    res.status(400).json({ error: 'Missing or invalid deliveryId parameter' })
     return
   }
 
