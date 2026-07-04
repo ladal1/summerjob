@@ -4,6 +4,7 @@ import json
 import logging
 import signal
 import sys
+from typing import Any
 
 from src.config import LOG_LEVEL
 from src.rabbitmq_setup import setup_connection
@@ -17,6 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 _shutdown = False
+_channel: Any = None
 
 
 def _handle_signal(signum: int, frame) -> None:
@@ -25,7 +27,14 @@ def _handle_signal(signum: int, frame) -> None:
         logger.warning("Forced exit")
         sys.exit(1)
     _shutdown = True
-    logger.info("Shutdown requested (%s)", signal.Signals(signum).name)
+    name = signal.Signals(signum).name
+    logger.info("Shutdown requested (%s)", name)
+    if _channel is not None:
+        logger.info("Stopping consumer...")
+        try:
+            _channel.stop_consuming()
+        except Exception:
+            pass
 
 
 def on_message(ch, method, properties, body) -> None:
@@ -47,10 +56,12 @@ def on_message(ch, method, properties, body) -> None:
 
 
 def main() -> None:
+    global _channel
     signal.signal(signal.SIGINT, _handle_signal)
     signal.signal(signal.SIGTERM, _handle_signal)
 
     channel, queue_name = setup_connection()
+    _channel = channel
 
     channel.basic_consume(
         queue=queue_name, on_message_callback=on_message, auto_ack=False
@@ -64,6 +75,8 @@ def main() -> None:
             logger.info("Consumer stopped during shutdown")
         else:
             raise
+    finally:
+        logger.info("Shutdown complete")
 
 
 if __name__ == "__main__":

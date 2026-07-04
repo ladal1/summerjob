@@ -307,7 +307,6 @@ def generate_rides(plan_id: str, session: Session) -> None:
                         "job": job_id,
                     },
                 )
-                session.commit()
                 while available_seats > 0 and pointer < total_people:
                     session.execute(
                         q.insert_rider,
@@ -315,7 +314,8 @@ def generate_rides(plan_id: str, session: Session) -> None:
                     )
                     pointer += 1
                     available_seats -= 1
-                session.commit()
+
+        session.commit()
 
 
 # ---------------------------------------------------------------------------
