@@ -150,7 +150,7 @@ export default function ApplicationsPage({
 
   const registerPhoto = (file: File | null) => {
     try {
-      setValue('photoFile', file, { shouldDirty: true, shouldValidate: true })
+      setValue('photoFile', file, { shouldDirty: true })
     } catch (error) {
       console.error('Chyba v registerPhoto:', error)
     }

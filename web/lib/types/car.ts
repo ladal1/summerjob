@@ -42,14 +42,14 @@ const CarBasicSchema = z
     odometerEnd: z
       .number({ message: err.invalidTypeNumber })
       .nonnegative({ message: err.nonNonNegativeNumber })
-      .default(0)
-      .optional(),
+      .optional()
+      .default(0),
     reimbursed: z.boolean().optional().openapi({ example: false }),
     reimbursementAmount: z
       .number({ message: err.invalidTypeNumber })
       .nonnegative({ message: err.nonNonNegativeNumber })
-      .default(0)
-      .optional(),
+      .optional()
+      .default(0),
   })
   .strict()
 
