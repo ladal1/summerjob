@@ -7,6 +7,7 @@ import {
   sendNotificationToWorkersForPost,
   sendNotificationToWorkersWithFoodAllergies,
 } from 'lib/notifications/notifications'
+import logger from 'lib/logger/logger'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { NotificationMulticastRequestSchema } from 'lib/types/notification'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -51,7 +52,9 @@ async function post(
 
     res.status(200).end()
   } catch (e: unknown) {
-    console.error('Unexpected error in notification multicast: ', e)
+    logger.error(
+      `[notification/multicast] Unexpected error: ${e instanceof Error ? e.message : String(e)}`
+    )
     res.status(500).end()
   }
 }
