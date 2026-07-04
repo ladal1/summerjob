@@ -18,12 +18,14 @@ const MENU_WIDTH = 120
 
 export function ColorTagCell({ tags, onChange }: ColorTagCellProps) {
   const [open, setOpen] = useState(false)
+  const [optimisticTags, setOptimisticTags] = useState(tags)
   const [coords, setCoords] = useState<{ top: number; left: number }>({
     top: 0,
     left: 0,
   })
   const toggleRef = useRef<HTMLElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const latestPropTags = useRef(tags)
   const editable = onChange !== undefined
 
   // Position the (portalled) menu next to the palette icon using fixed
@@ -34,6 +36,16 @@ export function ColorTagCell({ tags, onChange }: ColorTagCellProps) {
     const left = Math.min(rect.left, window.innerWidth - MENU_WIDTH - 8)
     setCoords({ top: rect.bottom + 4, left: Math.max(8, left) })
   }, [open])
+
+  useEffect(() => {
+    const tagsChanged =
+      tags.length !== latestPropTags.current.length ||
+      tags.some(tag => !latestPropTags.current.includes(tag))
+    if (tagsChanged) {
+      latestPropTags.current = tags
+      setOptimisticTags(tags)
+    }
+  }, [tags])
 
   useEffect(() => {
     if (!open) return
@@ -57,13 +69,14 @@ export function ColorTagCell({ tags, onChange }: ColorTagCellProps) {
 
   const toggleTag = (tag: ColorTag) => {
     if (!onChange) return
-    const next = tags.includes(tag)
-      ? tags.filter(t => t !== tag)
-      : [...tags, tag]
+    const next = optimisticTags.includes(tag)
+      ? optimisticTags.filter(t => t !== tag)
+      : [...optimisticTags, tag]
+    setOptimisticTags(next)
     onChange(next)
   }
 
-  const orderedTags = colorTagOrder.filter(t => tags.includes(t))
+  const orderedTags = colorTagOrder.filter(t => optimisticTags.includes(t))
 
   return (
     <span className="smj-color-tag-cell" onClick={e => e.stopPropagation()}>
@@ -88,6 +101,9 @@ export function ColorTagCell({ tags, onChange }: ColorTagCellProps) {
             title="Barevné štítky"
             onClick={e => {
               e.stopPropagation()
+              if (!open) {
+                setOptimisticTags(tags)
+              }
               setOpen(o => !o)
             }}
           />
@@ -101,7 +117,7 @@ export function ColorTagCell({ tags, onChange }: ColorTagCellProps) {
                 onClick={e => e.stopPropagation()}
               >
                 {colorTagOrder.map(tag => {
-                  const active = tags.includes(tag)
+                  const active = optimisticTags.includes(tag)
                   return (
                     <span
                       key={tag}
