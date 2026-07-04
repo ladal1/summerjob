@@ -57,6 +57,9 @@ export function PlanJoblessRow({
   }, [sourceJobId, workerIds, trigger, reloadPlan])
 
   const onWorkerDropped = () => (e: React.DragEvent<HTMLTableRowElement>) => {
+    if (accessedFromReception) {
+      return
+    }
     const workerId = e.dataTransfer.getData('worker-id')
     const fromJobId = e.dataTransfer.getData('source-id')
     if (fromJobId === NO_JOB) {
@@ -135,7 +138,7 @@ export function PlanJoblessRow({
                     reloadPlan
                   )}
                   key={worker.id}
-                  draggable={true}
+                  draggable={!accessedFromReception}
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
                   onMouseEnter={() =>
                     worker.photoPath

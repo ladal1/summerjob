@@ -213,12 +213,14 @@ export default function AdminAdorationManager({
       ) : slots.length === 0 ? (
         <>
           <p className="text-secondary">Žádné sloty pro tento den.</p>
-          <button
-            className="btn btn-sm btn-outline-success"
-            onClick={() => setShowCreateModal(true)}
-          >
-            Vytvořit sloty
-          </button>
+          {!accessedFromReception && (
+            <button
+              className="btn btn-sm btn-outline-success"
+              onClick={() => setShowCreateModal(true)}
+            >
+              Vytvořit sloty
+            </button>
+          )}
         </>
       ) : (
         <>
@@ -450,13 +452,15 @@ export default function AdminAdorationManager({
                         </button>
                       </div>
                       <div className="d-flex flex-column gap-2 d-md-none">
-                        <button
-                          className="btn btn-sm btn-outline-dark"
-                          onClick={() => openEditModal(slot)}
-                          title="Upravit slot"
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
+                        {!accessedFromReception && (
+                          <button
+                            className="btn btn-sm btn-outline-dark"
+                            onClick={() => openEditModal(slot)}
+                            title="Upravit slot"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                        )}
                         <button
                           className="btn btn-sm btn-outline-primary"
                           onClick={() => openAssignModal(slot)}

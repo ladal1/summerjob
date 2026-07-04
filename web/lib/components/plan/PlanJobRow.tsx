@@ -87,7 +87,7 @@ export function PlanJobRow({
 
   const onWorkerDropped =
     (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
-      if (isBeingUpdated) {
+      if (isBeingUpdated || accessedFromReception) {
         return
       }
       const workerId = e.dataTransfer.getData('worker-id')
@@ -324,7 +324,7 @@ export function PlanJobRow({
                       }
                       onMouseLeave={() => onWorkerHover(null)}
                       key={worker.id}
-                      draggable={true}
+                      draggable={!accessedFromReception}
                       onDragStart={onWorkerDragStart(worker, job.id)}
                     />
                   ))}
