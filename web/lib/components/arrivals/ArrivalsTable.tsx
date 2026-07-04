@@ -25,6 +25,8 @@ const _columns: SortableColumn[] = [
 interface ArrivalsTableProps {
   workers: ArrivalWorker[]
   onUpdated: () => void
+  onWorkerArrived: (workerId: string) => void
+  onWorkerHidden: (workerId: string) => void
   sortOrder: SortOrder
   onSortChanged: (sort: SortOrder) => void
 }
@@ -32,6 +34,8 @@ interface ArrivalsTableProps {
 export default function ArrivalsTable({
   workers,
   onUpdated,
+  onWorkerArrived,
+  onWorkerHidden,
   sortOrder,
   onSortChanged,
 }: ArrivalsTableProps) {
@@ -50,7 +54,13 @@ export default function ArrivalsTable({
         <MessageRow message="Žádní pracanti" colspan={_columns.length} />
       )}
       {sortedData.map(worker => (
-        <ArrivalRow key={worker.id} worker={worker} onUpdated={onUpdated} />
+        <ArrivalRow
+          key={worker.id}
+          worker={worker}
+          onUpdated={onUpdated}
+          onWorkerArrived={onWorkerArrived}
+          onWorkerHidden={onWorkerHidden}
+        />
       ))}
     </SortableTable>
   )

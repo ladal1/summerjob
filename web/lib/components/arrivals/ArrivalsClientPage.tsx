@@ -32,6 +32,51 @@ export default function ArrivalsClientPage({
     onlyNotArrivedQ !== null ? onlyNotArrivedQ === 'true' : true
   )
   const [showHidden, setShowHidden] = useState(showHiddenQ === 'true')
+  const [recentlyArrived, setRecentlyArrived] = useState<Set<string>>(new Set())
+  const [recentlyHidden, setRecentlyHidden] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (recentlyArrived.size === 0 && recentlyHidden.size === 0) return
+    const timer = setTimeout(() => {
+      setRecentlyArrived(new Set())
+      setRecentlyHidden(new Set())
+    }, 30000)
+    return () => clearTimeout(timer)
+  }, [recentlyArrived, recentlyHidden])
+
+  const handleFilterChange = (value: string) => {
+    setFilter(value)
+    setRecentlyArrived(new Set())
+    setRecentlyHidden(new Set())
+  }
+
+  const handleOnlyNotArrivedChange = (value: boolean) => {
+    setOnlyNotArrived(value)
+    setRecentlyArrived(new Set())
+    setRecentlyHidden(new Set())
+  }
+
+  const handleShowHiddenChange = (value: boolean) => {
+    setShowHidden(value)
+    setRecentlyArrived(new Set())
+    setRecentlyHidden(new Set())
+  }
+
+  const handleWorkerArrived = (workerId: string) => {
+    setRecentlyArrived(prev => {
+      const next = new Set(prev)
+      next.add(workerId)
+      return next
+    })
+  }
+
+  const handleWorkerHidden = (workerId: string) => {
+    setRecentlyHidden(prev => {
+      const next = new Set(prev)
+      next.add(workerId)
+      return next
+    })
+  }
 
   const sortColumnQ = searchParams?.get('sortColumn')
   const sortDirectionQ = searchParams?.get('sortDirection')
@@ -62,9 +107,19 @@ export default function ArrivalsClientPage({
         fulltextData,
         onlyNotArrived,
         showHidden,
+        recentlyArrived,
+        recentlyHidden,
         data
       ),
-    [fulltextData, filter, onlyNotArrived, showHidden, data]
+    [
+      fulltextData,
+      filter,
+      onlyNotArrived,
+      showHidden,
+      recentlyArrived,
+      recentlyHidden,
+      data,
+    ]
   )
 
   const stats = useMemo(() => {
@@ -88,19 +143,19 @@ export default function ArrivalsClientPage({
           <div className="col">
             <Filters
               search={filter}
-              onSearchChanged={setFilter}
+              onSearchChanged={handleFilterChange}
               checkboxes={[
                 {
                   id: 'onlyNotArrivedCheckbox',
                   label: 'Pouze nedorazivší',
                   checked: onlyNotArrived,
-                  onCheckboxChanged: setOnlyNotArrived,
+                  onCheckboxChanged: handleOnlyNotArrivedChange,
                 },
                 {
                   id: 'showHiddenCheckbox',
                   label: 'Zobrazit skryté',
                   checked: showHidden,
-                  onCheckboxChanged: setShowHidden,
+                  onCheckboxChanged: handleShowHiddenChange,
                 },
               ]}
             />
@@ -111,6 +166,8 @@ export default function ArrivalsClientPage({
             <ArrivalsTable
               workers={filteredData || []}
               onUpdated={mutate}
+              onWorkerArrived={handleWorkerArrived}
+              onWorkerHidden={handleWorkerHidden}
               sortOrder={sortOrder}
               onSortChanged={setSortOrder}
             />
@@ -163,16 +220,18 @@ function filterWorkers(
   searchable: Map<string, string>,
   onlyNotArrived: boolean,
   showHidden: boolean,
+  recentlyArrived: Set<string>,
+  recentlyHidden: Set<string>,
   workers?: ArrivalWorker[]
 ) {
   if (!workers) return []
   return workers
     .filter(w => {
-      if (!showHidden && !w.show) return false
+      if (!showHidden && !w.show) return recentlyHidden.has(w.id)
       return true
     })
     .filter(w => {
-      if (onlyNotArrived) return !w.arrived
+      if (onlyNotArrived && w.arrived) return recentlyArrived.has(w.id)
       return true
     })
     .filter(w => {

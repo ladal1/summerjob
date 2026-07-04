@@ -15,6 +15,8 @@ import ErrorMessageModal from '../modal/ErrorMessageModal'
 interface ArrivalRowProps {
   worker: ArrivalWorker
   onUpdated: () => void
+  onWorkerArrived: (workerId: string) => void
+  onWorkerHidden: (workerId: string) => void
 }
 
 function formatBirthDate(isoDate: string | null): string {
@@ -26,7 +28,12 @@ function formatBirthDate(isoDate: string | null): string {
   return `${day}.${month}.${year}`
 }
 
-export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
+export default function ArrivalRow({
+  worker,
+  onUpdated,
+  onWorkerArrived,
+  onWorkerHidden,
+}: ArrivalRowProps) {
   const [showCarForm, setShowCarForm] = useState(false)
   const [showHideConfirm, setShowHideConfirm] = useState(false)
   const [optimisticArrived, setOptimisticArrived] = useState<boolean | null>(
@@ -94,12 +101,14 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
   const handleArrived = () => {
     setOptimisticArrived(true)
     triggerArrived({})
+    onWorkerArrived(worker.id)
   }
 
   const handleHide = () => {
     setOptimisticShow(false)
     triggerHide({})
     setShowHideConfirm(false)
+    onWorkerHidden(worker.id)
   }
 
   const handleUnarrive = () => {
@@ -125,10 +134,8 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
         <td>{worker.phone}</td>
         <td>{formatBirthDate(worker.birthDate)}</td>
         <td>
-          {worker.cars.length > 0 ? (
+          {worker.cars.length > 0 && (
             <span>{worker.cars.map(c => c.name).join(', ')}</span>
-          ) : (
-            <span className="text-muted">-</span>
           )}
           <span
             className="smj-action-edit cursor-pointer ms-2"
