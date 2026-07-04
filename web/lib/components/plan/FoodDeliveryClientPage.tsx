@@ -941,24 +941,39 @@ export default function FoodDeliveryClientPage({
                                                   </small>
                                                 </div>
                                                 <div className="btn-group">
-                                                  <Link
-                                                    href={(() => {
-                                                      const deliveryId =
-                                                        foodDeliveries?.find(
-                                                          d =>
-                                                            d.courierNum ===
-                                                            courierNumber
-                                                        )?.id
-                                                      return `/plan/${planId}/courier/${courierNumber}?deliveryId=${deliveryId}`
-                                                    })()}
-                                                  >
-                                                    <button
-                                                      className="btn btn-sm btn-outline-light"
-                                                      title="Otevřít pohled rozvozníka"
-                                                    >
-                                                      <i className="fas fa-eye"></i>
-                                                    </button>
-                                                  </Link>
+                                                  {(() => {
+                                                    const deliveryId =
+                                                      foodDeliveries?.find(
+                                                        d =>
+                                                          d.courierNum ===
+                                                          courierNumber
+                                                      )?.id
+
+                                                    if (!deliveryId) {
+                                                      return (
+                                                        <button
+                                                          className="btn btn-sm btn-outline-light"
+                                                          title="Pohled rozvozníka není dostupný"
+                                                          disabled
+                                                        >
+                                                          <i className="fas fa-eye"></i>
+                                                        </button>
+                                                      )
+                                                    }
+
+                                                    return (
+                                                      <Link
+                                                        href={`/plan/${planId}/courier/${courierNumber}?deliveryId=${deliveryId}`}
+                                                      >
+                                                        <button
+                                                          className="btn btn-sm btn-outline-light"
+                                                          title="Otevřít pohled rozvozníka"
+                                                        >
+                                                          <i className="fas fa-eye"></i>
+                                                        </button>
+                                                      </Link>
+                                                    )
+                                                  })()}
                                                   <button
                                                     className="btn btn-sm btn-outline-light"
                                                     onClick={() =>
