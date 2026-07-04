@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import InlineCarForm from './InlineCarForm'
 import ConfirmationModal from '../modal/ConfirmationModal'
+import ErrorMessageModal from '../modal/ErrorMessageModal'
 
 interface ArrivalRowProps {
   worker: ArrivalWorker
@@ -32,6 +33,7 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
     null
   )
   const [optimisticShow, setOptimisticShow] = useState<boolean | null>(null)
+  const [error, setError] = useState(false)
 
   const arrived = optimisticArrived ?? worker.arrived
   const show = optimisticShow ?? worker.show
@@ -42,6 +44,10 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
         setOptimisticArrived(null)
         onUpdated()
       },
+      onError: () => {
+        setOptimisticArrived(null)
+        setError(true)
+      },
     })
 
   const { trigger: triggerHide, isMutating: hideMutating } = useAPIMarkNoShow(
@@ -50,6 +56,10 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
       onSuccess: () => {
         setOptimisticShow(null)
         onUpdated()
+      },
+      onError: () => {
+        setOptimisticShow(null)
+        setError(true)
       },
     }
   )
@@ -60,6 +70,10 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
         setOptimisticArrived(null)
         onUpdated()
       },
+      onError: () => {
+        setOptimisticArrived(null)
+        setError(true)
+      },
     })
 
   const { trigger: triggerUnhide, isMutating: unhideMutating } =
@@ -68,10 +82,14 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
         setOptimisticShow(null)
         onUpdated()
       },
+      onError: () => {
+        setOptimisticShow(null)
+        setError(true)
+      },
     })
 
-  const isMutating =
-    arriveMutating || unarriveMutating || hideMutating || unhideMutating
+  const arriveBusy = arriveMutating || unarriveMutating
+  const hideBusy = hideMutating || unhideMutating
 
   const handleArrived = () => {
     setOptimisticArrived(true)
@@ -94,11 +112,7 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
     triggerUnhide()
   }
 
-  const rowClass = arrived
-    ? 'table-success'
-    : !show
-      ? 'table-secondary text-muted'
-      : ''
+  const rowClass = !show ? 'smj-table-body text-muted' : 'smj-table-body'
 
   return (
     <>
@@ -116,62 +130,57 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
           ) : (
             <span className="text-muted">-</span>
           )}
-          <button
-            className="btn btn-sm btn-outline-secondary ms-2"
-            type="button"
+          <span
+            className="smj-action-edit cursor-pointer ms-2"
+            role="button"
             onClick={() => setShowCarForm(!showCarForm)}
             title="Přidat auto"
           >
             <i className="fas fa-car"></i>
             <i className="fas fa-plus fa-xs ms-1"></i>
-          </button>
+          </span>
         </td>
-        <td className="smj-sticky-col-right smj-table-header">
-          <div className="d-flex gap-1 justify-content-end">
-            {!arrived && show && (
-              <button
-                className="btn btn-sm btn-success"
-                type="button"
-                onClick={handleArrived}
-                disabled={isMutating}
+        <td className="smj-sticky-col-right smj-table-body">
+          <div className="d-flex align-items-center gap-3 justify-content-end">
+            {arriveBusy ? (
+              <i
+                className="fas fa-spinner smj-action-complete spinning"
+                title="Ukládám..."
+              ></i>
+            ) : !arrived && show ? (
+              <i
+                className="fas fa-check smj-action-complete cursor-pointer"
                 title="Označit jako dorazil"
-              >
-                <i className="fas fa-check"></i>
-              </button>
-            )}
-            {arrived && (
-              <button
-                className="btn btn-sm btn-success"
-                type="button"
-                onClick={handleUnarrive}
-                disabled={isMutating}
+                onClick={handleArrived}
+              ></i>
+            ) : arrived ? (
+              <i
+                className="fas fa-times smj-action-completed cursor-pointer"
                 title="Zrušit příchod"
-              >
-                <i className="fas fa-check me-1"></i>
-                Dorazil
-              </button>
+                onClick={handleUnarrive}
+              ></i>
+            ) : (
+              <></>
             )}
-            {show && !arrived && (
-              <button
-                className="btn btn-sm btn-outline-danger"
-                type="button"
-                onClick={() => setShowHideConfirm(true)}
-                disabled={isMutating}
+            {hideBusy ? (
+              <i
+                className="fas fa-spinner smj-action-hide spinning"
+                title="Ukládám..."
+              ></i>
+            ) : show && !arrived ? (
+              <i
+                className="fas fa-eye-slash smj-action-hide cursor-pointer"
                 title="Skrýt (nedorazil)"
-              >
-                <i className="fas fa-eye-slash"></i>
-              </button>
-            )}
-            {!show && (
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                type="button"
-                onClick={handleUnhide}
-                disabled={isMutating}
+                onClick={() => setShowHideConfirm(true)}
+              ></i>
+            ) : !show ? (
+              <i
+                className="fas fa-eye smj-action-hidden cursor-pointer"
                 title="Zrušit skrytí"
-              >
-                <i className="fas fa-eye"></i>
-              </button>
+                onClick={handleUnhide}
+              ></i>
+            ) : (
+              <></>
             )}
           </div>
         </td>
@@ -203,6 +212,12 @@ export default function ArrivalRow({ worker, onUpdated }: ArrivalRowProps) {
             ? Bude skryt/a v celé aplikaci (plánování, seznamy pracantů, auta).
           </p>
         </ConfirmationModal>
+      )}
+      {error && (
+        <ErrorMessageModal
+          onClose={() => setError(false)}
+          mainMessage={'Akci se nepodařilo provést. Zkuste to znovu.'}
+        />
       )}
     </>
   )

@@ -39,6 +39,6 @@ async function del(
 }
 
 export default APIAccessController(
-  [Permission.WORKERS, Permission.ADMIN],
+  [Permission.WORKERS, Permission.ADMIN, Permission.RECEPTION],
   APIMethodHandler({ post, del })
 )

@@ -14,6 +14,6 @@ async function get(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default APIAccessController(
-  [Permission.WORKERS, Permission.ADMIN],
+  [Permission.WORKERS, Permission.ADMIN, Permission.RECEPTION],
   APIMethodHandler({ get })
 )

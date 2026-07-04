@@ -31,7 +31,7 @@ export default async function AdminPage() {
       <section>
         <div className="container">
           <div className="list-group">
-            {hasWorkersPermission && (
+            {(hasWorkersPermission || hasReceptionPermission) && (
               <Link
                 className="list-group-item list-group-item-action"
                 href="/admin/arrivals"

@@ -19,7 +19,8 @@ function escapeCsv(value: string): string {
 }
 
 async function get(req: NextApiRequest, res: NextApiResponse) {
-  const workers = await getWorkersForCsvExport()
+  const includeHidden = req.query.includeHidden === 'true'
+  const workers = await getWorkersForCsvExport(includeHidden)
 
   const header = 'Příjmení;Jméno;Datum narození;Email;Telefon'
   const rows = workers.map(w => {
@@ -47,6 +48,6 @@ async function get(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default APIAccessController(
-  [Permission.WORKERS, Permission.ADMIN],
+  [Permission.WORKERS, Permission.ADMIN, Permission.RECEPTION],
   APIMethodHandler({ get })
 )

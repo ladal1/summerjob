@@ -136,7 +136,7 @@ export async function unhideWorker(workerId: string) {
   })
 }
 
-export async function getWorkersForCsvExport() {
+export async function getWorkersForCsvExport(includeHidden = false) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
@@ -148,6 +148,7 @@ export async function getWorkersForCsvExport() {
       availability: {
         some: {
           eventId: activeEventId,
+          ...(includeHidden ? {} : { show: true }),
         },
       },
     },

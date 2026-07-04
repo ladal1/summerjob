@@ -267,8 +267,14 @@ export default function AdminAdorationManager({
                   <small className="text-muted">Plně obsazené</small>
                 </div>
                 {unfilledSlots.length > 0 && (
-                  <div className="d-flex align-items-center ms-auto">
-                    <div className="badge bg-info text-white me-2">
+                  <div
+                    className="d-flex align-items-start ms-auto"
+                    style={{ maxWidth: '100%' }}
+                  >
+                    <div
+                      className="badge bg-info text-white d-inline-flex flex-wrap"
+                      style={{ maxWidth: '100%', whiteSpace: 'normal' }}
+                    >
                       <i className="fas fa-clock me-1"></i>
                       Volné sloty:{' '}
                       {unfilledSlots.map((slot, index) => (
@@ -329,152 +335,161 @@ export default function AdminAdorationManager({
             </div>
           )}
 
-          <table className="table table-bordered table-sm mt-3">
-            <thead className="table-primary">
-              <tr>
-                {!accessedFromReception && (
-                  <th style={{ width: '40px' }}>
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={isAllSelected}
-                      onChange={toggleSelectAll}
-                    />
+          <div className="table-responsive">
+            <table className="table table-bordered table-sm mt-3">
+              <thead className="table-primary">
+                <tr>
+                  {!accessedFromReception && (
+                    <th style={{ width: '40px' }}>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={isAllSelected}
+                        onChange={toggleSelectAll}
+                      />
+                    </th>
+                  )}
+                  <th
+                    style={{ width: '120px' }}
+                    className="text-center d-none d-md-table-cell"
+                  >
+                    Čas
                   </th>
-                )}
-                <th
-                  style={{ width: '120px' }}
-                  className="text-center d-none d-md-table-cell"
-                >
-                  Čas
-                </th>
-                <th style={{ width: '80px' }} className="text-center d-md-none">
-                  Čas
-                </th>
-                <th>Lokace</th>
-                <th>Pracanti</th>
-                <th
-                  style={{ width: '120px' }}
-                  className="d-none d-md-table-cell"
-                >
-                  Akce
-                </th>
-                <th style={{ width: '60px' }} className="d-md-none">
-                  Akce
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedSlots.map(slot => {
-                const endTime = new Date(
-                  slot.localDateStart.getTime() + slot.length * 60000
-                )
-                const startTimeStr = format(slot.localDateStart, 'HH:mm')
-                const endTimeStr = format(endTime, 'HH:mm')
-                const statusInfo = getSlotStatusInfo(slot)
+                  <th
+                    style={{ width: '80px' }}
+                    className="text-center d-md-none"
+                  >
+                    Čas
+                  </th>
+                  <th>Lokace</th>
+                  <th>Pracanti</th>
+                  <th
+                    style={{ width: '120px' }}
+                    className="d-none d-md-table-cell"
+                  >
+                    Akce
+                  </th>
+                  <th style={{ width: '60px' }} className="d-md-none">
+                    Akce
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedSlots.map(slot => {
+                  const endTime = new Date(
+                    slot.localDateStart.getTime() + slot.length * 60000
+                  )
+                  const startTimeStr = format(slot.localDateStart, 'HH:mm')
+                  const endTimeStr = format(endTime, 'HH:mm')
+                  const statusInfo = getSlotStatusInfo(slot)
 
-                return (
-                  <tr key={slot.id} className={statusInfo.rowClass}>
-                    {!accessedFromReception && (
-                      <td className="align-middle">
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          checked={selectedIds.includes(slot.id)}
-                          onChange={() => toggleSelectOne(slot.id)}
-                        />
-                      </td>
-                    )}
-                    <td className="text-center align-middle d-none d-md-table-cell">
-                      <strong>
-                        {startTimeStr} - {endTimeStr}
-                      </strong>
-                      <br />
-                      <small className="text-muted">{slot.length} min</small>
-                    </td>
-                    <td
-                      className="text-center align-middle d-md-none"
-                      style={{ width: '80px' }}
-                    >
-                      <strong>
-                        {startTimeStr}
-                        <br />-<br />
-                        {endTimeStr}
-                      </strong>
-                      <br />
-                      <small className="text-muted">{slot.length}min</small>
-                    </td>
-                    <td className="align-middle">{slot.location}</td>
-                    <td className="align-middle">
-                      <div className="d-flex align-items-center gap-2 flex-wrap">
-                        <span className={`badge ${statusInfo.badgeClass}`}>
-                          <i className={`${statusInfo.icon} me-1`}></i>
-                          {slot.workerCount}/{slot.capacity}
-                        </span>
-                        <small
-                          className={`badge ${statusInfo.badgeClass} opacity-75`}
-                        >
-                          {statusInfo.badgeText}
-                        </small>
-                      </div>
-                      {slot.workers.length > 0 && (
-                        <div className="mt-1">
-                          <small className="text-muted me-2">Přiřazení:</small>
-                          {slot.workers.map((w, index) => (
-                            <span
-                              key={index}
-                              className="badge bg-light text-dark me-1 mb-1 d-inline-block"
-                              style={{ fontSize: '0.75rem' }}
-                            >
-                              {w.firstName} {w.lastName} ({w.phone})
-                            </span>
-                          ))}
-                        </div>
+                  return (
+                    <tr key={slot.id} className={statusInfo.rowClass}>
+                      {!accessedFromReception && (
+                        <td className="align-middle">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            checked={selectedIds.includes(slot.id)}
+                            onChange={() => toggleSelectOne(slot.id)}
+                          />
+                        </td>
                       )}
-                    </td>
-                    <td className="align-middle">
-                      <div className="d-flex gap-1 d-none d-md-flex">
-                        {!accessedFromReception && (
-                          <button
-                            className="btn btn-sm btn-outline-dark"
-                            onClick={() => openEditModal(slot)}
-                            title="Upravit slot"
+                      <td className="text-center align-middle d-none d-md-table-cell">
+                        <strong>
+                          {startTimeStr} - {endTimeStr}
+                        </strong>
+                        <br />
+                        <small className="text-muted">{slot.length} min</small>
+                      </td>
+                      <td
+                        className="text-center align-middle d-md-none"
+                        style={{ width: '80px' }}
+                      >
+                        <strong>
+                          {startTimeStr}
+                          <br />-<br />
+                          {endTimeStr}
+                        </strong>
+                        <br />
+                        <small className="text-muted">{slot.length}min</small>
+                      </td>
+                      <td className="align-middle text-break">
+                        {slot.location}
+                      </td>
+                      <td className="align-middle">
+                        <div className="d-flex align-items-center gap-2 flex-wrap">
+                          <span className={`badge ${statusInfo.badgeClass}`}>
+                            <i className={`${statusInfo.icon} me-1`}></i>
+                            {slot.workerCount}/{slot.capacity}
+                          </span>
+                          <small
+                            className={`badge ${statusInfo.badgeClass} opacity-75`}
                           >
-                            <i className="fas fa-edit"></i>
-                          </button>
+                            {statusInfo.badgeText}
+                          </small>
+                        </div>
+                        {slot.workers.length > 0 && (
+                          <div className="mt-1">
+                            <small className="text-muted me-2">
+                              Přiřazení:
+                            </small>
+                            {slot.workers.map((w, index) => (
+                              <span
+                                key={index}
+                                className="badge bg-light text-dark me-1 mb-1 d-inline-block"
+                                style={{ fontSize: '0.75rem' }}
+                              >
+                                {w.firstName} {w.lastName} ({w.phone})
+                              </span>
+                            ))}
+                          </div>
                         )}
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => openAssignModal(slot)}
-                          title="Přiřadit/odebrat pracanta"
-                        >
-                          <i className="fas fa-user-plus"></i>
-                        </button>
-                      </div>
-                      <div className="d-flex flex-column gap-2 d-md-none">
-                        {!accessedFromReception && (
+                      </td>
+                      <td className="align-middle">
+                        <div className="d-flex gap-1 d-none d-md-flex">
+                          {!accessedFromReception && (
+                            <button
+                              className="btn btn-sm btn-outline-dark"
+                              onClick={() => openEditModal(slot)}
+                              title="Upravit slot"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                          )}
                           <button
-                            className="btn btn-sm btn-outline-dark"
-                            onClick={() => openEditModal(slot)}
-                            title="Upravit slot"
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => openAssignModal(slot)}
+                            title="Přiřadit/odebrat pracanta"
                           >
-                            <i className="fas fa-edit"></i>
+                            <i className="fas fa-user-plus"></i>
                           </button>
-                        )}
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => openAssignModal(slot)}
-                          title="Přiřadit/odebrat pracanta"
-                        >
-                          <i className="fas fa-user-plus"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                        </div>
+                        <div className="d-flex flex-column gap-2 d-md-none">
+                          {!accessedFromReception && (
+                            <button
+                              className="btn btn-sm btn-outline-dark"
+                              onClick={() => openEditModal(slot)}
+                              title="Upravit slot"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => openAssignModal(slot)}
+                            title="Přiřadit/odebrat pracanta"
+                          >
+                            <i className="fas fa-user-plus"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
       {showCreateModal && (
