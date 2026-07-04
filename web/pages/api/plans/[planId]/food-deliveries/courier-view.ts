@@ -1,7 +1,6 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getFoodDeliveriesWithPlanByPlanId } from 'lib/data/food-delivery'
-import { Permission } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 // Minimal types for courier delivery view
@@ -9,8 +8,6 @@ export type CourierDeliveryWorker = {
   id: string
   firstName: string
   lastName: string
-  phone: string
-  age: number | null
   foodAllergies: string[]
 }
 
@@ -32,7 +29,6 @@ export type CourierDeliveryJob = {
     id: string
     firstName: string
     lastName: string
-    phone: string
   } | null
   completed: boolean
 }
@@ -64,9 +60,23 @@ async function get(
   res: NextApiResponse<CourierDeliveryAPIGetResponse>
 ) {
   const planId = req.query.planId as string
+  const deliveryId = req.query.deliveryId
+  if (typeof deliveryId !== 'string') {
+    res.status(400).end()
+    return
+  }
+
   const rawData = await getFoodDeliveriesWithPlanByPlanId(planId)
 
   if (!rawData) {
+    res.status(404).end()
+    return
+  }
+
+  const courierDelivery = rawData.deliveries.find(
+    delivery => delivery.id === deliveryId
+  )
+  if (!courierDelivery) {
     res.status(404).end()
     return
   }
@@ -82,8 +92,6 @@ async function get(
           id: worker.id,
           firstName: worker.firstName,
           lastName: worker.lastName,
-          phone: worker.phone,
-          age: worker.age,
           foodAllergies: worker.foodAllergies.map(fa => fa.name),
         })),
         proposedJob: {
@@ -111,19 +119,18 @@ async function get(
               id: job.responsibleWorker.id,
               firstName: job.responsibleWorker.firstName,
               lastName: job.responsibleWorker.lastName,
-              phone: job.responsibleWorker.phone,
             }
           : null,
         completed: false, // This comes from the delivery jobs, not the plan jobs
       })),
     },
-    deliveries: rawData.deliveries,
+    deliveries: [courierDelivery],
   }
 
   res.status(200).json(transformedData)
 }
 
 export default APIAccessController(
-  [Permission.PLANS],
+  [], // No permissions required for courier delivery viewing
   APIMethodHandler({ get })
 )

@@ -942,7 +942,15 @@ export default function FoodDeliveryClientPage({
                                                 </div>
                                                 <div className="btn-group">
                                                   <Link
-                                                    href={`/plan/${planId}/courier/${foodDeliveries?.find(d => d.courierNum === courierNumber)?.id}?deliveryId=${foodDeliveries?.find(d => d.courierNum === courierNumber)?.id}`}
+                                                    href={(() => {
+                                                      const deliveryId =
+                                                        foodDeliveries?.find(
+                                                          d =>
+                                                            d.courierNum ===
+                                                            courierNumber
+                                                        )?.id
+                                                      return `/plan/${planId}/courier/${deliveryId}?deliveryId=${deliveryId}`
+                                                    })()}
                                                   >
                                                     <button
                                                       className="btn btn-sm btn-outline-light"
