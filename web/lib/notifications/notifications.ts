@@ -9,6 +9,7 @@ import {
   getWorkerIdsWithFoodAllergies,
 } from 'lib/data/workers'
 import { getDateFromISOString } from 'lib/helpers/helpers'
+import logger from 'lib/logger/logger'
 import { Prisma } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import { NotificationCreateData } from 'lib/types/notification'
@@ -21,6 +22,15 @@ webpush.setVapidDetails(
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 )
+
+if (
+  !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+  !process.env.VAPID_PRIVATE_KEY
+) {
+  logger.error(
+    '[notifications] VAPID keys are not configured. Set NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY environment variables. Generate keys with: npx web-push generate-vapid-keys'
+  )
+}
 
 function normalizePayload(payload: string) {
   return JSON.stringify({
@@ -50,7 +60,7 @@ async function sendPushToSubscription(
       },
       message
     )
-  } catch (err) {
+  } catch (err: unknown) {
     // Delete stale subscriptions
     if (
       !!err &&
@@ -58,11 +68,18 @@ async function sendPushToSubscription(
       'statusCode' in err &&
       (err.statusCode === 404 || err.statusCode === 410)
     ) {
+      logger.info(
+        `[notifications] Deleting stale push subscription (endpoint: ${sub.endpoint})`
+      )
       await prisma.pushSubscription.deleteMany({
         where: { endpoint: sub.endpoint },
       })
     } else {
-      console.error('Unexpected push subscription error:', err)
+      logger.error(
+        `[notifications] Failed to send push notification (endpoint: ${sub.endpoint}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      )
     }
   }
 }
@@ -86,6 +103,11 @@ async function sendNotificationToWorkers(workerIds: string[], payload: string) {
       },
     },
   })
+  if (subscriptions.length === 0) {
+    logger.info(
+      `[notifications] No push subscriptions found for ${workerIds.length} worker(s) - only in-app notification was created`
+    )
+  }
   const message = normalizePayload(payload)
   await Promise.all(
     subscriptions.map(sub => sendPushToSubscription(sub, message))

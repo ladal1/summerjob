@@ -40,6 +40,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_VAPID_PUBLIC_KEY=${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY || secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
 
   download-to-server:
     name: Download and run Docker image on server

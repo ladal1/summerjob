@@ -35,6 +35,11 @@ ENV NODE_ENV=production
 # Next.js telemetry can be disabled if needed:
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time,
+# so they must be available during the build, not just at runtime.
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
+
 RUN npm run build
 
 # ============================================
