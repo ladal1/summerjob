@@ -3,6 +3,7 @@ import 'styles/bootstrap/css/bootstrap.min.css'
 import 'styles/custom.css'
 import { getSMJSession } from 'lib/auth/auth'
 import { redirect } from 'next/navigation'
+import PushNotificationManagerBar from 'lib/components/notifications/PushNotificationManagerBar'
 
 export default async function WebLayout({
   children,
@@ -16,6 +17,7 @@ export default async function WebLayout({
   return (
     <>
       <NavbarServer session={session} />
+      <PushNotificationManagerBar />
       <main>{children}</main>
     </>
   )

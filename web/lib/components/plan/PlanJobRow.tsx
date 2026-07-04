@@ -5,7 +5,8 @@ import {
   useAPIActiveJobUpdate,
 } from 'lib/fetcher/active-job'
 import { formatDateShort } from 'lib/helpers/helpers'
-import type { Worker } from 'lib/prisma/client'
+import type { ColorTag, Worker } from 'lib/prisma/client'
+import { useAPIProposedJobUpdate } from 'lib/fetcher/proposed-job'
 import { ActiveJobNoPlan, ActiveJobWorkersAndJobs } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { ToolCompleteData } from 'lib/types/tool'
@@ -27,6 +28,8 @@ import MoveWorkerModal from './MoveWorkerModal'
 import RideSelect from './RideSelect'
 import ToggleCompletedCheck from './ToggleCompletedCheck'
 import { SameCoworkerIssue, WorkerIssue } from './WorkerIssue'
+import { ColorTagCell } from '../table/ColorTagCell'
+import { WorkerColorTag } from '../worker/WorkerColorTag'
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan
@@ -70,13 +73,21 @@ export function PlanJobRow({
       },
     })
 
+  const { trigger: triggerJobUpdate } = useAPIProposedJobUpdate(
+    job.proposedJob.id,
+    { onSuccess: () => reloadPlan() }
+  )
+  const setColorTags = (colorTags: ColorTag[]) => {
+    triggerJobUpdate({ colorTags })
+  }
+
   const [workerToMove, setWorkerToMove] = useState<WorkerComplete | undefined>(
     undefined
   )
 
   const onWorkerDropped =
     (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
-      if (isBeingUpdated) {
+      if (isBeingUpdated || accessedFromReception) {
         return
       }
       const workerId = e.dataTransfer.getData('worker-id')
@@ -241,7 +252,8 @@ export function PlanJobRow({
             sameCoworkerIssue,
             adorationByWorker,
             jobPositionMap,
-            accessedFromReception
+            accessedFromReception,
+            setColorTags
           )}
           onDrop={onWorkerDropped(job.id)}
         >
@@ -312,7 +324,7 @@ export function PlanJobRow({
                       }
                       onMouseLeave={() => onWorkerHover(null)}
                       key={worker.id}
-                      draggable={true}
+                      draggable={!accessedFromReception}
                       onDragStart={onWorkerDragStart(worker, job.id)}
                     />
                   ))}
@@ -387,7 +399,8 @@ function formatRowData(
   sameCoworkerIssue: boolean,
   adorationByWorker: Map<string, boolean>,
   jobPositionMap: Map<string, number>,
-  accessedFromReception: boolean
+  accessedFromReception: boolean,
+  setColorTags: (colorTags: ColorTag[]) => void
 ): RowCells[] {
   const cells: RowCells[] = [
     {
@@ -403,6 +416,12 @@ function formatRowData(
           className="d-inline-flex gap-1 align-items-center"
           key={`name-${job.id}`}
         >
+          {!accessedFromReception && (
+            <ColorTagCell
+              tags={job.proposedJob.colorTags}
+              onChange={setColorTags}
+            />
+          )}
           {job.proposedJob.name}
           <ActiveJobIssueIcon
             job={job}
@@ -516,6 +535,13 @@ function formatWorkerData(
             sameWork={workerSameWork}
             sameCoworker={workerSameCoworker}
           />
+          {!accessedFromReception && (
+            <WorkerColorTag
+              workerId={worker.id}
+              colorTags={worker.colorTags}
+              onUpdated={reloadPlan}
+            />
+          )}
           {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
           {wantsAdoration && (
             <i className="fas fa-church ms-2" title="Chce adorovat"></i>

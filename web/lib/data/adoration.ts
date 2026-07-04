@@ -1,8 +1,9 @@
 // lib/data/adoration.ts
 import prisma from 'lib/prisma/connection'
 import type { PrismaTransactionClient } from 'lib/types/prisma'
-import { startOfDay, endOfDay, addDays, format } from 'date-fns'
+import { startOfDay, endOfDay, addDays, format, add } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
+import { AdorationSlot, Worker } from 'lib/prisma/client'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
 import { AdorationSlotWithWorkerIds } from 'lib/types/adoration'
@@ -509,4 +510,23 @@ export async function findNearestDateWithAdorationSlots(
   })
 
   return nearestSlot ? format(nearestSlot.dateStart, 'yyyy-MM-dd') : null
+}
+
+export async function getUpcomingAdorationSlots(
+  hours: number
+): Promise<(AdorationSlot & { workers: Worker[] })[]> {
+  const lowerBound = new Date()
+  const upperBound = add(lowerBound, { hours })
+
+  return await prisma.adorationSlot.findMany({
+    where: {
+      dateStart: {
+        gte: lowerBound,
+        lte: upperBound,
+      },
+    },
+    include: {
+      workers: true,
+    },
+  })
 }

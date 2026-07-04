@@ -108,6 +108,10 @@ export default function EditProposedJobForm({
     const modified = pick(data, ...Object.keys(dirtyFields)) as ProposedJobForm
     modified.availability = data.availability
     modified.requiredDays = data.requiredDays
+    modified.minWorkers = data.minWorkers
+    modified.maxWorkers = data.maxWorkers
+    modified.strongWorkers = data.strongWorkers
+    modified.priority = data.priority
     trigger(modified, {
       onSuccess: () => {
         setSaved(true)

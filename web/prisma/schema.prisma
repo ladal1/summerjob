@@ -33,6 +33,15 @@ enum ApplicationStatus {
   REJECTED
 }
 
+enum ColorTag {
+  YELLOW
+  GREEN
+  RED
+  PURPLE
+  BLUE
+  ORANGE
+}
+
 model SkillHas {
   id      String   @id @default(uuid())
   name    String   @unique
@@ -151,6 +160,11 @@ model Worker {
   application        Application?                @relation(fields: [applicationId], references: [id])
   applicationId      String?                     @unique
   adorationSlots     AdorationSlot[] @relation("SlotWorkers")
+  pushSubscriptions  PushSubscription[]
+  notifications      Notification[]              @relation("NotificationRecipients")
+  seenNotifications  Notification[]              @relation("NotificationSeenBy")
+  adorationReminderLogging AdorationReminderLogging[]
+  colorTags          ColorTag[]                  @default([])
 }
 
 model WorkerPermissions {
@@ -218,6 +232,7 @@ model ProposedJob {
   toolsToTakeWith    Tool[]                      @relation("ToolToTakeWith")
   photos             JobPhoto[]                  @relation("PhotoProposedJob")
   priority           Int                         @default(1)
+  colorTags          ColorTag[]                  @default([])
 }
 
 model PinnedProposedJobByWorker {
@@ -394,6 +409,7 @@ model AdorationSlot {
   workers   Worker[]                @relation("SlotWorkers")
   event     SummerJobEvent          @relation(fields: [eventId], references: [id])
   eventId   String
+  adorationReminderLogging AdorationReminderLogging[]
 }
 
 model FoodDelivery {
@@ -420,4 +436,34 @@ model FoodDeliveryJobOrder {
 
   @@unique([foodDeliveryId, activeJobId]) // Each job can appear only once per delivery
   @@unique([foodDeliveryId, order])       // Each order position is unique per delivery
+}
+
+// Subscriptions for push notifications
+model PushSubscription {
+  id       String @id @default(uuid())
+  worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId String
+  endpoint String @unique
+  p256dh   String
+  auth     String
+}
+
+// Internal notifications
+model Notification {
+  id            String   @id @default(uuid())
+  workers       Worker[] @relation("NotificationRecipients")
+  seenByWorkers Worker[] @relation("NotificationSeenBy")
+  text          String
+  receivedAt    DateTime @default(now())
+}
+
+model AdorationReminderLogging {
+  id String @id @default(uuid())
+  
+  worker          Worker        @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId        String
+  adorationSlot   AdorationSlot @relation(fields: [adorationSlotId], references: [id], onDelete: Cascade)
+  adorationSlotId String
+  
+  @@unique([workerId, adorationSlotId])
 }
