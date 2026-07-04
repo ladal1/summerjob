@@ -49,6 +49,24 @@ function MapHighlighter({
   return null
 }
 
+// Distinct color palette for courier numbers (cycling for numbers beyond palette length)
+const COURIER_COLORS = [
+  '#e74c3c', // red
+  '#3498db', // blue
+  '#2ecc71', // green
+  '#f39c12', // orange
+  '#9b59b6', // purple
+  '#1abc9c', // teal
+  '#e67e22', // dark orange
+  '#e91e63', // pink
+  '#00bcd4', // cyan
+  '#ff5722', // deep orange
+]
+
+function colorForCourier(number: number): string {
+  return COURIER_COLORS[(number - 1) % COURIER_COLORS.length]
+}
+
 // Fix for Marker Icon that is not defaultly showing for react-leaflet
 // Set this once at module scope to avoid performance issues
 const DefaultIcon = L.icon({
@@ -75,7 +93,11 @@ export default function JobsMapView({
   jobs,
   jobOrder,
   height = 280,
+  courierNums,
+  onAssignCourier,
+  highlightJobId,
 }: JobsMapViewProps) {
+  const markerRefs = useRef<Map<string, L.Marker>>(new Map())
   // Create numbered icons for ordered jobs
   const createNumberedIcon = (number: number) => {
     const color = colorForCourier(number)

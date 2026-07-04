@@ -2,6 +2,7 @@ import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { updateJobDeliveryStatus } from 'lib/data/food-delivery'
 import logger from 'lib/logger/logger'
 import { APILogEvent } from 'lib/types/logger'
+import { ExtendedSession } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 async function post(
