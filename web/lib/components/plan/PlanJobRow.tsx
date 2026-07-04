@@ -416,10 +416,12 @@ function formatRowData(
           className="d-inline-flex gap-1 align-items-center"
           key={`name-${job.id}`}
         >
-          <ColorTagCell
-            tags={job.proposedJob.colorTags}
-            onChange={setColorTags}
-          />
+          {!accessedFromReception && (
+            <ColorTagCell
+              tags={job.proposedJob.colorTags}
+              onChange={setColorTags}
+            />
+          )}
           {job.proposedJob.name}
           <ActiveJobIssueIcon
             job={job}
@@ -533,11 +535,13 @@ function formatWorkerData(
             sameWork={workerSameWork}
             sameCoworker={workerSameCoworker}
           />
-          <WorkerColorTag
-            workerId={worker.id}
-            colorTags={worker.colorTags}
-            onUpdated={reloadPlan}
-          />
+          {!accessedFromReception && (
+            <WorkerColorTag
+              workerId={worker.id}
+              colorTags={worker.colorTags}
+              onUpdated={reloadPlan}
+            />
+          )}
           {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
           {wantsAdoration && (
             <i className="fas fa-church ms-2" title="Chce adorovat"></i>

@@ -75,7 +75,9 @@ function formatWorkerRow(
     {
       content: (
         <span className="d-inline-flex align-items-center">
-          <ColorTagCell tags={worker.colorTags} onChange={setColorTags} />
+          {!accessedFromReception && (
+            <ColorTagCell tags={worker.colorTags} onChange={setColorTags} />
+          )}
           {worker.firstName}
         </span>
       ),

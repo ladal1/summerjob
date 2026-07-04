@@ -179,11 +179,13 @@ function formatWorkerData(
     {
       content: (
         <span className="d-inline-flex align-items-center">
-          <WorkerColorTag
-            workerId={worker.id}
-            colorTags={worker.colorTags}
-            onUpdated={reloadPlan}
-          />
+          {!accessedFromReception && (
+            <WorkerColorTag
+              workerId={worker.id}
+              colorTags={worker.colorTags}
+              onUpdated={reloadPlan}
+            />
+          )}
           {name}
         </span>
       ),
