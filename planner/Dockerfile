@@ -1,15 +1,24 @@
-# Use official Python image
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:latest AS uv
 
-# Set working directory
+FROM python:3.13-slim AS builder
+
+COPY --from=uv /uv /uvx /bin/
+
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock .
+RUN uv sync --system --no-dev
 
-# Copy the rest of the application code
 COPY . .
 
-# Set default command to run the message consumer
-CMD ["python", "src/receive.py"]
+FROM python:3.13-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=builder /app /app
+
+WORKDIR /app
+
+CMD ["python", "main.py"]

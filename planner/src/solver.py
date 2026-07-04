@@ -1,111 +1,197 @@
-import os
-import psycopg2
-import psycopg2.extras
-from pulp import LpMinimize, LpProblem, lpSum, LpVariable
-import pandas as pd
+from __future__ import annotations
+
+import logging
+import time
 import uuid
-from dotenv import load_dotenv
+from typing import Any
 
-from src.queries import (
-    insert_plan, select_jobs, select_job_details, select_strong_workers, select_workers,
-    select_forbids, select_forbidden_jobs, select_active_jobs, select_areas, select_score,
-    select_drive_jobs, select_driver, select_people, insert_ride, insert_rider
-)
+import pandas as pd
+from pulp import LpMinimize, LpProblem, lpSum, LpVariable
+from sqlalchemy.orm import Session
 
-# Load variables from .env
-load_dotenv()
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_DB = os.getenv("POSTGRES_DB")
-DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DB}"
+from src import queries as q
+from src.db import get_session
+from src.parsing import parse_pg_array
 
+logger = logging.getLogger(__name__)
 
-def dictionarify(query_results):
-    return {row["id"]: {**row} for row in query_results}
+MAX_RETRIES = 3
+BACKOFF_BASE = 2.0
+COOCCURRENCE_PENALTY_WEIGHT = 1.0
 
 
-def transform_score(query_results):
-    return {(row["job"], row["worker"]): row["score"] for row in query_results}
+# ---------------------------------------------------------------------------
+# helpers
+# ---------------------------------------------------------------------------
+
+def dictionarify(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {str(row["id"]): dict(row) for row in rows}
 
 
-def is_viable(worker, job, forbidden, attempt):
-    # Handle worker allergies - ensure we have a proper list/array
-    worker_allergies = worker["workAllergies"] or []
-    if isinstance(worker_allergies, str):
-        # If it's a string like "DUST" or "{DUST,MITES}", parse it
-        if worker_allergies.startswith('{') and worker_allergies.endswith('}'):
-            # Handle PostgreSQL array format like "{DUST,MITES}"
-            worker_allergies = worker_allergies[1:-1].split(',') if len(worker_allergies) > 2 else []
-        else:
-            # Handle single allergy as string
-            worker_allergies = [worker_allergies] if worker_allergies else []
-    
-    # Handle job allergens - ensure we have a proper list/array  
-    job_allergens = job["allergens"] or []
-    if isinstance(job_allergens, str):
-        # If it's a string like "{}" or "{DUST,MITES}", parse it
-        if job_allergens.startswith('{') and job_allergens.endswith('}'):
-            # Handle PostgreSQL array format like "{DUST,MITES}"
-            job_allergens = job_allergens[1:-1].split(',') if len(job_allergens) > 2 else []
-        else:
-            # Handle single allergen as string
-            job_allergens = [job_allergens] if job_allergens else []
-    
-    # Check if worker's allergies conflict with job allergens
+def transform_score(rows: list[dict[str, Any]]) -> dict[tuple[str, str], Any]:
+    return {(str(row["job"]), str(row["worker"])): row["score"] for row in rows}
+
+
+def is_viable(
+    worker: dict[str, Any],
+    job: dict[str, Any],
+    attempt: int,
+) -> bool:
+    worker_allergies = parse_pg_array(worker.get("workAllergies"))
+    job_allergens = parse_pg_array(job.get("allergens"))
     allergies_ok = set(worker_allergies).isdisjoint(set(job_allergens))
-    
-    # Check adoration requirements
-    adoration_ok = (worker["isAdoring"] and job["supportsAdoration"]) or not worker["isAdoring"]
-    
-    # Check if job is forbidden for this worker (unless it's a retry attempt)
-    forbidden_ok = job["id"] not in forbidden or attempt > 1
-    
-    return allergies_ok and adoration_ok and forbidden_ok
+    adoration_ok = (
+        (worker.get("isAdoring") and job.get("supportsAdoration"))
+        or not worker.get("isAdoring")
+    )
+    return allergies_ok and adoration_ok
 
 
-def what_workers(row, plan):
-    workers = [index for index, value in row.items() if hasattr(value, 'varValue') and value.varValue > 0]
+def what_workers(row: pd.Series, plan: dict[str, list[str]]) -> None:
+    workers = [
+        idx for idx, value in row.items()
+        if hasattr(value, "varValue") and value.varValue > 0
+    ]
     plan[row.name] = workers
 
 
-def save_to_db(res_dict, active_jobs, cursor):
-    for index, value in res_dict.items():
-        for val in value:
-            cursor.execute(insert_plan, {"job": active_jobs[index]["activeJobId"], "worker": val})
+# ---------------------------------------------------------------------------
+# variable / constraint helpers
+# ---------------------------------------------------------------------------
+
+def add_variable(
+    counter: int,
+    driver: list[Any],
+    first_round: bool,
+    job: dict[str, Any],
+    job_vars: dict[str, Any],
+    strongman: list[Any],
+    worker: str,
+    workers: dict[str, dict[str, Any]],
+    area_driver: dict[str, list[Any]],
+    score: list[Any],
+    scores: dict[tuple[str, str], Any],
+) -> int:
+    name = f"x{counter}"
+    x = LpVariable(name, lowBound=0, upBound=1, cat="Binary")
+    job_vars[worker] = x
+    key = (str(job["id"]), worker)
+    if key in scores:
+        score.append(scores[key] * x)
+    if first_round:
+        if workers[worker].get("isStrong"):
+            strongman.append(x)
+        if workers[worker].get("isDriver") and job.get("requiresCar"):
+            seats = workers[worker].get("seats", 0) or 0
+            driver.append(seats * x)
+            area_driver.setdefault(str(job["areaId"]), []).append(seats * x)
+    return counter + 1
 
 
-def generate_plan(plan_id, connection, first_round=True, attempt=0):
-    dict_cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    primitive_cursor = connection.cursor()
+def restrict_pair(
+    forbid: str,
+    friend: str,
+    job: Any,
+    model: LpProblem,
+    model_variables: pd.DataFrame,
+) -> LpProblem:
+    forbid_var = (
+        model_variables.at[job, forbid]
+        if not pd.isna(model_variables.at[job, forbid])
+        else None
+    )
+    friend_var = (
+        model_variables.at[job, friend]
+        if not pd.isna(model_variables.at[job, friend])
+        else None
+    )
+    if forbid_var is not None and friend_var is not None:
+        model += forbid_var + friend_var <= 1
+    return model
 
-    primitive_cursor.execute(select_jobs, {"planId": plan_id})
-    jobs = [x[0] for x in primitive_cursor.fetchall()]
 
-    job_properties = load(dict_cursor, plan_id, select_job_details)
-    workers = load(dict_cursor, plan_id, select_strong_workers if first_round else select_workers)
-    forbids = load(dict_cursor, plan_id, select_forbids)
-    forbidden_jobs = load(dict_cursor, plan_id, select_forbidden_jobs)
-    active_jobs = load(dict_cursor, plan_id, select_active_jobs)
-    areas = load(dict_cursor, plan_id, select_areas)
+# ---------------------------------------------------------------------------
+# data loading
+# ---------------------------------------------------------------------------
 
-    dict_cursor.execute(select_score, {"planId": plan_id})
-    scores = transform_score(dict_cursor.fetchall())
+def load(
+    session: Session, plan_id: str, query: Any
+) -> dict[str, dict[str, Any]]:
+    result = session.execute(query, {"planId": plan_id})
+    return dictionarify([dict(row._mapping) for row in result])
+
+
+# ---------------------------------------------------------------------------
+# save results
+# ---------------------------------------------------------------------------
+
+def save_to_db(
+    res_dict: dict[str, list[str]],
+    active_jobs: dict[str, dict[str, Any]],
+    session: Session,
+) -> None:
+    for index, workers in res_dict.items():
+        for worker in workers:
+            session.execute(
+                q.insert_plan,
+                {"job": active_jobs[index]["activeJobId"], "worker": worker},
+            )
+    session.commit()
+
+
+# ---------------------------------------------------------------------------
+# plan generation (core solver)
+# ---------------------------------------------------------------------------
+
+def generate_plan(
+    plan_id: str,
+    session: Session,
+    first_round: bool = True,
+    attempt: int = 0,
+) -> bool:
+    jobs_raw = session.execute(q.select_jobs, {"planId": plan_id}).scalars().all()
+    jobs = [str(x) for x in jobs_raw]
+
+    job_properties = load(session, plan_id, q.select_job_details)
+    workers = load(
+        session, plan_id, q.select_strong_workers if first_round else q.select_workers
+    )
+    forbids = load(session, plan_id, q.select_forbids)
+
+    active_jobs = load(session, plan_id, q.select_active_jobs)
+    areas = load(session, plan_id, q.select_areas)
+
+    scores_raw = session.execute(q.select_score, {"planId": plan_id})
+    scores = transform_score([dict(row._mapping) for row in scores_raw])
+
+    cooccurrence_raw = session.execute(q.select_cooccurrence, {"planId": plan_id})
+    cooccurrence: dict[tuple[str, str], int] = {}
+    for row in cooccurrence_raw:
+        m = row._mapping
+        a, b = str(m["worker_a"]), str(m["worker_b"])
+        cooccurrence[(a, b)] = int(m["count"])
 
     model = LpProblem(name="Plan", sense=LpMinimize)
-    model_variables = pd.DataFrame(columns=workers.keys())
-    score = []
+    model_variables = pd.DataFrame(columns=list(workers.keys()))
+    score: list[Any] = []
     counter = 0
-    area_drivers = {area: [] for area in areas}
+    area_drivers: dict[str, list[Any]] = {area: [] for area in areas}
 
     for job in jobs:
-        job_vars, strongman, driver = {}, [], []
+        job_vars: dict[str, Any] = {}
+        strongman: list[Any] = []
+        driver: list[Any] = []
         for worker in workers:
-            if is_viable(workers[worker], job_properties[job], forbidden_jobs, attempt):
-                add_variable(counter, driver, first_round, job_properties[job], job_vars,
-                             strongman, worker, workers, area_drivers, score, scores)
-                counter += 1
+            if is_viable(workers[worker], job_properties[job], attempt):
+                counter = add_variable(
+                    counter, driver, first_round, job_properties[job],
+                    job_vars, strongman, worker, workers, area_drivers,
+                    score, scores,
+                )
 
-        df_new_row = pd.DataFrame([pd.Series(job_vars, name=job)], columns=model_variables.columns)
+        df_new_row = pd.DataFrame(
+            [pd.Series(job_vars, name=job)], columns=model_variables.columns
+        )
         model_variables = pd.concat([model_variables, df_new_row])
 
         max_workers = job_properties[job]["maxWorkers"]
@@ -124,7 +210,7 @@ def generate_plan(plan_id, connection, first_round=True, attempt=0):
 
     if attempt < 2:
         for forbid in forbids:
-            friend = forbids[forbid]["forbid"]
+            friend = str(forbids[forbid]["forbid"])
             if friend in workers and forbid in workers:
                 for job in jobs:
                     model = restrict_pair(forbid, friend, job, model, model_variables)
@@ -133,255 +219,134 @@ def generate_plan(plan_id, connection, first_round=True, attempt=0):
         for area in areas:
             model += lpSum(area_drivers[area]) >= areas[area]["requiredDrivers"]
 
-    model += lpSum(score)
+    objective = lpSum(score)
 
-    # Debug information before solving
-    print(f"=== DEBUG INFO - Attempt {attempt}, First Round: {first_round} ===")
-    print(f"Total workers: {len(workers)}")
-    print(f"Total jobs: {len(jobs)}")
-    print(f"Strong workers: {sum(1 for w in workers.values() if w['isStrong'])}")
-    print(f"Drivers: {sum(1 for w in workers.values() if w['isDriver'])}")
-    
-    # Check job requirements
-    total_min_workers = sum(job_properties[job]["minWorkers"] for job in jobs)
-    total_max_workers = sum(job_properties[job]["maxWorkers"] for job in jobs)
-    total_strong_needed = sum(job_properties[job]["strongWorkers"] for job in jobs) if first_round else 0
-    total_cars_needed = sum(job_properties[job]["neededCars"] for job in jobs) if first_round and attempt < 1 else 0
-    
-    print(f"Total minimum workers needed: {total_min_workers}")
-    print(f"Total maximum workers available: {total_max_workers}")
-    if first_round:
-        print(f"Total strong workers needed: {total_strong_needed}")
-        if attempt < 1:
-            print(f"Total cars needed: {total_cars_needed}")
-    
-    # Check viability constraints with detailed breakdown
-    viable_assignments = 0
-    jobs_with_zero_viable = []
-    for job in jobs:
-        viable_for_job = 0
-        allergy_blocked = 0
-        adoration_blocked = 0
-        forbidden_blocked = 0
-        
-        for worker in workers:
-            worker_data = workers[worker]
-            job_data = job_properties[job]
-            
-            # Check each constraint individually
-            worker_allergies = worker_data["workAllergies"] or []
-            if isinstance(worker_allergies, str):
-                if worker_allergies.startswith('{') and worker_allergies.endswith('}'):
-                    worker_allergies = worker_allergies[1:-1].split(',') if len(worker_allergies) > 2 else []
-                else:
-                    worker_allergies = [worker_allergies] if worker_allergies else []
-            
-            job_allergens = job_data["allergens"] or []
-            if isinstance(job_allergens, str):
-                if job_allergens.startswith('{') and job_allergens.endswith('}'):
-                    job_allergens = job_allergens[1:-1].split(',') if len(job_allergens) > 2 else []
-                else:
-                    job_allergens = [job_allergens] if job_allergens else []
-            
-            allergies_ok = set(worker_allergies).isdisjoint(set(job_allergens))
-            adoration_ok = (worker_data["isAdoring"] and job_data["supportsAdoration"]) or not worker_data["isAdoring"]
-            forbidden_ok = job_data["id"] not in forbidden_jobs or attempt > 1
-            
-            if not allergies_ok:
-                allergy_blocked += 1
-            elif not adoration_ok:
-                adoration_blocked += 1
-            elif not forbidden_ok:
-                forbidden_blocked += 1
-            else:
-                viable_for_job += 1
-                viable_assignments += 1
-        
-        print(f"Job {job}: {viable_for_job} viable workers (needs {job_properties[job]['minWorkers']}-{job_properties[job]['maxWorkers']})")
-        
-        if viable_for_job == 0:
-            jobs_with_zero_viable.append(job)
-            print(f"  ❌ BLOCKED: {allergy_blocked} by allergies, {adoration_blocked} by adoration, {forbidden_blocked} by forbidden")
-            print(f"  Job allergens: {job_data.get('allergens', [])}")
-            print(f"  Job supports adoration: {job_data.get('supportsAdoration', False)}")
-            print(f"  Job forbidden: {job_data['id'] in forbidden_jobs}")
-        elif viable_for_job < job_properties[job]['minWorkers']:
-            print(f"  ⚠️  INSUFFICIENT: needs {job_properties[job]['minWorkers']} but only {viable_for_job} viable")
-    
-    if jobs_with_zero_viable:
-        print(f"\n🚨 CRITICAL: {len(jobs_with_zero_viable)} jobs have ZERO viable workers!")
-        print(f"Zero-viable jobs: {jobs_with_zero_viable[:3]}{'...' if len(jobs_with_zero_viable) > 3 else ''}")
-    
-    print(f"Total viable worker-job assignments: {viable_assignments}")
-    print(f"Total forbidden pairs constraints: {len(forbids)}")
-    print(f"Total forbidden jobs for workers: {len(forbidden_jobs)}")
-    
-    # Sample worker allergies and adoration status
-    workers_with_allergies = sum(1 for w in workers.values() if w.get("workAllergies") and len(w["workAllergies"]) > 0)
-    adoring_workers = sum(1 for w in workers.values() if w.get("isAdoring", False))
-    print(f"Workers with allergies: {workers_with_allergies}")
-    print(f"Adoring workers: {adoring_workers}")
-    
-    # Sample job characteristics for zero-viable jobs
-    if len(jobs_with_zero_viable) > 0:
-        print(f"\nAnalyzing first zero-viable job: {jobs_with_zero_viable[0]}")
-        sample_job = job_properties[jobs_with_zero_viable[0]]
-        print(f"  Allergens: {sample_job.get('allergens', [])}")
-        print(f"  Supports adoration: {sample_job.get('supportsAdoration', False)}")
-        print(f"  In forbidden list: {sample_job['id'] in forbidden_jobs}")
-        
-        # Test allergy logic with a sample worker
-        sample_worker_id = list(workers.keys())[0]
-        sample_worker = workers[sample_worker_id]
-        print(f"\nTesting allergy logic with worker {sample_worker_id}:")
-        
-        # Parse worker allergies properly
-        raw_worker_allergies = sample_worker.get('workAllergies', [])
-        worker_allergies = raw_worker_allergies or []
-        if isinstance(worker_allergies, str):
-            if worker_allergies.startswith('{') and worker_allergies.endswith('}'):
-                worker_allergies = worker_allergies[1:-1].split(',') if len(worker_allergies) > 2 else []
-            else:
-                worker_allergies = [worker_allergies] if worker_allergies else []
-        
-        # Parse job allergens properly  
-        raw_job_allergens = sample_job.get('allergens', [])
-        job_allergens = raw_job_allergens or []
-        if isinstance(job_allergens, str):
-            if job_allergens.startswith('{') and job_allergens.endswith('}'):
-                job_allergens = job_allergens[1:-1].split(',') if len(job_allergens) > 2 else []
-            else:
-                job_allergens = [job_allergens] if job_allergens else []
-        
-        print(f"  Worker allergies (raw): {raw_worker_allergies}")
-        print(f"  Worker allergies (parsed): {worker_allergies}")
-        print(f"  Job allergens (raw): {raw_job_allergens}")
-        print(f"  Job allergens (parsed): {job_allergens}")
-        
-        worker_allergy_set = set(worker_allergies)
-        job_allergen_set = set(job_allergens)
-        is_disjoint = worker_allergy_set.isdisjoint(job_allergen_set)
-        print(f"  Worker allergy set: {worker_allergy_set}")
-        print(f"  Job allergen set: {job_allergen_set}")
-        print(f"  Are disjoint (no conflict): {is_disjoint}")
-        print(f"  Intersection (conflicts): {worker_allergy_set.intersection(job_allergen_set)}")
-        
-        # Test with multiple workers to see the pattern
-        print("\nTesting allergy logic with first 3 workers on this job:")
-        for i, worker_id in enumerate(list(workers.keys())[:3]):
-            worker = workers[worker_id]
-            worker_allergies = set(worker["workAllergies"] or [])
-            job_allergens = set(sample_job["allergens"] or [])
-            is_disjoint = worker_allergies.isdisjoint(job_allergens)
-            print(f"  Worker {i+1}: allergies={worker_allergies}, disjoint={is_disjoint}")
-    
-    if attempt > 0:
-        print("Area driver requirements:")
-        for area in areas:
-            print(f"  Area {area}: needs {areas[area]['requiredDrivers']} drivers")
+    for (a, b), count in cooccurrence.items():
+        if a not in workers or b not in workers:
+            continue
+        x_a_series = model_variables[a].dropna()
+        x_b_series = model_variables[b].dropna()
+        shared_jobs = x_a_series.index.intersection(x_b_series.index)
+        for job in shared_jobs:
+            p = LpVariable(f"s{job}_{a}_{b}", lowBound=0, upBound=1, cat="Binary")
+            model += p <= x_a_series[job]
+            model += p <= x_b_series[job]
+            model += p >= x_a_series[job] + x_b_series[job] - 1
+            objective += COOCCURRENCE_PENALTY_WEIGHT * count * p
+
+    model += objective
+
+    # -- debug summary --
+    total_min = sum(
+        job_properties[j]["minWorkers"] for j in jobs
+    )
+    total_max = sum(
+        job_properties[j]["maxWorkers"] for j in jobs
+    )
+    logger.info(
+        "Attempt %d | first_round=%s | workers=%d | jobs=%d | min=%d | max=%d",
+        attempt, first_round, len(workers), len(jobs), total_min, total_max,
+    )
 
     status = model.solve()
     if status == -1:
-        print(f"SOLVER FAILED - Status: {status}")
-        print("Possible causes:")
-        print("1. Not enough workers for job minimum requirements")
-        print("2. Insufficient strong workers or drivers")
-        print("3. Too many forbidden combinations")
-        print("4. Conflicting area driver requirements")
-        print("5. Allergy conflicts eliminating too many assignments")
-        if attempt >= 2:
-            print("Maximum retry attempts reached - giving up")
-            return
-        else:
-            print(f"Retrying with attempt {attempt + 1}...")
-            generate_plan(plan_id, connection, first_round, attempt + 1)
-            return
-    else:
-        print(f"SOLVER SUCCESS - Status: {status}")
-        print("="*50)
+        logger.warning(
+            "Solver failed on attempt %d (first_round=%s)", attempt, first_round
+        )
+        return False
 
-    res_dict = {}
+    logger.info("Solver succeeded on attempt %d (status=%s)", attempt, status)
+    res_dict: dict[str, list[str]] = {}
     model_variables.apply(lambda v: what_workers(v, res_dict), axis=1)
-
-    save_to_db(res_dict, active_jobs, primitive_cursor)
-    connection.commit()
-
-
-def load(dict_cursor, plan_id, query):
-    dict_cursor.execute(query, {"planId": plan_id})
-    return dictionarify(dict_cursor.fetchall())
+    save_to_db(res_dict, active_jobs, session)
+    return True
 
 
-def restrict_pair(forbid, friend, job, model, model_variables):
-    forbid_var = model_variables.at[job, forbid] if not pd.isna(model_variables.at[job, forbid]) else None
-    friend_var = model_variables.at[job, friend] if not pd.isna(model_variables.at[job, friend]) else None
-    
-    if forbid_var is not None and friend_var is not None:
-        model += forbid_var + friend_var <= 1
-    return model
+# ---------------------------------------------------------------------------
+# rides generation
+# ---------------------------------------------------------------------------
 
+def generate_rides(plan_id: str, session: Session) -> None:
+    jobs_raw = session.execute(q.select_drive_jobs, {"planId": plan_id})
+    jobs = [dict(row._mapping) for row in jobs_raw]
 
-def add_variable(counter, driver, first_round, job, job_vars, strongman, worker, workers, area_driver, score, scores):
-    name = f"x{counter}"
-    x = LpVariable(name, lowBound=0, upBound=1, cat='Binary')
-    job_vars[worker] = x
-    if (job["id"], worker) in scores:
-        score.append(scores[(job["id"], worker)] * x)
-    if first_round:
-        if workers[worker]["isStrong"]:
-            strongman.append(x)
-        if workers[worker]["isDriver"] and job["requiresCar"]:
-            driver.append(workers[worker]["seats"] * x)
-            area_driver[job["areaId"]].append(workers[worker]["seats"] * x)
+    for job_row in jobs:
+        job_id = str(job_row["id"])
+        drivers_raw = session.execute(
+            q.select_driver, {"planId": job_id}
+        )
+        drivers = dictionarify([dict(row._mapping) for row in drivers_raw])
 
+        people_raw = session.execute(
+            q.select_people, {"planId": job_id}
+        )
+        people = [str(row._mapping["id"]) for row in people_raw]
 
-def generate_rides(received_plan_id, connection):
-    dict_cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    psycopg2.extras.register_uuid()
+        for d_id in list(drivers.keys()):
+            if d_id in people:
+                people.remove(d_id)
 
-    jobs = load(dict_cursor, received_plan_id, select_drive_jobs)
-    for job in jobs:
-        drivers = load(dict_cursor, job, select_driver)
-        people = list(load(dict_cursor, job, select_people).keys())
-        
-        # Remove drivers from people list to avoid double counting
-        for driver_id in drivers.keys():
-            if driver_id in people:
-                people.remove(driver_id)
-        
-        # Sort drivers by available seats (descending) to use larger cars first
-        sorted_drivers = sorted(drivers.items(), key=lambda x: x[1]["seats"], reverse=True)
-        
-        # Calculate total capacity and check if we need all drivers
+        sorted_drivers = sorted(
+            drivers.items(), key=lambda x: x[1]["seats"], reverse=True
+        )
         total_people = len(people)
-        people_pointer = 0
-        
-        for driver_id, driver_info in sorted_drivers:
-            # Check if there are still people to transport
-            if people_pointer >= total_people:
+        pointer = 0
+
+        for driver_id, info in sorted_drivers:
+            if pointer >= total_people:
                 break
-                
-            # Calculate available seats (subtract 1 for the driver)
-            available_seats = driver_info["seats"] - 1
-            
-            # Only create a ride if there are people to transport
-            if people_pointer < total_people:
+            available_seats = int(info["seats"]) - 1
+            if pointer < total_people:
                 ride = uuid.uuid4()
-                dict_cursor.execute(insert_ride, {"uuid": ride, "driver": driver_id, "car": driver_info["carId"], "job": job})
-                connection.commit()
-                
-                # Assign riders to this car
-                riders_in_this_car = 0
-                while available_seats > 0 and people_pointer < total_people:
-                    dict_cursor.execute(insert_rider, {"ride": ride, "worker": people[people_pointer]})
-                    people_pointer += 1
+                session.execute(
+                    q.insert_ride,
+                    {
+                        "uuid": ride,
+                        "driver": driver_id,
+                        "car": str(info["carId"]),
+                        "job": job_id,
+                    },
+                )
+                session.commit()
+                while available_seats > 0 and pointer < total_people:
+                    session.execute(
+                        q.insert_rider,
+                        {"ride": ride, "worker": people[pointer]},
+                    )
+                    pointer += 1
                     available_seats -= 1
-                    riders_in_this_car += 1
+                session.commit()
 
 
-def generate_plan_from_message(received_plan_id):
-    connection = psycopg2.connect(DATABASE_URL, options="-c search_path=public")
-    generate_plan(received_plan_id, connection)
-    generate_plan(received_plan_id, connection, False)
-    generate_rides(received_plan_id, connection)
-    print("Plan generation completed. Listening for the next messages...")
+# ---------------------------------------------------------------------------
+# public entry point
+# ---------------------------------------------------------------------------
+
+def _solve_round(
+    plan_id: str, session: Session, first_round: bool
+) -> bool:
+    for attempt in range(MAX_RETRIES):
+        if generate_plan(plan_id, session, first_round=first_round, attempt=attempt):
+            return True
+        delay = BACKOFF_BASE ** attempt
+        logger.warning(
+            "Round %s attempt %d/%d failed, retrying in %.1fs",
+            "first" if first_round else "second",
+            attempt + 1, MAX_RETRIES, delay,
+        )
+        time.sleep(delay)
+    logger.error(
+        "Round %s failed after %d attempts",
+        "first" if first_round else "second", MAX_RETRIES,
+    )
+    return False
+
+
+def generate_plan_from_message(received_plan_id: str) -> None:
+    with get_session() as session:
+        if not _solve_round(received_plan_id, session, first_round=True):
+            return
+        if not _solve_round(received_plan_id, session, first_round=False):
+            return
+        generate_rides(received_plan_id, session)
+        logger.info("Plan %s generated successfully", received_plan_id)
