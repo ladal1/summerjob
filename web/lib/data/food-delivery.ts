@@ -159,11 +159,30 @@ export async function deleteFoodDelivery(deliveryId: string) {
 }
 
 export async function updateJobDeliveryStatus(
+  planId: string,
   jobOrderId: string,
   completed: boolean
 ) {
-  return prisma.foodDeliveryJobOrder.update({
-    where: { id: jobOrderId },
+  const existingJobOrder = await prisma.foodDeliveryJobOrder.findFirst({
+    where: {
+      id: jobOrderId,
+      foodDelivery: {
+        planId,
+      },
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  if (!existingJobOrder) {
+    return null
+  }
+
+  const jobOrder = await prisma.foodDeliveryJobOrder.update({
+    where: {
+      id: jobOrderId,
+    },
     data: {
       completed,
       completedAt: completed ? new Date() : null,

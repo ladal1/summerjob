@@ -10,24 +10,32 @@ import { APILogEvent } from 'lib/types/logger'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 // Response type for GET request
-export type CourierDeliveryDetailResponse = Awaited<
-  ReturnType<typeof getFoodDeliveryWithPlanById>
+type CourierDeliveryWithPlan = NonNullable<
+  Awaited<ReturnType<typeof getFoodDeliveryWithPlanById>>
 >
+export type CourierDeliveryDetailResponse = {
+  plan: CourierDeliveryWithPlan['plan']
+  delivery: CourierDeliveryWithPlan['delivery']
+} | null
 
 async function get(
   req: NextApiRequest,
   res: NextApiResponse<CourierDeliveryDetailResponse>
 ) {
+  const planId = req.query.planId as string
   const deliveryId = req.query.deliveryId as string
 
   const data = await getFoodDeliveryWithPlanById(deliveryId)
 
-  if (!data) {
+  if (!data || data.plan.id !== planId) {
     res.status(404).json(null)
     return
   }
 
-  res.status(200).json(data)
+  res.status(200).json({
+    plan: data.plan,
+    delivery: data.delivery,
+  })
 }
 
 async function del(
@@ -52,6 +60,6 @@ async function del(
 // GET is public — couriers open their delivery via URL without an account.
 // DELETE requires PLANS.
 export default APIMethodHandler({
-  get,
+  get: get,
   del: APIAccessController([Permission.PLANS], del),
 })

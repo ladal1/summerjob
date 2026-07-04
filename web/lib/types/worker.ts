@@ -3,6 +3,7 @@ import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
 import {
   CarSchema,
+  ColorTagSchema,
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
@@ -73,6 +74,7 @@ export const WorkerCreateSchema = z
     tools: z.array(z.uuid()),
     foodAllergies: z.array(z.uuid()),
     workAllergies: z.array(z.uuid()),
+    colorTags: z.array(ColorTagSchema).optional(),
     note: z.string().optional(),
     age: z
       .union([

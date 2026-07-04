@@ -61,7 +61,7 @@ L.Marker.prototype.options.icon = DefaultIcon
 
 interface JobsMapViewProps {
   jobs: ActiveJobNoPlan[]
-  jobOrder?: { [jobId: string]: number } // Optional mapping of job ID to order number
+  jobOrder?: { [jobId: string]: number } // Optional mapping of job ID to display number
   height?: number // Optional height in pixels, defaults to 280px
   // When provided, popup shows assignment controls so user can change courier
   // directly from the map.
@@ -71,32 +71,11 @@ interface JobsMapViewProps {
   highlightJobId?: string | null
 }
 
-// Distinct, accessible colors for couriers on the map. Cycles if more couriers
-// than palette entries exist.
-const COURIER_COLOR_PALETTE = [
-  '#0d6efd', // blue
-  '#198754', // green
-  '#dc3545', // red
-  '#fd7e14', // orange
-  '#6610f2', // purple
-  '#20c997', // teal
-  '#d63384', // pink
-  '#ffc107', // amber
-]
-
-function colorForCourier(courierNum: number): string {
-  return COURIER_COLOR_PALETTE[(courierNum - 1) % COURIER_COLOR_PALETTE.length]
-}
-
 export default function JobsMapView({
   jobs,
   jobOrder,
   height = 280,
-  courierNums,
-  onAssignCourier,
-  highlightJobId,
 }: JobsMapViewProps) {
-  const markerRefs = useRef(new Map<string, L.Marker>())
   // Create numbered icons for ordered jobs
   const createNumberedIcon = (number: number) => {
     const color = colorForCourier(number)
@@ -167,10 +146,6 @@ export default function JobsMapView({
         minWorkers: job.proposedJob.minWorkers,
         contact: job.proposedJob.contact,
         completed: job.completed,
-        hasFood: job.proposedJob.hasFood,
-        allergens: Array.from(
-          new Set(job.workers.flatMap(w => w.foodAllergies.map(a => a.name)))
-        ),
       }))
   }, [jobs])
 
@@ -214,8 +189,8 @@ export default function JobsMapView({
 
   return (
     <div>
-      <div className="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <p className="text-muted mb-0 small">
+      <div className="mb-3">
+        <p className="text-muted">
           Zobrazeno {jobsWithCoordinates.length} z {jobs.length} vybraných jobů
           {jobsWithCoordinates.length < jobs.length &&
             ` (${jobs.length - jobsWithCoordinates.length} jobů nemá souřadnice)`}
@@ -267,9 +242,7 @@ export default function JobsMapView({
             const orderNumber = jobOrder?.[job.id]
             const icon = orderNumber
               ? createNumberedIcon(orderNumber)
-              : onAssignCourier
-                ? unassignedIcon
-                : DefaultIcon
+              : DefaultIcon
 
             return (
               <Marker
@@ -294,22 +267,6 @@ export default function JobsMapView({
                         <span className="badge bg-success ms-2">Hotovo</span>
                       )}
                     </h6>
-
-                    <div className="mb-2 d-flex flex-wrap gap-1">
-                      {!job.hasFood && (
-                        <span className="badge bg-warning text-dark">
-                          Potřebuje jídlo
-                        </span>
-                      )}
-                      {job.allergens.length > 0 && (
-                        <span
-                          className="badge bg-danger"
-                          title={job.allergens.join(', ')}
-                        >
-                          Alergie: {job.allergens.join(', ')}
-                        </span>
-                      )}
-                    </div>
 
                     <div className="mb-2">
                       <small>

@@ -22,6 +22,8 @@ import { RowCells } from '../table/RowCells'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
 import MarkAsCompletedIcon from '../table/icons/MarkAsCompletedIcon'
 import { priorityMapping } from 'lib/data/enumMapping/priorityMapping'
+import { ColorTagCell } from '../table/ColorTagCell'
+import { ColorTag } from 'lib/prisma/client'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
@@ -48,6 +50,10 @@ export default function ProposedJobRow({
 
   const setJobHidden = (hidden: boolean) => {
     triggerUpdate({ hidden })
+  }
+
+  const setColorTags = (colorTags: ColorTag[]) => {
+    triggerUpdate({ colorTags })
   }
 
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -136,6 +142,7 @@ export default function ProposedJobRow({
         setJobPinned,
         setJobCompleted,
         setJobHidden,
+        setColorTags,
         confirmDelete,
         isBeingDeleted
       )}
@@ -188,6 +195,7 @@ function formatJobRow(
   setPinned: (pinned: boolean) => void,
   setCompleted: (completed: boolean) => void,
   setHidden: (hidden: boolean) => void,
+  setColorTags: (colorTags: ColorTag[]) => void,
   deleteJob: () => void,
   isBeingDeleted: boolean
 ): RowCells[] {
@@ -196,7 +204,14 @@ function formatJobRow(
   const now = new Date()
   now.setHours(now.getHours() - 6)
   return [
-    { content: job.name },
+    {
+      content: (
+        <span className="d-inline-flex align-items-center">
+          <ColorTagCell tags={job.colorTags} onChange={setColorTags} />
+          {job.name}
+        </span>
+      ),
+    },
     { content: job.area?.name },
     { content: job.contact },
     { content: job.address },

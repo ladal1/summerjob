@@ -934,7 +934,7 @@ form.application input.custom-input::placeholder {
 
 /* Food delivery courier cards styling */
 .courier-card {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .courier-card .card-header {
@@ -998,18 +998,18 @@ form.application input.custom-input::placeholder {
   .h2-md {
     font-size: 1.5rem !important;
   }
-  
+
   .worker-allergies-box {
     max-width: 100%;
     width: 100%;
     margin-bottom: 0.5rem;
   }
-  
+
   .job-order-badge {
     font-size: 1rem !important;
     padding: 0.4rem 0.6rem !important;
   }
-  
+
   .flex-md-fill-none {
     flex: 1 1 auto;
   }
@@ -1019,7 +1019,7 @@ form.application input.custom-input::placeholder {
   .flex-md-fill-none {
     flex: 0 0 auto;
   }
-  
+
   .w-md-auto {
     width: auto !important;
   }
@@ -1068,4 +1068,66 @@ form.application input.custom-input::placeholder {
 
 .pending-job .badge {
   opacity: 0.8;
+}
+
+/* Color tags (shared palette for jobs & workers) */
+.smj-color-tag-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.smj-color-stripes {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.smj-color-stripe {
+  display: inline-block;
+  width: 0.35rem;
+  height: 2.2rem;
+  border-radius: 0.25rem;
+}
+
+.smj-color-picker-toggle {
+  cursor: pointer;
+  color: #9a9a9a;
+  transition: color 0.15s;
+}
+
+.smj-color-picker-toggle:hover {
+  color: #555;
+}
+
+.smj-color-picker-menu {
+  position: fixed;
+  z-index: 2000;
+  padding: 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 0.4rem;
+  background: #fff;
+  border: 1px solid #dcdcdc;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.smj-color-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.smj-color-swatch.active {
+  border-color: #333;
 }

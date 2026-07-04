@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { ExpandableRow } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
 import MoveWorkerModal from './MoveWorkerModal'
+import { WorkerColorTag } from '../worker/WorkerColorTag'
 
 const NO_JOB = 'NO_JOB'
 
@@ -56,6 +57,9 @@ export function PlanJoblessRow({
   }, [sourceJobId, workerIds, trigger, reloadPlan])
 
   const onWorkerDropped = () => (e: React.DragEvent<HTMLTableRowElement>) => {
+    if (accessedFromReception) {
+      return
+    }
     const workerId = e.dataTransfer.getData('worker-id')
     const fromJobId = e.dataTransfer.getData('source-id')
     if (fromJobId === NO_JOB) {
@@ -130,10 +134,11 @@ export function PlanJoblessRow({
                     planDay,
                     setWorkerToMove,
                     adorationByWorker,
-                    accessedFromReception
+                    accessedFromReception,
+                    reloadPlan
                   )}
                   key={worker.id}
-                  draggable={true}
+                  draggable={!accessedFromReception}
                   onDragStart={onWorkerDragStart(worker, NO_JOB)}
                   onMouseEnter={() =>
                     worker.photoPath
@@ -164,7 +169,8 @@ function formatWorkerData(
   planDay: Date,
   requestMoveWorker: (worker: WorkerComplete) => void,
   adorationByWorker: Map<string, boolean>,
-  accessedFromReception: boolean
+  accessedFromReception: boolean,
+  reloadPlan: () => void
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
@@ -173,7 +179,20 @@ function formatWorkerData(
   const allergies = [...worker.workAllergies.map(wa => wa.name)]
 
   const cols = [
-    { content: name },
+    {
+      content: (
+        <span className="d-inline-flex align-items-center">
+          {!accessedFromReception && (
+            <WorkerColorTag
+              workerId={worker.id}
+              colorTags={worker.colorTags}
+              onUpdated={reloadPlan}
+            />
+          )}
+          {name}
+        </span>
+      ),
+    },
     { content: worker.phone },
     {
       content: (
