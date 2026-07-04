@@ -18,6 +18,8 @@ export default async function Page(props: PageProps) {
   const deliveryIdFromQuery = searchParams?.deliveryId
   const deliveryId =
     typeof deliveryIdFromQuery === 'string' ? deliveryIdFromQuery : null
+  // Legacy courier links used deliveryId directly as the [courierId] path segment.
+  // Keep these links working by accepting UUID-shaped values in the route param.
   const isLegacyDeliveryIdPath =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
       courierId

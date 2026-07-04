@@ -74,7 +74,7 @@ async function get(
   const rawData = await getFoodDeliveriesWithPlanByPlanId(planId)
 
   if (!rawData) {
-    res.status(404).end()
+    res.status(404).json({ error: 'Plan not found' })
     return
   }
 
@@ -82,7 +82,7 @@ async function get(
     delivery => delivery.id === deliveryId
   )
   if (!courierDelivery) {
-    res.status(404).end()
+    res.status(404).json({ error: 'Delivery not found for this plan' })
     return
   }
 
