@@ -942,7 +942,7 @@ export default function FoodDeliveryClientPage({
                                                 </div>
                                                 <div className="btn-group">
                                                   <Link
-                                                    href={`/plan/${planId}/courier/${foodDeliveries?.find(d => d.courierNum === courierNumber)?.id}`}
+                                                    href={`/plan/${planId}/courier/${foodDeliveries?.find(d => d.courierNum === courierNumber)?.id}?deliveryId=${foodDeliveries?.find(d => d.courierNum === courierNumber)?.id}`}
                                                   >
                                                     <button
                                                       className="btn btn-sm btn-outline-light"

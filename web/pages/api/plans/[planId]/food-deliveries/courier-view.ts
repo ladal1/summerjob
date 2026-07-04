@@ -1,6 +1,7 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getFoodDeliveriesWithPlanByPlanId } from 'lib/data/food-delivery'
+import { Permission } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 // Minimal types for courier delivery view
@@ -123,6 +124,6 @@ async function get(
 }
 
 export default APIAccessController(
-  [], // No permissions required for courier delivery viewing
+  [Permission.PLANS],
   APIMethodHandler({ get })
 )

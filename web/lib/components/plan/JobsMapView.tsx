@@ -17,11 +17,15 @@ L.Marker.prototype.options.icon = DefaultIcon
 
 interface JobsMapViewProps {
   jobs: ActiveJobNoPlan[]
-  jobOrder?: { [jobId: string]: number } // Optional mapping of job ID to order number
+  jobOrder?: { [jobId: string]: number } // Optional mapping of job ID to display number
   height?: number // Optional height in pixels, defaults to 280px
 }
 
-export default function JobsMapView({ jobs, jobOrder, height = 280 }: JobsMapViewProps) {
+export default function JobsMapView({
+  jobs,
+  jobOrder,
+  height = 280,
+}: JobsMapViewProps) {
   // Create numbered icons for ordered jobs
   const createNumberedIcon = (number: number) => {
     return L.divIcon({
@@ -42,29 +46,35 @@ export default function JobsMapView({ jobs, jobOrder, height = 280 }: JobsMapVie
       className: 'custom-numbered-icon',
       iconSize: [30, 30],
       iconAnchor: [15, 15],
-      popupAnchor: [0, -15]
+      popupAnchor: [0, -15],
     })
   }
 
   // Filter jobs that have coordinates
   const jobsWithCoordinates = useMemo(() => {
-    return jobs.filter(job => 
-      job.proposedJob.coordinates && 
-      job.proposedJob.coordinates.length === 2 &&
-      job.proposedJob.coordinates[0] !== null &&
-      job.proposedJob.coordinates[1] !== null
-    ).map(job => ({
-      id: job.id,
-      name: job.proposedJob.name,
-      address: job.proposedJob.address,
-      areaName: job.proposedJob.area?.name || 'Nezadaná oblast',
-      coordinates: [job.proposedJob.coordinates[0]!, job.proposedJob.coordinates[1]!] as [number, number],
-      workersCount: job.workers.length,
-      maxWorkers: job.proposedJob.maxWorkers,
-      minWorkers: job.proposedJob.minWorkers,
-      contact: job.proposedJob.contact,
-      completed: job.completed
-    }))
+    return jobs
+      .filter(
+        job =>
+          job.proposedJob.coordinates &&
+          job.proposedJob.coordinates.length === 2 &&
+          job.proposedJob.coordinates[0] !== null &&
+          job.proposedJob.coordinates[1] !== null
+      )
+      .map(job => ({
+        id: job.id,
+        name: job.proposedJob.name,
+        address: job.proposedJob.address,
+        areaName: job.proposedJob.area?.name || 'Nezadaná oblast',
+        coordinates: [
+          job.proposedJob.coordinates[0]!,
+          job.proposedJob.coordinates[1]!,
+        ] as [number, number],
+        workersCount: job.workers.length,
+        maxWorkers: job.proposedJob.maxWorkers,
+        minWorkers: job.proposedJob.minWorkers,
+        contact: job.proposedJob.contact,
+        completed: job.completed,
+      }))
   }, [jobs])
 
   // Calculate center of map based on all job coordinates
@@ -72,10 +82,14 @@ export default function JobsMapView({ jobs, jobOrder, height = 280 }: JobsMapVie
     if (jobsWithCoordinates.length === 0) {
       return [49.8203, 15.4784] // Default to Czech Republic center
     }
-    
-    const avgLat = jobsWithCoordinates.reduce((sum, job) => sum + job.coordinates[0], 0) / jobsWithCoordinates.length
-    const avgLng = jobsWithCoordinates.reduce((sum, job) => sum + job.coordinates[1], 0) / jobsWithCoordinates.length
-    
+
+    const avgLat =
+      jobsWithCoordinates.reduce((sum, job) => sum + job.coordinates[0], 0) /
+      jobsWithCoordinates.length
+    const avgLng =
+      jobsWithCoordinates.reduce((sum, job) => sum + job.coordinates[1], 0) /
+      jobsWithCoordinates.length
+
     return [avgLat, avgLng]
   }, [jobsWithCoordinates])
 
@@ -94,11 +108,12 @@ export default function JobsMapView({ jobs, jobOrder, height = 280 }: JobsMapVie
     <div>
       <div className="mb-3">
         <p className="text-muted">
-          Zobrazeno {jobsWithCoordinates.length} z {jobs.length} vybraných jobů 
-          {jobsWithCoordinates.length < jobs.length && ` (${jobs.length - jobsWithCoordinates.length} jobů nemá souřadnice)`}
+          Zobrazeno {jobsWithCoordinates.length} z {jobs.length} vybraných jobů
+          {jobsWithCoordinates.length < jobs.length &&
+            ` (${jobs.length - jobsWithCoordinates.length} jobů nemá souřadnice)`}
         </p>
       </div>
-      
+
       <div style={{ height: `${height}px`, width: '100%', overflow: 'hidden' }}>
         <MapContainer
           center={mapCenter}
@@ -113,45 +128,58 @@ export default function JobsMapView({ jobs, jobOrder, height = 280 }: JobsMapVie
           />
           {jobsWithCoordinates.map(job => {
             const orderNumber = jobOrder?.[job.id]
-            const icon = orderNumber ? createNumberedIcon(orderNumber) : DefaultIcon
-            
+            const icon = orderNumber
+              ? createNumberedIcon(orderNumber)
+              : DefaultIcon
+
             return (
               <Marker key={job.id} position={job.coordinates} icon={icon}>
                 <Popup>
                   <div className="job-popup">
                     <h6 className="mb-2">
                       {orderNumber && (
-                        <span className="badge bg-primary me-2">{orderNumber}.</span>
+                        <span className="badge bg-primary me-2">
+                          {orderNumber}.
+                        </span>
                       )}
                       <strong>{job.name}</strong>
                       {job.completed && (
                         <span className="badge bg-success ms-2">Hotovo</span>
                       )}
                     </h6>
-                    
-                    <div className="mb-2">
-                      <small><strong>Oblast:</strong> {job.areaName}</small>
-                    </div>
-                    
-                    <div className="mb-2">
-                      <small><strong>Adresa:</strong> {job.address}</small>
-                    </div>
-                    
+
                     <div className="mb-2">
                       <small>
-                        <strong>Pracanti:</strong> {job.workersCount} / {job.minWorkers} .. {job.maxWorkers}
+                        <strong>Oblast:</strong> {job.areaName}
                       </small>
                     </div>
-                    
-                    {job.contact && (
-                      <div className="mb-2">
-                        <small><strong>Kontakt:</strong> {job.contact}</small>
-                      </div>
-                    )}
-                    
+
                     <div className="mb-2">
                       <small>
-                        <strong>Souřadnice:</strong> [{job.coordinates[0].toFixed(6)}, {job.coordinates[1].toFixed(6)}]
+                        <strong>Adresa:</strong> {job.address}
+                      </small>
+                    </div>
+
+                    <div className="mb-2">
+                      <small>
+                        <strong>Pracanti:</strong> {job.workersCount} /{' '}
+                        {job.minWorkers} .. {job.maxWorkers}
+                      </small>
+                    </div>
+
+                    {job.contact && (
+                      <div className="mb-2">
+                        <small>
+                          <strong>Kontakt:</strong> {job.contact}
+                        </small>
+                      </div>
+                    )}
+
+                    <div className="mb-2">
+                      <small>
+                        <strong>Souřadnice:</strong> [
+                        {job.coordinates[0].toFixed(6)},{' '}
+                        {job.coordinates[1].toFixed(6)}]
                       </small>
                     </div>
                   </div>
