@@ -504,6 +504,14 @@ export async function internal_updateWorker(
     }),
   }
 
+  const colorTagsUpdate = {
+    // Use `!== undefined` (not a truthiness check) so clearing all tags with an
+    // empty array still persists the empty set.
+    ...(data.colorTags !== undefined && {
+      colorTags: { set: data.colorTags },
+    }),
+  }
+
   // Get photoPath from uploaded photoFile. If there was uploaded image for this user, it will be deleted.
   if (file) {
     const photoPath = getPhotoPath(file) // update photoPath
@@ -544,6 +552,7 @@ export async function internal_updateWorker(
       age: data.age,
       ...skillsUpdate,
       ...toolsUpdate,
+      ...colorTagsUpdate,
       availability: {
         update: {
           where: {

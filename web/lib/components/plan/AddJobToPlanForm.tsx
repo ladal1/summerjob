@@ -19,6 +19,7 @@ import { z } from 'zod'
 import ErrorPage from '../error-page/ErrorPage'
 import { Issue } from './Issue'
 import FormWarning from '../forms/FormWarning'
+import { ColorTagCell } from '../table/ColorTagCell'
 
 interface AddJobToPlanFormProps {
   planId: string
@@ -201,7 +202,8 @@ function AddJobSelectItem({
 
   return (
     <>
-      <div className="text-wrap">
+      <div className="text-wrap d-inline-flex align-items-center">
+        <ColorTagCell tags={job.colorTags} />
         {job.name} ({job.area?.name})
         {isPinned(job, workerId) && (
           <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
