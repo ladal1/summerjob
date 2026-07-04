@@ -126,7 +126,12 @@ export default function AdorationWorkerAssignModal({
     >
       <div
         className="bg-white rounded shadow-lg p-4"
-        style={{ width: '600px' }}
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          maxHeight: 'calc(100vh - 2rem)',
+          overflowY: 'auto',
+        }}
       >
         <div className="d-flex justify-content-between align-items-start mb-3">
           <h5 className="mb-0">Přiřadit pracanta na adoraci</h5>

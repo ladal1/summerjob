@@ -45,7 +45,7 @@ export default function AdminCreateAdorationModal({
     defaultValues: {
       dateFrom: selectedDate || eventStart,
       dateTo: selectedDate || eventEnd,
-      location: ''
+      location: '',
     },
   })
 
@@ -55,7 +55,6 @@ export default function AdminCreateAdorationModal({
         onClose()
       }
     }
-
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
@@ -101,18 +100,23 @@ export default function AdminCreateAdorationModal({
       // Check if this is a cross-day range and warn user
       if (fromTotalMinutes > toTotalMinutes) {
         const { dateFrom, dateTo } = getValues()
-        const daysDiff = Math.floor((new Date(dateTo).getTime() - new Date(dateFrom).getTime()) / (24 * 60 * 60 * 1000))
-        
+        const daysDiff = Math.floor(
+          (new Date(dateTo).getTime() - new Date(dateFrom).getTime()) /
+            (24 * 60 * 60 * 1000)
+        )
+
         let message = `Vytváříte sloty přes půlnoc (${fromTime} - ${toTime}). `
-        
+
         if (daysDiff <= 1) {
-          message += 'Vytvoří se jeden souvislý blok slotů od startovního času do koncového času následujícího dne. '
+          message +=
+            'Vytvoří se jeden souvislý blok slotů od startovního času do koncového času následujícího dne. '
         } else {
-          message += 'Sloty budou vytvořeny pro každý den v rozmezí - od startovního času do konce dne a od začátku dalšího dne do koncového času. '
+          message +=
+            'Sloty budou vytvořeny pro každý den v rozmezí - od startovního času do konce dne a od začátku dalšího dne do koncového času. '
         }
-        
+
         message += 'Pokračovat?'
-        
+
         const confirmCrossDay = confirm(message)
         if (!confirmCrossDay) {
           setLoading(false)
@@ -147,10 +151,22 @@ export default function AdminCreateAdorationModal({
       style={{ zIndex: 1050 }}
       ref={backdropRef}
     >
-      <div className="bg-white rounded shadow-lg p-4" style={{ width: '720px' }}>
+      <div
+        className="bg-white rounded shadow-lg p-4"
+        style={{
+          width: '100%',
+          maxWidth: '720px',
+          maxHeight: 'calc(100vh - 2rem)',
+          overflowY: 'auto',
+        }}
+      >
         <div className="d-flex justify-content-between align-items-start mb-3">
           <h5 className="mb-0">Vytvořit nové sloty</h5>
-          <button type="button" className="btn-close" onClick={onClose}></button>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={onClose}
+          ></button>
         </div>
 
         <div className="row g-3">
@@ -199,7 +215,9 @@ export default function AdminCreateAdorationModal({
               pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
               onChange={e => setToTime(e.target.value)}
             />
-            <div className="form-text">Formát: 24h (např. 17:15 nebo 07:00 pro souvislý blok přes půlnoc)</div>
+            <div className="form-text">
+              Formát: 24h (např. 17:15 nebo 07:00 pro souvislý blok přes půlnoc)
+            </div>
           </div>
           <div className="col-md-3">
             <label className="form-label fw-bold">Délka slotu</label>
@@ -240,7 +258,11 @@ export default function AdminCreateAdorationModal({
         </div>
 
         <div className="mt-4 d-flex justify-content-between gap-2">
-          <button className="btn btn-primary" onClick={formHandleSubmit(handleSubmit)} disabled={loading}>
+          <button
+            className="btn btn-primary"
+            onClick={formHandleSubmit(handleSubmit)}
+            disabled={loading}
+          >
             {loading ? 'Vytvářím...' : 'Vytvořit sloty'}
           </button>
           <button className="btn btn-secondary" onClick={onClose}>

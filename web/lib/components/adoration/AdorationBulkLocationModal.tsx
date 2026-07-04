@@ -62,14 +62,26 @@ export default function AdorationBulkLocationModal({
 
   return (
     <div
-      className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center px-3"
+      className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-start pt-5 px-3"
       style={{ zIndex: 1050 }}
       ref={backdropRef}
     >
-      <div className="bg-white rounded shadow-lg p-4" style={{ width: '500px' }}>
+      <div
+        className="bg-white rounded shadow-lg p-4"
+        style={{
+          width: '100%',
+          maxWidth: '500px',
+          maxHeight: 'calc(100vh - 2rem)',
+          overflowY: 'auto',
+        }}
+      >
         <div className="d-flex justify-content-between align-items-start mb-3">
           <h5 className="mb-0">Změnit lokaci slotů</h5>
-          <button type="button" className="btn-close" onClick={onClose}></button>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={onClose}
+          ></button>
         </div>
 
         <div className="alert alert-info mb-3">
@@ -79,15 +91,17 @@ export default function AdorationBulkLocationModal({
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-3">
-            <label htmlFor="location" className="form-label">Nová lokace</label>
+            <label htmlFor="location" className="form-label">
+              Nová lokace
+            </label>
             <input
               type="text"
               className={`form-control ${errors.location ? 'is-invalid' : ''}`}
               id="location"
               placeholder="Např. Kaple 1, Kostol sv. Petra..."
-              {...register('location', { 
+              {...register('location', {
                 required: 'Lokace je povinná',
-                minLength: { value: 1, message: 'Lokace nesmí být prázdná' }
+                minLength: { value: 1, message: 'Lokace nesmí být prázdná' },
               })}
             />
             {errors.location && (
@@ -99,10 +113,18 @@ export default function AdorationBulkLocationModal({
           </div>
 
           <div className="d-flex justify-content-end gap-2">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+            >
               Zrušit
             </button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
               {loading ? 'Aplikuji...' : 'Změnit lokaci'}
             </button>
           </div>
