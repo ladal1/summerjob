@@ -18,6 +18,8 @@ services:
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET} # Generate a random string with `openssl rand -base64 32`
       - AMQP_URL=${AMQP_URL}
       - QUEUE_NAME=${QUEUE_NAME}
+      - NEXT_PUBLIC_VAPID_PUBLIC_KEY=${NEXT_PUBLIC_VAPID_PUBLIC_KEY}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
       - UPLOAD_DIR=/web-storage
     ports:
       - 127.0.0.1:3000:3000
