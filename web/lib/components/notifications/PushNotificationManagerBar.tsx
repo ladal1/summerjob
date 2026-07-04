@@ -57,12 +57,22 @@ export default function PushNotificationManagerButton() {
           body: JSON.stringify(sub),
         })
         if (!res.ok) {
+          console.error(
+            '[PushNotifications] Failed to rebind existing subscription:',
+            res.status,
+            res.statusText
+          )
           setIsShown(true)
         }
       } else {
         setIsShown(true)
       }
-    } catch {}
+    } catch (error) {
+      console.error(
+        '[PushNotifications] Service worker registration failed:',
+        error
+      )
+    }
   }
 
   async function subscribeToPush() {
@@ -102,16 +112,35 @@ export default function PushNotificationManagerButton() {
       })
 
       if (!res.ok) {
-        throw new Error()
+        let errorDetail = ''
+        try {
+          const body = await res.json()
+          errorDetail = JSON.stringify(body)
+        } catch {
+          errorDetail = await res.text().catch(() => '')
+        }
+        console.error(
+          '[PushNotifications] Subscribe API request failed:',
+          res.status,
+          res.statusText,
+          errorDetail
+        )
+        throw new Error(`Subscribe API returned ${res.status}`)
       }
 
       setSuccess(true)
       setTimeout(() => setIsShown(false), 5000)
-    } catch {
+    } catch (error) {
+      console.error('[PushNotifications] Failed to subscribe to push:', error)
       if (sub) {
         try {
           await sub.unsubscribe()
-        } catch {}
+        } catch (unsubError) {
+          console.error(
+            '[PushNotifications] Failed to unsubscribe after error:',
+            unsubError
+          )
+        }
       }
       setErrorMessage('Došlo k chybě, zkuste to prosím později')
     } finally {
