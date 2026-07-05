@@ -59,6 +59,7 @@ services:
     environment:
       - AMQP_URL=${AMQP_URL}
       - QUEUE_NAME=${QUEUE_NAME}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@summerjob-db:5432/${POSTGRES_DB}?schema=public
     networks:
       - summerjob-network
     image: "ghcr.io/ladal1/summerjob-planner:latest"
