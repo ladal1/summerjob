@@ -48,12 +48,12 @@ async function post(
 }
 
 export default APIAccessController(
-  [Permission.CARS, Permission.PLANS],
+  [Permission.CARS, Permission.PLANS, Permission.RECEPTION],
   APIMethodHandler({ get, post })
 )
 
 export const config = {
   api: {
-    bodyParser: false
-  }
+    bodyParser: false,
+  },
 }

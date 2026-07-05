@@ -47,7 +47,7 @@ async function del(
 }
 
 export default APIAccessController(
-  [Permission.CARS],
+  [Permission.CARS, Permission.RECEPTION],
   APIMethodHandler({ get, patch, del })
 )
 
