@@ -518,6 +518,7 @@ function formatWorkerData(
 
   if (worker.cars.length > 0) abilities.push('Auto')
   if (worker.isStrong) abilities.push('Silák')
+  if (worker.isTeam) abilities.push('Tým')
   if (worker.skills) {
     worker.skills.map(skill => {
       abilities.push(skill.name)
@@ -545,6 +546,9 @@ function formatWorkerData(
           {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{' '}
           {wantsAdoration && (
             <i className="fas fa-church ms-2" title="Chce adorovat"></i>
+          )}{' '}
+          {worker.isTeam && (
+            <i className="fa-solid fa-people-group ms-2" title="Tým"></i>
           )}{' '}
           {isResponsible && (
             <i className="fas fa-user-tie ms-2" title="Zodpovědná osoba"></i>
