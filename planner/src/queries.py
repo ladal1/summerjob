@@ -5,7 +5,12 @@ from sqlalchemy import text
 _SELECT_WORKERS = """
 SELECT DISTINCT "workerId" as "id",
     "isStrong",
-    "workAllergies",
+    (
+        SELECT array_agg(WA.name)
+        FROM "_WorkAllergyToWorker" WAW
+        JOIN "WorkAllergy" WA ON WAW."A" = WA.id
+        WHERE WAW."B" = W.id
+    ) as "workAllergies",
     "Car".id IS NOT NULL as "isDriver",
     EXISTS(
         SELECT 1 FROM "_SlotWorkers" SW
@@ -59,7 +64,12 @@ SELECT PJ.id,
     "minWorkers" - cw.currentWorkers as "minWorkers",
     CASE WHEN "strongWorkers" - currentStrongWorkers < 0 THEN 0 ELSE "strongWorkers" - currentStrongWorkers END as "strongWorkers",
      "jobTypeId",
-    "allergens",
+    (
+        SELECT array_agg(WA.name)
+        FROM "_ProposedJobToWorkAllergy" PJWA
+        JOIN "WorkAllergy" WA ON PJWA."B" = WA.id
+        WHERE PJWA."A" = PJ.id
+    ) as "allergens",
     "requiresCar",
     "supportsAdoration",
     "areaId",

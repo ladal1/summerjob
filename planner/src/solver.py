@@ -246,8 +246,10 @@ def generate_plan(
         job_properties[j]["maxWorkers"] for j in jobs
     )
     logger.info(
-        "Attempt %d | first_round=%s | workers=%d | jobs=%d | min=%d | max=%d",
+        "Attempt %d | first_round=%s | workers=%d | jobs=%d | min=%d | max=%d"
+        " | scores=%d | cooccurrence=%d | objective_terms=%d",
         attempt, first_round, len(workers), len(jobs), total_min, total_max,
+        len(scores), len(cooccurrence), len(score),
     )
 
     status = model.solve()
