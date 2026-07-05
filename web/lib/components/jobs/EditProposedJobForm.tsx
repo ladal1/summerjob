@@ -456,7 +456,7 @@ export default function EditProposedJobForm({
             label="Celkový počet dní na splnění"
             placeholder="Počet dní"
             min={1}
-            defaultValue={1}
+            defaultValue={job.requiredDays}
             register={() =>
               register('requiredDays', {
                 valueAsNumber: true,
@@ -477,7 +477,7 @@ export default function EditProposedJobForm({
               id="minWorkers"
               type="number"
               min={1}
-              defaultValue={1}
+              defaultValue={job.minWorkers}
               {...register('minWorkers', {
                 valueAsNumber: true,
                 onChange: e => (e.target.value = formatNumber(e.target.value)),
@@ -489,7 +489,7 @@ export default function EditProposedJobForm({
               id="maxWorkers"
               type="number"
               min={1}
-              defaultValue={1}
+              defaultValue={job.maxWorkers}
               {...register('maxWorkers', {
                 valueAsNumber: true,
                 onChange: e => (e.target.value = formatNumber(e.target.value)),
@@ -501,7 +501,7 @@ export default function EditProposedJobForm({
               id="strongWorkers"
               type="number"
               min={0}
-              defaultValue={0}
+              defaultValue={job.strongWorkers}
               {...register('strongWorkers', {
                 valueAsNumber: true,
                 onChange: e => (e.target.value = formatNumber(e.target.value)),
@@ -593,6 +593,7 @@ export default function EditProposedJobForm({
             registerPriority={registerPriority}
             errors={errors}
           />
+          <input type="hidden" {...register('priority')} />
         </form>
       </Form>
     </>
