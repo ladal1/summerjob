@@ -40,7 +40,7 @@ jobs:
         run: npm run lint
 
   lint-planner:
-    name: Lint planner
+    name: Lint and test planner
     runs-on: ubuntu-latest
     defaults:
       run:
