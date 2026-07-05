@@ -203,6 +203,9 @@ function formatWorkerData(
           {worker.isStrong && (
             <i className="fas fa-dumbbell me-2" title={'Silák'} />
           )}
+          {worker.isTeam && (
+            <i className="fa-solid fa-people-group me-2" title={'Tým'} />
+          )}
           {hasWorkerAdorationOnDay(worker.id, adorationByWorker) && (
             <i className="fa fa-church" title={'Adoruje'} />
           )}
