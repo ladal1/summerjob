@@ -38,7 +38,18 @@ export const ToolCreateSchema = z
 export type ToolCreateDataInput = z.input<typeof ToolCreateSchema>
 export type ToolCreateData = z.infer<typeof ToolCreateSchema>
 
-export const ToolUpdateSchema = ToolCreateSchema.partial().strict()
+export const ToolUpdateSchema = ToolCreateSchema.omit({
+  amount: true,
+})
+  .extend({
+    amount: z
+      .number({ message: err.invalidTypeNumber })
+      .int({ message: err.nonInteger })
+      .positive({ message: err.nonPositiveNumber })
+      .optional(),
+  })
+  .partial()
+  .strict()
 
 export type ToolUpdateDataInput = z.input<typeof ToolUpdateSchema>
 export type ToolUpdateData = z.infer<typeof ToolUpdateSchema>

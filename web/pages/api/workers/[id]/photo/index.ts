@@ -105,7 +105,10 @@ async function isAllowedToAccessWorkerPhoto(
     res.status(401).json({ error: 'Unauthorized' })
     return false
   }
-  const regularAccess = isAccessAllowed([Permission.WORKERS], session)
+  const regularAccess = isAccessAllowed(
+    [Permission.WORKERS, Permission.RECEPTION],
+    session
+  )
   if (regularAccess) {
     return true
   }

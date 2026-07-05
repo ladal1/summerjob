@@ -59,7 +59,26 @@ export type CarCreateData = z.infer<typeof CarCreateSchema>
 
 export const CarUpdateSchema = CarCreateSchema.omit({
   ownerId: true,
+  odometerStart: true,
+  odometerEnd: true,
+  reimbursementAmount: true,
 })
+  .extend({
+    odometerStart: z
+      .number({
+        message: err.invalidTypeNumber,
+      })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .optional(),
+    odometerEnd: z
+      .number({ message: err.invalidTypeNumber })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .optional(),
+    reimbursementAmount: z
+      .number({ message: err.invalidTypeNumber })
+      .nonnegative({ message: err.nonNonNegativeNumber })
+      .optional(),
+  })
   .partial()
   .refine(
     value => {

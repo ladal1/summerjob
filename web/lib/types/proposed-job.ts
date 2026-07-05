@@ -198,6 +198,36 @@ export const ProposedJobUpdateSchema = ProposedJobBasicSchema.merge(
     toolsToTakeWithIdsDeleted: z.array(z.string()).optional(),
   })
 )
+  .omit({
+    minWorkers: true,
+    maxWorkers: true,
+    strongWorkers: true,
+    priority: true,
+  })
+  .extend({
+    minWorkers: z
+      .number({
+        message: err.invalidTypeMinWorkers,
+      })
+      .int({ message: err.nonInteger })
+      .positive({ message: err.nonPositiveMinWorkers })
+      .optional(),
+    maxWorkers: z
+      .number({
+        message: err.invalidTypeMaxWorkers,
+      })
+      .int({ message: err.nonInteger })
+      .positive({ message: err.nonPositiveMaxWorkers })
+      .optional(),
+    strongWorkers: z
+      .number({
+        message: err.invalidTypeStrongWorkers,
+      })
+      .int({ message: err.nonInteger })
+      .nonnegative({ message: err.nonNonNegativeStrongWorkers })
+      .optional(),
+    priority: z.number().optional(),
+  })
   .strict()
   .partial()
   .superRefine((val, ctx) => {

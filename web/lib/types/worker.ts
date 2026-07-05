@@ -135,7 +135,16 @@ export const WorkersCreateSchema = z
 export type WorkersCreateDataInput = z.input<typeof WorkersCreateSchema>
 export type WorkersCreateData = z.infer<typeof WorkersCreateSchema>
 
-export const WorkerUpdateSchema = WorkerCreateSchema.partial().strict()
+export const WorkerUpdateSchema = WorkerCreateSchema.omit({
+  strong: true,
+  team: true,
+})
+  .extend({
+    strong: z.boolean().optional(),
+    team: z.boolean().optional(),
+  })
+  .partial()
+  .strict()
 
 export type WorkerUpdateDataInput = z.input<typeof WorkerUpdateSchema>
 export type WorkerUpdateData = z.infer<typeof WorkerUpdateSchema>
