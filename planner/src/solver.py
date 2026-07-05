@@ -95,6 +95,8 @@ def restrict_pair(
     model: LpProblem,
     model_variables: pd.DataFrame,
 ) -> LpProblem:
+    if forbid not in model_variables.columns or friend not in model_variables.columns:
+        return model
     forbid_var = (
         model_variables.at[job, forbid]
         if not pd.isna(model_variables.at[job, forbid])
