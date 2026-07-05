@@ -44,6 +44,7 @@ export const FilterPostsModal = ({
       tags: filters.tags,
       participate: filters.participate,
       showAll: filters.showAll,
+      showPast: filters.showPast,
     },
   })
   const onSubmit = (dataForm: PostFilterForm) => {
@@ -139,6 +140,11 @@ export const FilterPostsModal = ({
               id: 'showAll',
               icon: 'fas fa-eye',
               label: 'Zobrazit všechny příspěvky bez ohledu na den',
+            },
+            {
+              id: 'showPast',
+              icon: 'fas fa-history',
+              label: 'Zobrazit dokončené akce',
             },
           ]}
         />
