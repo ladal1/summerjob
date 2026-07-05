@@ -35,7 +35,7 @@ def transform_score(rows: list[dict[str, Any]]) -> dict[tuple[str, str], Any]:
 def is_viable(
     worker: dict[str, Any],
     job: dict[str, Any],
-    attempt: int,
+    _attempt: int,
 ) -> bool:
     worker_allergies = parse_pg_array(worker.get("workAllergies"))
     job_allergens = parse_pg_array(job.get("allergens"))

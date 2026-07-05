@@ -80,47 +80,47 @@ class TestIsViable:
     def test_viable_no_allergies_no_adoration(self) -> None:
         worker: dict[str, Any] = {"workAllergies": [], "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": [], "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is True
+        assert is_viable(worker, job, _attempt=0) is True
 
     def test_allergy_conflict(self) -> None:
         worker: dict[str, Any] = {"workAllergies": ["DUST"], "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": ["DUST"], "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is False
+        assert is_viable(worker, job, _attempt=0) is False
 
     def test_allergy_no_conflict(self) -> None:
         worker: dict[str, Any] = {"workAllergies": ["DUST"], "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": ["MITES"], "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is True
+        assert is_viable(worker, job, _attempt=0) is True
 
     def test_adoring_worker_on_supporting_job(self) -> None:
         worker: dict[str, Any] = {"workAllergies": [], "isAdoring": True}
         job: dict[str, Any] = {"id": "j1", "allergens": [], "supportsAdoration": True}
-        assert is_viable(worker, job, attempt=0) is True
+        assert is_viable(worker, job, _attempt=0) is True
 
     def test_adoring_worker_on_non_supporting_job(self) -> None:
         worker: dict[str, Any] = {"workAllergies": [], "isAdoring": True}
         job: dict[str, Any] = {"id": "j1", "allergens": [], "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is False
+        assert is_viable(worker, job, _attempt=0) is False
 
     def test_non_adoring_worker_ignores_adoration_flag(self) -> None:
         worker: dict[str, Any] = {"workAllergies": [], "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": [], "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is True
+        assert is_viable(worker, job, _attempt=0) is True
 
     def test_pg_array_worker_allergies(self) -> None:
         worker: dict[str, Any] = {"workAllergies": "{DUST,MITES}", "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": ["DUST"], "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is False
+        assert is_viable(worker, job, _attempt=0) is False
 
     def test_pg_array_job_allergens(self) -> None:
         worker: dict[str, Any] = {"workAllergies": ["DUST"], "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": "{DUST,MITES}", "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is False
+        assert is_viable(worker, job, _attempt=0) is False
 
     def test_none_allergies(self) -> None:
         worker: dict[str, Any] = {"workAllergies": None, "isAdoring": False}
         job: dict[str, Any] = {"id": "j1", "allergens": None, "supportsAdoration": False}
-        assert is_viable(worker, job, attempt=0) is True
+        assert is_viable(worker, job, _attempt=0) is True
 
 
 # ---------------------------------------------------------------------------
