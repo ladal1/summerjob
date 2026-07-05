@@ -29,7 +29,7 @@ async function patch(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  if (!isAccessAllowed([Permission.ADMIN], session)) {
+  if (!isAccessAllowed([Permission.WORKERS, Permission.JOBS], session)) {
     res.status(403).end()
     return
   }
@@ -53,7 +53,7 @@ async function del(
   res: NextApiResponse,
   session: ExtendedSession
 ) {
-  if (!isAccessAllowed([Permission.ADMIN], session)) {
+  if (!isAccessAllowed([Permission.WORKERS, Permission.JOBS], session)) {
     res.status(403).end()
     return
   }

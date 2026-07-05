@@ -19,6 +19,7 @@ export default async function AdminPage() {
     hasAdminPermission || hasPermission(Permission.ADORATION)
   const hasWorkersPermission =
     hasAdminPermission || hasPermission(Permission.WORKERS)
+  const hasJobsPermission = hasAdminPermission || hasPermission(Permission.JOBS)
   const hasNotificationsPermission =
     hasAdminPermission || hasPermission(Permission.NOTIFICATIONS)
   const hasReceptionPermission = hasPermission(Permission.RECEPTION)
@@ -135,7 +136,9 @@ export default async function AdminPage() {
               </Link>
             )}
 
-            {hasAdminPermission && (
+            {(hasAdminPermission ||
+              hasWorkersPermission ||
+              hasJobsPermission) && (
               <Link
                 className="list-group-item list-group-item-action"
                 href="/admin/lists"

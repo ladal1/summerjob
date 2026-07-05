@@ -16,6 +16,7 @@ export default async function AdminLayout({
     Permission.APPLICATIONS,
     Permission.ADORATION,
     Permission.WORKERS,
+    Permission.JOBS,
     Permission.NOTIFICATIONS,
     Permission.RECEPTION,
   ])

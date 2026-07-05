@@ -31,7 +31,7 @@ async function post(
   res: NextApiResponse<JobTypesAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  if (!isAccessAllowed([Permission.ADMIN], session)) {
+  if (!isAccessAllowed([Permission.JOBS], session)) {
     res.status(403).end()
     return
   }

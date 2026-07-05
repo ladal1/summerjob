@@ -38,7 +38,7 @@ async function post(
   res: NextApiResponse<WorkAllergiesAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  if (!isAccessAllowed([Permission.ADMIN], session)) {
+  if (!isAccessAllowed([Permission.WORKERS, Permission.JOBS], session)) {
     res.status(403).end()
     return
   }
