@@ -87,6 +87,7 @@ interface PostsClientPageProps {
   allDates: DateBool[][]
   advancedAccess: boolean
   accessedFromReception: boolean
+  isReceptionKiosk: boolean
   userId: string
 }
 
@@ -97,6 +98,7 @@ export default function PostsClientPage({
   allDates,
   advancedAccess,
   accessedFromReception,
+  isReceptionKiosk,
   userId,
 }: PostsClientPageProps) {
   const inititalPosts = deserializePosts(sPosts)
@@ -505,7 +507,7 @@ export default function PostsClientPage({
         <div className="row">
           <div className="col-lg-4">
             <PostType title="Obecné">
-              {hasAdoration && !accessedFromReception && (
+              {hasAdoration && !isReceptionKiosk && (
                 <div className="pb-1">
                   <AdorationBox />
                 </div>

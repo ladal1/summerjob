@@ -27,6 +27,10 @@ export default async function PostsPage() {
   const accessedFromReception = !!session?.permissions.includes(
     Permission.RECEPTION
   )
+  const isReceptionKiosk =
+    accessedFromReception &&
+    !!session?.user?.email &&
+    session.user.email === process.env.RECEPTION_EMAIL
   return (
     <PostsClientPage
       sPosts={sPosts}
@@ -35,6 +39,7 @@ export default async function PostsPage() {
       allDates={allDates}
       advancedAccess={isAdvancedAccessAllowed.success}
       accessedFromReception={accessedFromReception}
+      isReceptionKiosk={isReceptionKiosk}
       userId={session!.userID}
     />
   )
