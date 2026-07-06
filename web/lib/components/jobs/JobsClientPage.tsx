@@ -40,18 +40,20 @@ export default function ProposedJobsClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const areaIdQ = searchParams?.get('area')
-  const selectedDayQ = searchParams?.get('day')
+  const areaIdsQ = searchParams?.get('area')
+  const dayIdsQ = searchParams?.get('day')
   const searchQ = searchParams?.get('search')
+  const selectedAreaIds = areaIdsQ ? areaIdsQ.split(',') : []
+  const selectedDayIds = dayIdsQ ? dayIdsQ.split(',') : []
 
   //#region Filtering areas
   const areas = getAvailableAreas(data)
-  const [selectedArea, setSelectedArea] = useState(
-    areas.find(a => a.id === areaIdQ) || areas[0]
+  const [selectedAreas, setSelectedAreas] = useState(
+    areas.filter(a => selectedAreaIds.includes(a.id) && a.id !== 'all')
   )
 
-  const onAreaSelected = (id: string) => {
-    setSelectedArea(areas.find(a => a.id === id) || areas[0])
+  const onAreasSelected = (ids: string[]) => {
+    setSelectedAreas(areas.filter(a => ids.includes(a.id) && a.id !== 'all'))
   }
   //#endregion
 
@@ -59,12 +61,17 @@ export default function ProposedJobsClientPage({
   const firstDay = new Date(startDate)
   const lastDay = new Date(endDate)
   const days = getDays(firstDay, lastDay)
-  const [selectedDay, setSelectedDay] = useState(
-    days.find(a => a.id === selectedDayQ) || days[0]
+  const [selectedDays, setSelectedDays] = useState(
+    days.filter(d => selectedDayIds.includes(d.id) && d.id !== 'all')
   )
 
-  const onDaySelected = (day: Date) => {
-    setSelectedDay(days.find(d => d.day.getTime() === day.getTime()) || days[0])
+  const onDaysSelected = (dayValues: Date[]) => {
+    setSelectedDays(
+      days.filter(
+        d =>
+          d.id !== 'all' && dayValues.some(v => v.getTime() === d.day.getTime())
+      )
+    )
   }
   //#endregion
 
@@ -73,43 +80,39 @@ export default function ProposedJobsClientPage({
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    router.replace(
-      `?${new URLSearchParams({
-        area: selectedArea.id,
-        day: selectedDay.id,
-        search: filter,
-      })}`,
-      {
-        scroll: false,
-      }
-    )
-  }, [selectedArea, selectedDay, filter, router])
+    const params = new URLSearchParams()
+    if (selectedAreas.length > 0) {
+      params.set('area', selectedAreas.map(a => a.id).join(','))
+    }
+    if (selectedDays.length > 0) {
+      params.set('day', selectedDays.map(d => d.id).join(','))
+    }
+    if (filter) {
+      params.set('search', filter)
+    }
+    router.replace(`?${params}`, {
+      scroll: false,
+    })
+  }, [selectedAreas, selectedDays, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
 
   const shouldShowJob = useCallback(
     (job: ProposedJobComplete) => {
       const area =
-        selectedArea.id === areas[0].id || job.area?.id === selectedArea.id
+        selectedAreas.length === 0 ||
+        selectedAreas.some(a => a.id === job.area?.id)
       const fulltext =
         fulltextData.get(job.id)?.includes(normalizeString(filter).trimEnd()) ??
         false
       const day =
-        selectedDay.id === days[0].id ||
-        job.availability
-          .map(d => d.getTime())
-          .includes(selectedDay.day.getTime())
+        selectedDays.length === 0 ||
+        selectedDays.some(d =>
+          job.availability.map(x => x.getTime()).includes(d.day.getTime())
+        )
       return area && fulltext && day
     },
-    [
-      areas,
-      days,
-      filter,
-      fulltextData,
-      selectedArea.id,
-      selectedDay.day,
-      selectedDay.id,
-    ]
+    [filter, fulltextData, selectedAreas, selectedDays]
   )
 
   const filteredJobs = useMemo(() => {
@@ -141,22 +144,22 @@ export default function ProposedJobsClientPage({
               <Filters
                 search={filter}
                 onSearchChanged={setFilter}
-                selects={[
+                multiSelects={[
                   {
                     id: 'area',
-                    options: areas,
-                    selected: selectedArea,
-                    onSelectChanged: onAreaSelected,
-                    defaultOptionId: 'all',
+                    options: areas.slice(1),
+                    selected: selectedAreas,
+                    onSelectChanged: onAreasSelected,
+                    placeholder: 'Oblast',
                   },
                 ]}
-                selectsDays={[
+                multiSelectsDays={[
                   {
                     id: 'day',
-                    options: days,
-                    selected: selectedDay,
-                    onSelectChanged: onDaySelected,
-                    defaultOptionId: 'all',
+                    options: days.slice(1),
+                    selected: selectedDays,
+                    onSelectChanged: onDaysSelected,
+                    placeholder: 'Dny',
                   },
                 ]}
               />

@@ -232,8 +232,8 @@ export default function PlanClientPage({
 
   // get query parameters
   const searchParams = useSearchParams()
-  const areaIdQ = searchParams?.get('area')
-  const contactQ = searchParams?.get('contact')
+  const areaIdsQ = searchParams?.get('area')
+  const contactIdsQ = searchParams?.get('contact')
   const searchQ = searchParams?.get('search')
   const showNumbersQ = searchParams?.get('showNumbers') === 'true'
   const sortColumnQ = searchParams?.get('sortColumn')
@@ -241,6 +241,8 @@ export default function PlanClientPage({
     | 'asc'
     | 'desc'
     | null
+  const selectedAreaIds = areaIdsQ ? areaIdsQ.split(',') : []
+  const selectedContactIds = contactIdsQ ? contactIdsQ.split(',') : []
 
   // area
   const areas = useMemo(
@@ -248,11 +250,11 @@ export default function PlanClientPage({
     [planData]
   )
 
-  const [selectedArea, setSelectedArea] = useState(
-    areas.find(a => a.id === areaIdQ) || areas[0]
+  const [selectedAreas, setSelectedAreas] = useState(
+    areas.filter(a => selectedAreaIds.includes(a.id) && a.id !== 'all')
   )
-  const onAreaSelected = (id: string) => {
-    setSelectedArea(areas.find(a => a.id === id) || areas[0])
+  const onAreasSelected = (ids: string[]) => {
+    setSelectedAreas(areas.filter(a => ids.includes(a.id) && a.id !== 'all'))
   }
 
   // contact
@@ -261,11 +263,13 @@ export default function PlanClientPage({
     [planData]
   )
 
-  const [selectedContact, setSelectedContact] = useState(
-    contacts.find(a => a.id === contactQ) || contacts[0]
+  const [selectedContacts, setSelectedContacts] = useState(
+    contacts.filter(a => selectedContactIds.includes(a.id) && a.id !== 'all')
   )
-  const onContactSelected = (id: string) => {
-    setSelectedContact(contacts.find(a => a.id === id) || contacts[0])
+  const onContactsSelected = (ids: string[]) => {
+    setSelectedContacts(
+      contacts.filter(a => ids.includes(a.id) && a.id !== 'all')
+    )
   }
 
   // search
@@ -287,12 +291,17 @@ export default function PlanClientPage({
   // replace url with new query parameters
   const router = useRouter()
   useEffect(() => {
-    const params = new URLSearchParams({
-      area: selectedArea.id,
-      contact: selectedContact.id,
-      search: filter,
-      showNumbers: showNumbers.toString(),
-    })
+    const params = new URLSearchParams()
+    if (selectedAreas.length > 0) {
+      params.set('area', selectedAreas.map(a => a.id).join(','))
+    }
+    if (selectedContacts.length > 0) {
+      params.set('contact', selectedContacts.map(a => a.id).join(','))
+    }
+    if (filter) {
+      params.set('search', filter)
+    }
+    params.set('showNumbers', showNumbers.toString())
 
     // Only add sort parameters if they're not defaults
     if (sortOrder.columnId !== 'name' || sortOrder.direction !== 'asc') {
@@ -301,18 +310,18 @@ export default function PlanClientPage({
     }
 
     router.replace(`?${params}`, { scroll: false })
-  }, [selectedArea, selectedContact, filter, showNumbers, sortOrder, router])
+  }, [selectedAreas, selectedContacts, filter, showNumbers, sortOrder, router])
 
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
 
   const shouldShowJob = useCallback(
     (job: ActiveJobNoPlan) => {
       const isInArea =
-        selectedArea.id === areas[0].id ||
-        job.proposedJob.area?.id === selectedArea.id
+        selectedAreas.length === 0 ||
+        selectedAreas.some(a => a.id === job.proposedJob.area?.id)
       const includesContact =
-        selectedContact.id === contacts[0].id ||
-        job.proposedJob.contact === selectedContact.id
+        selectedContacts.length === 0 ||
+        selectedContacts.some(c => c.id === job.proposedJob.contact)
       const searchableTokens = searchableJobs.get(job.id)?.split(';')
       if (searchableTokens) {
         return (
@@ -330,14 +339,7 @@ export default function PlanClientPage({
       }
       return isInArea
     },
-    [
-      selectedArea.id,
-      areas,
-      selectedContact.id,
-      contacts,
-      searchableJobs,
-      filter,
-    ]
+    [selectedAreas, selectedContacts, searchableJobs, filter]
   )
 
   const filteredJobs = useMemo(() => {
@@ -432,20 +434,20 @@ export default function PlanClientPage({
                   <Filters
                     search={filter}
                     onSearchChanged={setFilter}
-                    selects={[
+                    multiSelects={[
                       {
                         id: 'contact',
-                        options: contacts,
-                        selected: selectedContact,
-                        onSelectChanged: onContactSelected,
-                        defaultOptionId: 'all',
+                        options: contacts.slice(1),
+                        selected: selectedContacts,
+                        onSelectChanged: onContactsSelected,
+                        placeholder: 'Kontakt',
                       },
                       {
                         id: 'area',
-                        options: areas,
-                        selected: selectedArea,
-                        onSelectChanged: onAreaSelected,
-                        defaultOptionId: 'all',
+                        options: areas.slice(1),
+                        selected: selectedAreas,
+                        onSelectChanged: onAreasSelected,
+                        placeholder: 'Oblast',
                       },
                     ]}
                     checkboxes={[
