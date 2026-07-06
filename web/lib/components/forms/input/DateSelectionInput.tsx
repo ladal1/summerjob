@@ -12,6 +12,7 @@ interface DateSelectionInputProps<FormData extends FieldValues> {
   label: string
   register: () => UseFormRegisterReturn
   setValue?: UseFormSetValue<FormData>
+  watch?: (name: string) => unknown
   days: DateBool[][]
   disableAfter?: number
   allowSpecialButtons?: boolean
@@ -23,6 +24,7 @@ export const DateSelectionInput = <FormData extends FieldValues>({
   label,
   register,
   setValue,
+  watch,
   days,
   disableAfter = undefined,
   allowSpecialButtons = false,
@@ -37,6 +39,7 @@ export const DateSelectionInput = <FormData extends FieldValues>({
         disableAfter={disableAfter}
         register={register}
         setValue={setValue}
+        watch={watch}
         allowSpecialButtons={allowSpecialButtons}
       />
     </div>

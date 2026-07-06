@@ -72,7 +72,11 @@ export default function AdorationSlotsTable({ eventId }: Props) {
       await apiAdorationSignup(slotId)
       await mutate()
     } catch (err) {
-      alert('Chyba při přihlašování na adoraci.')
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Chyba při přihlašování na adoraci.'
+      alert(message)
       console.error('Adoration signup error:', err)
     } finally {
       setSignuping(null)

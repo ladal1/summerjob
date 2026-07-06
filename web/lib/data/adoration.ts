@@ -2,7 +2,7 @@
 import prisma from 'lib/prisma/connection'
 import type { PrismaTransactionClient } from 'lib/types/prisma'
 import { startOfDay, endOfDay, addDays, format, add } from 'date-fns'
-import { fromZonedTime } from 'date-fns-tz'
+import { fromZonedTime, toZonedTime } from 'date-fns-tz'
 import { AdorationSlot, Worker } from 'lib/prisma/client'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { NoActiveEventError } from './internal-error'
@@ -529,4 +529,36 @@ export async function getUpcomingAdorationSlots(
       workers: true,
     },
   })
+}
+
+export async function isWorkerAssignedToNonAdorationAreaOnDate(
+  workerId: string,
+  slotDateStart: Date,
+  prismaClient: PrismaTransactionClient = prisma
+): Promise<boolean> {
+  const zonedDate = toZonedTime(slotDateStart, CEST_TZ)
+  const cestDate = new Date(
+    zonedDate.getFullYear(),
+    zonedDate.getMonth(),
+    zonedDate.getDate()
+  )
+  const { startUTC, endUTC } = cestDateToUtc(cestDate)
+
+  const conflictingJobs = await prismaClient.activeJob.findFirst({
+    where: {
+      workers: { some: { id: workerId } },
+      plan: {
+        day: {
+          gte: startUTC,
+          lte: endUTC,
+        },
+      },
+      proposedJob: {
+        area: { supportsAdoration: false },
+      },
+    },
+    select: { id: true },
+  })
+
+  return conflictingJobs !== null
 }

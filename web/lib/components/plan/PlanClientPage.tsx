@@ -441,6 +441,7 @@ export default function PlanClientPage({
                         selected: selectedContacts,
                         onSelectChanged: onContactsSelected,
                         placeholder: 'Kontakt',
+                        maxWidth: '400px',
                       },
                       {
                         id: 'area',

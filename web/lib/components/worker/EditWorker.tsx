@@ -55,6 +55,7 @@ export default function EditWorker({
     formState: { dirtyFields },
     register,
     setValue,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<WorkerForm>({
@@ -254,8 +255,11 @@ export default function EditWorker({
               id="availability.workDays"
               label="Pracovní dostupnost"
               register={() => register('availability.workDays')}
+              setValue={setValue}
+              watch={watch}
               days={allDates}
               disableAfter={isProfilePage ? 18 : undefined}
+              allowSpecialButtons
             />
           </div>
           <DynamicGroupButtonsInput

@@ -1,6 +1,10 @@
 import { formatDateLong } from 'lib/helpers/helpers'
-import { ChangeEvent } from 'react'
-import Select, { CSSObjectWithLabel, StylesConfig } from 'react-select'
+import { ChangeEvent, useEffect, useState } from 'react'
+import Select, {
+  components,
+  CSSObjectWithLabel,
+  StylesConfig,
+} from 'react-select'
 
 interface SelectOption {
   id: string
@@ -40,6 +44,7 @@ interface FiltersProps {
     selected: SelectOption[]
     onSelectChanged: (ids: string[]) => void
     placeholder?: string
+    maxWidth?: string
   }[]
   multiSelectsDays?: {
     id: string
@@ -47,6 +52,7 @@ interface FiltersProps {
     selected: SelectOptionDays[]
     onSelectChanged: (days: Date[]) => void
     placeholder?: string
+    maxWidth?: string
   }[]
   checkboxes?: {
     id: string
@@ -64,8 +70,16 @@ const multiSelectStyles: StylesConfig<ReactSelectOption, true> = {
       border: 0,
       borderRadius: '5px',
       minWidth: '200px',
+      maxWidth: '300px',
       minHeight: '42px',
       boxShadow: '1px 1px 2px 2px rgba(0, 0, 0, 0.1)',
+    }) as CSSObjectWithLabel,
+  valueContainer: base =>
+    ({
+      ...base,
+      flexWrap: 'wrap',
+      maxHeight: '120px',
+      overflowY: 'auto',
     }) as CSSObjectWithLabel,
   option: base =>
     ({
@@ -92,6 +106,47 @@ const multiSelectStyles: StylesConfig<ReactSelectOption, true> = {
     }) as CSSObjectWithLabel,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MultiValueComp = components.MultiValue as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ValueContainerComp = components.ValueContainer as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const OptionComp = components.Option as any
+
+const multiSelectComponents = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  MultiValue: (props: any) => {
+    const values = props.getValue()
+    if (values.length > 1) return null
+    return <MultiValueComp {...props} />
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ValueContainer: (props: any) => {
+    const values = props.getValue()
+    if (values.length > 1) {
+      return (
+        <ValueContainerComp {...props}>
+          <span className="text-muted">{values.length} vybráno</span>
+        </ValueContainerComp>
+      )
+    }
+    return <ValueContainerComp {...props} />
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Option: (props: any) => {
+    return (
+      <OptionComp {...props}>
+        <div className="d-flex align-items-center justify-content-between">
+          <span className="smj-option-label">{props.data.label}</span>
+          {props.isSelected && (
+            <i className="fas fa-check smj-option-check"></i>
+          )}
+        </div>
+      </OptionComp>
+    )
+  },
+}
+
 export function Filters({
   search,
   onSearchChanged,
@@ -101,6 +156,9 @@ export function Filters({
   multiSelectsDays,
   checkboxes,
 }: FiltersProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const handleSelectChange = (
     id: string,
     e: ChangeEvent<HTMLSelectElement>
@@ -143,17 +201,17 @@ export function Filters({
     <>
       <div className="row">
         <div className="col-auto mb-3">
-          <label htmlFor="search">
-            <i className="fas fa-magnifying-glass me-2"></i>
-          </label>
-          <input
-            id="search"
-            type="text"
-            className="p-2 d-inline-block outline-none border-0 smj-filter-input smj-input"
-            placeholder="Vyhledat..."
-            value={search}
-            onChange={e => onSearchChanged(e.target.value)}
-          />
+          <div className="smj-filter-search-wrapper">
+            <i className="fas fa-magnifying-glass smj-filter-search-icon"></i>
+            <input
+              id="search"
+              type="text"
+              className="smj-filter-search"
+              placeholder="Vyhledat..."
+              value={search}
+              onChange={e => onSearchChanged(e.target.value)}
+            />
+          </div>
         </div>
         {selects &&
           selects.map(select => (
@@ -212,25 +270,45 @@ export function Filters({
           multiSelects.map(select => (
             <div className="col-auto mb-3" key={select.id}>
               <div className="d-inline-block">
-                <Select<ReactSelectOption, true>
-                  inputId={select.id}
-                  options={select.options.map(o => ({
-                    value: o.id,
-                    label: o.name,
-                  }))}
-                  value={select.selected.map(o => ({
-                    value: o.id,
-                    label: o.name,
-                  }))}
-                  onChange={val =>
-                    select.onSelectChanged((val ?? []).map(v => v.value))
-                  }
-                  placeholder={select.placeholder ?? 'Vyberte...'}
-                  isMulti
-                  isClearable
-                  closeMenuOnSelect={false}
-                  styles={multiSelectStyles}
-                />
+                {mounted ? (
+                  <Select<ReactSelectOption, true>
+                    inputId={select.id}
+                    instanceId={select.id}
+                    options={select.options.map(o => ({
+                      value: o.id,
+                      label: o.name,
+                    }))}
+                    value={select.selected.map(o => ({
+                      value: o.id,
+                      label: o.name,
+                    }))}
+                    onChange={val =>
+                      select.onSelectChanged((val ?? []).map(v => v.value))
+                    }
+                    placeholder={select.placeholder ?? 'Vyberte...'}
+                    isMulti
+                    isClearable
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                    styles={{
+                      ...multiSelectStyles,
+                      control: base =>
+                        ({
+                          ...base,
+                          backgroundColor: 'white',
+                          border: 0,
+                          borderRadius: '5px',
+                          minWidth: '200px',
+                          maxWidth: select.maxWidth ?? '300px',
+                          minHeight: '42px',
+                          boxShadow: '1px 1px 2px 2px rgba(0, 0, 0, 0.1)',
+                        }) as CSSObjectWithLabel,
+                    }}
+                    components={multiSelectComponents}
+                  />
+                ) : (
+                  <div className="smj-select-placeholder" />
+                )}
               </div>
             </div>
           ))}
@@ -238,31 +316,51 @@ export function Filters({
           multiSelectsDays.map(select => (
             <div className="col-auto mb-3" key={select.id}>
               <div className="d-inline-block">
-                <Select<ReactSelectOption, true>
-                  inputId={select.id}
-                  options={select.options.map(o => ({
-                    value: o.id,
-                    label: formatDateLong(o.day),
-                  }))}
-                  value={select.selected.map(o => ({
-                    value: o.id,
-                    label: formatDateLong(o.day),
-                  }))}
-                  onChange={val =>
-                    select.onSelectChanged(
-                      (val ?? [])
-                        .map(
-                          v => select.options.find(o => o.id === v.value)?.day
-                        )
-                        .filter((d): d is Date => d !== undefined)
-                    )
-                  }
-                  placeholder={select.placeholder ?? 'Vyberte dny...'}
-                  isMulti
-                  isClearable
-                  closeMenuOnSelect={false}
-                  styles={multiSelectStyles}
-                />
+                {mounted ? (
+                  <Select<ReactSelectOption, true>
+                    inputId={select.id}
+                    instanceId={select.id}
+                    options={select.options.map(o => ({
+                      value: o.id,
+                      label: formatDateLong(o.day),
+                    }))}
+                    value={select.selected.map(o => ({
+                      value: o.id,
+                      label: formatDateLong(o.day),
+                    }))}
+                    onChange={val =>
+                      select.onSelectChanged(
+                        (val ?? [])
+                          .map(
+                            v => select.options.find(o => o.id === v.value)?.day
+                          )
+                          .filter((d): d is Date => d !== undefined)
+                      )
+                    }
+                    placeholder={select.placeholder ?? 'Vyberte dny...'}
+                    isMulti
+                    isClearable
+                    closeMenuOnSelect={false}
+                    hideSelectedOptions={false}
+                    styles={{
+                      ...multiSelectStyles,
+                      control: base =>
+                        ({
+                          ...base,
+                          backgroundColor: 'white',
+                          border: 0,
+                          borderRadius: '5px',
+                          minWidth: '200px',
+                          maxWidth: select.maxWidth ?? '300px',
+                          minHeight: '42px',
+                          boxShadow: '1px 1px 2px 2px rgba(0, 0, 0, 0.1)',
+                        }) as CSSObjectWithLabel,
+                    }}
+                    components={multiSelectComponents}
+                  />
+                ) : (
+                  <div className="smj-select-placeholder" />
+                )}
               </div>
             </div>
           ))}

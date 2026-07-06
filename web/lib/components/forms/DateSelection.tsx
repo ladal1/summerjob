@@ -1,9 +1,8 @@
 import { DateBool } from 'lib/data/dateSelectionType'
-import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
+import { getWeekdayNames } from 'lib/helpers/helpers'
 import React, { useCallback, useEffect, useState } from 'react'
 import { UseFormRegisterReturn, UseFormSetValue } from 'react-hook-form'
 import CallSMJTeamModal from '../modal/CallSMJTeamModal'
-import { InputActionButton } from './InputActionButton'
 
 interface DateSelectionProps {
   name: string
@@ -12,6 +11,7 @@ interface DateSelectionProps {
   register: () => UseFormRegisterReturn
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue?: UseFormSetValue<any>
+  watch?: (name: string) => unknown
   allowSpecialButtons: boolean
 }
 
@@ -21,21 +21,9 @@ export default function DateSelection({
   disableAfter = undefined,
   register,
   setValue,
+  watch,
   allowSpecialButtons,
 }: DateSelectionProps) {
-  const firstDay = days[0][0].date
-  const lastDay = days[days.length - 1][days[0].length - 1].date
-
-  const labelMonth =
-    firstDay.getMonth() == lastDay.getMonth()
-      ? getMonthName(firstDay)
-      : getMonthName(firstDay) + ' / ' + getMonthName(lastDay)
-  const labelYear =
-    firstDay.getFullYear() == lastDay.getFullYear()
-      ? firstDay.getFullYear()
-      : firstDay.getFullYear() + ' / ' + lastDay.getFullYear()
-  const label = labelMonth + ' ' + labelYear
-
   const weekDays = getWeekdayNames()
 
   const makeWeekKey = (week: DateBool[]): string => {
@@ -43,6 +31,13 @@ export default function DateSelection({
     const end = week[week.length - 1].date
     return start.toJSON() + '-' + end.toJSON()
   }
+
+  const getCurrentValue = (): string[] => {
+    const val = watch?.(name)
+    return Array.isArray(val) ? (val as string[]) : []
+  }
+
+  const selectedCount = getCurrentValue().length
 
   //#region Disable date button
 
@@ -69,6 +64,14 @@ export default function DateSelection({
     return date.getDate() === tomorrowDate.getDate()
   }
 
+  const isToday = (date: Date): boolean => {
+    return (
+      date.getDate() === currentDate.getDate() &&
+      date.getMonth() === currentDate.getMonth() &&
+      date.getFullYear() === currentDate.getFullYear()
+    )
+  }
+
   const isDateDisabledDueToAfterHours = (date: Date) => {
     return isAfterHours && isDateRightAfterNow(date)
   }
@@ -92,36 +95,96 @@ export default function DateSelection({
     }
     const allSelectedDays = days
       .flat()
-      .filter(day => !day.isDisabled)
+      .filter(
+        day => !day.isDisabled && !isDateDisabledDueToAfterHours(day.date)
+      )
       .map(day => day.date.toJSON())
     setValue(name, allSelectedDays, { shouldDirty: true, shouldValidate: true })
+  }
+
+  const toggleWeekday = (weekdayIndex: number) => {
+    if (setValue === undefined) {
+      return
+    }
+    const currentValue = getCurrentValue()
+    const weekdayDays = days
+      .map(week => week[weekdayIndex])
+      .filter(
+        day => !day.isDisabled && !isDateDisabledDueToAfterHours(day.date)
+      )
+    const weekdayDateStrings = weekdayDays.map(d => d.date.toJSON())
+    const allSelected = weekdayDateStrings.every(d => currentValue.includes(d))
+    if (allSelected) {
+      const newValue = currentValue.filter(d => !weekdayDateStrings.includes(d))
+      setValue(name, newValue, { shouldDirty: true, shouldValidate: true })
+    } else {
+      const newValue = [...new Set([...currentValue, ...weekdayDateStrings])]
+      setValue(name, newValue, { shouldDirty: true, shouldValidate: true })
+    }
+  }
+
+  const isWeekdayFullySelected = (weekdayIndex: number): boolean => {
+    const currentValue = getCurrentValue()
+    const weekdayDays = days
+      .map(week => week[weekdayIndex])
+      .filter(
+        day => !day.isDisabled && !isDateDisabledDueToAfterHours(day.date)
+      )
+    return (
+      weekdayDays.length > 0 &&
+      weekdayDays.every(d => currentValue.includes(d.date.toJSON()))
+    )
   }
 
   //#endregion
 
   return (
     <div className="container p-0 m-0">
-      <div className="d-flex justify-content-between align-items-baseline gap-3">
-        <label className="form-label fw-normal fs-5">{label}</label>
+      <div className="d-flex justify-content-between align-items-baseline mb-1">
+        {selectedCount > 0 ? (
+          <small className="text-muted">{selectedCount} dní vybráno</small>
+        ) : (
+          <span />
+        )}
         {allowSpecialButtons && (
-          <div className="d-inline-flex gap-2">
-            <InputActionButton
-              className="fas fa-xmark smj-action-delete"
-              onClick={clearAll}
-              title="Vypnout všechny dny"
-            />
-            <InputActionButton
-              className="fas fa-check smj-action-complete"
+          <div className="d-inline-flex gap-3">
+            <span
+              className="smj-text-action text-muted"
               onClick={selectAll}
               title="Zvolit všechny dny"
-            />
+            >
+              Vybrat vše
+            </span>
+            <span
+              className="smj-text-action text-muted"
+              onClick={clearAll}
+              title="Vypnout všechny dny"
+            >
+              Smazat vše
+            </span>
           </div>
         )}
       </div>
-      <div className="row gx-2">
-        {weekDays.map(day => (
+      <div className="row gx-2 mt-1">
+        {weekDays.map((day, wdIndex) => (
           <React.Fragment key={day}>
-            <div className="col d-flex justify-content-center">{day}</div>
+            <div className="col d-flex justify-content-center">
+              {allowSpecialButtons && setValue ? (
+                <span
+                  className={`weekday-toggle ${
+                    isWeekdayFullySelected(wdIndex)
+                      ? 'weekday-toggle-active'
+                      : ''
+                  }`}
+                  onClick={() => toggleWeekday(wdIndex)}
+                  title={`Přepnout všechny ${day.toLowerCase()}`}
+                >
+                  {day}
+                </span>
+              ) : (
+                day
+              )}
+            </div>
           </React.Fragment>
         ))}
       </div>
@@ -152,7 +215,7 @@ export default function DateSelection({
                   <label
                     className={`btn btn-day-select btn-light ${
                       day.isDisabled ? 'smj-action-hidden' : ''
-                    }`}
+                    } ${isToday(day.date) ? 'smj-day-today' : ''}`}
                     htmlFor={`${name}-${day.date.toJSON()}`}
                   >
                     {day.date.getDate()}
