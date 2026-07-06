@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 MAX_RETRIES = 3
 BACKOFF_BASE = 2.0
 COOCCURRENCE_PENALTY_WEIGHT = 1.0
+ASSIGN_PENALTY = 1000.0
+MIN_SHORTFALL_PENALTY = 100.0
 
 
 # ---------------------------------------------------------------------------
@@ -176,6 +178,7 @@ def generate_plan(
     model = LpProblem(name="Plan", sense=LpMinimize)
     model_variables = pd.DataFrame(columns=list(workers.keys()))
     score: list[Any] = []
+    penalties: list[Any] = []
     counter = 0
     area_drivers: dict[str, list[Any]] = {area: [] for area in areas}
 
@@ -205,10 +208,14 @@ def generate_plan(
             if attempt < 1:
                 model += lpSum(driver) >= job_properties[job]["neededCars"]
         else:
-            model += lpSum(job_vars.values()) >= min_workers
+            shortfall = LpVariable(f"short_{job}", lowBound=0)
+            model += lpSum(job_vars.values()) + shortfall >= min_workers
+            penalties.append(MIN_SHORTFALL_PENALTY * shortfall)
 
     for worker in workers:
-        model += lpSum(model_variables[worker].dropna().tolist()) == 1
+        assigned = lpSum(model_variables[worker].dropna().tolist())
+        model += assigned <= 1
+        penalties.append(ASSIGN_PENALTY * (1 - assigned))
 
     if attempt < 2:
         for forbid in forbids:
@@ -221,7 +228,7 @@ def generate_plan(
         for area in areas:
             model += lpSum(area_drivers[area]) >= areas[area]["requiredDrivers"]
 
-    objective = lpSum(score)
+    objective = lpSum(score) + lpSum(penalties)
 
     for (a, b), count in cooccurrence.items():
         if a not in workers or b not in workers:
@@ -262,6 +269,11 @@ def generate_plan(
     logger.info("Solver succeeded on attempt %d (status=%s)", attempt, status)
     res_dict: dict[str, list[str]] = {}
     model_variables.apply(lambda v: what_workers(v, res_dict), axis=1)
+    assigned_count = sum(len(ws) for ws in res_dict.values())
+    logger.info(
+        "Assigned %d/%d workers (%d unassigned)",
+        assigned_count, len(workers), len(workers) - assigned_count,
+    )
     save_to_db(res_dict, active_jobs, session)
     return True
 
