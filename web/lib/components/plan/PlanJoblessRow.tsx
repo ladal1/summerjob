@@ -8,6 +8,7 @@ import { ExpandableRow } from '../table/ExpandableRow'
 import { SimpleRow } from '../table/SimpleRow'
 import MoveWorkerModal from './MoveWorkerModal'
 import { WorkerColorTag } from '../worker/WorkerColorTag'
+import { PhoneLink } from 'lib/components/phone/PhoneText'
 
 const NO_JOB = 'NO_JOB'
 
@@ -193,7 +194,11 @@ function formatWorkerData(
         </span>
       ),
     },
-    { content: worker.phone },
+    {
+      content: (
+        <PhoneLink phone={worker.phone} className="text-decoration-none" />
+      ),
+    },
     {
       content: (
         <>

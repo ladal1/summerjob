@@ -18,6 +18,7 @@ import remarkGfm from 'remark-gfm'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow } from '../table/ExpandableRow'
+import { PhoneLink } from 'lib/components/phone/PhoneText'
 import { RowCells } from '../table/RowCells'
 import { RowContent, RowContentsInterface } from '../table/RowContent'
 import { SimpleRow } from '../table/SimpleRow'
@@ -556,7 +557,11 @@ function formatWorkerData(
         </>
       ),
     },
-    { content: worker.phone },
+    {
+      content: (
+        <PhoneLink phone={worker.phone} className="text-decoration-none" />
+      ),
+    },
     { content: abilities.join(', ') },
     { content: allergies.join(', ') },
     {

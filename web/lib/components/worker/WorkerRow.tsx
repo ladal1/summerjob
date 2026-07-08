@@ -6,6 +6,7 @@ import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { SimpleRow } from '../table/SimpleRow'
 import { ColorTagCell } from '../table/ColorTagCell'
 import { ColorTag } from 'lib/prisma/client'
+import { PhoneLink } from 'lib/components/phone/PhoneText'
 
 interface WorkerRowProps {
   worker: WorkerComplete
@@ -83,7 +84,11 @@ function formatWorkerRow(
       ),
     },
     { content: worker.lastName },
-    { content: worker.phone },
+    {
+      content: (
+        <PhoneLink phone={worker.phone} className="text-decoration-none" />
+      ),
+    },
     { content: worker.email },
     {
       content: (

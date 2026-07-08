@@ -13,6 +13,7 @@ import AdorationWorkerAssignModal from './AdorationWorkerAssignModal'
 import AdorationEditModal from './AdorationEditModal'
 import AdorationBulkLocationModal from './AdorationBulkLocationModal'
 import type { FrontendAdorationSlot } from 'lib/types/adoration'
+import { PhoneLink } from 'lib/components/phone/PhoneText'
 
 interface Props {
   event: {
@@ -440,7 +441,12 @@ export default function AdminAdorationManager({
                                 className="badge bg-light text-dark me-1 mb-1 d-inline-block"
                                 style={{ fontSize: '0.75rem' }}
                               >
-                                {w.firstName} {w.lastName} ({w.phone})
+                                {w.firstName} {w.lastName} (
+                                <PhoneLink
+                                  phone={w.phone}
+                                  className="text-dark text-decoration-none"
+                                />
+                                )
                               </span>
                             ))}
                           </div>
