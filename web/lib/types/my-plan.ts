@@ -57,6 +57,13 @@ export const MyPlanSchema = z.object({
         address: z.string().min(1),
         coordinates: z.tuple([z.number(), z.number()]).nullable(),
       }),
+      manager: z
+        .object({
+          name: z.string().min(1),
+          phone: z.string().min(1),
+        })
+        .nullable()
+        .optional(),
       hasFood: z.boolean(),
       hasShower: z.boolean(),
       ride: MyRideSchema.optional(),

@@ -42,7 +42,7 @@ export async function getActiveJobById(
       },
       proposedJob: {
         include: {
-          area: true,
+          area: { include: { manager: true } },
           toolsOnSite: {
             include: {
               tool: {

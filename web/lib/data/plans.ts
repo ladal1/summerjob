@@ -52,7 +52,7 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
           },
           proposedJob: {
             include: {
-              area: true,
+              area: { include: { manager: true } },
               toolsOnSite: {
                 include: {
                   tool: {
@@ -141,7 +141,7 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
           },
           proposedJob: {
             include: {
-              area: true,
+              area: { include: { manager: true } },
               toolsOnSite: {
                 include: {
                   tool: {
@@ -228,7 +228,7 @@ export async function getPlanByDate(date: Date): Promise<PlanComplete | null> {
           },
           proposedJob: {
             include: {
-              area: true,
+              area: { include: { manager: true } },
               toolsOnSite: {
                 include: {
                   tool: {

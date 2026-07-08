@@ -8,6 +8,7 @@ import { IconAndLabel } from '../forms/IconAndLabel'
 import { Label } from '../forms/Label'
 import { OpenNavigationButton } from '../forms/OpenNavigationButton'
 import Map from '../map/Map'
+import { PhoneLink, TextWithPhones } from '../phone/PhoneText'
 
 interface MyJobProps {
   selectedPlan: MyPlan
@@ -46,8 +47,21 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                       </div>
                     </>
                   )}
+                  {selectedPlan.job.manager && (
+                    <>
+                      <Label id="manager" label="Vedoucí oblasti" />
+                      <div>
+                        <i className="fas fa-user-tie me-1"></i>
+                        {selectedPlan.job.manager.name}{' '}
+                        <PhoneLink
+                          phone={selectedPlan.job.manager.phone}
+                          className="text-decoration-none"
+                        />
+                      </div>
+                    </>
+                  )}
                   <Label id="contact" label="Kontaktní osoba" />
-                  {selectedPlan.job.contact}
+                  <TextWithPhones text={selectedPlan.job.contact} />
                   <Label id="onSite" label="Na místě" />
                   {selectedPlan.job.hasFood || selectedPlan.job.hasShower ? (
                     <div className="d-flex gap-4">
@@ -88,7 +102,12 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map(worker => (
                       <div key={worker.id}>
-                        {worker.name} ({worker.phone})
+                        {worker.name} (
+                        <PhoneLink
+                          phone={worker.phone}
+                          className="text-decoration-none"
+                        />
+                        )
                         {worker.responsibleWorker && (
                           <span className="text-muted">
                             {' '}
@@ -132,7 +151,10 @@ export default function MyJob({ selectedPlan }: MyJobProps) {
                             <IconAndLabel label="Řidič: " icon="fas fa-user" />
                             {selectedPlan.job.ride.driverName}
                             {', '}
-                            {selectedPlan.job.ride.driverPhone}
+                            <PhoneLink
+                              phone={selectedPlan.job.ride.driverPhone}
+                              className="text-decoration-none"
+                            />
                           </div>
                         </div>
                       </>

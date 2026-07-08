@@ -1,6 +1,7 @@
 'use client'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAPIAreaCreate } from 'lib/fetcher/area'
+import { useAPIWorkers } from 'lib/fetcher/worker'
 import { AreaCreateSchema } from 'lib/types/area'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -9,6 +10,8 @@ import { z } from 'zod'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { TextInput } from '../forms/input/TextInput'
 import { Form } from '../forms/Form'
+import { Label } from '../forms/Label'
+import FormWarning from '../forms/FormWarning'
 
 interface CreateAreaProps {
   eventId: string
@@ -26,7 +29,13 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
     formState: { errors, dirtyFields },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      managerId: '',
+    },
   })
+
+  const { data: workers } = useAPIWorkers()
+  const teamMembers = (workers ?? []).filter(w => w.isTeam)
 
   const onSubmit = (data: FormData) => {
     trigger(data, {
@@ -84,6 +93,22 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
                 label: 'V oblasti je možné adorovat',
               },
             ]}
+          />
+          <Label id="managerId" label="Vedoucí oblasti" />
+          <select
+            id="managerId"
+            className="form-select smj-input p-0 fs-5"
+            {...register('managerId')}
+          >
+            <option value="">Žádný</option>
+            {teamMembers.map(worker => (
+              <option key={worker.id} value={worker.id}>
+                {worker.firstName} {worker.lastName}
+              </option>
+            ))}
+          </select>
+          <FormWarning
+            message={errors.managerId?.message as string | undefined}
           />
         </form>
       </Form>

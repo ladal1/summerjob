@@ -186,7 +186,7 @@ export async function getMyPlan(
       }
     }
   }
-  
+
   return {
     day: plan.day,
     job: {
@@ -197,7 +197,7 @@ export async function getMyPlan(
         id: worker.id,
         name: `${worker.firstName} ${worker.lastName}`,
         phone: worker.phone,
-        responsibleWorker: myJob.responsibleWorker?.id === worker.id
+        responsibleWorker: myJob.responsibleWorker?.id === worker.id,
       })),
       contact: myJob.proposedJob.contact,
       allergens: myJob.proposedJob.allergens,
@@ -214,6 +214,12 @@ export async function getMyPlan(
               ]
             : null,
       },
+      manager: myJob.proposedJob.area?.manager
+        ? {
+            name: `${myJob.proposedJob.area.manager.firstName} ${myJob.proposedJob.area.manager.lastName}`,
+            phone: myJob.proposedJob.area.manager.phone,
+          }
+        : null,
       hasFood: myJob.proposedJob.hasFood,
       hasShower: myJob.proposedJob.hasShower,
       ...(myRide && { ride: myRide }),

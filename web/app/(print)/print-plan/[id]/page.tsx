@@ -1,5 +1,6 @@
 import ErrorPage404 from 'lib/components/404/404'
 import RideListPrint from 'lib/components/plan/print/RideListPrint'
+import { PhoneLink, TextWithPhones } from 'lib/components/phone/PhoneText'
 import { getPlanById } from 'lib/data/plans'
 import { formatDateLong } from 'lib/helpers/helpers'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
@@ -89,7 +90,30 @@ export function JobInfo({
               }}
             >
               <i className="fas fa-user-nurse me-1"></i>
-              Zdravotník: 732 403 990
+              Zdravotník:{' '}
+              <PhoneLink
+                phone="732 403 990"
+                style={{ color: 'inherit', textDecoration: 'none' }}
+              />
+            </div>
+          )}
+          {isPrintPage && job.proposedJob.area?.manager && (
+            <div
+              className="mb-2"
+              style={{
+                fontSize: '1.1em',
+                fontWeight: 'bold',
+                color: '#198754',
+              }}
+            >
+              <i className="fas fa-user-tie me-1"></i>
+              Vedoucí oblasti: {job.proposedJob.area.manager.firstName}{' '}
+              {job.proposedJob.area.manager.lastName} (
+              <PhoneLink
+                phone={job.proposedJob.area.manager.phone}
+                style={{ color: 'inherit', textDecoration: 'none' }}
+              />
+              )
             </div>
           )}
           <div>
@@ -117,7 +141,10 @@ export function JobInfo({
           </div>
           <div>
             <i className="fas fa-phone me-1"></i>
-            {job.proposedJob.contact}
+            <TextWithPhones
+              text={job.proposedJob.contact}
+              linkStyle={{ color: 'inherit', textDecoration: 'none' }}
+            />
           </div>
 
           <div>

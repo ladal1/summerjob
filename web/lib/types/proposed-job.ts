@@ -5,6 +5,7 @@ import {
   AreaSchema,
   ColorTagSchema,
   ProposedJobSchema,
+  WorkerSchema,
 } from 'lib/prisma/zod'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
 import { customErrorMessages as err } from 'lib/lang/error-messages'
@@ -24,8 +25,12 @@ export const ProposedJobForActiveJobSchema = z.object({
   name: z.string().min(1, { message: err.emptyProposedJobName }),
 })
 
+export const AreaWithManagerSchema = AreaSchema.extend({
+  manager: WorkerSchema.nullable(),
+})
+
 export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
-  area: AreaSchema.nullable(),
+  area: AreaWithManagerSchema.nullable(),
   toolsOnSite: z.array(ToolCompleteSchema),
   toolsToTakeWith: z.array(ToolCompleteSchema),
   allergens: z.array(

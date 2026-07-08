@@ -1,6 +1,12 @@
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RideComplete } from 'lib/types/ride'
+import { PhoneLink } from 'lib/components/phone/PhoneText'
 import React from 'react'
+
+const printLinkStyle: React.CSSProperties = {
+  color: 'inherit',
+  textDecoration: 'none',
+}
 
 interface RideListPrintProps {
   job: ActiveJobNoPlan
@@ -38,14 +44,18 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
             <div className="w-50">
               {ride.driver.firstName} {ride.driver.lastName}
             </div>
-            <div className="w-50 ms-2">{ride.driver.phone}</div>
+            <div className="w-50 ms-2">
+              <PhoneLink phone={ride.driver.phone} style={printLinkStyle} />
+            </div>
           </div>
           {passengersFromThisJob.map(p => (
             <div className="ms-2 d-flex" key={`rideinfo-${ride.id}-${p.id}`}>
               <div className="w-50">
                 {p.firstName} {p.lastName}
               </div>
-              <div className="w-50">{p.phone}</div>
+              <div className="w-50">
+                <PhoneLink phone={p.phone} style={printLinkStyle} />
+              </div>
             </div>
           ))}
           {!fromJobId && passengersFromOtherJobsData.length > 0 && (
@@ -59,7 +69,12 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
                     <i>[{data.jobId}] </i>
                     {data.passenger.firstName} {data.passenger.lastName}
                   </div>
-                  <div className="w-50">{data.passenger.phone}</div>
+                  <div className="w-50">
+                    <PhoneLink
+                      phone={data.passenger.phone}
+                      style={printLinkStyle}
+                    />
+                  </div>
                 </div>
               ))}
             </>
@@ -128,7 +143,9 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
               <div className="w-50">
                 {w.firstName} {w.lastName}
               </div>
-              <div className="w-50">{w.phone}</div>
+              <div className="w-50">
+                <PhoneLink phone={w.phone} style={printLinkStyle} />
+              </div>
             </div>
           ))}
         </div>

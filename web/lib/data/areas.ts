@@ -8,6 +8,7 @@ export async function getAreaById(id: string): Promise<AreaComplete | null> {
     },
     include: {
       jobs: true,
+      manager: true,
     },
   })
 }

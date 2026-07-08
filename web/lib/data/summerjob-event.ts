@@ -30,6 +30,7 @@ export async function getSummerJobEventById(
       areas: {
         include: {
           jobs: true,
+          manager: true,
         },
       },
       plans: true,
@@ -47,6 +48,7 @@ export async function getSummerJobEvents(): Promise<SummerJobEventComplete[]> {
       areas: {
         include: {
           jobs: true,
+          manager: true,
         },
       },
       plans: true,
