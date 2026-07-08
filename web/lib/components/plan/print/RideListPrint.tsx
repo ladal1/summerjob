@@ -1,12 +1,7 @@
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RideComplete } from 'lib/types/ride'
-import { PhoneLink } from 'lib/components/phone/PhoneText'
+import { formatPhone } from 'lib/components/phone/PhoneText'
 import React from 'react'
-
-const printLinkStyle: React.CSSProperties = {
-  color: 'inherit',
-  textDecoration: 'none',
-}
 
 interface RideListPrintProps {
   job: ActiveJobNoPlan
@@ -14,6 +9,29 @@ interface RideListPrintProps {
 }
 
 export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
+  const respId = job.responsibleWorkerId
+  const workerName = (w: {
+    id: string
+    firstName: string
+    lastName: string
+  }) =>
+    w.id === respId ? (
+      <strong>
+        <u>
+          {w.firstName} {w.lastName}
+        </u>
+      </strong>
+    ) : (
+      <span>
+        {w.firstName} {w.lastName}
+      </span>
+    )
+  const workerPhone = (w: { id: string; phone: string }) =>
+    w.id === respId ? (
+      <strong>{formatPhone(w.phone)}</strong>
+    ) : (
+      <span>{formatPhone(w.phone)}</span>
+    )
   const formatSingleRide = (ride: RideComplete, fromJobId?: number) => {
     const passengersFromOtherJobsIds = ride.passengers
       .filter(p => !job.workers.map(w => w.id).includes(p.id))
@@ -41,39 +59,31 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
             {ride.car.name} {fromJobId && <i>[{fromJobId}]</i>}
           </div>
           <div className="driver-name d-flex">
-            <div className="w-50">
-              {ride.driver.firstName} {ride.driver.lastName}
-            </div>
-            <div className="w-50 ms-2">
-              <PhoneLink phone={ride.driver.phone} style={printLinkStyle} />
-            </div>
+            <div className="ride-col-name">{workerName(ride.driver)}</div>
+            <div className="ride-col-phone">{workerPhone(ride.driver)}</div>
           </div>
           {passengersFromThisJob.map(p => (
-            <div className="ms-2 d-flex" key={`rideinfo-${ride.id}-${p.id}`}>
-              <div className="w-50">
-                {p.firstName} {p.lastName}
-              </div>
-              <div className="w-50">
-                <PhoneLink phone={p.phone} style={printLinkStyle} />
-              </div>
+            <div
+              className="ms-2 me-1 d-flex"
+              key={`rideinfo-${ride.id}-${p.id}`}
+            >
+              <div className="ride-col-name">{workerName(p)}</div>
+              <div className="ride-col-phone">{workerPhone(p)}</div>
             </div>
           ))}
           {!fromJobId && passengersFromOtherJobsData.length > 0 && (
             <>
               {passengersFromOtherJobsData.map<React.ReactNode>(data => (
                 <div
-                  className="ms-2 d-flex"
+                  className="ms-2 me-1 d-flex"
                   key={`rideinfo-${ride.id}-${data.jobId}-${data.passenger.id}`}
                 >
-                  <div className="w-50">
+                  <div className="ride-col-name">
                     <i>[{data.jobId}] </i>
-                    {data.passenger.firstName} {data.passenger.lastName}
+                    {workerName(data.passenger)}
                   </div>
-                  <div className="w-50">
-                    <PhoneLink
-                      phone={data.passenger.phone}
-                      style={printLinkStyle}
-                    />
+                  <div className="ride-col-phone">
+                    {workerPhone(data.passenger)}
                   </div>
                 </div>
               ))}
@@ -125,7 +135,7 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
     : ''
 
   return (
-    <div className="ms-1">
+    <div>
       {job.rides.map(r => (
         <span key={r.id}>{formatSingleRide(r)}</span>
       ))}
@@ -139,13 +149,9 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
           </div>
           <div className="driver-name d-flex"></div>
           {workersWithoutRide.map(w => (
-            <div className="ms-2 d-flex" key={`rideinfo-noride-${w.id}`}>
-              <div className="w-50">
-                {w.firstName} {w.lastName}
-              </div>
-              <div className="w-50">
-                <PhoneLink phone={w.phone} style={printLinkStyle} />
-              </div>
+            <div className="ms-2 me-1 d-flex" key={`rideinfo-noride-${w.id}`}>
+              <div className="ride-col-name">{workerName(w)}</div>
+              <div className="ride-col-phone">{workerPhone(w)}</div>
             </div>
           ))}
         </div>

@@ -4,7 +4,7 @@
   padding: 0;
   border: 0;
   font-size: 11pt;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif, serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, serif;
   line-height: 1.5;
   color: #000;
   background: #fff;
@@ -17,7 +17,7 @@
   padding: 0;
   border: 0;
   font-size: 11pt;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif, serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, serif;
   line-height: 1.5;
   color: #000;
   background: #fff;
@@ -53,7 +53,7 @@ h2 {
 
 .jobinfo-container {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   padding: 0.5rem;
   margin-bottom: 1rem;
   border-top: 4px solid #acacac;
@@ -102,22 +102,35 @@ h2 {
   margin-left: 2rem;
 }
 
-.job-number-col {
+.job-number-row {
   display: flex;
-  justify-content: flex-start;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.job-number-col {
   font-size: 3rem;
-  line-height: 3rem;
-  margin-right: 0.5rem;
+  line-height: 1;
 }
 
 .job-data-col {
   display: flex;
   flex-direction: row;
   flex-grow: 1;
+  gap: 2rem;
 }
 
 .w-50 {
   width: 50%;
+}
+
+.w-60 {
+  width: 60%;
+}
+
+.w-40 {
+  width: 40%;
 }
 
 .w-20 {
@@ -144,7 +157,50 @@ h2 {
   border: 3px solid #c0c0c0;
   padding: 0.2rem;
   margin-bottom: 0.5rem;
-  margin-left: 0.5rem;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.contact-box {
+  border: 3px solid #c0c0c0;
+  padding: 0.2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.contact-box-title {
+  font-weight: bold;
+  margin: 0rem 0.5rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid #c0c0c0;
+}
+
+.contact-box-row {
+  display: flex;
+  margin: 0rem 0.5rem;
+  gap: 1rem;
+}
+
+.contact-box-label {
+  flex: 1;
+}
+
+.contact-box-value {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ride-col-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.ride-col-phone {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .mt-2 {
@@ -153,6 +209,7 @@ h2 {
 
 .d-flex {
   display: flex;
+  gap: 1rem;
 }
 
 .driver-name {

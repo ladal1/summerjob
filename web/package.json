@@ -15,7 +15,7 @@
     "create-session": "tsx scripts/create-session.ts",
     "create-admin": "tsx scripts/create-admin.ts",
     "create-reception": "tsx scripts/create-reception.ts",
-    "test": "vitest run",
+    "test": "NODE_OPTIONS='--max-old-space-size=8192' vitest run",
     "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prettier:fix": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prepare": "npx prisma generate && cd .. && husky web/.husky",

@@ -1,6 +1,6 @@
 import ErrorPage404 from 'lib/components/404/404'
 import RideListPrint from 'lib/components/plan/print/RideListPrint'
-import { PhoneLink, TextWithPhones } from 'lib/components/phone/PhoneText'
+import { formatPhone } from 'lib/components/phone/PhoneText'
 import { getPlanById } from 'lib/data/plans'
 import { formatDateLong } from 'lib/helpers/helpers'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
@@ -71,68 +71,16 @@ export function JobInfo({
   const otherJobs = jobs.filter(j => j.id !== job.id)
   return (
     <div className="jobinfo-container">
-      <div className="job-number-col">{job.seqId}</div>
+      <div className="job-number-row">
+        <div className="job-number-col">{job.seqId}</div>
+        <h2>{job.proposedJob.name}</h2>
+      </div>
       <div className="job-data-col">
-        <div className="w-50">
-          <h2>{job.proposedJob.name}</h2>
+        <div className="w-60">
           <div className="markdown-content">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {job.proposedJob.publicDescription}
             </ReactMarkdown>
-          </div>
-          {isPrintPage && (
-            <div
-              className="mb-2"
-              style={{
-                fontSize: '1.1em',
-                fontWeight: 'bold',
-                color: '#d63384',
-              }}
-            >
-              <i className="fas fa-user-nurse me-1"></i>
-              Zdravotník:{' '}
-              <PhoneLink
-                phone="732 403 990"
-                style={{ color: 'inherit', textDecoration: 'none' }}
-              />
-            </div>
-          )}
-          {isPrintPage && job.proposedJob.area?.manager && (
-            <div
-              className="mb-2"
-              style={{
-                fontSize: '1.1em',
-                fontWeight: 'bold',
-                color: '#198754',
-              }}
-            >
-              <i className="fas fa-user-tie me-1"></i>
-              Vedoucí oblasti: {job.proposedJob.area.manager.firstName}{' '}
-              {job.proposedJob.area.manager.lastName} (
-              <PhoneLink
-                phone={job.proposedJob.area.manager.phone}
-                style={{ color: 'inherit', textDecoration: 'none' }}
-              />
-              )
-            </div>
-          )}
-          <div>
-            <i className="fas fa-user-group me-1"></i>
-            {job.workers.length == 0 && 'Nikdo'}
-            {job.workers.length > 0 &&
-              job.workers
-                .map<React.ReactNode>(w =>
-                  w.id === job.responsibleWorkerId ? (
-                    <u key={`resp-worker-${w.id}`}>
-                      {w.firstName} {w.lastName}
-                    </u>
-                  ) : (
-                    <span key={`worker-${w.id}`}>
-                      {w.firstName} {w.lastName}
-                    </span>
-                  )
-                )
-                .reduce((prev, curr) => [prev, ', ', curr])}
           </div>
           <div>
             <i className="fas fa-house me-1"></i>
@@ -141,10 +89,7 @@ export function JobInfo({
           </div>
           <div>
             <i className="fas fa-phone me-1"></i>
-            <TextWithPhones
-              text={job.proposedJob.contact}
-              linkStyle={{ color: 'inherit', textDecoration: 'none' }}
-            />
+            {job.proposedJob.contact}
           </div>
 
           <div>
@@ -160,8 +105,39 @@ export function JobInfo({
           </div>
         </div>
 
-        <div className="w-50 mt-2">
+        <div className="w-40 mt-2">
           <RideListPrint job={job} otherJobs={otherJobs} />
+          {isPrintPage && (
+            <div className="contact-box">
+              <div className="contact-box-title" style={{ color: '#d63384' }}>
+                <i className="fas fa-user-nurse me-1"></i>
+                Zdravotník
+              </div>
+              <div className="contact-box-row">
+                <div className="contact-box-label">Telefon:</div>
+                <div className="contact-box-value">
+                  {formatPhone('732 403 990')}
+                </div>
+              </div>
+            </div>
+          )}
+          {isPrintPage && job.proposedJob.area?.manager && (
+            <div className="contact-box">
+              <div className="contact-box-title" style={{ color: '#198754' }}>
+                <i className="fas fa-user-tie me-1"></i>
+                JobTeam
+              </div>
+              <div className="contact-box-row">
+                <div className="contact-box-label">
+                  {job.proposedJob.area.manager.firstName}{' '}
+                  {job.proposedJob.area.manager.lastName}
+                </div>
+                <div className="contact-box-value">
+                  {formatPhone(job.proposedJob.area.manager.phone)}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
