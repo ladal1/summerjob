@@ -48,7 +48,10 @@ async function post(
 }
 
 export default APIAccessController(
-  [Permission.CARS, Permission.PLANS, Permission.RECEPTION],
+  {
+    GET: [Permission.CARS, Permission.PLANS, Permission.RECEPTION],
+    POST: [Permission.CARS, Permission.PLANS],
+  },
   APIMethodHandler({ get, post })
 )
 

@@ -13,9 +13,13 @@ import { CarsTable } from './CarsTable'
 
 interface CarsClientPageProps {
   initialData: Serialized
+  accessedFromReception: boolean
 }
 
-export default function CarsClientPage({ initialData }: CarsClientPageProps) {
+export default function CarsClientPage({
+  initialData,
+  accessedFromReception,
+}: CarsClientPageProps) {
   const initialCars = deserializeCars(initialData)
   const { data, mutate } = useAPICars({
     fallbackData: initialCars,
@@ -51,12 +55,14 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
   return (
     <>
       <PageHeader title={'Seznam vozidel'}>
-        <Link href="/cars/new">
-          <button className="btn btn-primary btn-with-icon" type="button">
-            <i className="fas fa-car"></i>
-            <span>Nové auto</span>
-          </button>
-        </Link>
+        {!accessedFromReception && (
+          <Link href="/cars/new">
+            <button className="btn btn-primary btn-with-icon" type="button">
+              <i className="fas fa-car"></i>
+              <span>Nové auto</span>
+            </button>
+          </Link>
+        )}
       </PageHeader>
 
       <section>
@@ -68,7 +74,11 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
           </div>
           <div className="row gx-3">
             <div className="col-lg-10 pb-2">
-              <CarsTable data={filteredCars} reload={requestReload} />
+              <CarsTable
+                data={filteredCars}
+                reload={requestReload}
+                accessedFromReception={accessedFromReception}
+              />
             </div>
             <div className="col-sm-12 col-lg-2">
               <CarsStatistics data={filteredCars} />

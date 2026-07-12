@@ -3,7 +3,7 @@ import AccessDeniedPage from 'lib/components/error-page/AccessDeniedPage'
 import { Permission } from 'lib/types/auth'
 
 export const metadata = {
-  title: 'Auta'
+  title: 'Auta',
 }
 
 export default async function CarsLayout({
@@ -11,7 +11,10 @@ export default async function CarsLayout({
 }: {
   children: React.ReactNode
 }) {
-  const isAllowed = await withPermissions([Permission.CARS])
+  const isAllowed = await withPermissions([
+    Permission.CARS,
+    Permission.RECEPTION,
+  ])
   if (!isAllowed.success) {
     return <AccessDeniedPage />
   }

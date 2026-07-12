@@ -29,9 +29,14 @@ const _columns: SortableColumn[] = [
 interface CarTableProps {
   data?: CarComplete[]
   reload: (expectedResult: CarComplete[]) => void
+  accessedFromReception: boolean
 }
 
-export function CarsTable({ data, reload }: CarTableProps) {
+export function CarsTable({
+  data,
+  reload,
+  accessedFromReception,
+}: CarTableProps) {
   const [deletingCarId, setDeletingCarId] = useState<string | undefined>(
     undefined
   )
@@ -98,7 +103,12 @@ export function CarsTable({ data, reload }: CarTableProps) {
           <SimpleRow
             key={car.id}
             {...{
-              data: formatCarRow(car, car.id === deletingCarId, deleteCar),
+              data: formatCarRow(
+                car,
+                car.id === deletingCarId,
+                deleteCar,
+                accessedFromReception
+              ),
             }}
           />
         ))}
@@ -109,7 +119,8 @@ export function CarsTable({ data, reload }: CarTableProps) {
 function formatCarRow(
   car: CarComplete,
   isBeingDeleted: boolean,
-  deleteCar: (carId: string) => void
+  deleteCar: (carId: string) => void,
+  accessedFromReception: boolean
 ) {
   const drivenKm = car.odometerEnd - car.odometerStart
   return [
@@ -129,7 +140,7 @@ function formatCarRow(
           >
             <i className="fas fa-edit" title="Upravit"></i>
           </Link>
-          {!isBeingDeleted && (
+          {!isBeingDeleted && !accessedFromReception && (
             <>
               <i
                 className="fas fa-trash-alt smj-action-delete cursor-pointer"

@@ -36,7 +36,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: '/cars',
       name: 'Auta',
       icon: 'fas fa-car',
-      permissions: [Permission.CARS],
+      permissions: [Permission.CARS, Permission.RECEPTION],
     },
     {
       path: '/workers',
