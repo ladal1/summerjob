@@ -5,12 +5,9 @@ import {
   ActiveJobUpdateSchema,
 } from 'lib/types/active-job'
 import { useState } from 'react'
-import { Modal, ModalSize } from '../modal/Modal'
 import { useAPIActiveJobUpdate } from 'lib/fetcher/active-job'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { pick } from 'lib/helpers/helpers'
 
 interface ToggleCompletedCheckProps {
   job: ActiveJobNoPlan
@@ -19,11 +16,7 @@ interface ToggleCompletedCheckProps {
 export default function ToggleCompletedCheck({
   job,
 }: ToggleCompletedCheckProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { dirtyFields, errors },
-  } = useForm<ActiveJobUpdateData>({
+  useForm<ActiveJobUpdateData>({
     resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
       completed: job.completed,
@@ -35,61 +28,20 @@ export default function ToggleCompletedCheck({
 
   const [checked, setChecked] = useState(job.completed)
 
-  const { trigger, isMutating } = useAPIActiveJobUpdate(job.id, job.planId)
-  const [showNoteModal, setShowNoteModal] = useState(false)
-
-  const onSubmit = (data: ActiveJobUpdateData) => {
-    const modified = pick(
-      data,
-      ...Object.keys(dirtyFields)
-    ) as ActiveJobUpdateData
-    trigger(modified, {
-      onSuccess: () => {
-        setShowNoteModal(false)
-      },
-    })
-  }
+  const { trigger } = useAPIActiveJobUpdate(job.id, job.planId)
+  // Remove confirmation modal: instantly toggle completed and update
+  const onChange = () => {
+    setChecked(!checked);
+    trigger({ completed: !checked });
+  };
 
   return (
-    <>
-      <input
-        id="completed"
-        className="form-check-input smj-checkbox"
-        type="checkbox"
-        checked={checked}
-        {...register('completed', {
-          onChange: () => {
-            setChecked(!checked)
-            setShowNoteModal(true)
-          },
-        })}
-      />
-      {showNoteModal && (
-        <Modal
-          title={`Upravit poznámku - ${job.proposedJob.name}`}
-          size={ModalSize.MEDIUM}
-          onClose={() => setShowNoteModal(false)}
-        >
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <TextAreaInput
-              id={'proposedJob.privateDescription'}
-              label={'Poznámka pro organizátory'}
-              register={() => register('proposedJob.privateDescription')}
-              rows={4}
-              margin={false}
-              errors={errors}
-            />
-            <div className="d-flex justify-content-end mt-3">
-              <input
-                type={'submit'}
-                className="btn btn-primary"
-                value={'Uložit'}
-                disabled={isMutating}
-              />
-            </div>
-          </form>
-        </Modal>
-      )}
-    </>
-  )
+    <input
+      id="completed"
+      className="form-check-input smj-checkbox"
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+    />
+  );
 }
