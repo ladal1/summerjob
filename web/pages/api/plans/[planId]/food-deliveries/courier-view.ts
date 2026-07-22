@@ -1,4 +1,3 @@
-import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { getFoodDeliveriesWithPlanByPlanId } from 'lib/data/food-delivery'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -8,8 +7,6 @@ export type CourierDeliveryWorker = {
   id: string
   firstName: string
   lastName: string
-  phone: string
-  age: number | null
   foodAllergies: string[]
 }
 
@@ -31,7 +28,6 @@ export type CourierDeliveryJob = {
     id: string
     firstName: string
     lastName: string
-    phone: string
   } | null
   completed: boolean
 }
@@ -57,16 +53,35 @@ export type CourierDeliveryAPIGetResponse = {
   plan: CourierDeliveryPlan
   deliveries: CourierDeliveryData[]
 }
+type CourierDeliveryAPIErrorResponse = {
+  error: string
+}
 
 async function get(
   req: NextApiRequest,
-  res: NextApiResponse<CourierDeliveryAPIGetResponse>
+  res: NextApiResponse<
+    CourierDeliveryAPIGetResponse | CourierDeliveryAPIErrorResponse
+  >
 ) {
   const planId = req.query.planId as string
+  const deliveryId = req.query.deliveryId
+  if (typeof deliveryId !== 'string') {
+    res.status(400).json({ error: 'Missing or invalid deliveryId parameter' })
+    return
+  }
+
   const rawData = await getFoodDeliveriesWithPlanByPlanId(planId)
 
   if (!rawData) {
-    res.status(404).end()
+    res.status(404).json({ error: 'Plan not found' })
+    return
+  }
+
+  const courierDelivery = rawData.deliveries.find(
+    delivery => delivery.id === deliveryId
+  )
+  if (!courierDelivery) {
+    res.status(404).json({ error: 'Delivery not found for this plan' })
     return
   }
 
@@ -81,8 +96,6 @@ async function get(
           id: worker.id,
           firstName: worker.firstName,
           lastName: worker.lastName,
-          phone: worker.phone,
-          age: worker.age,
           foodAllergies: worker.foodAllergies.map(fa => fa.name),
         })),
         proposedJob: {
@@ -110,19 +123,16 @@ async function get(
               id: job.responsibleWorker.id,
               firstName: job.responsibleWorker.firstName,
               lastName: job.responsibleWorker.lastName,
-              phone: job.responsibleWorker.phone,
             }
           : null,
         completed: false, // This comes from the delivery jobs, not the plan jobs
       })),
     },
-    deliveries: rawData.deliveries,
+    deliveries: [courierDelivery],
   }
 
   res.status(200).json(transformedData)
 }
 
-export default APIAccessController(
-  [], // No permissions required for courier delivery viewing
-  APIMethodHandler({ get })
-)
+// Public endpoint — couriers access their delivery list via URL without an account.
+export default APIMethodHandler({ get })
