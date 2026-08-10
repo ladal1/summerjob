@@ -32,7 +32,7 @@ services:
   summerjob-db:
     container_name: summerjob-db
     hostname: summerjob-db
-    image: postgres:15
+    image: postgres:18
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
