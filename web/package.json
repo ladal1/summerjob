@@ -89,7 +89,7 @@
     "supertest": "^7.2.2",
     "tsx": "^4.21.0",
     "vite-tsconfig-paths": "^6.0.5",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.11",
     "zod-prisma-types": "^3.3.11"
   }
 }
